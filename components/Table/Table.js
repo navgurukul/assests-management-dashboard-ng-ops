@@ -1,7 +1,7 @@
 "use client";
 import { Chip } from "@nextui-org/react";
 import TableWrapper from "./TableWrapper";
-import { assetsTableData } from '@/dummyJson/dummyJson';
+import { assetsPageData } from '@/dummyJson/dummyJson';
 
 const statusColorMap = {
   Active: "success",
@@ -11,13 +11,18 @@ const statusColorMap = {
 };
 
 const columns = [
-  { key: "assetId", label: "ASSET ID" },
-  { key: "name", label: "NAME" },
-  { key: "category", label: "CATEGORY" },
-  { key: "status", label: "STATUS" },
-  { key: "location", label: "LOCATION" },
-  { key: "assignedTo", label: "ASSIGNED TO" },
-  { key: "purchaseDate", label: "PURCHASE DATE" },
+  { key: "campus", label: "Campus" },
+  { key: "lws", label: "LWS" },
+  { key: "lis", label: "LIS" },
+  { key: "lr", label: "LR" },
+  { key: "lnw", label: "LNW" },
+  { key: "lwfhe", label: "LWFHE" },
+  { key: "lct", label: "LCT" },
+  { key: "laslfh", label: "LASLFH" },
+  { key: "lsdb", label: "LSD/B" },
+  { key: "lsjop", label: "LSJOP" },
+  { key: "lngin", label: "LNGIN" },
+  { key: "total", label: "Total" },
 ];
 
 export default function AssetsTable() {
@@ -25,18 +30,21 @@ export default function AssetsTable() {
     const cellValue = item[columnKey];
 
     switch (columnKey) {
-      case "assetId":
-        return <span className="font-medium">{cellValue}</span>;
-      case "status":
-        return (
-          <Chip 
-            color={statusColorMap[cellValue]} 
-            variant="flat"
-            size="sm"
-          >
-            {cellValue}
-          </Chip>
-        );
+      case "campus":
+        return <span className="font-semibold text-gray-900">{cellValue}</span>;
+      case "total":
+        return <span className="font-bold text-blue-600">{cellValue}</span>;
+      case "lws":
+      case "lis":
+      case "lr":
+      case "lnw":
+      case "lwfhe":
+      case "lct":
+      case "laslfh":
+      case "lsdb":
+      case "lsjop":
+      case "lngin":
+        return <span className="text-gray-700 text-center">{cellValue}</span>;
       default:
         return cellValue;
     }
@@ -44,13 +52,13 @@ export default function AssetsTable() {
 
   return (
     <TableWrapper
-      data={assetsTableData}
+      data={assetsPageData}
       columns={columns}
-      title="Assets Overview"
+      title="Consolidated laptop Data - Navgurukul"
       renderCell={renderCell}
       itemsPerPage={10}
       showPagination={true}
-      ariaLabel="Assets table"
+      ariaLabel="Consolidated laptop table"
     />
   );
 }

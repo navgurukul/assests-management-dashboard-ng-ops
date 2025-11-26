@@ -63,16 +63,16 @@ export const ticketsTableData = [
 ];
 
 export const assetsPageData = [
-  { id: 1, assetTag: 'NG-SARJ-L-0315', type: 'Laptop', campus: 'Sarjapura', status: 'Repair', location: 'Vendor: TechCare', actions: 'View' },
-  { id: 2, assetTag: 'NG-PUNE-L-0210', type: 'Laptop', campus: 'Pune', status: 'Allocated', location: 'Student: Meena', actions: 'View' },
-  { id: 3, assetTag: 'NG-HIMA-L-0144', type: 'Laptop', campus: 'Himachal', status: 'In Stock', location: 'Store Room', actions: 'Assign' },
-  { id: 4, assetTag: 'NG-DANT-L-0029', type: 'Laptop', campus: 'Dantewada', status: 'Scrap', location: 'Scrap Room', actions: 'Details' },
-  { id: 5, assetTag: 'NG-JABA-L-0421', type: 'Laptop', campus: 'Jabalpur', status: 'Allocated', location: 'Student: Rahul', actions: 'View' },
-  { id: 6, assetTag: 'NG-UDAI-L-0156', type: 'Laptop', campus: 'Udaipur', status: 'In Stock', location: 'Store Room', actions: 'Assign' },
-  { id: 7, assetTag: 'NG-RAIP-L-0087', type: 'Laptop', campus: 'Raipur', status: 'Repair', location: 'Vendor: FixIT', actions: 'View' },
-  { id: 8, assetTag: 'NG-AMAR-L-0298', type: 'Laptop', campus: 'Amaravati', status: 'Allocated', location: 'Student: Priya', actions: 'View' },
-  { id: 9, assetTag: 'NG-DHAR-L-0112', type: 'Laptop', campus: 'Dharamshala', status: 'In Stock', location: 'Store Room', actions: 'Assign' },
-  { id: 10, assetTag: 'NG-KISH-L-0045', type: 'Laptop', campus: 'Kishangarh', status: 'Scrap', location: 'Scrap Room', actions: 'Details' },
+  { id: 1, campus: 'Sarjapura', lws: 45, lis: 12, lr: 8, lnw: 5, lwfhe: 3, lct: 2, laslfh: 0, lsdb: 1, lsjop: 2, lngin: 1, total: 79 },
+  { id: 2, campus: 'Pune', lws: 38, lis: 10, lr: 15, lnw: 8, lwfhe: 2, lct: 1, laslfh: 0, lsdb: 0, lsjop: 1, lngin: 1, total: 76 },
+  { id: 3, campus: 'Dharamshala', lws: 28, lis: 8, lr: 12, lnw: 6, lwfhe: 1, lct: 1, laslfh: 0, lsdb: 1, lsjop: 0, lngin: 0, total: 57 },
+  { id: 4, campus: 'Bangalore', lws: 52, lis: 15, lr: 18, lnw: 10, lwfhe: 4, lct: 2, laslfh: 0, lsdb: 1, lsjop: 1, lngin: 2, total: 105 },
+  { id: 5, campus: 'Dantewada', lws: 22, lis: 6, lr: 9, lnw: 4, lwfhe: 1, lct: 1, laslfh: 0, lsdb: 0, lsjop: 0, lngin: 0, total: 43 },
+  { id: 6, campus: 'Jashpur', lws: 35, lis: 9, lr: 11, lnw: 7, lwfhe: 2, lct: 1, laslfh: 0, lsdb: 1, lsjop: 1, lngin: 1, total: 68 },
+  { id: 7, campus: 'Raipur', lws: 30, lis: 8, lr: 14, lnw: 5, lwfhe: 1, lct: 1, laslfh: 0, lsdb: 0, lsjop: 0, lngin: 0, total: 59 },
+  { id: 8, campus: 'Amaravati', lws: 18, lis: 5, lr: 8, lnw: 3, lwfhe: 1, lct: 1, laslfh: 2, lsdb: 0, lsjop: 0, lngin: 0, total: 38 },
+  { id: 9, campus: 'Udaipur', lws: 25, lis: 7, lr: 10, lnw: 6, lwfhe: 2, lct: 0, laslfh: 0, lsdb: 0, lsjop: 0, lngin: 1, total: 51 },
+  { id: 10, campus: 'Jabalpur', lws: 20, lis: 6, lr: 7, lnw: 4, lwfhe: 1, lct: 0, laslfh: 0, lsdb: 0, lsjop: 0, lngin: 0, total: 38 },
 ];
 
 export const componentsPageData = [
