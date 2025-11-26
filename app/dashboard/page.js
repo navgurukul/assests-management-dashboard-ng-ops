@@ -4,7 +4,7 @@ import React from 'react';
 import DashboardCard from '@/components/atoms/DashboardCard';
 import PieChart from '@/components/molecules/PieChart';
 import StackedColumnChart from '@/components/molecules/StackedColumnChart';
-import { dashboardCards, locationWiseAssetsData, assetsPerCampusData } from '@/app/dummyJson/dummyJson';
+import { dashboardCards, locationWiseAssetsData, assetsPerCampusData } from '@/dummyJson/dummyJson';
 import { CheckCircle2, Archive, Settings, Wrench } from 'lucide-react';
 import DemoTable from '@/components/Table/Table';
 

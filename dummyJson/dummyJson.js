@@ -100,3 +100,126 @@ export const consignmentsPageData = [
   { id: 9, code: 'CON-DHAR-071119-REPR-017', courier: 'Delhivery', fromTo: 'Dharamshala -> Vendor', status: 'IN TRANSIT' },
   { id: 10, code: 'CON-KISH-051119-TRNF-019', courier: 'DTDC', fromTo: 'Kishangarh -> Sarjapura', status: 'DELIVERED' },
 ];
+
+// Ticket Details Data
+export const ticketDetailsData = {
+  1: {
+    ticketId: 'TKT-SARJ-251119-R-001',
+    type: 'Repair',
+    sla: '02h 15m',
+    slaStatus: 'critical',
+    status: 'IN PROGRESS',
+    timeline: [
+      { label: 'OPEN', completed: true, active: false },
+      { label: 'IN PROGRESS', completed: false, active: true },
+      { label: 'VENDOR WAIT', completed: false, active: false },
+      { label: 'RESOLVED', completed: false, active: false },
+      { label: 'CLOSED', completed: false, active: false },
+    ],
+    deviceSummary: {
+      asset: 'NG-SARJ-L-0315',
+      brand: 'Lenovo T480',
+      currentLocation: 'Sarjapura Vendor',
+      condition: 'NOT WORKING',
+    },
+    logEntries: [
+      { time: '12:35 PM', text: 'Assigned to IT (Anita)' },
+      { time: '01:40 PM', text: 'Diagnostics complete' },
+      { time: '02:10 PM', text: 'Issue requires motherboard replace' },
+    ],
+  },
+  2: {
+    ticketId: 'TKT-PUNE-251119-C-002',
+    type: 'Change',
+    sla: '11h 30m',
+    slaStatus: 'normal',
+    status: 'ESCALATED',
+    timeline: [
+      { label: 'OPEN', completed: true, active: false },
+      { label: 'IN PROGRESS', completed: true, active: false },
+      { label: 'VENDOR WAIT', completed: false, active: false },
+      { label: 'RESOLVED', completed: false, active: false },
+      { label: 'CLOSED', completed: false, active: false },
+    ],
+    deviceSummary: {
+      asset: 'NG-PUNE-L-0210',
+      brand: 'HP Pavilion',
+      currentLocation: 'Pune Campus',
+      condition: 'WORKING',
+    },
+    logEntries: [
+      { time: '09:15 AM', text: 'Ticket created by Student B' },
+      { time: '10:30 AM', text: 'Assigned to IT Team' },
+      { time: '11:45 AM', text: 'Escalated to senior technician' },
+    ],
+  },
+};
+
+// Asset Details Data
+export const assetDetailsData = {
+  1: {
+    assetTag: 'NG-SARJ-L-0315',
+    type: 'Laptop',
+    campus: 'Sarjapura',
+    status: 'Repair',
+    slaRisk: 'High (RED)',
+    specs: {
+      brand: 'Lenovo ThinkPad T480',
+      cpu: 'i5',
+      ram: '8GBx2',
+      ssd: '256GB',
+      purchase: '₹45,000',
+      donor: 'CSR Fund',
+    },
+    components: [
+      {
+        componentTag: 'RAM-SARJ-8GB-2311-01',
+        type: 'RAM',
+        status: 'Working',
+        installedOn: '03 Oct 2025',
+        slot: 'SLOT A',
+      },
+      {
+        componentTag: 'RAM-SARJ-8GB-2311-02',
+        type: 'RAM',
+        status: 'Working',
+        installedOn: '03 Oct 2025',
+        slot: 'SLOT B',
+      },
+    ],
+    movementLog: [
+      { date: '21 Nov', event: 'Sent to Vendor (Consignment: CON-SARJ-2111-REPR-001)' },
+      { date: '19 Nov', event: 'Ticket Raised by Student A' },
+      { date: '10 Sep', event: 'Allocated to Student A' },
+    ],
+  },
+  2: {
+    assetTag: 'NG-PUNE-L-0210',
+    type: 'Laptop',
+    campus: 'Pune',
+    status: 'Allocated',
+    slaRisk: 'Low (GREEN)',
+    specs: {
+      brand: 'HP Pavilion',
+      cpu: 'i7',
+      ram: '16GB',
+      ssd: '512GB',
+      purchase: '₹55,000',
+      donor: 'Corporate Donation',
+    },
+    components: [
+      {
+        componentTag: 'RAM-PUNE-16GB-1211-01',
+        type: 'RAM',
+        status: 'Working',
+        installedOn: '15 Sep 2025',
+        slot: 'SLOT A',
+      },
+    ],
+    movementLog: [
+      { date: '15 Sep', event: 'Allocated to Student: Meena' },
+      { date: '01 Sep', event: 'Received from Vendor' },
+      { date: '20 Aug', event: 'Purchased and added to inventory' },
+    ],
+  },
+};

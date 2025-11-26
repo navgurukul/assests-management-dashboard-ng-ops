@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { menuItems } from '@/app/dummyJson/dummyJson';
+import { menuItems } from '@/dummyJson/dummyJson';
 
 const iconMap = {
   LayoutDashboard,

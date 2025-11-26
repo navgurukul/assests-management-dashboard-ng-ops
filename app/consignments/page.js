@@ -2,7 +2,7 @@
 
 import React from 'react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import { consignmentsPageData } from '@/app/dummyJson/dummyJson';
+import { consignmentsPageData } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "code", label: "CODE" },

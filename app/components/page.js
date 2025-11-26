@@ -3,7 +3,7 @@
 import React from 'react';
 import { Trash2, Download, FileText } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import { componentsPageData } from '@/app/dummyJson/dummyJson';
+import { componentsPageData } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "componentTag", label: "COMPONENT TAG" },

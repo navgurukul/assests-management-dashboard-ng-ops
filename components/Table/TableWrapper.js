@@ -11,7 +11,8 @@ export default function TableWrapper({
   itemsPerPage = 10,
   showPagination = true,
   classNames = {},
-  ariaLabel = "Data table"
+  ariaLabel = "Data table",
+  onRowClick
 }) {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -60,7 +61,11 @@ export default function TableWrapper({
         </TableHeader>
         <TableBody items={displayData}>
           {(item) => (
-            <TableRow key={item.id}>
+            <TableRow 
+              key={item.id}
+              onClick={() => onRowClick && onRowClick(item)}
+              className={onRowClick ? "cursor-pointer" : ""}
+            >
               {columns.map((column) => (
                 <TableCell key={column.key}>
                   {renderCell ? renderCell(item, column.key) : item[column.key]}

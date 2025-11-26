@@ -1,7 +1,7 @@
 "use client";
 import { Chip } from "@nextui-org/react";
 import TableWrapper from "./TableWrapper";
-import { assetsTableData } from '@/app/dummyJson/dummyJson';
+import { assetsTableData } from '@/dummyJson/dummyJson';
 
 const statusColorMap = {
   Active: "success",
