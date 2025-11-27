@@ -236,6 +236,8 @@ export const assetDetailsData = {
       { date: '20 Aug', event: 'Purchased and added to inventory' },
     ],
   },
+};
+
 /**
  * MODAL CONFIGURATIONS
  * Each modal type has a configuration object defining which fields to display

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import GenericModalWrapper from './GenericModalWrapper';
-import { componentInstallModalConfig, componentStripModalConfig } from '@/app/dummyJson/dummyJson';
+import { componentInstallModalConfig, componentStripModalConfig } from '@/dummyJson/dummyJson';
 
 /**
  * ComponentActionModal Component

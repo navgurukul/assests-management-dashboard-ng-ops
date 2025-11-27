@@ -2,7 +2,7 @@
 
 import React from 'react';
 import GenericModalWrapper from './GenericModalWrapper';
-import { allocationModalConfig } from '@/app/dummyJson/dummyJson';
+import { allocationModalConfig } from '@/dummyJson/dummyJson';
 
 /**
  * AllocationModal Component
