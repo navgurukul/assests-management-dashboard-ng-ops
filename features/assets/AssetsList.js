@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import { assetsPageData } from '@/dummyJson/dummyJson';
+import { assetsListData } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "assetTag", label: "ASSET TAG" },
@@ -112,7 +112,7 @@ export default function AssetsList() {
 
       {/* Table */}
       <TableWrapper
-        data={assetsPageData}
+        data={assetsListData}
         columns={columns}
         title=""
         renderCell={renderCell}

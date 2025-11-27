@@ -75,6 +75,20 @@ export const assetsPageData = [
   { id: 10, campus: 'Jabalpur', lws: 20, lis: 6, lr: 7, lnw: 4, lwfhe: 1, lct: 0, laslfh: 0, lsdb: 0, lsjop: 0, lngin: 0, total: 38 },
 ];
 
+// Individual Assets List Data for /assets route
+export const assetsListData = [
+  { id: 1, assetTag: 'NG-SARJ-L-0315', type: 'Laptop', campus: 'Sarjapura', status: 'Repair', location: 'Vendor: TechCare', actions: 'View' },
+  { id: 2, assetTag: 'NG-PUNE-L-0210', type: 'Laptop', campus: 'Pune', status: 'Allocated', location: 'Student: Meena', actions: 'View' },
+  { id: 3, assetTag: 'NG-DHAR-L-0144', type: 'Laptop', campus: 'Dharamshala', status: 'In Stock', location: 'Store Room', actions: 'Assign' },
+  { id: 4, assetTag: 'NG-BANG-L-0089', type: 'Laptop', campus: 'Bangalore', status: 'Allocated', location: 'Student: Raj', actions: 'View' },
+  { id: 5, assetTag: 'NG-DANT-L-0029', type: 'Laptop', campus: 'Dantewada', status: 'Scrap', location: 'Scrap Room', actions: 'Details' },
+  { id: 6, assetTag: 'NG-JASH-L-0421', type: 'Laptop', campus: 'Jashpur', status: 'Allocated', location: 'Student: Rahul', actions: 'View' },
+  { id: 7, assetTag: 'NG-RAIP-L-0087', type: 'Laptop', campus: 'Raipur', status: 'Repair', location: 'Vendor: FixIT', actions: 'View' },
+  { id: 8, assetTag: 'NG-AMAR-L-0298', type: 'Laptop', campus: 'Amaravati', status: 'Allocated', location: 'Student: Priya', actions: 'View' },
+  { id: 9, assetTag: 'NG-UDAI-L-0112', type: 'Laptop', campus: 'Udaipur', status: 'In Stock', location: 'Store Room', actions: 'Assign' },
+  { id: 10, assetTag: 'NG-JABA-L-0045', type: 'Laptop', campus: 'Jabalpur', status: 'Allocated', location: 'Student: Ankit', actions: 'View' },
+];
+
 export const componentsPageData = [
   { id: 1, componentTag: 'RAM-SARJ-8GB-2311-01', type: 'RAM', status: 'Working', installedOn: 'NG-SARJ-L-0315', action: 'Remove' },
   { id: 2, componentTag: 'SSD-PUNE-512-1211-02', type: 'SSD', status: 'In Stock', installedOn: '-', action: 'Install' },
