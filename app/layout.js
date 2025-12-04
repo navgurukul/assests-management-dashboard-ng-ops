@@ -3,6 +3,7 @@ import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import ReactQueryProvider from "./helper/ReactQueryProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -19,6 +20,7 @@ function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
+        <ReactQueryProvider>
         <ClientProviders>
           <div className="h-screen flex flex-col overflow-hidden" >
             <Header />
@@ -30,6 +32,7 @@ function RootLayout({ children }) {
             </div>
           </div>
         </ClientProviders>
+        </ReactQueryProvider>
       </body>
     </html>
   );

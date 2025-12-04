@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import { assetsListData } from '@/dummyJson/dummyJson';
+import useFetch from '@/app/hooks/query/useFetch';
 
 const columns = [
   { key: "assetTag", label: "ASSET TAG" },
@@ -15,8 +15,34 @@ const columns = [
   { key: "actions", label: "ACTIONS" },
 ];
 
+const statusOptions = ['Repair', 'Allocated', 'In Stock', 'Scrap'];
+const actionOptions = ['View', 'Assign', 'Details'];
+
 export default function AssetsList() {
   const router = useRouter();
+  
+  // Fetch users data from DummyJSON API
+  const { data, isLoading, isError, error } = useFetch({
+    url: 'https://dummyjson.com/users',
+    queryKey: ['users'],
+  });
+
+  // Transform API data to match table structure
+  const assetsListData = React.useMemo(() => {
+    if (!data || !data.users) return [];
+    
+    return data.users.map((user) => ({
+      id: user.id,
+      assetTag: `${user.username.toUpperCase()}-${user.id}`,
+      type: user.company?.department || 'Unknown',
+      campus: user.address?.city || 'N/A',
+      status: statusOptions[user.id % statusOptions.length],
+      location: user.address?.state || 'N/A',
+      actions: actionOptions[user.id % actionOptions.length],
+      // Store full user data for details page
+      userData: user
+    }));
+  }, [data]);
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -61,6 +87,30 @@ export default function AssetsList() {
   const handleRowClick = (asset) => {
     router.push(`/assets/${asset.id}?id=${asset.id}`);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading assets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 font-medium">Error loading assets</p>
+          <p className="text-gray-600 mt-2">{error?.message || 'Something went wrong'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
