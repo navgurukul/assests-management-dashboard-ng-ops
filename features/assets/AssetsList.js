@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText } from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import useFetch from '@/app/hooks/query/useFetch';
+import AssetForm from '@/forms/form';
+import { assetsListData } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "assetTag", label: "ASSET TAG" },
@@ -15,34 +16,9 @@ const columns = [
   { key: "actions", label: "ACTIONS" },
 ];
 
-const statusOptions = ['Repair', 'Allocated', 'In Stock', 'Scrap'];
-const actionOptions = ['View', 'Assign', 'Details'];
-
 export default function AssetsList() {
   const router = useRouter();
-  
-  // Fetch users data from DummyJSON API
-  const { data, isLoading, isError, error } = useFetch({
-    url: 'https://dummyjson.com/users',
-    queryKey: ['users'],
-  });
-
-  // Transform API data to match table structure
-  const assetsListData = React.useMemo(() => {
-    if (!data || !data.users) return [];
-    
-    return data.users.map((user) => ({
-      id: user.id,
-      assetTag: `${user.username.toUpperCase()}-${user.id}`,
-      type: user.company?.department || 'Unknown',
-      campus: user.address?.city || 'N/A',
-      status: statusOptions[user.id % statusOptions.length],
-      location: user.address?.state || 'N/A',
-      actions: actionOptions[user.id % actionOptions.length],
-      // Store full user data for details page
-      userData: user
-    }));
-  }, [data]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -87,30 +63,6 @@ export default function AssetsList() {
   const handleRowClick = (asset) => {
     router.push(`/assets/${asset.id}?id=${asset.id}`);
   };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading assets...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Error loading assets</p>
-          <p className="text-gray-600 mt-2">{error?.message || 'Something went wrong'}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -157,6 +109,13 @@ export default function AssetsList() {
           <button className="border border-gray-300 rounded px-4 py-2 text-sm font-medium hover:bg-gray-50">
             Export CSV
           </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="border border-gray-300 rounded px-4 py-2 text-sm font-medium hover:bg-gray-50"
+          >
+            Add Asset
+          </button>
+
         </div>
       </div>
 
@@ -171,6 +130,36 @@ export default function AssetsList() {
         ariaLabel="Assets table"
         onRowClick={handleRowClick}
       />
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <h2 className="text-2xl font-bold text-gray-800">Add New Asset</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Body - Form */}
+            <AssetForm />
+
+            <div className="flex justify-end gap-3 mt-6 border-t pt-4">
+              {/* <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 font-medium"
+              >
+                Cancel
+              </button> */}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
