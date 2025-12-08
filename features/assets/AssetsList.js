@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, {useState}from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText } from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X} from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import useFetch from '@/app/hooks/query/useFetch';
 import AssetForm from '@/forms/page';
