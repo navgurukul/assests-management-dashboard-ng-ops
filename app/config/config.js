@@ -1,22 +1,23 @@
+import { toast } from "react-hot-toast";
+
 export const onErrorHelper = (err) => {
+  if (!err) return;
+
   try {
-    const errorData = err;
-
-    if (errorData.errors) {
-      const errorMessages = errorData.errors.map((e) => {
-        return e.detail || e.info || e.message;
-      });
-
-      errorMessages.forEach((message) => {
+    // Handle array of errors
+    if (err.errors?.length) {
+      err.errors.forEach((error) => {
+        const message = error.detail || error.info || error.message || "An error occurred";
         toast.error(message);
       });
-    } else {
-      const errorMessage =
-        errorData?.detail || errorData?.info || errorData?.message;
-
-      toast.error(errorMessage);
+      return;
     }
-  } catch (e) {
-    // silent fail
+
+    // Handle single error
+    const message = err.detail || err.info || err.message || "An unexpected error occurred";
+    toast.error(message);
+  } catch (error) {
+    // Fallback for any unexpected error structure
+    toast.error("An unexpected error occurred");
   }
 };
