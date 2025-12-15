@@ -21,26 +21,29 @@ const actionOptions = ['View', 'Assign', 'Details'];
 export default function AssetsList() {
   const router = useRouter();
   
-  // Fetch users data from DummyJSON API
+  // Fetch assets data from API
   const { data, isLoading, isError, error } = useFetch({
-    url: 'https://dummyjson.com/users',
-    queryKey: ['users'],
+    url: 'http://13.203.90.62/assets',
+    queryKey: ['assets'],
   });
 
   // Transform API data to match table structure
   const assetsListData = React.useMemo(() => {
-    if (!data || !data.users) return [];
+    if (!data || !data.data) return [];
     
-    return data.users.map((user) => ({
-      id: user.id,
-      assetTag: `${user.username.toUpperCase()}-${user.id}`,
-      type: user.company?.department || 'Unknown',
-      campus: user.address?.city || 'N/A',
-      status: statusOptions[user.id % statusOptions.length],
-      location: user.address?.state || 'N/A',
-      actions: actionOptions[user.id % actionOptions.length],
-      // Store full user data for details page
-      userData: user
+    return data.data.map((asset) => ({
+      id: asset.id,
+      assetTag: asset.assetTag,
+      type: asset.assetTypeId || 'Unknown',
+      campus: asset.campusId || 'N/A',
+      status: asset.status === 'IN_STOCK' ? 'In Stock' : 
+              asset.status === 'ALLOCATED' ? 'Allocated' : 
+              asset.status === 'REPAIR' ? 'Repair' : 
+              asset.status === 'SCRAP' ? 'Scrap' : asset.status,
+      location: asset.currentLocationId || 'N/A',
+      actions: actionOptions[0], // Default to 'View'
+      // Store full asset data for details page
+      assetData: asset
     }));
   }, [data]);
 
