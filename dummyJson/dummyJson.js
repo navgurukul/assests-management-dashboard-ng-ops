@@ -237,3 +237,419 @@ export const assetDetailsData = {
     ],
   },
 };
+
+// Component Details Data
+export const componentDetailsData = {
+  'RAM-SARJ-8GB-2311-01': {
+    // Basic Information
+    componentTag: 'RAM-SARJ-8GB-2311-01',
+    componentType: 'RAM',
+    brand: 'Kingston',
+    modelNumber: 'KVR26N19S8/8',
+    specifications: '8GB DDR4 2666MHz SODIMM',
+    serialNumber: 'KST8GB2666-SN12345',
+    purchaseDate: '2023-11-15T00:00:00Z',
+    warrantyExpiryDate: '2026-11-15T00:00:00Z',
+    purchasePrice: 2400,
+    vendorName: 'Tech Supplies India',
+    
+    // Source Information
+    sourceType: 'NEW_PURCHASE',
+    invoiceNumber: 'INV-2023-11-0156',
+    purchaseOrderNumber: 'PO-2023-456',
+    vendorDetails: 'Tech Supplies India, Mumbai\nGST: 27ABCDE1234F1Z5',
+    
+    // Current Status
+    status: 'INSTALLED',
+    locationType: 'INSTALLED',
+    conditionNotes: 'Excellent condition, tested and working perfectly',
+    
+    // Location (if in stock)
+    campus: 'Sarjapura',
+    almirah: 'ALM-A1',
+    shelf: '3B',
+    
+    // Installation details (if installed)
+    currentDevice: {
+      id: 1,
+      tag: 'NG-SARJ-L-0315',
+      type: 'Laptop',
+      currentUser: 'Rahul Kumar',
+      installationDate: '2024-01-15T00:00:00Z',
+      location: 'Sarjapura Campus'
+    },
+    
+    // Additional Details
+    lastTestedDate: '2024-12-01T00:00:00Z',
+    testedBy: 'Vijay Sharma',
+    testResults: 'Memory test passed. No errors detected. Read/Write speed within expected range.',
+    assignedTo: 'Hardware Department',
+    remarks: 'Part of bulk purchase order. High-quality component suitable for student laptops.',
+    
+    // Journey/Timeline
+    journey: [
+      {
+        type: 'ACQUIRED',
+        description: 'Component purchased from Tech Supplies India',
+        timestamp: '2023-11-15T10:30:00Z',
+        location: 'Mumbai Warehouse',
+        performedBy: 'Procurement Team',
+        notes: 'Bulk order of 50 units',
+        documents: [
+          { name: 'Invoice INV-2023-11-0156.pdf', url: '#' },
+          { name: 'Purchase Order.pdf', url: '#' }
+        ]
+      },
+      {
+        type: 'RECEIVED',
+        description: 'Component received and stored at Sarjapura campus',
+        timestamp: '2023-11-20T14:15:00Z',
+        location: 'Sarjapura → ALM-A1 → Shelf 3B',
+        performedBy: 'Inventory Manager - Suresh',
+        notes: 'Quality check completed. All units in good condition.'
+      },
+      {
+        type: 'TESTED',
+        description: 'Component tested before installation',
+        timestamp: '2024-01-10T11:00:00Z',
+        location: 'Sarjapura Campus - Tech Lab',
+        performedBy: 'Vijay Sharma',
+        notes: 'Memtest86+ passed 4 iterations without errors'
+      },
+      {
+        type: 'INSTALLED',
+        description: 'Installed in laptop NG-SARJ-L-0315',
+        timestamp: '2024-01-15T09:30:00Z',
+        location: 'Sarjapura Campus',
+        performedBy: 'Vijay Sharma',
+        deviceTag: 'NG-SARJ-L-0315',
+        reason: 'RAM upgrade from 4GB to 8GB'
+      }
+    ],
+    
+    // Previously installed in
+    previousInstallations: [],
+    
+    // Storage history
+    storageHistory: [
+      {
+        campus: 'Sarjapura',
+        almirah: 'ALM-A1',
+        shelf: '3B',
+        from: '2023-11-20T14:15:00Z',
+        to: '2024-01-15T09:30:00Z'
+      }
+    ],
+    
+    // Documents
+    documents: [
+      {
+        id: 1,
+        name: 'Purchase Invoice.pdf',
+        type: 'INVOICE',
+        mimeType: 'application/pdf',
+        size: 245680,
+        uploadedAt: '2023-11-20T00:00:00Z',
+        url: '#'
+      },
+      {
+        id: 2,
+        name: 'Warranty Certificate.pdf',
+        type: 'WARRANTY',
+        mimeType: 'application/pdf',
+        size: 156420,
+        uploadedAt: '2023-11-20T00:00:00Z',
+        url: '#'
+      },
+      {
+        id: 3,
+        name: 'Component Photo.jpg',
+        type: 'PHOTO',
+        mimeType: 'image/jpeg',
+        size: 523140,
+        uploadedAt: '2024-01-10T00:00:00Z',
+        url: '#'
+      }
+    ],
+    
+    // Audit log
+    auditLog: [
+      {
+        action: 'Component installed in device',
+        user: 'Vijay Sharma',
+        timestamp: '2024-01-15T09:30:00Z'
+      },
+      {
+        action: 'Component tested',
+        user: 'Vijay Sharma',
+        timestamp: '2024-01-10T11:00:00Z'
+      },
+      {
+        action: 'Component received and stored',
+        user: 'Suresh Kumar',
+        timestamp: '2023-11-20T14:15:00Z'
+      },
+      {
+        action: 'Component record created',
+        user: 'System',
+        timestamp: '2023-11-15T10:30:00Z'
+      }
+    ]
+  },
+  
+  'SSD-PUNE-512-1211-02': {
+    componentTag: 'SSD-PUNE-512-1211-02',
+    componentType: 'SSD',
+    brand: 'Samsung',
+    modelNumber: '970 EVO Plus',
+    specifications: '512GB NVMe M.2 PCIe Gen 3.0 x4',
+    serialNumber: 'S4EVNG0N123456Z',
+    purchaseDate: '2021-12-10T00:00:00Z',
+    warrantyExpiryDate: '2026-12-10T00:00:00Z',
+    purchasePrice: 5800,
+    vendorName: 'Prime Electronics',
+    
+    sourceType: 'NEW_PURCHASE',
+    invoiceNumber: 'INV-2021-12-0892',
+    purchaseOrderNumber: 'PO-2021-789',
+    
+    status: 'IN_STOCK',
+    locationType: 'IN_STOCK',
+    campus: 'Pune',
+    almirah: 'ALM-B2',
+    shelf: '1A',
+    conditionNotes: 'Brand new, never used. Still in original packaging.',
+    
+    lastTestedDate: '2024-11-15T00:00:00Z',
+    testedBy: 'Amit Patel',
+    testResults: 'CrystalDiskInfo shows 100% health. Sequential read: 3500 MB/s, Write: 3200 MB/s',
+    remarks: 'Reserved for high-performance workstations',
+    
+    journey: [
+      {
+        type: 'ACQUIRED',
+        description: 'Component purchased from Prime Electronics',
+        timestamp: '2021-12-10T10:00:00Z',
+        location: 'Delhi Warehouse',
+        performedBy: 'Procurement Team'
+      },
+      {
+        type: 'RECEIVED',
+        description: 'Component received and stored at Pune campus',
+        timestamp: '2021-12-15T15:30:00Z',
+        location: 'Pune → ALM-B2 → Shelf 1A',
+        performedBy: 'Ravi Mehta'
+      },
+      {
+        type: 'TESTED',
+        description: 'Component tested and verified',
+        timestamp: '2024-11-15T10:00:00Z',
+        location: 'Pune Campus - Tech Lab',
+        performedBy: 'Amit Patel',
+        notes: 'Health check performed. SSD in perfect condition.'
+      }
+    ],
+    
+    previousInstallations: [],
+    storageHistory: [
+      {
+        campus: 'Pune',
+        almirah: 'ALM-B2',
+        shelf: '1A',
+        from: '2021-12-15T15:30:00Z',
+        to: null
+      }
+    ],
+    
+    documents: [
+      {
+        id: 1,
+        name: 'Purchase Invoice.pdf',
+        type: 'INVOICE',
+        mimeType: 'application/pdf',
+        size: 198450,
+        uploadedAt: '2021-12-15T00:00:00Z',
+        url: '#'
+      },
+      {
+        id: 2,
+        name: 'Warranty Document.pdf',
+        type: 'WARRANTY',
+        mimeType: 'application/pdf',
+        size: 142380,
+        uploadedAt: '2021-12-15T00:00:00Z',
+        url: '#'
+      }
+    ],
+    
+    auditLog: [
+      {
+        action: 'Component tested',
+        user: 'Amit Patel',
+        timestamp: '2024-11-15T10:00:00Z'
+      },
+      {
+        action: 'Component received and stored',
+        user: 'Ravi Mehta',
+        timestamp: '2021-12-15T15:30:00Z'
+      }
+    ]
+  },
+  
+  'MB-DANT-INTEL-1211-09': {
+    componentTag: 'MB-DANT-INTEL-1211-09',
+    componentType: 'MOTHERBOARD',
+    brand: 'ASUS',
+    modelNumber: 'PRIME H510M-E',
+    specifications: 'Intel H510 Chipset, LGA 1200, Micro-ATX',
+    serialNumber: 'MBASUS2021H510-45678',
+    purchaseDate: '2021-12-05T00:00:00Z',
+    warrantyExpiryDate: '2024-12-05T00:00:00Z',
+    purchasePrice: 6500,
+    vendorName: 'Component World',
+    
+    sourceType: 'EXTRACTED',
+    sourceDeviceTag: 'NG-DANT-D-0089',
+    sourceDeviceType: 'Desktop',
+    sourceDeviceId: 89,
+    extractionDate: '2024-10-15T00:00:00Z',
+    extractionReason: 'DEVICE_SCRAP',
+    extractionTechnician: 'Rohit Verma',
+    
+    status: 'SCRAP',
+    locationType: 'IN_STOCK',
+    campus: 'Dantewada',
+    almirah: 'ALM-SCRAP',
+    shelf: 'SCRAP-1',
+    conditionNotes: 'Multiple capacitors blown. BIOS chip damaged. Not economical to repair.',
+    
+    lastTestedDate: '2024-10-16T00:00:00Z',
+    testedBy: 'Rohit Verma',
+    testResults: 'POST test failed. No display output. Damaged beyond repair.',
+    remarks: 'To be sent to e-waste recycling facility',
+    
+    journey: [
+      {
+        type: 'ACQUIRED',
+        description: 'Component purchased from Component World',
+        timestamp: '2021-12-05T09:00:00Z',
+        location: 'Raipur Warehouse',
+        performedBy: 'Procurement Team'
+      },
+      {
+        type: 'RECEIVED',
+        description: 'Component received at Dantewada',
+        timestamp: '2021-12-12T10:00:00Z',
+        location: 'Dantewada → ALM-C1 → Shelf 2A',
+        performedBy: 'Manoj Singh'
+      },
+      {
+        type: 'INSTALLED',
+        description: 'Installed in desktop NG-DANT-D-0089',
+        timestamp: '2021-12-20T11:30:00Z',
+        location: 'Dantewada Campus',
+        performedBy: 'Manoj Singh',
+        deviceTag: 'NG-DANT-D-0089'
+      },
+      {
+        type: 'EXTRACTED',
+        description: 'Extracted from desktop NG-DANT-D-0089',
+        timestamp: '2024-10-15T14:00:00Z',
+        location: 'Dantewada Campus',
+        performedBy: 'Rohit Verma',
+        deviceTag: 'NG-DANT-D-0089',
+        reason: 'Device marked for scrap - motherboard failure'
+      },
+      {
+        type: 'MARKED_SCRAP',
+        description: 'Component marked as scrap',
+        timestamp: '2024-10-16T15:00:00Z',
+        location: 'Dantewada → ALM-SCRAP → SCRAP-1',
+        performedBy: 'Rohit Verma',
+        notes: 'Not economical to repair. Recommended for e-waste disposal.'
+      }
+    ],
+    
+    previousInstallations: [
+      {
+        id: 89,
+        tag: 'NG-DANT-D-0089',
+        type: 'Desktop',
+        installedFrom: '2021-12-20T11:30:00Z',
+        installedTo: '2024-10-15T14:00:00Z',
+        removalReason: 'Device scrapped - component failure'
+      }
+    ],
+    
+    storageHistory: [
+      {
+        campus: 'Dantewada',
+        almirah: 'ALM-SCRAP',
+        shelf: 'SCRAP-1',
+        from: '2024-10-16T15:00:00Z',
+        to: null
+      },
+      {
+        campus: 'Dantewada',
+        almirah: 'ALM-C1',
+        shelf: '2A',
+        from: '2021-12-12T10:00:00Z',
+        to: '2021-12-20T11:30:00Z'
+      }
+    ],
+    
+    documents: [
+      {
+        id: 1,
+        name: 'Original Purchase Invoice.pdf',
+        type: 'INVOICE',
+        mimeType: 'application/pdf',
+        size: 178920,
+        uploadedAt: '2021-12-12T00:00:00Z',
+        url: '#'
+      },
+      {
+        id: 2,
+        name: 'Scrap Assessment Report.pdf',
+        type: 'TEST_REPORT',
+        mimeType: 'application/pdf',
+        size: 234560,
+        uploadedAt: '2024-10-16T00:00:00Z',
+        url: '#'
+      },
+      {
+        id: 3,
+        name: 'Damaged Component Photo.jpg',
+        type: 'PHOTO',
+        mimeType: 'image/jpeg',
+        size: 689120,
+        uploadedAt: '2024-10-16T00:00:00Z',
+        url: '#'
+      }
+    ],
+    
+    auditLog: [
+      {
+        action: 'Component marked as scrap',
+        user: 'Rohit Verma',
+        timestamp: '2024-10-16T15:00:00Z'
+      },
+      {
+        action: 'Component extracted from device',
+        user: 'Rohit Verma',
+        timestamp: '2024-10-15T14:00:00Z'
+      },
+      {
+        action: 'Component tested',
+        user: 'Rohit Verma',
+        timestamp: '2024-10-16T09:00:00Z'
+      },
+      {
+        action: 'Component installed in device',
+        user: 'Manoj Singh',
+        timestamp: '2021-12-20T11:30:00Z'
+      }
+    ]
+  }
+};
+

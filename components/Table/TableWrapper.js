@@ -1,7 +1,9 @@
 "use client";
 import { useState, useMemo } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
+import { Plus } from "lucide-react";
 import TableFooter from "./TableFooter";
+import CustomButton from "@/components/atoms/CustomButton";
 
 export default function TableWrapper({ 
   data = [],
@@ -39,12 +41,13 @@ export default function TableWrapper({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           {showCreateButton && (
-            <button
+            <CustomButton
+              text="Create"
+              icon={Plus}
               onClick={onCreateClick}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Create
-            </button>
+              variant="primary"
+              size="md"
+            />
           )}
         </div>
       )}
