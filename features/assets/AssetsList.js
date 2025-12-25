@@ -32,7 +32,7 @@ export default function AssetsList() {
   
   // Fetch assets data from API
   const { data, isLoading, isError, error } = useFetch({
-    url: 'http://13.203.90.62/api/assets',
+    url: 'https://asset-dashboard.navgurukul.org/api/assets',
     queryKey: ['assets'],
   });
 
@@ -112,7 +112,7 @@ export default function AssetsList() {
     setIsSubmitting(true);
     try {
       // Make API call to create asset
-      const response = await fetch('http://13.203.90.62/api/assets', {
+      const response = await fetch('https://asset-dashboard.navgurukul.org/api/assets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

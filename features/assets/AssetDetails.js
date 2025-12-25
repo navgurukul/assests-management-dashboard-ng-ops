@@ -7,7 +7,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 export default function AssetDetails({ assetId, onBack }) {
   // Fetch asset details from API
   const { data, isLoading, isError, error } = useFetch({
-    url: `http://13.203.90.62/api/assets/${assetId}`,
+    url: `https://asset-dashboard.navgurukul.org/api/assets/${assetId}`,
     queryKey: ['asset', assetId],
     enabled: !!assetId,
   });
