@@ -3,6 +3,7 @@
 import React from 'react';
 import { Field, ErrorMessage } from 'formik';
 import DocumentSelector from './DocumentSelector';
+import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 
 export default function FormField({ field, formik }) {
   const { name, label, type, placeholder, required, options, min, max } = field;
@@ -121,6 +122,25 @@ export default function FormField({ field, formik }) {
           />
         );
 
+      case 'api-autocomplete':
+        return (
+          <ApiAutocomplete
+            name={name}
+            label={label}
+            placeholder={placeholder}
+            apiUrl={field.apiUrl}
+            value={formik.values[name] || ''}
+            onChange={(e) => formik.setFieldValue(name, e.target.value)}
+            onBlur={() => formik.setFieldTouched(name, true)}
+            isInvalid={hasError}
+            errorMessage={hasError ? formik.errors[name] : ''}
+            isRequired={required}
+            isDisabled={field.disabled}
+            labelKey={field.labelKey || 'name'}
+            valueKey={field.valueKey || 'id'}
+          />
+        );
+
       default:
         return (
           <Field
@@ -137,16 +157,18 @@ export default function FormField({ field, formik }) {
 
   return (
     <div className="mb-4">
-      {type !== 'checkbox' && (
+      {type !== 'checkbox' && type !== 'api-autocomplete' && (
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       {renderInput()}
-      <ErrorMessage name={name}>
-        {(msg) => <div className="text-red-500 text-sm mt-1">{msg}</div>}
-      </ErrorMessage>
+      {type !== 'api-autocomplete' && (
+        <ErrorMessage name={name}>
+          {(msg) => <div className="text-red-500 text-sm mt-1">{msg}</div>}
+        </ErrorMessage>
+      )}
     </div>
   );
 }

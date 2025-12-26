@@ -44,14 +44,14 @@ export default function AssetsList() {
     return data.data.map((asset) => ({
       id: asset.id,
       assetTag: asset.assetTag,
-      type: asset.assetTypeId || 'Unknown',
-      campus: asset.campusId || 'N/A',
+      type: asset.assetType?.name || 'Unknown',
+      campus: asset.campus?.name || 'N/A',
       status: asset.status === 'IN_STOCK' ? 'In Stock' : 
               asset.status === 'ALLOCATED' ? 'Allocated' : 
               asset.status === 'REPAIR' ? 'Under Repair' : 
               asset.status === 'SCRAP' ? 'Scrap' : 
               asset.status === 'PARTED_OUT' ? 'Parted Out' : asset.status,
-      location: asset.currentLocationId || 'N/A',
+      location: asset.location?.name || 'N/A',
       actions: actionOptions[0], // Default to 'View'
       // Store full asset data for details page
       assetData: asset
