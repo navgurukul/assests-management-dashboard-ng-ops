@@ -1,9 +1,10 @@
 import * as Yup from 'yup';
 
-export const componentFormFields = [
-  // Basic Information Section
+// Break down the component form into logical steps
+export const componentStepperConfig = [
   {
-    section: 'Basic Information',
+    label: 'Basic Information',
+    description: 'Enter the core details about the component',
     fields: [
       {
         name: 'componentTag',
@@ -61,20 +62,19 @@ export const componentFormFields = [
         type: 'text',
         placeholder: 'Enter serial number',
         required: false
-      },
+      }
+    ]
+  },
+  {
+    label: 'Purchase Details',
+    description: 'Add purchase and warranty information',
+    fields: [
       {
         name: 'purchaseDate',
         label: 'Purchase Date',
         type: 'date',
         placeholder: 'Select purchase date',
         required: true
-      },
-      {
-        name: 'warrantyExpiryDate',
-        label: 'Warranty Expiry Date',
-        type: 'date',
-        placeholder: 'Select warranty expiry date',
-        required: false
       },
       {
         name: 'purchasePrice',
@@ -90,13 +90,19 @@ export const componentFormFields = [
         type: 'text',
         placeholder: 'Enter vendor name',
         required: false
+      },
+      {
+        name: 'warrantyExpiryDate',
+        label: 'Warranty Expiry Date',
+        type: 'date',
+        placeholder: 'Select warranty expiry date',
+        required: false
       }
     ]
   },
-
-  // Source Information Section
   {
-    section: 'Source Information',
+    label: 'Source Information',
+    description: 'Specify where the component came from',
     fields: [
       {
         name: 'sourceType',
@@ -183,10 +189,9 @@ export const componentFormFields = [
       }
     ]
   },
-
-  // Current Status Section
   {
-    section: 'Current Status',
+    label: 'Current Status',
+    description: 'Define the component\'s current state and location',
     fields: [
       {
         name: 'status',
@@ -267,10 +272,9 @@ export const componentFormFields = [
       }
     ]
   },
-
-  // Additional Details Section
   {
-    section: 'Additional Details',
+    label: 'Testing & Assignment',
+    description: 'Add testing information and assignment details',
     fields: [
       {
         name: 'lastTestedDate',
@@ -312,10 +316,9 @@ export const componentFormFields = [
       }
     ]
   },
-
-  // Documents Section
   {
-    section: 'Documents & Bills',
+    label: 'Documents',
+    description: 'Attach bills, invoices, and other documents',
     fields: [
       {
         name: 'documents',
@@ -330,7 +333,7 @@ export const componentFormFields = [
   }
 ];
 
-// Validation schema
+// Same validation schema
 export const componentFormValidationSchema = Yup.object().shape({
   componentTag: Yup.string().required('Component tag is required'),
   componentType: Yup.string().required('Component type is required'),
@@ -360,7 +363,7 @@ export const componentFormValidationSchema = Yup.object().shape({
 
 // Initial values for form
 export const componentFormInitialValues = {
-  componentTag: '',
+  componentTag: 'COMP-' + Date.now(),
   componentType: '',
   brand: '',
   modelNumber: '',

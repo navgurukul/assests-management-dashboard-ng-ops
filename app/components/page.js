@@ -1,18 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, Download, Eye } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import Modal from '@/components/molecules/Modal';
-import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
 import { componentsPageData } from '@/dummyJson/dummyJson';
-import {
-  componentFormFields,
-  componentFormValidationSchema,
-  componentFormInitialValues,
-} from '@/app/config/formConfigs/componentFormConfig';
 
 const columns = [
   { key: "componentTag", label: "COMPONENT TAG" },
@@ -24,8 +17,6 @@ const columns = [
 
 export default function ComponentsPage() {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleViewDetails = (componentId) => {
     // Use componentTag instead of numeric ID
@@ -93,39 +84,8 @@ export default function ComponentsPage() {
   };
 
   const handleCreateClick = () => {
-    setIsModalOpen(true);
+    router.push('/components/create');
   };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleFormSubmit = async (values) => {
-    setIsSubmitting(true);
-    try {
-      // Dummy submission - just console log
-      console.log('Component created with values:', values);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert(`Component created successfully!\nComponent Tag: ${values.componentTag}\nType: ${values.componentType}`);
-      
-      // Close modal
-      setIsModalOpen(false);
-      
-    } catch (error) {
-      console.error('Error creating component:', error);
-      alert('Failed to create component. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Get only basic fields for the form (first section)
-  const basicFormFields = componentFormFields
-    .find(section => section.section === 'Basic Information')
-    ?.fields || [];
 
   return (
     <div className="p-6 overflow-y-auto h-full">
@@ -140,24 +100,6 @@ export default function ComponentsPage() {
         showCreateButton={true}
         onCreateClick={handleCreateClick}
       />
-
-      {/* Create Component Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Create New Component"
-        size="large"
-      >
-        <GenericForm
-          fields={basicFormFields}
-          initialValues={componentFormInitialValues}
-          validationSchema={componentFormValidationSchema}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCloseModal}
-          submitButtonText="Create Component"
-          isSubmitting={isSubmitting}
-        />
-      </Modal>
     </div>
   );
 }

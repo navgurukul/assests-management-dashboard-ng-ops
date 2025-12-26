@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Field, ErrorMessage } from 'formik';
+import DocumentSelector from './DocumentSelector';
 
 export default function FormField({ field, formik }) {
   const { name, label, type, placeholder, required, options, min, max } = field;
@@ -108,6 +109,16 @@ export default function FormField({ field, formik }) {
               </label>
             ))}
           </div>
+        );
+
+      case 'document-selector':
+        return (
+          <DocumentSelector
+            selectedDocuments={formik.values[name] || []}
+            onDocumentsChange={(docs) => formik.setFieldValue(name, docs)}
+            allowMultiple={field.allowMultiple !== false}
+            documentType={field.documentType || 'INVOICE'}
+          />
         );
 
       default:

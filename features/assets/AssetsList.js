@@ -7,6 +7,7 @@ import TableWrapper from '@/components/Table/TableWrapper';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 import {
   assetFormFields,
   assetValidationSchema,
@@ -112,7 +113,7 @@ export default function AssetsList() {
     setIsSubmitting(true);
     try {
       // Make API call to create asset
-      const response = await fetch('https://asset-dashboard.navgurukul.org/api/assets', {
+      const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

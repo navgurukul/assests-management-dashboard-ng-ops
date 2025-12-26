@@ -9,6 +9,88 @@ export const menuItems = [
   { name: 'Settings', icon: 'Settings', path: '/settings' },
 ];
 
+// Documents/Bills Data - For linking to components
+export const documentsLibrary = [
+  {
+    id: 'DOC-001',
+    name: 'Invoice - Amazon Basics - Jan 2024',
+    type: 'INVOICE',
+    vendor: 'Amazon',
+    date: '2024-01-15',
+    amount: '₹45,000',
+    invoiceNumber: 'AMZ-2024-001',
+    componentsLinked: 25,
+    filePath: '/documents/invoice-amazon-jan-2024.pdf',
+    uploadedBy: 'Admin',
+    uploadedDate: '2024-01-15'
+  },
+  {
+    id: 'DOC-002',
+    name: 'Invoice - Dell Computers - Feb 2024',
+    type: 'INVOICE',
+    vendor: 'Dell India',
+    date: '2024-02-20',
+    amount: '₹1,20,000',
+    invoiceNumber: 'DELL-2024-002',
+    componentsLinked: 10,
+    filePath: '/documents/invoice-dell-feb-2024.pdf',
+    uploadedBy: 'Admin',
+    uploadedDate: '2024-02-20'
+  },
+  {
+    id: 'DOC-003',
+    name: 'Invoice - Kingston RAM Bulk Purchase',
+    type: 'INVOICE',
+    vendor: 'Kingston Distributor',
+    date: '2024-03-05',
+    amount: '₹75,000',
+    invoiceNumber: 'KING-2024-003',
+    componentsLinked: 50,
+    filePath: '/documents/invoice-kingston-mar-2024.pdf',
+    uploadedBy: 'Admin',
+    uploadedDate: '2024-03-05'
+  },
+  {
+    id: 'DOC-004',
+    name: 'Warranty Certificate - HP',
+    type: 'WARRANTY',
+    vendor: 'HP India',
+    date: '2024-01-10',
+    amount: 'N/A',
+    invoiceNumber: 'HP-WAR-2024-001',
+    componentsLinked: 5,
+    filePath: '/documents/warranty-hp-jan-2024.pdf',
+    uploadedBy: 'Admin',
+    uploadedDate: '2024-01-10'
+  },
+  {
+    id: 'DOC-005',
+    name: 'Invoice - Samsung SSD 512GB - Bulk Order',
+    type: 'INVOICE',
+    vendor: 'Samsung Authorized Dealer',
+    date: '2023-12-10',
+    amount: '₹85,000',
+    invoiceNumber: 'SAM-SSD-2023-045',
+    componentsLinked: 30,
+    filePath: '/documents/invoice-samsung-dec-2023.pdf',
+    uploadedBy: 'Admin',
+    uploadedDate: '2023-12-10'
+  },
+  {
+    id: 'DOC-006',
+    name: 'Invoice - Seagate HDD 1TB - Annual Purchase',
+    type: 'INVOICE',
+    vendor: 'Seagate Distributor India',
+    date: '2023-11-15',
+    amount: '₹95,000',
+    invoiceNumber: 'SEA-HDD-2023-089',
+    componentsLinked: 40,
+    filePath: '/documents/invoice-seagate-nov-2023.pdf',
+    uploadedBy: 'Admin',
+    uploadedDate: '2023-11-15'
+  }
+];
+
 export const dashboardCards = [
   { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-400' },
   { id: 2, count: 278, label: 'In Storage', icon: 'Archive', bgColor: 'bg-orange-400' },
