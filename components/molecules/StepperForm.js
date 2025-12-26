@@ -61,7 +61,7 @@ export default function StepperForm({
       enableReinitialize
     >
       {(formikProps) => (
-        <Form className="space-y-6">
+        <Form className="space-y-3">
           {/* Stepper Header */}
           <div className="relative">
             <div className="flex items-center justify-between">
@@ -96,9 +96,9 @@ export default function StepperForm({
                     </div>
                     
                     {/* Step Label */}
-                    <div className="mt-2 text-center max-w-[120px]">
+                    <div className="mt-1 text-center max-w-[120px]">
                       <p
-                        className={`text-xs font-medium ${
+                        className={`text-[10px] font-medium ${
                           isStepActive(index)
                             ? 'text-blue-600'
                             : isStepCompleted(index)
@@ -129,17 +129,17 @@ export default function StepperForm({
           </div>
 
           {/* Step Content */}
-          <div className="bg-gray-50 rounded-lg p-6 min-h-[400px]">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+          <div className="bg-gray-50 rounded-lg p-8 min-h-[300px]">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
               {steps[currentStep].label}
             </h3>
             {steps[currentStep].description && (
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-xs text-gray-600 mb-4">
                 {steps[currentStep].description}
               </p>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {steps[currentStep].fields.map((field) => {
                 // Handle conditional fields (showIf)
                 if (field.showIf) {
@@ -162,7 +162,7 @@ export default function StepperForm({
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center pt-6 border-t">
+          <div className="flex justify-between items-center pt-2 border-t">
             <div>
               {currentStep > 0 && (
                 <Button
