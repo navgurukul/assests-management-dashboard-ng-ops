@@ -101,7 +101,7 @@ export const componentStepperConfig = [
     ]
   },
   {
-    label: 'Source Information',
+    label: 'Source Info.',
     description: 'Specify where the component came from',
     fields: [
       {
@@ -273,7 +273,7 @@ export const componentStepperConfig = [
     ]
   },
   {
-    label: 'Testing & Assignment',
+    label: 'Testing',
     description: 'Add testing information and assignment details',
     fields: [
       {
