@@ -17,6 +17,17 @@ export default function TicketDetails({ ticketId, onBack }) {
   // Left column sections (30%) - Smaller information cards
   const leftSections = [
     {
+      title: 'DETAILS',
+      itemsGrid: true,
+      items: [
+        { label: 'Ticket ID', value: ticketDetails.ticketId },
+        { label: 'Campus', value: ticketDetails.campus || '—' },
+        { label: 'Raised On', value: ticketDetails.raisedOn || '—' },
+        { label: 'Ticket Type', value: ticketDetails.type },
+        { label: 'Assigned To', value: ticketDetails.assignedTo || '—' },
+      ],
+    },
+    {
       title: 'STATUS TIMELINE',
       timeline: ticketDetails.timeline,
     },
@@ -40,7 +51,13 @@ export default function TicketDetails({ ticketId, onBack }) {
   // Right column sections (70%) - Larger content cards
   const rightSections = [
     {
-      title: 'NOTES / UPDATES LOG (editable thread)',
+      title: 'RESOLUTION NOTES',
+      content: (
+        <div className="text-sm text-gray-700">{ticketDetails.resolutionNotes || '—'}</div>
+      ),
+    },
+    {
+      title: 'HISTORY LOG',
       logEntries: ticketDetails.logEntries,
     },
     {
@@ -49,7 +66,9 @@ export default function TicketDetails({ ticketId, onBack }) {
         { label: 'Add Update', variant: 'default', onClick: () => console.log('Add Update') },
         { label: 'Escalate', variant: 'danger', onClick: () => console.log('Escalate') },
         { label: 'Resolve', variant: 'success', onClick: () => console.log('Resolve') },
-        { label: 'Close Ticket', variant: 'primary', onClick: () => console.log('Close') },
+        ...(ticketDetails.status === 'RESOLVED' ? [
+          { label: 'Close Ticket', variant: 'primary', onClick: () => console.log('Close') }
+        ] : []),
       ],
     },
   ];

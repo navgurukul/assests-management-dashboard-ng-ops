@@ -3,13 +3,14 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
-import { ticketsTableData } from '@/dummyJson/dummyJson';
+import { ticketsTableData, ticketDetailsData } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "ticketId", label: "TICKET ID" },
   { key: "type", label: "TYPE" },
-  { key: "sla", label: "SLA" },
+  { key: "device", label: "DEVICE" },
   { key: "status", label: "STATUS" },
+  { key: "updated", label: "UPDATED" },
 ];
 
 export default function TicketsList() {
@@ -21,13 +22,11 @@ export default function TicketsList() {
     switch (columnKey) {
       case "ticketId":
         return <span className="font-medium text-gray-800">{cellValue}</span>;
-      case "sla":
-        const slaColor = item.slaStatus === 'critical' 
-          ? 'text-red-600 font-semibold' 
-          : item.slaStatus === 'warning' 
-          ? 'text-orange-600 font-semibold' 
-          : 'text-gray-600';
-        return <span className={slaColor}>{cellValue}</span>;
+      case "device":
+        // Derive device from details data when available
+        const details = ticketDetailsData[item.id];
+        const deviceTag = details?.deviceSummary?.asset || '-';
+        return <span className="text-gray-700">{deviceTag}</span>;
       case "status":
         const statusColors = {
           'IN PROGRESS': 'bg-blue-100 text-blue-800',
@@ -40,6 +39,8 @@ export default function TicketsList() {
             {cellValue}
           </span>
         );
+      case "updated":
+        return <span className="text-gray-500 text-sm">{cellValue || '—'}</span>;
       default:
         return cellValue;
     }
