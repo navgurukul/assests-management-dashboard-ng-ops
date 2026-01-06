@@ -54,7 +54,7 @@ export const assetFormFields = [
     placeholder: 'Search and select campus',
     apiUrl: 'https://asset-dashboard.navgurukul.org/api/campuses',
     queryKey: ['campuses'],
-    labelKey: 'name',
+    labelKey: 'campusName',
     valueKey: 'id',
     required: true,
   },
