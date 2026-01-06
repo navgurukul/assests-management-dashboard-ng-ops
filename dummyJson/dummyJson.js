@@ -93,7 +93,7 @@ export const documentsLibrary = [
 
 export const dashboardCards = [
   { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-400' },
-  { id: 2, count: 278, label: 'In Storage', icon: 'Archive', bgColor: 'bg-orange-400' },
+ 
   { id: 3, count: 321, label: 'Needs Repair', icon: 'Settings', bgColor: 'bg-slate-500' },
   { id: 4, count: 22, label: 'In Repair', icon: 'Wrench', bgColor: 'bg-red-400' },
 ];
@@ -132,16 +132,16 @@ export const assetsTableData = [
 ];
 
 export const ticketsTableData = [
-  { id: 1, ticketId: 'TKT-SARJ-251119-R-001', type: 'Repair', sla: '02h', slaStatus: 'critical', status: 'IN PROGRESS' },
-  { id: 2, ticketId: 'TKT-PUNE-251119-C-002', type: 'Change', sla: '11h', slaStatus: 'normal', status: 'ESCALATED' },
-  { id: 3, ticketId: 'TKT-HIMA-241119-D-001', type: 'Dispute', sla: '19h', slaStatus: 'normal', status: 'OPEN' },
-  { id: 4, ticketId: 'TKT-JASH-231119-N-004', type: 'New', sla: '28h', slaStatus: 'normal', status: 'PENDING APPROVAL' },
-  { id: 5, ticketId: 'TKT-DANT-221119-R-005', type: 'Repair', sla: '05h', slaStatus: 'warning', status: 'IN PROGRESS' },
-  { id: 6, ticketId: 'TKT-UDAI-201119-C-006', type: 'Change', sla: '15h', slaStatus: 'normal', status: 'OPEN' },
-  { id: 7, ticketId: 'TKT-RAIP-191119-D-007', type: 'Dispute', sla: '32h', slaStatus: 'normal', status: 'PENDING APPROVAL' },
-  { id: 8, ticketId: 'TKT-AMAR-181119-N-008', type: 'New', sla: '01h', slaStatus: 'critical', status: 'ESCALATED' },
-  { id: 9, ticketId: 'TKT-JABA-171119-R-009', type: 'Repair', sla: '08h', slaStatus: 'warning', status: 'IN PROGRESS' },
-  { id: 10, ticketId: 'TKT-DHAR-161119-C-010', type: 'Change', sla: '24h', slaStatus: 'normal', status: 'OPEN' },
+  { id: 1, ticketId: 'TKT-SARJ-251119-R-001', type: 'Repair', sla: '02h', slaStatus: 'critical', status: 'IN PROGRESS', updated: 'Today' },
+  { id: 2, ticketId: 'TKT-PUNE-251119-C-002', type: 'Change', sla: '11h', slaStatus: 'normal', status: 'ESCALATED', updated: '12 Jan' },
+  { id: 3, ticketId: 'TKT-HIMA-241119-D-001', type: 'Dispute', sla: '19h', slaStatus: 'normal', status: 'OPEN', updated: '11 Jan' },
+  { id: 4, ticketId: 'TKT-JASH-231119-N-004', type: 'New', sla: '28h', slaStatus: 'normal', status: 'PENDING APPROVAL', updated: '10 Jan' },
+  { id: 5, ticketId: 'TKT-DANT-221119-R-005', type: 'Repair', sla: '05h', slaStatus: 'warning', status: 'IN PROGRESS', updated: '09 Jan' },
+  { id: 6, ticketId: 'TKT-UDAI-201119-C-006', type: 'Change', sla: '15h', slaStatus: 'normal', status: 'OPEN', updated: '08 Jan' },
+  { id: 7, ticketId: 'TKT-RAIP-191119-D-007', type: 'Dispute', sla: '32h', slaStatus: 'normal', status: 'PENDING APPROVAL', updated: '07 Jan' },
+  { id: 8, ticketId: 'TKT-AMAR-181119-N-008', type: 'New', sla: '01h', slaStatus: 'critical', status: 'ESCALATED', updated: 'Today' },
+  { id: 9, ticketId: 'TKT-JABA-171119-R-009', type: 'Repair', sla: '08h', slaStatus: 'warning', status: 'IN PROGRESS', updated: 'Yesterday' },
+  { id: 10, ticketId: 'TKT-DHAR-161119-C-010', type: 'Change', sla: '24h', slaStatus: 'normal', status: 'OPEN', updated: '05 Jan' },
 ];
 
 export const assetsPageData = [
@@ -202,6 +202,9 @@ export const ticketDetailsData = {
   1: {
     ticketId: 'TKT-SARJ-251119-R-001',
     type: 'Repair',
+    campus: 'Sarjapura',
+    raisedOn: '25 Nov 2025',
+    assignedTo: 'Campus IT Coordinator',
     sla: '02h 15m',
     slaStatus: 'critical',
     status: 'IN PROGRESS',
@@ -223,10 +226,14 @@ export const ticketDetailsData = {
       { time: '01:40 PM', text: 'Diagnostics complete' },
       { time: '02:10 PM', text: 'Issue requires motherboard replace' },
     ],
+    resolutionNotes: 'Added by IT team',
   },
   2: {
     ticketId: 'TKT-PUNE-251119-C-002',
     type: 'Change',
+    campus: 'Pune',
+    raisedOn: '25 Nov 2025',
+    assignedTo: 'Campus IT Coordinator',
     sla: '11h 30m',
     slaStatus: 'normal',
     status: 'ESCALATED',
@@ -248,6 +255,7 @@ export const ticketDetailsData = {
       { time: '10:30 AM', text: 'Assigned to IT Team' },
       { time: '11:45 AM', text: 'Escalated to senior technician' },
     ],
+    resolutionNotes: 'Pending coordinator review',
   },
 };
 
@@ -320,6 +328,145 @@ export const assetDetailsData = {
   },
 };
 
+ 
+/**
+ * MODAL CONFIGURATIONS
+ * Each modal type has a configuration object defining which fields to display
+ * Fields can be toggled on/off by adding/removing from the array
+ */
+
+export const allocationModalConfig = {
+  id: 'allocation-modal',
+  title: '🔧 Allocation Modal',
+  subtitle: 'Assign Asset to User',
+  fields: [
+    {
+      id: 'asset_tag',
+      type: 'display',
+      label: 'Assign Asset',
+      displayValue: 'NG-SARJ-L-0210',
+      description: 'The asset to be assigned',
+    },
+    {
+      id: 'user_search',
+      type: 'search',
+      label: 'Select User',
+      placeholder: 'Search Student: Suresh Kumar',
+      description: 'Search and select the user to assign this asset to',
+      required: true,
+      minLength: 3,
+    },
+    {
+      id: 'reason',
+      type: 'select',
+      label: 'Reason',
+      options: [
+        { value: 'replacement', label: 'Replacement ▼' },
+        { value: 'new_allocation', label: 'New Allocation' },
+        { value: 'repair', label: 'Repair' },
+      ],
+      placeholder: 'Select reason',
+      required: true,
+    },
+    {
+      id: 'preview',
+      type: 'display',
+      label: 'Preview',
+      displayValue: 'Current Owner: Meena → New Owner: Suresh, Location change: WITH_USER(Meena) → WITH_USER(Suresh)',
+      description: 'Review the changes before confirming',
+    },
+  ],
+  actionButtons: [
+    { id: 'cancel', label: 'Cancel', variant: 'secondary' },
+    { id: 'confirm', label: 'Confirm Assign', variant: 'primary' },
+  ],
+};
+
+export const componentInstallModalConfig = {
+  id: 'component-install-modal',
+  title: '⚙️ Component Action Modal — install',
+  subtitle: 'Install Component on Device',
+  fields: [
+    {
+      id: 'component_tag',
+      type: 'display',
+      label: 'Install Component',
+      displayValue: 'RAM-SARJ-8GB-2311-01',
+      description: 'The component to be installed',
+    },
+    {
+      id: 'device_search',
+      type: 'search',
+      label: 'Select Device',
+      placeholder: 'Search: Lenovo T480 / NG-PUNE-L-0210',
+      description: 'Find and select the device to install component on',
+      required: true,
+      minLength: 3,
+    },
+    {
+      id: 'slot',
+      type: 'select',
+      label: 'Slot',
+      options: [
+        { value: 'slot_a', label: 'Slot A ▼' },
+        { value: 'slot_b', label: 'Slot B' },
+        { value: 'slot_c', label: 'Slot C' },
+      ],
+      placeholder: 'Select Slot',
+      required: true,
+    },
+    {
+      id: 'notes',
+      type: 'textarea',
+      label: 'Notes',
+      placeholder: 'Add any additional notes here...',
+      maxLength: 200,
+    },
+  ],
+  actionButtons: [
+    { id: 'cancel', label: 'Cancel', variant: 'secondary' },
+    { id: 'install', label: 'Install Component', variant: 'primary' },
+  ],
+};
+
+export const componentStripModalConfig = {
+  id: 'component-strip-modal',
+  title: '🔌 Component Action Modal — strip from laptop',
+  subtitle: 'Remove Component from Device',
+  fields: [
+    {
+      id: 'component_to_remove',
+      type: 'display',
+      label: 'Remove Component',
+      displayValue: 'RAM 8GB from NG-SARJ-L-0315',
+      description: 'The component to be removed',
+    },
+    {
+      id: 'removal_reason',
+      type: 'select',
+      label: 'Reason',
+      options: [
+        { value: 'reuse', label: 'Reuse' },
+        { value: 'replace', label: 'Replace' },
+        { value: 'scrap', label: 'Scrap ▼' },
+      ],
+      placeholder: 'Select reason',
+      required: true,
+    },
+    {
+      id: 'new_status',
+      type: 'display',
+      label: 'New Status After Removal',
+      displayValue: 'In Stock',
+      description: 'The status of the component after removal',
+    },
+  ],
+  actionButtons: [
+    { id: 'confirm_removal', label: 'Confirm Removal', variant: 'danger' },
+    { id: 'cancel', label: 'Cancel', variant: 'secondary' },
+  ],
+};
+ 
 // Component Details Data
 export const componentDetailsData = {
   'RAM-SARJ-8GB-2311-01': {
