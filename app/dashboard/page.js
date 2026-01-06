@@ -31,7 +31,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-6 h-full overflow-y-auto"> 
+    <div className="p-6 h-screen overflow-y-auto"> 
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {dashboardCards.map((card) => {
