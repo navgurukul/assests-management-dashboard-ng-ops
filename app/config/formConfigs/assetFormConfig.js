@@ -2,13 +2,6 @@ import * as Yup from 'yup';
 
 export const assetFormFields = [
   {
-    name: 'assetTag',
-    label: 'Asset Tag',
-    type: 'text',
-    placeholder: 'Enter asset tag (e.g., NG-SARJ-L-0001)',
-    required: true,
-  },
-  {
     name: 'assetTypeId',
     label: 'Asset Type',
     type: 'api-autocomplete',
@@ -63,11 +56,15 @@ export const assetFormFields = [
     label: 'Current Location',
     type: 'api-autocomplete',
     placeholder: 'Search and select location',
-    apiUrl: 'https://asset-dashboard.navgurukul.org/api/locations',
+    apiUrl: 'https://asset-dashboard.navgurukul.org/api/locations/campus',
     queryKey: ['locations'],
     labelKey: 'name',
     valueKey: 'id',
     required: true,
+    dependsOn: {
+      field: 'campusId',
+      paramKey: 'campusId',
+    },
   },
   {
     name: 'status',
@@ -132,7 +129,6 @@ export const assetFormFields = [
 ];
 
 export const assetValidationSchema = Yup.object().shape({
-  assetTag: Yup.string().required('Asset tag is required'),
   assetTypeId: Yup.string().required('Asset type is required'),
   brand: Yup.string().required('Brand is required'),
   model: Yup.string().required('Model is required'),
@@ -157,7 +153,7 @@ export const assetValidationSchema = Yup.object().shape({
 });
 
 export const assetInitialValues = {
-  assetTag: '',
+  assetTag: 'CAMPUSNAME-ASSET-TYPE-ID',
   assetTypeId: '',
   brand: '',
   model: '',

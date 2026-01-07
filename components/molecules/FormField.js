@@ -123,11 +123,16 @@ export default function FormField({ field, formik }) {
         );
 
       case 'api-autocomplete':
+        // Handle dependsOn - disable field if dependent field has no value
+        const dependsOnField = field.dependsOn?.field;
+        const dependentValue = dependsOnField ? formik.values[dependsOnField] : null;
+        const isDependentDisabled = dependsOnField && !dependentValue;
+        
         return (
           <ApiAutocomplete
             name={name}
             label={label}
-            placeholder={placeholder}
+            placeholder={isDependentDisabled ? `Please select ${dependsOnField?.replace('Id', '')} first` : placeholder}
             apiUrl={field.apiUrl}
             value={formik.values[name] || ''}
             onChange={(e) => formik.setFieldValue(name, e.target.value)}
@@ -135,9 +140,11 @@ export default function FormField({ field, formik }) {
             isInvalid={hasError}
             errorMessage={hasError ? formik.errors[name] : ''}
             isRequired={required}
-            isDisabled={field.disabled}
+            isDisabled={field.disabled || isDependentDisabled}
             labelKey={field.labelKey || 'name'}
             valueKey={field.valueKey || 'id'}
+            dependsOn={field.dependsOn}
+            dependentValue={dependentValue}
           />
         );
 
