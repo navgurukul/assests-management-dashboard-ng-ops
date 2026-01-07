@@ -1,12 +1,7 @@
-/**
- * Environment Configuration
- * Centralized config for all environment variables
- */
-
 const config = {
   // API Configuration
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api',
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://asset-dashboard.navgurukul.org/api',
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  appUrl: process.env.NEXT_PUBLIC_APP_URL,
   
   // Environment
   // env: process.env.NEXT_PUBLIC_ENV || 'production',
