@@ -6,6 +6,7 @@ import { Search, Eye, UserPlus, FileText } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
+import FilterDropdown from '@/components/molecules/FilterDropdown';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import {
@@ -35,10 +36,26 @@ export default function AssetsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
-  // Fetch assets data from API with pagination
+  // Filter state
+  const [filters, setFilters] = useState({});
+  
+  // Build query string with filters
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    
+    if (filters.campus) params.append('campusId', filters.campus);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.type) params.append('type', filters.type);
+    
+    return params.toString();
+  };
+  
+  // Fetch assets data from API with pagination and filters
   const { data, isLoading, isError, error } = useFetch({
-    url: `/assets?page=${currentPage}&limit=${pageSize}`,
-    queryKey: ['assets', currentPage, pageSize],
+    url: `/assets?${buildQueryString()}`,
+    queryKey: ['assets', currentPage, pageSize, filters],
   });
 
   // Handle page change
@@ -51,6 +68,35 @@ export default function AssetsList() {
     setPageSize(newSize);
     setCurrentPage(1); // Reset to first page when changing page size
   };
+  
+  // Handle filter change
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+  
+  // Filter options - can be fetched from API later
+  const campusOptions = [
+    { value: '1', label: 'Campus A' },
+    { value: '2', label: 'Campus B' },
+    { value: '3', label: 'Campus C' },
+  ];
+  
+  const filterStatusOptions = [
+    { value: 'IN_STOCK', label: 'In Stock' },
+    { value: 'ALLOCATED', label: 'Allocated' },
+    { value: 'REPAIR', label: 'Under Repair' },
+    { value: 'SCRAP', label: 'Scrap' },
+    { value: 'PARTED_OUT', label: 'Parted Out' },
+  ];
+  
+  const assetTypeOptions = [
+    { value: '1', label: 'Laptop' },
+    { value: '2', label: 'Desktop' },
+    { value: '3', label: 'Monitor' },
+    { value: '4', label: 'Keyboard' },
+    { value: '5', label: 'Mouse' },
+  ];
 
   // Transform API data to match table structure
   const assetsListData = React.useMemo(() => {
@@ -184,8 +230,6 @@ export default function AssetsList() {
 
   return (
     <div className="space-y-6">
-      {/* Filter Bar */} 
-
       {/* Table */}
       <TableWrapper
         data={assetsListData}
@@ -198,6 +242,16 @@ export default function AssetsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Filter component
+        filterComponent={
+          <FilterDropdown
+            onFilterChange={handleFilterChange}
+            campusOptions={campusOptions}
+            statusOptions={filterStatusOptions}
+            assetTypeOptions={assetTypeOptions}
+            selectedFilters={filters}
+          />
+        }
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}

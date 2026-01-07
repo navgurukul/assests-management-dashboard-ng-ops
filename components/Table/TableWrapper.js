@@ -18,6 +18,8 @@ export default function TableWrapper({
   onRowClick,
   showCreateButton = false,
   onCreateClick,
+  // Filter props
+  filterComponent,
   // Server-side pagination props
   serverPagination = false,
   paginationData = null, // { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage }
@@ -63,15 +65,18 @@ export default function TableWrapper({
       {title && (
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          {showCreateButton && (
-            <CustomButton
+          <div className="flex items-center gap-3">
+            {showCreateButton && (
+              <CustomButton
               text="Create"
               icon={Plus}
               onClick={onCreateClick}
               variant="primary"
               size="md"
-            />
-          )}
+              />
+            )}
+            {filterComponent}
+          </div>
         </div>
       )}
       
