@@ -31,11 +31,26 @@ export default function AssetsList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Fetch assets data from API
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  
+  // Fetch assets data from API with pagination
   const { data, isLoading, isError, error } = useFetch({
-    url: 'https://asset-dashboard.navgurukul.org/api/assets',
-    queryKey: ['assets'],
+    url: `/assets?page=${currentPage}&limit=${pageSize}`,
+    queryKey: ['assets', currentPage, pageSize],
   });
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
 
   // Transform API data to match table structure
   const assetsListData = React.useMemo(() => {
@@ -177,12 +192,17 @@ export default function AssetsList() {
         columns={columns}
         title="Assets"
         renderCell={renderCell}
-        itemsPerPage={10}
+        itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Assets table"
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Server-side pagination props
+        serverPagination={true}
+        paginationData={data?.pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
 
       {/* Create Asset Modal */}
