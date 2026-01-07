@@ -189,7 +189,7 @@ export default function AssetsList() {
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Create New Asset"
+        title="Register New Asset"
         size="large"
       >
         <GenericForm

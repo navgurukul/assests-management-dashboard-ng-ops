@@ -23,10 +23,23 @@ export default function ApiAutocomplete({
   isDisabled = false,
   labelKey = 'name',
   valueKey = 'id',
+  dependsOn = null,
+  dependentValue = null,
 }) {
+  // Build the API URL with dependent value if exists (append to path)
+  const finalApiUrl = dependsOn && dependentValue
+    ? `${apiUrl}/${dependentValue}`
+    : apiUrl;
+
+  // Include dependent value in queryKey to refetch when it changes
+  const finalQueryKey = dependsOn && dependentValue
+    ? [...(queryKey || [name]), dependentValue]
+    : queryKey || [name];
+
   const { data, isLoading, isError } = useFetch({
-    url: apiUrl,
-    queryKey: queryKey || [name],
+    url: finalApiUrl,
+    queryKey: finalQueryKey,
+    enabled: !dependsOn || !!dependentValue, // Only fetch if no dependency or dependent value exists
   });
 
   const items = data?.data || [];
