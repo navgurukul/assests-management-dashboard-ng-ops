@@ -13,7 +13,6 @@ export default function FilterDropdown({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
-  const [activeFilters, setActiveFilters] = useState(selectedFilters);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -48,7 +47,7 @@ export default function FilterDropdown({
   ];
 
   const handleFilterSelect = (filterKey, value) => {
-    const newFilters = { ...activeFilters };
+    const newFilters = { ...selectedFilters };
     
     if (newFilters[filterKey] === value) {
       // If already selected, remove it
@@ -58,37 +57,20 @@ export default function FilterDropdown({
       newFilters[filterKey] = value;
     }
     
-    setActiveFilters(newFilters);
     onFilterChange(newFilters);
   };
 
-  const clearFilters = () => {
-    setActiveFilters({});
-    onFilterChange({});
-  };
-
-  const activeFilterCount = Object.keys(activeFilters).length;
+  const activeFilterCount = Object.keys(selectedFilters).length;
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div className="flex items-center gap-2">
-        <CustomButton
-          text={`Filter${activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}`}
-          icon={Filter}
-          onClick={() => setIsOpen(!isOpen)}
-          variant={activeFilterCount > 0 ? "primary" : "secondary"}
-          size="md"
-        />
-        {activeFilterCount > 0 && (
-          <button
-            onClick={clearFilters}
-            className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Clear
-          </button>
-        )}
-      </div>
+      <CustomButton
+        text={`Filter${activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}`}
+        icon={Filter}
+        onClick={() => setIsOpen(!isOpen)}
+        variant={activeFilterCount > 0 ? "primary" : "secondary"}
+        size="md"
+      />
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
@@ -104,7 +86,7 @@ export default function FilterDropdown({
                   <span className="text-sm font-medium text-gray-700">
                     {filter.label}
                   </span>
-                  {activeFilters[filter.key] && (
+                  {selectedFilters[filter.key] && (
                     <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                   )}
                   <svg
@@ -126,11 +108,11 @@ export default function FilterDropdown({
                           key={item.value}
                           onClick={() => handleFilterSelect(filter.key, item.value)}
                           className={`px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between ${
-                            activeFilters[filter.key] === item.value ? 'bg-blue-50' : ''
+                            selectedFilters[filter.key] === item.value ? 'bg-blue-50' : ''
                           }`}
                         >
                           <span className="text-sm text-gray-700">{item.label}</span>
-                          {activeFilters[filter.key] === item.value && (
+                          {selectedFilters[filter.key] === item.value && (
                             <svg
                               className="w-4 h-4 text-blue-500"
                               fill="currentColor"

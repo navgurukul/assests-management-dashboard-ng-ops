@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText } from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
+import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import {
@@ -57,6 +58,18 @@ export default function AssetsList() {
     url: `/assets?${buildQueryString()}`,
     queryKey: ['assets', currentPage, pageSize, filters],
   });
+  
+  // Fetch campus options from API
+  const { data: campusData } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+  });
+  
+  // Fetch asset types from API
+  const { data: assetTypesData } = useFetch({
+    url: '/asset-types',
+    queryKey: ['asset-types'],
+  });
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -75,13 +88,35 @@ export default function AssetsList() {
     setCurrentPage(1); // Reset to first page when filters change
   };
   
-  // Filter options - can be fetched from API later
-  const campusOptions = [
-    { value: '1', label: 'Campus A' },
-    { value: '2', label: 'Campus B' },
-    { value: '3', label: 'Campus C' },
-  ];
+  // Handle removing a single filter chip
+  const handleRemoveFilter = (filterKey) => {
+    const newFilters = { ...filters };
+    delete newFilters[filterKey];
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
   
+  // Transform campus data from API to filter options
+  const campusOptions = React.useMemo(() => {
+    if (!campusData || !campusData.data) return [];
+    
+    return campusData.data.map((campus) => ({
+      value: campus.id,
+      label: campus.campusName,
+    }));
+  }, [campusData]);
+  
+  // Transform asset types data from API to filter options
+  const assetTypeOptions = React.useMemo(() => {
+    if (!assetTypesData || !assetTypesData.data) return [];
+    
+    return assetTypesData.data.map((assetType) => ({
+      value: assetType.id,
+      label: assetType.name,
+    }));
+  }, [assetTypesData]);
+  
+  // Status filter options
   const filterStatusOptions = [
     { value: 'IN_STOCK', label: 'In Stock' },
     { value: 'ALLOCATED', label: 'Allocated' },
@@ -90,13 +125,32 @@ export default function AssetsList() {
     { value: 'PARTED_OUT', label: 'Parted Out' },
   ];
   
-  const assetTypeOptions = [
-    { value: '1', label: 'Laptop' },
-    { value: '2', label: 'Desktop' },
-    { value: '3', label: 'Monitor' },
-    { value: '4', label: 'Keyboard' },
-    { value: '5', label: 'Mouse' },
-  ];
+  // Get label for a filter value
+  const getFilterLabel = (filterKey, value) => {
+    if (filterKey === 'campus') {
+      const campus = campusOptions.find(opt => opt.value === value);
+      return campus ? campus.label : value;
+    }
+    if (filterKey === 'type') {
+      const assetType = assetTypeOptions.find(opt => opt.value === value);
+      return assetType ? assetType.label : value;
+    }
+    if (filterKey === 'status') {
+      const status = filterStatusOptions.find(opt => opt.value === value);
+      return status ? status.label : value;
+    }
+    return value;
+  };
+  
+  // Get category name for display
+  const getCategoryName = (filterKey) => {
+    const categoryNames = {
+      campus: 'Campus',
+      type: 'Asset Type',
+      status: 'Status'
+    };
+    return categoryNames[filterKey] || filterKey;
+  };
 
   // Transform API data to match table structure
   const assetsListData = React.useMemo(() => {
@@ -250,6 +304,15 @@ export default function AssetsList() {
             statusOptions={filterStatusOptions}
             assetTypeOptions={assetTypeOptions}
             selectedFilters={filters}
+          />
+        }
+        // Active filters chips component
+        activeFiltersComponent={
+          <ActiveFiltersChips
+            filters={filters}
+            onRemoveFilter={handleRemoveFilter}
+            getCategoryName={getCategoryName}
+            getFilterLabel={getFilterLabel}
           />
         }
         // Server-side pagination props

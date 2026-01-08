@@ -20,6 +20,7 @@ export default function TableWrapper({
   onCreateClick,
   // Filter props
   filterComponent,
+  activeFiltersComponent, // New prop for filter chips
   // Server-side pagination props
   serverPagination = false,
   paginationData = null, // { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage }
@@ -77,6 +78,13 @@ export default function TableWrapper({
             )}
             {filterComponent}
           </div>
+        </div>
+      )}
+      
+      {/* Active Filters Section */}
+      {activeFiltersComponent && (
+        <div className="mb-4">
+          {activeFiltersComponent}
         </div>
       )}
       
