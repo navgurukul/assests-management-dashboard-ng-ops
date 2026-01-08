@@ -96,26 +96,28 @@ export default function App({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2">
       {/* Page Size Selector */}
-      {showPageSizeSelector && (
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>Show</span>
-          <select
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-          <span>entries</span>
-        </div>
-      )}
+      <div className="flex items-center gap-2 text-sm text-gray-600 min-w-[140px]">
+        {showPageSizeSelector && (
+          <>
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <span>entries</span>
+          </>
+        )}
+      </div>
 
       {/* Centered Pagination */}
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center flex-1">
         <Pagination
           page={currentPage}
           total={totalPages}
@@ -130,11 +132,13 @@ export default function App({
       </div>
 
       {/* Page Info */}
-      {showPageInfo && totalCount > 0 && (
-        <span className="text-sm text-gray-600">
-          Showing {startItem} to {endItem} of {totalCount} entries
-        </span>
-      )}
+      <div className="flex items-center text-sm text-gray-600 min-w-[180px] justify-end">
+        {showPageInfo && totalCount > 0 && (
+          <span>
+            Showing {startItem} to {endItem} of {totalCount} entries
+          </span>
+        )}
+      </div>
     </div>
   );
 }

@@ -112,7 +112,14 @@ export default function TableWrapper({
             </TableColumn>
           ))}
         </TableHeader>
-        <TableBody items={displayData}>
+        <TableBody 
+          items={displayData}
+          emptyContent={
+            <div className="flex items-center justify-center py-20">
+              <p className="text-gray-500 text-base font-medium">No data found</p>
+            </div>
+          }
+        >
           {(item) => (
             <TableRow 
               key={item.id}
