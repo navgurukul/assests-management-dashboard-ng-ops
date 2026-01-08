@@ -267,25 +267,25 @@ export default function ComponentDetails({ componentId, onBack }) {
 
         {/* Summary Statistics - Quick Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-4">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-sm p-3 border border-blue-200">
+          <div className=" from-blue-50 to-indigo-50 rounded-lg shadow-sm p-3 border border-blue-200">
             <p className="text-[10px] text-gray-500 mb-0.5 uppercase tracking-wide">Component Age</p>
             <p className="text-xl font-bold text-gray-900">{summaryStats.age}</p>
           </div>
           
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm p-3 border border-green-200">
+          <div className=" from-green-50 to-emerald-50 rounded-lg shadow-sm p-3 border border-green-200">
             <p className="text-[10px] text-gray-500 mb-0.5 uppercase tracking-wide">Devices Used In</p>
             <p className="text-xl font-bold text-gray-900">{summaryStats.devicesUsedIn}</p>
           </div>
           
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-sm p-3 border border-purple-200">
+          <div className=" from-purple-50 to-pink-50 rounded-lg shadow-sm p-3 border border-purple-200">
             <p className="text-[10px] text-gray-500 mb-0.5 uppercase tracking-wide">Current Value</p>
             <p className="text-xl font-bold text-gray-900">₹{summaryStats.currentValue?.toLocaleString('en-IN')}</p>
           </div>
           
           <div className={`rounded-lg shadow-sm p-3 border ${
             summaryStats.warrantyExpired 
-              ? 'bg-gradient-to-br from-red-50 to-orange-50 border-red-200' 
-              : 'bg-gradient-to-br from-green-50 to-teal-50 border-green-200'
+              ? ' from-red-50 to-orange-50 border-red-200' 
+              : ' from-green-50 to-teal-50 border-green-200'
           }`}>
             <p className="text-[10px] text-gray-500 mb-0.5 uppercase tracking-wide">Warranty Status</p>
             <p className={`text-xl font-bold ${summaryStats.warrantyExpired ? 'text-red-600' : 'text-green-600'}`}>
