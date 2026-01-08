@@ -132,16 +132,16 @@ export const assetsTableData = [
 ];
 
 export const ticketsTableData = [
-  { id: 1, ticketId: 'TKT-SARJ-251119-R-001', type: 'Repair', sla: '02h', slaStatus: 'critical', status: 'IN PROGRESS', updated: 'Today' },
-  { id: 2, ticketId: 'TKT-PUNE-251119-C-002', type: 'Change', sla: '11h', slaStatus: 'normal', status: 'ESCALATED', updated: '12 Jan' },
-  { id: 3, ticketId: 'TKT-HIMA-241119-D-001', type: 'Dispute', sla: '19h', slaStatus: 'normal', status: 'OPEN', updated: '11 Jan' },
-  { id: 4, ticketId: 'TKT-JASH-231119-N-004', type: 'New', sla: '28h', slaStatus: 'normal', status: 'PENDING APPROVAL', updated: '10 Jan' },
-  { id: 5, ticketId: 'TKT-DANT-221119-R-005', type: 'Repair', sla: '05h', slaStatus: 'warning', status: 'IN PROGRESS', updated: '09 Jan' },
-  { id: 6, ticketId: 'TKT-UDAI-201119-C-006', type: 'Change', sla: '15h', slaStatus: 'normal', status: 'OPEN', updated: '08 Jan' },
-  { id: 7, ticketId: 'TKT-RAIP-191119-D-007', type: 'Dispute', sla: '32h', slaStatus: 'normal', status: 'PENDING APPROVAL', updated: '07 Jan' },
-  { id: 8, ticketId: 'TKT-AMAR-181119-N-008', type: 'New', sla: '01h', slaStatus: 'critical', status: 'ESCALATED', updated: 'Today' },
-  { id: 9, ticketId: 'TKT-JABA-171119-R-009', type: 'Repair', sla: '08h', slaStatus: 'warning', status: 'IN PROGRESS', updated: 'Yesterday' },
-  { id: 10, ticketId: 'TKT-DHAR-161119-C-010', type: 'Change', sla: '24h', slaStatus: 'normal', status: 'OPEN', updated: '05 Jan' },
+  { id: 1, ticketId: 'TKT-SARJ-251119-R-001', type: 'Repair', sla: '02h', slaStatus: 'critical', status: 'IN PROGRESS', updated: 'Today', actionTakenBy: 'IT coordinator' },
+  { id: 2, ticketId: 'TKT-PUNE-251119-C-002', type: 'Change', sla: '11h', slaStatus: 'normal', status: 'ESCALATED', updated: '12 Jan', actionTakenBy: 'Operation associate' },
+  { id: 3, ticketId: 'TKT-HIMA-241119-D-001', type: 'Dispute', sla: '19h', slaStatus: 'normal', status: 'OPEN', updated: '11 Jan', actionTakenBy: 'Teach lead' },
+  { id: 4, ticketId: 'TKT-JASH-231119-N-004', type: 'New', sla: '28h', slaStatus: 'normal', status: 'PENDING APPROVAL', updated: '10 Jan', actionTakenBy: 'IT coordinator' },
+  { id: 5, ticketId: 'TKT-DANT-221119-R-005', type: 'Repair', sla: '05h', slaStatus: 'warning', status: 'IN PROGRESS', updated: '09 Jan', actionTakenBy: 'Repairing team/company' },
+  { id: 6, ticketId: 'TKT-UDAI-201119-C-006', type: 'Change', sla: '15h', slaStatus: 'normal', status: 'OPEN', updated: '08 Jan', actionTakenBy: 'Operation associate' },
+  { id: 7, ticketId: 'TKT-RAIP-191119-D-007', type: 'Dispute', sla: '32h', slaStatus: 'normal', status: 'PENDING APPROVAL', updated: '07 Jan', actionTakenBy: 'IT coordinator' },
+  { id: 8, ticketId: 'TKT-AMAR-181119-N-008', type: 'New', sla: '01h', slaStatus: 'critical', status: 'ESCALATED', updated: 'Today', actionTakenBy: 'Repairing team/company' },
+  { id: 9, ticketId: 'TKT-JABA-171119-R-009', type: 'Repair', sla: '08h', slaStatus: 'warning', status: 'IN PROGRESS', updated: 'Yesterday', actionTakenBy: 'IT coordinator' },
+  { id: 10, ticketId: 'TKT-DHAR-161119-C-010', type: 'Change', sla: '24h', slaStatus: 'normal', status: 'OPEN', updated: '05 Jan', actionTakenBy: 'Teach lead' },
 ];
 
 export const assetsPageData = [

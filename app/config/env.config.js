@@ -40,7 +40,7 @@ const config = {
     // Tickets
     tickets: {
       list: '/tickets',
-      create: '/tickets/create',
+      create: '/tickets',
       update: (id) => `/tickets/${id}`,
       delete: (id) => `/tickets/${id}`,
       details: (id) => `/tickets/${id}`,
