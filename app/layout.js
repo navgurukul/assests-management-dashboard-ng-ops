@@ -21,17 +21,9 @@ function RootLayout({ children }) {
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
         <ReactQueryProvider>
-        <ClientProviders>
-          <div className="h-screen flex flex-col overflow-hidden" >
-            <Header />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main className="w-full max-h-screen overflow-hidden">
-                {children}
-              </main>
-            </div>
-          </div>
-        </ClientProviders>
+          <ClientProviders>
+            {children}
+          </ClientProviders>
         </ReactQueryProvider>
       </body>
     </html>
