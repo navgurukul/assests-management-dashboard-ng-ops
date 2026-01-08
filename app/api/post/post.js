@@ -1,3 +1,5 @@
+import { getAuthToken } from '@/app/utils/authUtils';
+
 const post = async ({
   url,
   method = "POST",
@@ -5,7 +7,7 @@ const post = async ({
 }) => {
   try {
     // Get token from localStorage
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
    
     const headers = {
       "Content-Type": "application/json",
@@ -13,7 +15,7 @@ const post = async ({
    
     // Add Authorization header if token exists
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = token;
     }
    
     const response = await fetch(url, {

@@ -4,6 +4,8 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "./helper/ReactQueryProvider";
+import { AuthProvider } from "@/app/context/AuthContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -20,11 +22,15 @@ function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
-        <ReactQueryProvider>
-          <ClientProviders>
-            {children}
-          </ClientProviders>
-        </ReactQueryProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+          <ReactQueryProvider>
+            <AuthProvider>
+              <ClientProviders>
+                {children}
+              </ClientProviders>
+            </AuthProvider>
+          </ReactQueryProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

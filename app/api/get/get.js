@@ -1,3 +1,5 @@
+import { getAuthToken } from '@/app/utils/authUtils';
+
 const defaultErrorHandler = async ({ data, statusCode}) => {
     return {
         code: statusCode,
@@ -14,12 +16,22 @@ const get = async ({
 }) => {
     let jsonData;
 
+    // Get token from localStorage
+    const token = getAuthToken();
+    
+    const headers = {
+        'Content-Type': contentType,
+        // 'x-client-id': xClientId,
+    };
+
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = token;
+    }
+
     jsonData = await fetch(url, {
         signal,
-        headers: {
-            'Content-Type': contentType,
-            // 'x-client-id': xClientId,
-        },
+        headers,
         method: 'GET',
     });
 

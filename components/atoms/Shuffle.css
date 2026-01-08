@@ -1,0 +1,46 @@
+.shuffle-parent {
+  display: inline-block;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1;
+}
+
+.shuffle-parent.gradient-text {
+  background: linear-gradient(
+    120deg,
+    #334155 0%,
+    #475569 15%,
+    #64748b 30%,
+    #e2e8f0 45%,
+    #f8fafc 50%,
+    #e2e8f0 55%,
+    #64748b 70%,
+    #475569 85%,
+    #334155 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glassShine 12s linear infinite;
+}
+
+@keyframes glassShine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shuffle-char {
+  line-height: 1;
+  display: inline-block;
+  text-align: center;
+}
+
+.shuffle-char-large {
+  font-size: 1.25em;
+  vertical-align: baseline;
+}
