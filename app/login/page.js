@@ -390,7 +390,7 @@ function LoginContent() {
 
           {/* Main Heading */}
           <Shuffle
-            text="ASSET TRACKER"
+            text="ASSETS TRACKER"
             tag="h1"
             className={`text-6xl md:text-8xl lg:text-7xl font-black mb-4 text-center ${isDarkMode ? 'gradient-text-dark' : 'gradient-text-light'}`}
             duration={0.35}
