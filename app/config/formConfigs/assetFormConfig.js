@@ -153,7 +153,6 @@ export const assetValidationSchema = Yup.object().shape({
 });
 
 export const assetInitialValues = {
-  assetTag: 'CAMPUSNAME-ASSET-TYPE-ID',
   assetTypeId: '',
   brand: '',
   model: '',
