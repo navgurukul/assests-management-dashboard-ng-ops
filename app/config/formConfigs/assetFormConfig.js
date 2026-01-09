@@ -34,6 +34,29 @@ export const assetFormFields = [
     required: true,
   },
   {
+    name: 'processor',
+    label: 'Processor',
+    type: 'text',
+    placeholder: 'Enter processor (e.g., i5, i7, Ryzen 5)',
+    required: false,
+  },
+  {
+    name: 'ramSizeGB',
+    label: 'RAM Size (GB)',
+    type: 'number',
+    placeholder: 'Enter RAM size in GB (e.g., 8, 16, 32)',
+    required: false,
+    min: 0,
+  },
+  {
+    name: 'storageSizeGB',
+    label: 'Storage Size (GB)',
+    type: 'number',
+    placeholder: 'Enter storage size in GB (e.g., 256, 512, 1024)',
+    required: false,
+    min: 0,
+  },
+  {
     name: 'serialNumber',
     label: 'Serial Number',
     type: 'text',
@@ -126,6 +149,18 @@ export const assetFormFields = [
     placeholder: 'Add any additional notes or comments',
     required: false,
   },
+  {
+    name: 'charger',
+    label: 'Charger',
+    type: 'checkbox',
+    required: false,
+  },
+  {
+    name: 'bag',
+    label: 'Bag',
+    type: 'checkbox',
+    required: false,
+  },
 ];
 
 export const assetValidationSchema = Yup.object().shape({
@@ -133,6 +168,13 @@ export const assetValidationSchema = Yup.object().shape({
   brand: Yup.string().required('Brand is required'),
   model: Yup.string().required('Model is required'),
   specLabel: Yup.string().required('Specification label is required'),
+  processor: Yup.string(),
+  ramSizeGB: Yup.number()
+    .nullable()
+    .min(0, 'RAM size must be a positive number'),
+  storageSizeGB: Yup.number()
+    .nullable()
+    .min(0, 'Storage size must be a positive number'),
   serialNumber: Yup.string().required('Serial number is required'),
   campusId: Yup.string().required('Campus is required'),
   currentLocationId: Yup.string().required('Current location is required'),
@@ -150,6 +192,8 @@ export const assetValidationSchema = Yup.object().shape({
     .nullable()
     .min(0, 'Cost must be a positive number'),
   notes: Yup.string(),
+  charger: Yup.boolean(),
+  bag: Yup.boolean(),
 });
 
 export const assetInitialValues = {
@@ -157,6 +201,9 @@ export const assetInitialValues = {
   brand: '',
   model: '',
   specLabel: '',
+  processor: '',
+  ramSizeGB: '',
+  storageSizeGB: '',
   serialNumber: '',
   campusId: '',
   currentLocationId: '',
@@ -166,4 +213,6 @@ export const assetInitialValues = {
   purchaseDate: '',
   cost: '',
   notes: '',
+  charger: false,
+  bag: false,
 };
