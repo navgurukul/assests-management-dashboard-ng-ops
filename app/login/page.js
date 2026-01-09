@@ -144,7 +144,7 @@ export default function LoginPage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -156,7 +156,7 @@ export default function LoginPage() {
   // If already authenticated, show redirect message
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
           <p className="text-gray-600">Redirecting...</p>
         </div>
@@ -354,7 +354,7 @@ export default function LoginPage() {
         }
       `}</style>
 
-      <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900' : 'bg-gradient-to-br from-white via-orange-50/30 to-emerald-50/40'}`}>
+      <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-linear-to-br from-slate-900 via-slate-800 to-blue-900' : 'bg-linear-to-br from-white via-orange-50/30 to-emerald-50/40'}`}>
         {/* Dark/Light Mode Toggle */}
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
@@ -431,7 +431,7 @@ export default function LoginPage() {
 
           {/* Login Section */}
           <div className="btn-animate my-4">
-            <div className="flex justify-center [&_iframe]:!rounded-full [&_div]:!rounded-full overflow-hidden rounded-full">
+            <div className="flex justify-center [&_iframe]:rounded-full! [&_div]:rounded-full! overflow-hidden rounded-full">
               <GoogleLogin
                 onSuccess={handleGoogleLoginSuccess}
                 onError={handleGoogleLoginError}
@@ -463,7 +463,7 @@ export default function LoginPage() {
                 >
                   <div className="flex flex-col gap-3 w-full h-full">
                     <div className="flex gap-4 items-start">
-                      <div className={`icon-shine-wrapper w-14 h-14 flex-shrink-0 bg-gradient-to-br ${feature.bgColor} flex items-center justify-center rounded-xl shadow-lg`}>
+                      <div className={`icon-shine-wrapper w-14 h-14 shrink-0 bg-linear-to-br ${feature.bgColor} flex items-center justify-center rounded-xl shadow-lg`}>
                         {feature.icon}
                       </div>
                       <div>
