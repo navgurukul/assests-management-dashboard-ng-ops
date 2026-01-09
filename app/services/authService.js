@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const LOGIN_API_DASHBOARD = process.env.NEXT_PUBLIC_MERAKI_URL;
+const LOGIN_API_DASHBOARD = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 
 export const authenticateWithGoogle = async (idToken) => {
