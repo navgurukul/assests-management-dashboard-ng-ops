@@ -33,7 +33,7 @@ export default function ComponentDetails({ componentId, onBack }) {
   // Fetch component details from API
   // For now, using dummy data. Replace with actual API call when backend is ready.
   const { data, isLoading, isError, error } = useFetch({
-    url: `https://asset-dashboard.navgurukul.org/api/components/${componentId}`,
+    url: config.getApiUrl(config.endpoints.components.details(componentId)),
     queryKey: ['component', componentId],
     enabled: false, // Disabled for now, using dummy data
   });

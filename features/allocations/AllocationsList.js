@@ -7,6 +7,7 @@ import TableWrapper from '@/components/Table/TableWrapper';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 import {
   allocationFormFields,
   allocationValidationSchema,
@@ -33,9 +34,20 @@ export default function AllocationsList() {
   
   // Fetch allocations data from API
   const { data, isLoading, isError, error } = useFetch({
-    url: 'http://13.203.90.62/allocations',
+    url: config.getApiUrl(config.endpoints.allocations?.list || '/allocations'),
     queryKey: ['allocations'],
   });
+
+  // Format reason helper function
+  const formatReason = (reason) => {
+    const reasonMap = {
+      'JOINER': 'Joiner',
+      'REPAIR': 'Repair',
+      'REPLACEMENT': 'Replacement',
+      'LOANER': 'Loaner',
+    };
+    return reasonMap[reason] || reason;
+  };
 
   // Transform API data to match table structure
   const allocationsListData = React.useMemo(() => {
@@ -55,16 +67,6 @@ export default function AllocationsList() {
       allocationData: allocation
     }));
   }, [data]);
-
-  const formatReason = (reason) => {
-    const reasonMap = {
-      'JOINER': 'Joiner',
-      'REPAIR': 'Repair',
-      'REPLACEMENT': 'Replacement',
-      'LOANER': 'Loaner',
-    };
-    return reasonMap[reason] || reason;
-  };
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -174,7 +176,7 @@ export default function AllocationsList() {
       };
 
       // Make API call to create allocation
-      const response = await fetch('http://13.203.90.62/allocations', {
+      const response = await fetch(config.getApiUrl(config.endpoints.allocations?.create || '/allocations'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +211,7 @@ export default function AllocationsList() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://13.203.90.62/allocations/${allocationId}`, {
+      const response = await fetch(config.getApiUrl(config.endpoints.allocations?.update?.(allocationId) || `/allocations/${allocationId}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

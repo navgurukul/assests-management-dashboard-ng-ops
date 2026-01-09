@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
 import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
 
 const columns = [
@@ -26,7 +27,7 @@ export default function TicketsList() {
   const router = useRouter();
 
   const { data, isLoading, isError } = useFetch({
-    url: 'https://asset-dashboard.navgurukul.org/api/all-tickets',
+    url: config.getApiUrl('/all-tickets'),
     queryKey: ['all-tickets'],
   });
 

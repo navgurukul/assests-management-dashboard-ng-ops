@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 import GenericForm from '@/components/molecules/GenericForm';
+import post from '@/app/api/post/post';
+import config from '@/app/config/env.config';
 import {
   ticketFormFields,
   ticketValidationSchema,
@@ -16,9 +18,32 @@ export default function CreateTicketPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFormSubmit = async (values) => {
-    // Backend POST is temporarily disabled while BE fixes are in progress
-    alert('Ticket creation is temporarily unavailable while backend fixes are in progress.');
-    router.push('/tickets');
+    setIsSubmitting(true);
+    try {
+      console.log('Creating ticket with values:', values);
+      
+      // Make API call to create ticket using post helper with auth
+      const result = await post({
+        url: config.getApiUrl(config.endpoints.tickets.create),
+        method: 'POST',
+        data: values,
+      });
+
+      console.log('Ticket created successfully:', result);
+      
+      alert(`Ticket created successfully!\nTicket Number: ${result.data.ticketNumber}\nStatus: ${result.data.status}`);
+      
+      // Navigate back to tickets list
+      router.push('/tickets');
+      
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+      const errorMessage = error?.message || 'Failed to create ticket';
+      const errorDetails = error?.errors ? `\n${JSON.stringify(error.errors)}` : '';
+      alert(`${errorMessage}${errorDetails}\n\nPlease try again.`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {

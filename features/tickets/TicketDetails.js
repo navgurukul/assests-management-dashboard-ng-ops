@@ -1,12 +1,23 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
+import Modal from '@/components/molecules/Modal';
+import GenericForm from '@/components/molecules/GenericForm';
 import useFetch from '@/app/hooks/query/useFetch';
+import post from '@/app/api/post/post';
+import config from '@/app/config/env.config';
+import {
+  ticketUpdateFormFields,
+  ticketUpdateValidationSchema,
+} from '@/app/config/formConfigs/ticketUpdateFormConfig';
 
 export default function TicketDetails({ ticketId, onBack }) {
-  const { data, isLoading, isError } = useFetch({
-    url: `https://asset-dashboard.navgurukul.org/api/tickets/${ticketId}`,
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data, isLoading, isError, refetch } = useFetch({
+    url: config.getApiUrl(config.endpoints.tickets.details(ticketId)),
     queryKey: ['ticket', ticketId],
   });
 
@@ -23,6 +34,63 @@ export default function TicketDetails({ ticketId, onBack }) {
   }
 
   const ticket = data.data;
+  const historyEntries = (ticket.historyLogs || []).map((log) => ({
+    time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
+    text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
+  }));
+
+  const handleUpdateClick = () => {
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleUpdateSubmit = async (values) => {
+    setIsSubmitting(true);
+    try {
+      // Filter out empty values
+      const payload = Object.keys(values).reduce((acc, key) => {
+        if (values[key] !== '' && values[key] !== null && values[key] !== undefined) {
+          acc[key] = values[key];
+        }
+        return acc;
+      }, {});
+
+      if (Object.keys(payload).length === 0) {
+        alert('Please update at least one field');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const result = await post({
+        url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
+        method: 'PUT',
+        data: payload,
+      });
+
+      console.log('Ticket updated successfully:', result);
+      alert('Ticket updated successfully!');
+      
+      setIsUpdateModalOpen(false);
+      refetch(); // Refresh ticket data
+      
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+      const errorMessage = error?.message || 'Failed to update ticket';
+      alert(`${errorMessage}\n\nPlease try again.`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsUpdateModalOpen(false);
+  };
+
+  const updateInitialValues = {
+    status: ticket.status || '',
+    assigneeUserId: ticket.assigneeUserId || '',
+    description: ticket.description || '',
+    resolutionNotes: ticket.resolutionNotes || '',
+  };
 
   const leftSections = [
     {
@@ -60,17 +128,45 @@ export default function TicketDetails({ ticketId, onBack }) {
     },
     {
       title: 'HISTORY LOG',
-      logEntries: ticket.logEntries || [],
+      ...(historyEntries.length
+        ? { logEntries: historyEntries }
+        : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
+    },
+    {
+      title: 'ACTIONS',
+      actions: [
+        { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
+      ],
     },
   ];
 
   return (
-    <DetailsPage
-      title={`Ticket: ${ticket.ticketNumber || ticket.id}`}
-      subtitle={`Created: ${ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—'}`}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      onBack={onBack}
-    />
+    <>
+      <DetailsPage
+        title={`Ticket: ${ticket.ticketNumber || ticket.id}`}
+        subtitle={`Created: ${ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—'}`}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        onBack={onBack}
+      />
+
+      <Modal
+        isOpen={isUpdateModalOpen}
+        onClose={handleCloseModal}
+        title="Update Ticket"
+        size="medium"
+      >
+        <GenericForm
+          fields={ticketUpdateFormFields}
+          initialValues={updateInitialValues}
+          validationSchema={ticketUpdateValidationSchema}
+          onSubmit={handleUpdateSubmit}
+          onCancel={handleCloseModal}
+          isSubmitting={isSubmitting}
+          submitButtonText="Update Ticket"
+          cancelButtonText="Cancel"
+        />
+      </Modal>
+    </>
   );
 }

@@ -3,11 +3,12 @@
 import React from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 
 export default function AllocationDetails({ allocationId, onBack }) {
   // Fetch allocation details from API
   const { data, isLoading, isError, error } = useFetch({
-    url: `http://13.203.90.62/allocations/${allocationId}`,
+    url: config.getApiUrl(config.endpoints.allocations?.details?.(allocationId) || `/allocations/${allocationId}`),
     queryKey: ['allocation', allocationId],
     enabled: !!allocationId,
   });
