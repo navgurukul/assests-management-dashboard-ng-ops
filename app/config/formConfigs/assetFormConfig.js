@@ -129,6 +129,13 @@ export const assetFormFields = [
     ],
   },
   {
+    name: 'sourceBy',
+    label: 'Source By',
+    type: 'text',
+    placeholder: 'Enter source by',
+    required: true,
+  },
+  {
     name: 'purchaseDate',
     label: 'Purchase Date',
     type: 'date',
@@ -188,6 +195,7 @@ export const assetValidationSchema = Yup.object().shape({
   sourceType: Yup.string()
     .required('Source type is required')
     .oneOf(['PURCHASED', 'DONATED', 'PERSONAL'], 'Invalid source type'),
+  sourceBy: Yup.string().required('Source by is required'),
   purchaseDate: Yup.date().required('Purchase date is required'),
   cost: Yup.number()
     .nullable()
@@ -211,6 +219,7 @@ export const assetInitialValues = {
   status: 'IN_STOCK',
   condition: 'WORKING',
   sourceType: 'PURCHASED',
+  sourceBy: '',
   purchaseDate: '',
   cost: '',
   notes: '',
