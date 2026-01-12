@@ -95,6 +95,24 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
       ],
     },
     {
+      title: 'Accessories',
+      itemsGrid: true,
+      items: [
+        { label: 'Charger', value: assetDetails.charger ? 'Yes' : 'No', className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
+        { label: 'Bag', value: assetDetails.bag ? 'Yes' : 'No', className: assetDetails.bag ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
+      ],
+    },
+    {
+      title: 'Notes & Additional Information',
+      items: [
+        { label: 'Notes', value: assetDetails.notes || 'No notes available' },
+      ],
+    },
+  ];
+
+  // Right column sections (70%) - Larger content cards
+  const rightSections = [
+    {
       title: 'Device Information',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
@@ -108,15 +126,8 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
       ],
     },
     {
-      title: 'Accessories',
-      itemsGrid: true,
-      items: [
-        { label: 'Charger', value: assetDetails.charger ? 'Yes' : 'No', className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
-        { label: 'Bag', value: assetDetails.bag ? 'Yes' : 'No', className: assetDetails.bag ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
-      ],
-    },
-    {
       title: 'Purchase Info',
+      itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Source Type', value: formatSourceType(assetDetails.sourceType) || 'N/A' },
         { label: 'Owned By', value: assetDetails.ownedBy || 'N/A' },
@@ -125,18 +136,9 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
         { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost.toLocaleString()}` : 'N/A' },
       ],
     },
-  ];
-
-  // Right column sections (70%) - Larger content cards
-  const rightSections = [
-    {
-      title: 'Notes & Additional Information',
-      items: [
-        { label: 'Notes', value: assetDetails.notes || 'No notes available' },
-      ],
-    },
     {
       title: 'System Information',
+      itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Asset ID', value: assetDetails.id || 'N/A' },
         { label: 'Asset Type Category', value: assetDetails.assetType?.category || 'N/A' },
