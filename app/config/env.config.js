@@ -13,7 +13,7 @@ const config = {
     // Components
     components: {
       list: '/components',
-      create: '/components/create',
+      create: '/components',
       update: (id) => `/components/${id}`,
       delete: (id) => `/components/${id}`,
       details: (id) => `/components/${id}`,
