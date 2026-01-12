@@ -2,28 +2,26 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText, X } from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X, Check } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
+import ColumnSelector from '@/app/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
+import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   assetFormFields,
   assetValidationSchema,
   assetInitialValues,
 } from '@/app/config/formConfigs/assetFormConfig';
-
-const columns = [
-  { key: "assetTag", label: "ASSET TAG" },
-  { key: "type", label: "TYPE" },
-  { key: "campus", label: "CAMPUS" },
-  { key: "status", label: "STATUS" },
-  { key: "location", label: "LOCATION" },
-  { key: "actions", label: "ACTIONS" },
-];
+import {
+  ASSET_TABLE_ID,
+  assetTableColumns,
+  defaultVisibleColumns,
+} from '@/app/config/tableConfigs/assetTableConfig';
 
 const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
 const actionOptions = ['View', 'Assign', 'Details'];
@@ -39,6 +37,17 @@ export default function AssetsList() {
   
   // Filter state
   const [filters, setFilters] = useState({});
+  
+  // Column visibility management
+  const {
+    visibleColumns,
+    visibleColumnKeys,
+    allColumns,
+    toggleColumn,
+    showAllColumns,
+    resetToDefault,
+    alwaysVisibleColumns,
+  } = useTableColumns(ASSET_TABLE_ID, assetTableColumns, defaultVisibleColumns);
   
   // Build query string with filters
   const buildQueryString = () => {
@@ -160,6 +169,8 @@ export default function AssetsList() {
       id: asset.id,
       assetTag: asset.assetTag,
       type: asset.assetType?.name || 'Unknown',
+      brand: asset.brand || 'N/A',
+      model: asset.model || 'N/A',
       campus: asset.campus?.name || 'N/A',
       status: asset.status === 'IN_STOCK' ? 'In Stock' : 
               asset.status === 'ALLOCATED' ? 'Allocated' : 
@@ -167,6 +178,26 @@ export default function AssetsList() {
               asset.status === 'SCRAP' ? 'Scrap' : 
               asset.status === 'PARTED_OUT' ? 'Parted Out' : asset.status,
       location: asset.location?.name || 'N/A',
+      processor: asset.processor || 'N/A',
+      ramSizeGB: asset.ramSizeGB ? `${asset.ramSizeGB} GB` : 'N/A',
+      storageSizeGB: asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A',
+      serialNumber: asset.serialNumber || 'N/A',
+      condition: asset.condition === 'WORKING' ? 'Working' : 
+                 asset.condition === 'DAMAGED' ? 'Damaged' : 
+                 asset.condition === 'FAULTY' ? 'Faulty' : asset.condition || 'N/A',
+      sourceType: asset.sourceType === 'PURCHASED' ? 'Purchased' : 
+                  asset.sourceType === 'DONATED' ? 'Donated' : 
+                  asset.sourceType === 'LEASED' ? 'Leased' : asset.sourceType || 'N/A',
+      ownedBy: asset.ownedBy || 'N/A',
+      purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : 'N/A',
+      cost: asset.cost ? `₹${asset.cost.toLocaleString()}` : 'N/A',
+      charger: asset.charger,
+      bag: asset.bag,
+      specLabel: asset.specLabel || 'N/A',
+      sourceBy: asset.sourceBy || 'N/A',
+      notes: asset.notes || 'N/A',
+      createdAt: asset.createdAt ? new Date(asset.createdAt).toLocaleDateString() : 'N/A',
+      updatedAt: asset.updatedAt ? new Date(asset.updatedAt).toLocaleDateString() : 'N/A',
       actions: actionOptions[0], // Default to 'View'
       // Store full asset data for details page
       assetData: asset
@@ -179,6 +210,7 @@ export default function AssetsList() {
     switch (columnKey) {
       case "assetTag":
         return <span className="font-medium text-gray-800">{cellValue}</span>;
+      
       case "status":
         const statusColors = {
           'Under Repair': 'bg-red-100 text-red-800',
@@ -192,6 +224,34 @@ export default function AssetsList() {
             {cellValue}
           </span>
         );
+      
+      case "condition":
+        const conditionColors = {
+          'Working': 'bg-green-100 text-green-800',
+          'Damaged': 'bg-orange-100 text-orange-800',
+          'Faulty': 'bg-red-100 text-red-800',
+        };
+        return (
+          <span className={`px-3 py-1 rounded text-xs font-medium ${conditionColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
+            {cellValue}
+          </span>
+        );
+      
+      case "charger":
+      case "bag":
+        return (
+          <div className="flex items-center justify-center">
+            {cellValue ? (
+              <Check className="w-4 h-4 text-green-600" />
+            ) : (
+              <X className="w-4 h-4 text-red-600" />
+            )}
+          </div>
+        );
+      
+      case "cost":
+        return <span className="font-medium text-gray-700">{cellValue}</span>;
+      
       case "actions":
         const actionIcons = {
           'View': <Eye className="w-4 h-4" />,
@@ -209,8 +269,9 @@ export default function AssetsList() {
             <span>{cellValue}</span>
           </button>
         );
+      
       default:
-        return cellValue;
+        return <span className="text-gray-700">{cellValue}</span>;
     }
   };
 
@@ -287,7 +348,7 @@ export default function AssetsList() {
       {/* Table */}
       <TableWrapper
         data={assetsListData}
-        columns={columns}
+        columns={visibleColumns}
         title="Assets"
         renderCell={renderCell}
         itemsPerPage={pageSize}
@@ -304,6 +365,17 @@ export default function AssetsList() {
             statusOptions={filterStatusOptions}
             assetTypeOptions={assetTypeOptions}
             selectedFilters={filters}
+          />
+        }
+        // Column selector component
+        columnSelectorComponent={
+          <ColumnSelector
+            allColumns={allColumns}
+            visibleColumnKeys={visibleColumnKeys}
+            alwaysVisibleColumns={alwaysVisibleColumns}
+            onToggleColumn={toggleColumn}
+            onShowAll={showAllColumns}
+            onResetToDefault={resetToDefault}
           />
         }
         // Active filters chips component
