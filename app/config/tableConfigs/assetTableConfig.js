@@ -94,16 +94,6 @@ export const assetTableColumns = [
     description: 'Purchase cost'
   },
   { 
-    key: 'charger', 
-    label: 'CHARGER',
-    description: 'Charger availability'
-  },
-  { 
-    key: 'bag', 
-    label: 'BAG',
-    description: 'Bag availability'
-  },
-  { 
     key: 'specLabel', 
     label: 'SPEC LABEL',
     description: 'Specification label'
@@ -112,11 +102,6 @@ export const assetTableColumns = [
     key: 'sourceBy', 
     label: 'SOURCE BY',
     description: 'Who sourced the asset'
-  },
-  { 
-    key: 'notes', 
-    label: 'NOTES',
-    description: 'Additional notes'
   },
   { 
     key: 'createdAt', 
