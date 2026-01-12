@@ -3,106 +3,8 @@ import * as Yup from 'yup';
 // Break down the component form into logical steps
 export const componentStepperConfig = [
   {
-    label: 'Basic Information',
-    description: 'Enter the core details about the component',
-    fields: [
-      {
-        name: 'componentTag',
-        label: 'Component Tag',
-        type: 'text',
-        placeholder: 'Auto-generated',
-        required: true,
-        disabled: true,
-        helpText: 'Unique identifier for the component'
-      },
-      {
-        name: 'componentType',
-        label: 'Component Type',
-        type: 'select',
-        placeholder: 'Select component type',
-        required: true,
-        options: [
-          { value: 'RAM', label: 'RAM' },
-          { value: 'SSD', label: 'SSD' },
-          { value: 'HDD', label: 'HDD' },
-          { value: 'MOTHERBOARD', label: 'Motherboard' },
-          { value: 'GPU', label: 'GPU' },
-          { value: 'CPU', label: 'CPU' },
-          { value: 'POWER_SUPPLY', label: 'Power Supply' },
-          { value: 'COOLING_FAN', label: 'Cooling Fan' },
-          { value: 'NETWORK_CARD', label: 'Network Card' },
-          { value: 'OTHER', label: 'Other' }
-        ]
-      },
-      {
-        name: 'brand',
-        label: 'Brand/Manufacturer',
-        type: 'text',
-        placeholder: 'e.g., Kingston, Samsung, Seagate',
-        required: true
-      },
-      {
-        name: 'modelNumber',
-        label: 'Model Number',
-        type: 'text',
-        placeholder: 'Enter model number',
-        required: true
-      },
-      {
-        name: 'specifications',
-        label: 'Specifications',
-        type: 'text',
-        placeholder: 'e.g., 8GB DDR4 2666MHz, 512GB NVMe',
-        required: true,
-        helpText: 'Detailed specifications of the component'
-      },
-      {
-        name: 'serialNumber',
-        label: 'Serial Number',
-        type: 'text',
-        placeholder: 'Enter serial number',
-        required: false
-      }
-    ]
-  },
-  {
-    label: 'Purchase Details',
-    description: 'Add purchase and warranty information',
-    fields: [
-      {
-        name: 'purchaseDate',
-        label: 'Purchase Date',
-        type: 'date',
-        placeholder: 'Select purchase date',
-        required: true
-      },
-      {
-        name: 'purchasePrice',
-        label: 'Purchase Price (₹)',
-        type: 'number',
-        placeholder: 'Enter purchase price',
-        required: true,
-        min: 0
-      },
-      {
-        name: 'vendorName',
-        label: 'Vendor/Supplier Name',
-        type: 'text',
-        placeholder: 'Enter vendor name',
-        required: false
-      },
-      {
-        name: 'warrantyExpiryDate',
-        label: 'Warranty Expiry Date',
-        type: 'date',
-        placeholder: 'Select warranty expiry date',
-        required: false
-      }
-    ]
-  },
-  {
-    label: 'Source Info.',
-    description: 'Specify where the component came from',
+    label: 'Component Source',
+    description: 'Specify where the component came from and purchase details',
     fields: [
       {
         name: 'sourceType',
@@ -130,6 +32,21 @@ export const componentStepperConfig = [
         placeholder: 'Enter PO number',
         required: false,
         showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
+      },
+      {
+        name: 'purchaseVendorName',
+        label: 'Vendor Name',
+        type: 'select',
+        placeholder: 'Select vendor',
+        required: false,
+        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' },
+        options: [
+          { value: 'Vendor A', label: 'Vendor A' },
+          { value: 'Vendor B', label: 'Vendor B' },
+          { value: 'Vendor C', label: 'Vendor C' },
+          { value: 'Vendor D', label: 'Vendor D' },
+          { value: 'Vendor E', label: 'Vendor E' }
+        ]
       },
       {
         name: 'vendorDetails',
@@ -182,10 +99,103 @@ export const componentStepperConfig = [
       {
         name: 'extractionTechnician',
         label: 'Technician Name',
-        type: 'text',
-        placeholder: 'Enter technician name',
+        type: 'select',
+        placeholder: 'Select technician',
         required: false,
-        showIf: { field: 'sourceType', value: 'EXTRACTED' }
+        showIf: { field: 'sourceType', value: 'EXTRACTED' },
+        options: [
+          { value: 'Person A', label: 'Person A' },
+          { value: 'Person B', label: 'Person B' },
+          { value: 'Person C', label: 'Person C' }
+        ]
+      },
+      // Purchase Details (only for New Purchase)
+      {
+        name: 'purchaseDate',
+        label: 'Purchase Date',
+        type: 'date',
+        placeholder: 'Select purchase date',
+        required: false,
+        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
+      },
+      {
+        name: 'purchasePrice',
+        label: 'Purchase Price (₹)',
+        type: 'number',
+        placeholder: 'Enter purchase price',
+        required: false,
+        min: 0,
+        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
+      },
+      {
+        name: 'vendorName',
+        label: 'Vendor/Supplier Name',
+        type: 'text',
+        placeholder: 'Enter vendor name',
+        required: false,
+        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
+      },
+      {
+        name: 'warrantyExpiryDate',
+        label: 'Warranty Expiry Date',
+        type: 'date',
+        placeholder: 'Select warranty expiry date',
+        required: false,
+        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
+      }
+    ]
+  },
+  {
+    label: 'Basic Information',
+    description: 'Enter the core details about the component',
+    fields: [
+      {
+        name: 'componentType',
+        label: 'Component Type',
+        type: 'select',
+        placeholder: 'Select component type',
+        required: true,
+        options: [
+          { value: 'RAM', label: 'RAM' },
+          { value: 'SSD', label: 'SSD' },
+          { value: 'HDD', label: 'HDD' },
+          { value: 'MOTHERBOARD', label: 'Motherboard' },
+          { value: 'GPU', label: 'GPU' },
+          { value: 'CPU', label: 'CPU' },
+          { value: 'POWER_SUPPLY', label: 'Power Supply' },
+          { value: 'COOLING_FAN', label: 'Cooling Fan' },
+          { value: 'NETWORK_CARD', label: 'Network Card' },
+          { value: 'OTHER', label: 'Other' }
+        ]
+      },
+      {
+        name: 'brand',
+        label: 'Brand/Manufacturer',
+        type: 'text',
+        placeholder: 'e.g., Kingston, Samsung, Seagate',
+        required: true
+      },
+      {
+        name: 'modelNumber',
+        label: 'Model Number',
+        type: 'text',
+        placeholder: 'Enter model number',
+        required: true
+      },
+      {
+        name: 'specifications',
+        label: 'Specifications',
+        type: 'text',
+        placeholder: 'e.g., 8GB DDR4 2666MHz, 512GB NVMe',
+        required: true,
+        helpText: 'Detailed specifications of the component'
+      },
+      {
+        name: 'serialNumber',
+        label: 'Serial Number',
+        type: 'text',
+        placeholder: 'Enter serial number',
+        required: false
       }
     ]
   },
@@ -291,17 +301,24 @@ export const componentStepperConfig = [
 
 // Same validation schema
 export const componentFormValidationSchema = Yup.object().shape({
-  componentTag: Yup.string().required('Component tag is required'),
   componentType: Yup.string().required('Component type is required'),
   brand: Yup.string().required('Brand is required'),
   modelNumber: Yup.string().required('Model number is required'),
   specifications: Yup.string().required('Specifications are required'),
   serialNumber: Yup.string(),
-  purchaseDate: Yup.date().required('Purchase date is required'),
+  purchaseDate: Yup.date().when('sourceType', {
+    is: 'NEW_PURCHASE',
+    then: (schema) => schema.required('Purchase date is required'),
+    otherwise: (schema) => schema.notRequired()
+  }),
   warrantyExpiryDate: Yup.date(),
   purchasePrice: Yup.number()
     .min(0, 'Price cannot be negative')
-    .required('Purchase price is required'),
+    .when('sourceType', {
+      is: 'NEW_PURCHASE',
+      then: (schema) => schema.required('Purchase price is required'),
+      otherwise: (schema) => schema.notRequired()
+    }),
   vendorName: Yup.string(),
   sourceType: Yup.string()
     .oneOf(['NEW_PURCHASE', 'EXTRACTED'])
@@ -330,6 +347,7 @@ export const componentFormInitialValues = {
   sourceType: 'NEW_PURCHASE',
   invoiceNumber: '',
   purchaseOrderNumber: '',
+  purchaseVendorName: '',
   vendorDetails: '',
   sourceDeviceTag: '',
   sourceDeviceType: '',
