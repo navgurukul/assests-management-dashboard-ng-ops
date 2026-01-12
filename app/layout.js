@@ -4,6 +4,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "./helper/ReactQueryProvider";
+import ReduxProvider from "./helper/ReduxProvider";
 import { AuthProvider } from "@/app/context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
@@ -23,13 +24,15 @@ function RootLayout({ children }) {
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
-          <ReactQueryProvider>
-            <AuthProvider>
-              <ClientProviders>
-                {children}
-              </ClientProviders>
-            </AuthProvider>
-          </ReactQueryProvider>
+          <ReduxProvider>
+            <ReactQueryProvider>
+              <AuthProvider>
+                <ClientProviders>
+                  {children}
+                </ClientProviders>
+              </AuthProvider>
+            </ReactQueryProvider>
+          </ReduxProvider>
         </GoogleOAuthProvider>
       </body>
     </html>
