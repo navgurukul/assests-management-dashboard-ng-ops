@@ -1,31 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertTriangle, Calendar, Package, Wrench, ChevronDown, ChevronUp, Clock, HardDrive, Shield, FileText, TestTube, MapPin } from 'lucide-react';
+import { AlertTriangle, Calendar, Package, Wrench, Clock, Shield, FileText } from 'lucide-react';
 import ComponentTimeline from './components/ComponentTimeline';
 import { 
-  CurrentlyInstalledCard, 
-  PreviouslyInstalledCard, 
-  StorageHistoryCard,
-  SummaryStatsCard 
+  CurrentlyInstalledCard 
 } from './components/InfoCards';
-import ActionButtons from './components/ActionButtons';
 import DocumentAttachments from './components/DocumentAttachments';
-import CustomButton from '@/components/atoms/CustomButton';
 
-// Tab definitions
+// Tab definitions - matching Create Component stepper order + Component Journey
 const tabs = [
   { id: 'journey', label: 'Component Journey', icon: Clock },
-  { id: 'usage', label: 'Usage History', icon: HardDrive },
-  { id: 'warranty', label: 'Warranty & Purchase', icon: Shield },
+  { id: 'source', label: 'Component Source', icon: Package },
+  { id: 'basic', label: 'Basic Information', icon: FileText },
+  { id: 'status', label: 'Current Status', icon: Shield },
   { id: 'documents', label: 'Documents', icon: FileText },
-  { id: 'testing', label: 'Testing History', icon: TestTube },
-  { id: 'location', label: 'Location History', icon: MapPin },
 ];
 
 export default function ComponentDetails({ componentId, componentData, onBack }) {
-  const [editMode, setEditMode] = useState(false);
-  const [showAllFields, setShowAllFields] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState(null);
   const [activeTab, setActiveTab] = useState('journey');
 
@@ -104,52 +96,7 @@ export default function ComponentDetails({ componentId, componentData, onBack })
     return badgeColors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
 
-  // Action handlers
-  const handleEdit = () => {
-    setEditMode(true);
-    console.log('Edit mode enabled');
-  };
-
-  const handleMarkFaulty = () => {
-    console.log('Mark as faulty');
-    // API call to mark as faulty
-  };
-
-  const handleMoveStorage = () => {
-    console.log('Move storage');
-    // Open modal for storage location change
-  };
-
-  const handleInstall = () => {
-    console.log('Install in device');
-    // Open modal for device installation
-  };
-
-  const handleRemove = () => {
-    console.log('Remove from device');
-    // API call to remove from device
-  };
-
-  const handleMarkScrap = () => {
-    console.log('Mark as scrap');
-    // API call to mark as scrap
-  };
-
-  const handleGenerateQR = () => {
-    console.log('Generate QR code');
-    // Generate and download QR code
-  };
-
-  const handlePrintLabel = () => {
-    console.log('Print label');
-    // Open print dialog for component label
-  };
-
-  const handleViewTestReports = () => {
-    console.log('View test reports');
-    // Open test reports modal
-  };
-
+  // Document handlers (still needed for DocumentAttachments component)
   const handleUploadDocuments = (files) => {
     console.log('Upload documents:', files);
     // Upload files to server
@@ -267,21 +214,6 @@ export default function ComponentDetails({ componentId, componentData, onBack })
           {/* Journey Tab */}
           {activeTab === 'journey' && (
             <div className="space-y-6">
-              {/* Action Buttons */}
-              <ActionButtons
-                componentStatus={componentDetails.status}
-                onEdit={handleEdit}
-                onMarkFaulty={handleMarkFaulty}
-                onMoveStorage={handleMoveStorage}
-                onInstall={handleInstall}
-                onRemove={handleRemove}
-                onMarkScrap={handleMarkScrap}
-                onGenerateQR={handleGenerateQR}
-                onPrintLabel={handlePrintLabel}
-                onViewTestReports={handleViewTestReports}
-                onUploadDocuments={handleUploadDocuments}
-              />
-
               {/* Component Journey Timeline */}
               <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <div className="flex justify-between items-center mb-6">
@@ -317,113 +249,9 @@ export default function ComponentDetails({ componentId, componentData, onBack })
             </div>
           )}
 
-          {/* Usage History Tab */}
-          {activeTab === 'usage' && (
+          {/* Component Source Tab */}
+          {activeTab === 'source' && (
             <div className="space-y-6">
-              {/* Previously Installed In */}
-              {componentDetails.previousInstallations && componentDetails.previousInstallations.length > 0 ? (
-                <PreviouslyInstalledCard devices={componentDetails.previousInstallations} />
-              ) : (
-                <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-                  <HardDrive className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">No previous installation history available</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Warranty & Purchase Tab */}
-          {activeTab === 'warranty' && (
-            <div className="space-y-6">
-              {/* Basic Information Card */}
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-                  Basic Information
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Component Type</span>
-                    <span className="text-sm font-medium text-gray-900">{componentDetails.componentType?.name || componentDetails.componentType || 'N/A'}</span>
-                  </div>
-                  
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Brand</span>
-                    <span className="text-sm font-medium text-gray-900">{componentDetails.brand || 'N/A'}</span>
-                  </div>
-                  
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Model Number</span>
-                    <span className="text-sm font-medium text-gray-900">{componentDetails.model || 'N/A'}</span>
-                  </div>
-                  
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Specifications</span>
-                    <span className="text-sm font-medium text-gray-900">{componentDetails.specifications || 'N/A'}</span>
-                  </div>
-                  
-                  {componentDetails.serialNumber && (
-                    <div className="flex flex-col">
-                      <span className="text-xs text-gray-500 mb-1">Serial Number</span>
-                      <span className="text-sm font-medium text-gray-900">{componentDetails.serialNumber}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Toggle for more fields */}
-                <CustomButton
-                  text={showAllFields ? 'Show Less' : 'Show More Details'}
-                  icon={showAllFields ? ChevronUp : ChevronDown}
-                  onClick={() => setShowAllFields(!showAllFields)}
-                  variant="secondary"
-                  size="sm"
-                  className="mt-4"
-                />
-
-                {/* Additional fields */}
-                {showAllFields && (
-                  <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {componentDetails.purchaseDetails?.purchaseDate && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Purchase Date</span>
-                        <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(componentDetails.purchaseDetails.purchaseDate).toLocaleDateString('en-IN')}
-                        </span>
-                      </div>
-                    )}
-
-                    {componentDetails.purchaseDetails?.warrantyExpiryDate && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Warranty Expiry</span>
-                        <span className={`text-sm font-medium flex items-center gap-1 ${
-                          warrantyStatus.warrantyExpired ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          <Calendar className="w-3 h-3" />
-                          {new Date(componentDetails.purchaseDetails.warrantyExpiryDate).toLocaleDateString('en-IN')}
-                        </span>
-                      </div>
-                    )}
-
-                    {componentDetails.purchaseDetails?.purchasePrice && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Purchase Price</span>
-                        <span className="text-sm font-medium text-gray-900">
-                          ₹{componentDetails.purchaseDetails.purchasePrice?.toLocaleString('en-IN')}
-                        </span>
-                      </div>
-                    )}
-
-                    {componentDetails.purchaseDetails?.vendorName && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Vendor</span>
-                        <span className="text-sm font-medium text-gray-900">{componentDetails.purchaseDetails.vendorName}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
               {/* Source Information Card */}
               <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide flex items-center gap-2">
@@ -443,35 +271,110 @@ export default function ComponentDetails({ componentId, componentData, onBack })
                     </span>
                   </div>
 
-                  {componentDetails.source === 'NEW_PURCHASE' && componentDetails.purchaseDetails?.invoiceNumber && (
-                    <div className="flex flex-col">
-                      <span className="text-xs text-gray-500 mb-1">Invoice Number</span>
-                      <span className="text-sm font-medium text-gray-900">{componentDetails.purchaseDetails.invoiceNumber}</span>
-                    </div>
+                  {/* New Purchase Details */}
+                  {componentDetails.source === 'NEW_PURCHASE' && (
+                    <>
+                      {componentDetails.purchaseDetails?.invoiceNumber && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Invoice Number</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.purchaseDetails.invoiceNumber}</span>
+                        </div>
+                      )}
+                      
+                      {componentDetails.purchaseDetails?.purchaseOrderNumber && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Purchase Order Number</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.purchaseDetails.purchaseOrderNumber}</span>
+                        </div>
+                      )}
+
+                      {componentDetails.purchaseDetails?.vendorName && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Vendor Name</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.purchaseDetails.vendorName}</span>
+                        </div>
+                      )}
+
+                      {componentDetails.purchaseDetails?.vendorDetails && (
+                        <div className="flex flex-col col-span-2">
+                          <span className="text-xs text-gray-500 mb-1">Vendor Details</span>
+                          <span className="text-sm text-gray-700">{componentDetails.purchaseDetails.vendorDetails}</span>
+                        </div>
+                      )}
+
+                      {componentDetails.purchaseDetails?.purchaseDate && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Purchase Date</span>
+                          <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(componentDetails.purchaseDetails.purchaseDate).toLocaleDateString('en-IN')}
+                          </span>
+                        </div>
+                      )}
+
+                      {componentDetails.purchaseDetails?.purchasePrice && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Purchase Price</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            ₹{componentDetails.purchaseDetails.purchasePrice?.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      )}
+
+                      {componentDetails.purchaseDetails?.warrantyExpiryDate && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Warranty Expiry Date</span>
+                          <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(componentDetails.purchaseDetails.warrantyExpiryDate).toLocaleDateString('en-IN')}
+                          </span>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {componentDetails.source === 'EXTRACTED' && componentDetails.extractionDetails?.sourceAssetTag && (
+                  {/* Extracted from Device Details */}
+                  {componentDetails.source === 'EXTRACTED' && (
                     <>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Source Device</span>
-                        <a 
-                          href={`/assets/${componentDetails.extractionDetails.sourceAssetId}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                        >
-                          {componentDetails.extractionDetails.sourceAssetTag}
-                        </a>
-                      </div>
+                      {componentDetails.extractionDetails?.sourceAssetTag && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Source Device Tag</span>
+                          <a 
+                            href={`/assets/${componentDetails.extractionDetails.sourceAssetId}`}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                          >
+                            {componentDetails.extractionDetails.sourceAssetTag}
+                          </a>
+                        </div>
+                      )}
                       
-                      {componentDetails.extractionDetails.extractionReason && (
+                      {componentDetails.extractionDetails?.sourceDeviceType && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Source Device Type</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.extractionDetails.sourceDeviceType}</span>
+                        </div>
+                      )}
+
+                      {componentDetails.extractionDetails?.extractionDate && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Extraction Date</span>
+                          <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(componentDetails.extractionDetails.extractionDate).toLocaleDateString('en-IN')}
+                          </span>
+                        </div>
+                      )}
+
+                      {componentDetails.extractionDetails?.extractionReason && (
                         <div className="flex flex-col">
                           <span className="text-xs text-gray-500 mb-1">Extraction Reason</span>
                           <span className="text-sm font-medium text-gray-900">{componentDetails.extractionDetails.extractionReason}</span>
                         </div>
                       )}
 
-                      {componentDetails.extractionDetails.extractedBy && (
+                      {componentDetails.extractionDetails?.extractedBy && (
                         <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-1">Extracted By</span>
+                          <span className="text-xs text-gray-500 mb-1">Technician Name</span>
                           <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
                             <Wrench className="w-3 h-3" />
                             {componentDetails.extractionDetails.extractedBy?.name || componentDetails.extractionDetails.extractedBy}
@@ -479,6 +382,141 @@ export default function ComponentDetails({ componentId, componentData, onBack })
                         </div>
                       )}
                     </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Basic Information Tab */}
+          {activeTab === 'basic' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
+                  Basic Information
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Component Type</span>
+                    <span className="text-sm font-medium text-gray-900">{componentDetails.componentType?.name || componentDetails.componentType || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Brand/Manufacturer</span>
+                    <span className="text-sm font-medium text-gray-900">{componentDetails.brand || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Model Number</span>
+                    <span className="text-sm font-medium text-gray-900">{componentDetails.model || componentDetails.modelNumber || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Specifications</span>
+                    <span className="text-sm font-medium text-gray-900">{componentDetails.specifications || 'N/A'}</span>
+                  </div>
+                  
+                  {componentDetails.serialNumber && (
+                    <div className="flex flex-col col-span-2">
+                      <span className="text-xs text-gray-500 mb-1">Serial Number</span>
+                      <span className="text-sm font-medium text-gray-900">{componentDetails.serialNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Current Status Tab */}
+          {activeTab === 'status' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  Current Status
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Status</span>
+                    <span className={`text-sm font-medium px-2 py-1 rounded inline-block w-fit ${
+                      componentDetails.status === 'WORKING' ? 'bg-green-100 text-green-800' :
+                      componentDetails.status === 'IN_STOCK' ? 'bg-blue-100 text-blue-800' :
+                      componentDetails.status === 'INSTALLED' ? 'bg-purple-100 text-purple-800' :
+                      componentDetails.status === 'UNDER_TESTING' ? 'bg-yellow-100 text-yellow-800' :
+                      componentDetails.status === 'FAULTY' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {componentDetails.status || 'N/A'}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Location Type</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {componentDetails.status === 'INSTALLED' ? 'Installed in Device' : 'In Stock'}
+                    </span>
+                  </div>
+
+                  {/* In Stock Location */}
+                  {componentDetails.status !== 'INSTALLED' && (
+                    <>
+                      {componentDetails.campus?.name && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Campus Name</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.campus.name}</span>
+                        </div>
+                      )}
+                      
+                      {componentDetails.storage?.name && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Almirah/Storage</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.storage.name}</span>
+                        </div>
+                      )}
+
+                      {componentDetails.shelfNumber && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Shelf Number</span>
+                          <span className="text-sm font-medium text-gray-900">{componentDetails.shelfNumber}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Installed Location */}
+                  {componentDetails.status === 'INSTALLED' && (
+                    <>
+                      {componentDetails.currentDevice?.assetTag && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Device Tag</span>
+                          <a 
+                            href={`/assets/${componentDetails.currentDevice.id}`}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                          >
+                            {componentDetails.currentDevice.assetTag}
+                          </a>
+                        </div>
+                      )}
+
+                      {componentDetails.installationDate && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500 mb-1">Installation Date</span>
+                          <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(componentDetails.installationDate).toLocaleDateString('en-IN')}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {componentDetails.conditionNotes && (
+                    <div className="flex flex-col col-span-2">
+                      <span className="text-xs text-gray-500 mb-1">Condition Notes</span>
+                      <span className="text-sm text-gray-700">{componentDetails.conditionNotes}</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -495,135 +533,7 @@ export default function ComponentDetails({ componentId, componentData, onBack })
               />
             </div>
           )}
-
-          {/* Testing History Tab */}
-          {activeTab === 'testing' && (
-            <div className="space-y-6">
-              {/* Testing Information */}
-              {(componentDetails.lastTestedDate || componentDetails.testResults) ? (
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide flex items-center gap-2">
-                    <TestTube className="w-4 h-4" />
-                    Testing Information
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {componentDetails.lastTestedDate && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Last Tested</span>
-                        <span className="text-sm font-medium text-gray-900">
-                          {new Date(componentDetails.lastTestedDate).toLocaleDateString('en-IN')}
-                        </span>
-                      </div>
-                    )}
-
-                    {componentDetails.testedBy && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Tested By</span>
-                        <span className="text-sm font-medium text-gray-900">{componentDetails.testedBy}</span>
-                      </div>
-                    )}
-
-                    {componentDetails.testResults && (
-                      <div className="flex flex-col col-span-2">
-                        <span className="text-xs text-gray-500 mb-1">Test Results</span>
-                        <span className="text-sm text-gray-700">{componentDetails.testResults}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-                  <TestTube className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">No testing history available</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Location History Tab */}
-          {activeTab === 'location' && (
-            <div className="space-y-6">
-              {/* Current Location Card */}
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Current Location
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {componentDetails.status === 'IN_STOCK' ? (
-                    <>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Campus</span>
-                        <span className="text-sm font-medium text-gray-900">{componentDetails.campus?.campusName || componentDetails.campus?.name || 'N/A'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Storage</span>
-                        <span className="text-sm font-medium text-gray-900">{componentDetails.storageId || componentDetails.storage?.name || 'N/A'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 mb-1">Shelf</span>
-                        <span className="text-sm font-medium text-gray-900">{componentDetails.shelfNumber || 'N/A'}</span>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="text-sm text-gray-500 col-span-3">Currently installed in a device (see Usage History tab)</p>
-                  )}
-
-                  {componentDetails.conditionNotes && (
-                    <div className="flex flex-col col-span-3 pt-3 border-t">
-                      <span className="text-xs text-gray-500 mb-1">Condition Notes</span>
-                      <span className="text-sm text-gray-700">{componentDetails.conditionNotes}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Storage History */}
-              {componentDetails.storageHistory && componentDetails.storageHistory.length > 0 ? (
-                <StorageHistoryCard storageHistory={componentDetails.storageHistory} />
-              ) : (
-                <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-                  <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">No storage history available</p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
-
-        {/* Remarks Section (shown on all tabs) */}
-        {componentDetails.remarks && (
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mt-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-              General Remarks
-            </h3>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">{componentDetails.remarks}</p>
-          </div>
-        )}
-
-        {/* Audit Log (shown on all tabs) */}
-        {componentDetails.auditLog && componentDetails.auditLog.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mt-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-              Audit Log
-            </h3>
-            <div className="space-y-2 text-xs">
-              {componentDetails.auditLog.map((log, index) => (
-                <div key={index} className="flex justify-between items-start p-2 bg-gray-50 rounded">
-                  <div>
-                    <span className="font-medium text-gray-900">{log.action}</span>
-                    <span className="text-gray-600 ml-2">by {log.user}</span>
-                  </div>
-                  <span className="text-gray-500 whitespace-nowrap">
-                    {new Date(log.timestamp).toLocaleString('en-IN')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
