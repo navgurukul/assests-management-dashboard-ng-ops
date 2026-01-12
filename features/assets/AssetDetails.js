@@ -2,49 +2,21 @@
 
 import React from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
-import useFetch from '@/app/hooks/query/useFetch';
 
-export default function AssetDetails({ assetId, onBack }) {
-  // Fetch asset details from API
-  const { data, isLoading, isError, error } = useFetch({
-    url: config.getApiUrl(config.endpoints.assets.details(assetId)),
-    queryKey: ['asset', assetId],
-    enabled: !!assetId,
-  });
-
-  // Loading state
-  if (isLoading) {
+export default function AssetDetails({ assetId, assetData, onBack }) {
+  // If no asset data is passed, show error
+  if (!assetData) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading asset details...</p>
+          <p className="text-red-600 font-medium">Asset data not available</p>
+          <p className="text-gray-600 mt-2">Please navigate from the assets list</p>
         </div>
       </div>
     );
   }
 
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Error loading asset details</p>
-          <p className="text-gray-600 mt-2">{error?.message || 'Something went wrong'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data || !data.data) {
-    return (
-      <div className="p-6">
-        <p>Asset not found</p>
-      </div>
-    );
-  }
-
-  const assetDetails = data.data;
+  const assetDetails = assetData;
 
   // Map API status to display format
   const formatStatus = (status) => {
@@ -66,6 +38,16 @@ export default function AssetDetails({ assetId, onBack }) {
       'NOT_WORKING': 'Not Working',
     };
     return conditionMap[condition] || condition;
+  };
+
+  // Format source type
+  const formatSourceType = (sourceType) => {
+    const sourceTypeMap = {
+      'PURCHASED': 'Purchased',
+      'DONATED': 'Donated',
+      'LEASED': 'Leased',
+    };
+    return sourceTypeMap[sourceType] || sourceType;
   };
 
   const displayStatus = formatStatus(assetDetails.status);
@@ -107,9 +89,9 @@ export default function AssetDetails({ assetId, onBack }) {
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Condition', value: formatCondition(assetDetails.condition), className: `font-semibold ${getConditionColor()}` },
-        { label: 'Campus', value: assetDetails.campusId || 'N/A' },
-        { label: 'Location', value: assetDetails.currentLocationId || 'N/A' },
-        { label: 'Source Type', value: assetDetails.sourceType || 'N/A' },
+        { label: 'Asset Type', value: assetDetails.assetType?.name || 'N/A' },
+        { label: 'Campus', value: assetDetails.campus?.name || 'N/A' },
+        { label: 'Location', value: assetDetails.location?.name || 'N/A' },
       ],
     },
     {
@@ -118,15 +100,29 @@ export default function AssetDetails({ assetId, onBack }) {
       items: [
         { label: 'Brand', value: assetDetails.brand || 'N/A' },
         { label: 'Model', value: assetDetails.model || 'N/A' },
-        { label: 'Serial Number', value: assetDetails.serialNumber || 'N/A' },
+        { label: 'Processor', value: assetDetails.processor || 'N/A' },
+        { label: 'RAM', value: assetDetails.ramSizeGB ? `${assetDetails.ramSizeGB} GB` : 'N/A' },
+        { label: 'Storage', value: assetDetails.storageSizeGB ? `${assetDetails.storageSizeGB} GB` : 'N/A' },
+        { label: 'Serial Number', value: assetDetails.serialNumber || 'N/A', className: 'col-span-2' },
         { label: 'Spec Label', value: assetDetails.specLabel || 'N/A', className: 'col-span-2' },
+      ],
+    },
+    {
+      title: 'Accessories',
+      itemsGrid: true,
+      items: [
+        { label: 'Charger', value: assetDetails.charger ? 'Yes' : 'No', className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
+        { label: 'Bag', value: assetDetails.bag ? 'Yes' : 'No', className: assetDetails.bag ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
       ],
     },
     {
       title: 'Purchase Info',
       items: [
+        { label: 'Source Type', value: formatSourceType(assetDetails.sourceType) || 'N/A' },
+        { label: 'Owned By', value: assetDetails.ownedBy || 'N/A' },
+        { label: 'Source By', value: assetDetails.sourceBy || 'N/A' },
         { label: 'Purchase Date', value: assetDetails.purchaseDate ? new Date(assetDetails.purchaseDate).toLocaleDateString() : 'N/A' },
-        { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost}` : 'N/A' },
+        { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost.toLocaleString()}` : 'N/A' },
       ],
     },
   ];
@@ -137,12 +133,14 @@ export default function AssetDetails({ assetId, onBack }) {
       title: 'Notes & Additional Information',
       items: [
         { label: 'Notes', value: assetDetails.notes || 'No notes available' },
-        { label: 'Asset Type ID', value: assetDetails.assetTypeId || 'N/A' },
       ],
     },
     {
       title: 'System Information',
       items: [
+        { label: 'Asset ID', value: assetDetails.id || 'N/A' },
+        { label: 'Asset Type Category', value: assetDetails.assetType?.category || 'N/A' },
+        { label: 'Campus Code', value: assetDetails.campus?.code || 'N/A' },
         { label: 'Created At', value: assetDetails.createdAt ? new Date(assetDetails.createdAt).toLocaleString() : 'N/A' },
         { label: 'Updated At', value: assetDetails.updatedAt ? new Date(assetDetails.updatedAt).toLocaleString() : 'N/A' },
       ],

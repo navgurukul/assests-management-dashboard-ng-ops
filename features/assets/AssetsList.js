@@ -277,7 +277,11 @@ export default function AssetsList() {
   };
 
   const handleRowClick = (asset) => {
-    router.push(`/assets/${asset.id}?id=${asset.id}`);
+    // Store asset data in sessionStorage to pass to details page
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('currentAssetData', JSON.stringify(asset.assetData));
+    }
+    router.push(`/assets/${asset.id}`);
   };
 
   const handleCreateClick = () => {
