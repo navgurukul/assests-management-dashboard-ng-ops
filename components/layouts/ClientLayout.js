@@ -77,14 +77,14 @@ export default function ClientLayout({ children }) {
   // PROTECTED LAYOUT: For authenticated users (with sidebar and header)
   if (!isPublicPath && isAuthenticated) {
     return (
-      <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar />
+      <div className="flex flex-col h-screen overflow-hidden">
+        {/* Header - Full Width at Top */}
+        <Header />
 
-        {/* Main Content Area */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Header */}
-          <Header />
+        {/* Sidebar and Main Content - Side by Side Below Header */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <Sidebar />
 
           {/* Page Content */}
           <main className="flex-1 overflow-y-auto bg-gray-50">

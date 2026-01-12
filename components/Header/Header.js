@@ -36,7 +36,7 @@ const Header = () => {
   };
 
   return (
-    <div className="border-b border-gray-300 h-14 font-bold flex items-center justify-between px-4 bg-white z-10">
+    <div className="w-full border-b border-gray-300 h-14 font-bold flex items-center justify-between px-4 bg-white z-10">
       <span>Assets Management Dashboard</span>
       
       {isAuthenticated && user && (
