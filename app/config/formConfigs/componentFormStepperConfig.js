@@ -273,50 +273,6 @@ export const componentStepperConfig = [
     ]
   },
   {
-    label: 'Testing',
-    description: 'Add testing information and assignment details',
-    fields: [
-      {
-        name: 'lastTestedDate',
-        label: 'Last Tested Date',
-        type: 'date',
-        placeholder: 'Select last tested date',
-        required: false
-      },
-      {
-        name: 'testedBy',
-        label: 'Tested By',
-        type: 'text',
-        placeholder: 'Technician name',
-        required: false
-      },
-      {
-        name: 'testResults',
-        label: 'Test Results/Notes',
-        type: 'textarea',
-        placeholder: 'Enter test results or notes',
-        required: false,
-        rows: 3
-      },
-      {
-        name: 'assignedTo',
-        label: 'Assigned To',
-        type: 'text',
-        placeholder: 'Department/Person',
-        required: false,
-        helpText: 'Department or person this component is assigned to'
-      },
-      {
-        name: 'remarks',
-        label: 'Remarks',
-        type: 'textarea',
-        placeholder: 'General notes',
-        required: false,
-        rows: 3
-      }
-    ]
-  },
-  {
     label: 'Documents',
     description: 'Attach bills, invoices, and other documents',
     fields: [
@@ -356,9 +312,7 @@ export const componentFormValidationSchema = Yup.object().shape({
   locationType: Yup.string()
     .oneOf(['IN_STOCK', 'INSTALLED'])
     .required('Location type is required'),
-  conditionNotes: Yup.string(),
-  testResults: Yup.string(),
-  remarks: Yup.string()
+  conditionNotes: Yup.string()
 });
 
 // Initial values for form
@@ -390,10 +344,5 @@ export const componentFormInitialValues = {
   installedDeviceTag: '',
   installationDate: '',
   conditionNotes: '',
-  lastTestedDate: '',
-  testedBy: '',
-  testResults: '',
-  assignedTo: '',
-  remarks: '',
   documents: []
 };
