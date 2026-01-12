@@ -20,6 +20,7 @@ export default function TableWrapper({
   onCreateClick,
   // Filter props
   filterComponent,
+  columnSelectorComponent, // New prop for column selector
   activeFiltersComponent, // New prop for filter chips
   // Server-side pagination props
   serverPagination = false,
@@ -77,6 +78,7 @@ export default function TableWrapper({
               />
             )}
             {filterComponent}
+            {columnSelectorComponent}
           </div>
         </div>
       )}
