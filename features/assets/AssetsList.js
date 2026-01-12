@@ -8,7 +8,7 @@ import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
-import ColumnSelector from '@/app/components/molecules/ColumnSelector';
+import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -277,7 +277,11 @@ export default function AssetsList() {
   };
 
   const handleRowClick = (asset) => {
-    router.push(`/assets/${asset.id}?id=${asset.id}`);
+    // Store asset data in sessionStorage to pass to details page
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('currentAssetData', JSON.stringify(asset.assetData));
+    }
+    router.push(`/assets/${asset.id}`);
   };
 
   const handleCreateClick = () => {
