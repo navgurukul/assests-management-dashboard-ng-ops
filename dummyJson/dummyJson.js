@@ -331,7 +331,7 @@ export const assetDetailsData = {
  
 /**
  * MODAL CONFIGURATIONS
- * Each modal type has a configuration object defining which fields to display
+ * Each modal type has a configuration object defining whih fields to display
  * Fields can be toggled on/off by adding/removing from the array
  */
 

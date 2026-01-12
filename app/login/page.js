@@ -293,7 +293,7 @@ function LoginContent() {
                   >
                     {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
                   </button>
-                  Asset Tracking Dashboard
+                  Asset Tracking Dashboard.
                 </span>
               </div>
 
