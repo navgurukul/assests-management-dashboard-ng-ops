@@ -57,10 +57,10 @@ function LoginContent() {
 
   useEffect(() => {
     // If already authenticated, redirect based on role
-    if (isAuthenticated && user) {
+    if (!loading && isAuthenticated && user) {
       handleRedirect();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, loading]);
 
   const handleRedirect = () => {
     const rolesList = user?.rolesList || [];

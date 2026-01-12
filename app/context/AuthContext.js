@@ -43,11 +43,13 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Save auth state to localStorage whenever it changes
+  // Save auth state to localStorage and cookies whenever it changes
   const saveAuthState = (data) => {
     try {
       if (data) {
         localStorage.setItem(AUTH_KEY, JSON.stringify(data));
+        // Also save to cookie for middleware access
+        document.cookie = `${AUTH_KEY}=${data.token || 'authenticated'}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
         setAuthState({
           loading: false,
           error: null,
@@ -55,6 +57,8 @@ export function AuthProvider({ children }) {
         });
       } else {
         localStorage.removeItem(AUTH_KEY);
+        // Remove cookie
+        document.cookie = `${AUTH_KEY}=; path=/; max-age=0`;
         setAuthState({
           loading: false,
           error: null,
