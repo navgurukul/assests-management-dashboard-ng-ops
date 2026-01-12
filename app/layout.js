@@ -1,6 +1,5 @@
 import ClientProviders from "@/components/ClientProviders";
-import Header from "@/components/Header/Header";
-import Sidebar from "@/components/Sidebar/Sidebar";
+import ClientLayout from "@/components/layouts/ClientLayout";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "./helper/ReactQueryProvider";
@@ -28,7 +27,9 @@ function RootLayout({ children }) {
             <ReactQueryProvider>
               <AuthProvider>
                 <ClientProviders>
-                  {children}
+                  <ClientLayout>
+                    {children}
+                  </ClientLayout>
                 </ClientProviders>
               </AuthProvider>
             </ReactQueryProvider>

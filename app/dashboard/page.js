@@ -7,7 +7,6 @@ import StackedColumnChart from '@/components/molecules/StackedColumnChart';
 import { dashboardCards, locationWiseAssetsData, assetsPerCampusData } from '@/dummyJson/dummyJson';
 import { CheckCircle2, Archive, Settings, Wrench } from 'lucide-react';
 import AssetsTable from '@/components/Table/Table';
-import { ProtectedRoute } from '@/app/components/ProtectedRoute';
 
 const iconMap = {
   CheckCircle2: CheckCircle2,
@@ -16,7 +15,7 @@ const iconMap = {
   Wrench: Wrench,
 };
 
-function DashboardContent() {
+export default function DashboardPage() {
   const legendLabels = {
     'LWS': 'Laptops with Students',
     'LIS': 'Laptops in Stock',
@@ -75,13 +74,5 @@ function DashboardContent() {
       </div>
       <AssetsTable/>
     </div>
-  );
-}
-
-export default function DashboardPage() {
-  return (
-    <ProtectedRoute>
-      <DashboardContent />
-    </ProtectedRoute>
   );
 }
