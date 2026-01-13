@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
+
 // Break down the component form into logical steps
 export const componentStepperConfig = [
   {
@@ -109,6 +111,23 @@ export const componentStepperConfig = [
           { value: 'Person C', label: 'Person C' }
         ]
       },
+      {
+        name: 'condition',
+        label: 'Condition',
+        type: 'select',
+        placeholder: 'Select condition',
+        required: true,
+        showIf: { field: 'sourceType', value: 'EXTRACTED' },
+        options: [
+          { value: 'NEW', label: 'New' },
+          { value: 'USED', label: 'Used' },
+          { value: 'REFURBISHED', label: 'Refurbished' },
+          { value: 'FAULTY', label: 'Faulty' },
+          { value: 'GOOD', label: 'Good' },
+          { value: 'POOR', label: 'Poor' },
+          { value: 'MODERATE', label: 'Moderate' }
+        ]
+      },
       // Purchase Details (only for New Purchase)
       {
         name: 'purchaseDate',
@@ -144,21 +163,14 @@ export const componentStepperConfig = [
       {
         name: 'componentType',
         label: 'Component Type',
-        type: 'select',
-        placeholder: 'Select component type',
+        type: 'api-autocomplete',
+        placeholder: 'Search and select component type',
+        apiUrl: baseUrl + '/asset-types',
+        queryKey: ['asset-types'],
+        labelKey: 'name',
+        valueKey: 'id',
         required: true,
-        options: [
-          { value: 'RAM', label: 'RAM' },
-          { value: 'SSD', label: 'SSD' },
-          { value: 'HDD', label: 'HDD' },
-          { value: 'MOTHERBOARD', label: 'Motherboard' },
-          { value: 'GPU', label: 'GPU' },
-          { value: 'CPU', label: 'CPU' },
-          { value: 'POWER_SUPPLY', label: 'Power Supply' },
-          { value: 'COOLING_FAN', label: 'Cooling Fan' },
-          { value: 'NETWORK_CARD', label: 'Network Card' },
-          { value: 'OTHER', label: 'Other' }
-        ]
+        filterCategory: 'COMPONENT', // Filter to show only COMPONENT category
       },
       {
         name: 'brand',
@@ -210,25 +222,34 @@ export const componentStepperConfig = [
           { value: 'SCRAP', label: 'Scrap' }
         ]
       },
-      {
-        name: 'locationType',
-        label: 'Location Type',
-        type: 'radio',
-        required: true,
-        options: [
-          { value: 'IN_STOCK', label: 'In Stock' },
-          { value: 'INSTALLED', label: 'Installed in Device' }
-        ]
-      },
-      // In Stock location fields
+      // Location fields - shown when status is IN_STOCK
       {
         name: 'campusId',
-        label: 'Campus Name',
-        type: 'select',
-        placeholder: 'Select campus',
+        label: 'Campus',
+        type: 'api-autocomplete',
+        placeholder: 'Search and select campus',
+        apiUrl: baseUrl + '/campuses',
+        queryKey: ['campuses'],
+        labelKey: 'campusName',
+        valueKey: 'id',
         required: false,
-        showIf: { field: 'locationType', value: 'IN_STOCK' },
-        options: [] // To be populated from API
+        showIf: { field: 'status', value: 'IN_STOCK' },
+      },
+      {
+        name: 'locationId',
+        label: 'Location',
+        type: 'api-autocomplete',
+        placeholder: 'Search and select location',
+        apiUrl: baseUrl + '/locations/campus',
+        queryKey: ['locations'],
+        labelKey: 'name',
+        valueKey: 'id',
+        required: false,
+        showIf: { field: 'status', value: 'IN_STOCK' },
+        dependsOn: {
+          field: 'campusId',
+          paramKey: 'campusId',
+        },
       },
       {
         name: 'almirahId',
@@ -236,7 +257,7 @@ export const componentStepperConfig = [
         type: 'select',
         placeholder: 'Select almirah',
         required: false,
-        showIf: { field: 'locationType', value: 'IN_STOCK' },
+        showIf: { field: 'status', value: 'IN_STOCK' },
         options: [] // To be populated from API based on campus
       },
       {
@@ -245,16 +266,16 @@ export const componentStepperConfig = [
         type: 'text',
         placeholder: 'Enter shelf number',
         required: false,
-        showIf: { field: 'locationType', value: 'IN_STOCK' }
+        showIf: { field: 'status', value: 'IN_STOCK' },
       },
-      // Installed location fields
+      // Installed fields - shown when status is INSTALLED
       {
         name: 'installedDeviceTag',
         label: 'Device Tag',
         type: 'searchable-select',
         placeholder: 'Search and select device',
         required: false,
-        showIf: { field: 'locationType', value: 'INSTALLED' }
+        showIf: { field: 'status', value: 'INSTALLED' }
       },
       {
         name: 'installationDate',
@@ -262,13 +283,20 @@ export const componentStepperConfig = [
         type: 'date',
         placeholder: 'Select installation date',
         required: false,
-        showIf: { field: 'locationType', value: 'INSTALLED' }
+        showIf: { field: 'status', value: 'INSTALLED' }
       },
       {
-        name: 'conditionNotes',
-        label: 'Condition Notes',
+        name: 'ownedBy',
+        label: 'Owned By',
+        type: 'text',
+        placeholder: 'Enter owner (e.g., lws)',
+        required: false
+      },
+      {
+        name: 'notes',
+        label: 'Notes',
         type: 'textarea',
-        placeholder: 'Any remarks about physical condition',
+        placeholder: 'Additional notes',
         required: false,
         rows: 3
       }
@@ -317,10 +345,14 @@ export const componentFormValidationSchema = Yup.object().shape({
   status: Yup.string()
     .oneOf(['WORKING', 'IN_STOCK', 'INSTALLED', 'UNDER_TESTING', 'FAULTY', 'SCRAP'])
     .required('Status is required'),
-  locationType: Yup.string()
-    .oneOf(['IN_STOCK', 'INSTALLED'])
-    .required('Location type is required'),
-  conditionNotes: Yup.string()
+  condition: Yup.string()
+    .oneOf(['NEW', 'USED', 'REFURBISHED', 'FAULTY', 'GOOD', 'POOR', 'MODERATE'])
+    .when('sourceType', {
+      is: 'EXTRACTED',
+      then: (schema) => schema.required('Condition is required'),
+      otherwise: (schema) => schema.notRequired()
+    }),
+  notes: Yup.string()
 });
 
 // Initial values for form
@@ -345,12 +377,14 @@ export const componentFormInitialValues = {
   extractionReason: '',
   extractionTechnician: '',
   status: 'IN_STOCK',
-  locationType: 'IN_STOCK',
   campusId: '',
   almirahId: '',
   shelfNumber: '',
+  locationId: '',
   installedDeviceTag: '',
   installationDate: '',
-  conditionNotes: '',
+  condition: 'NEW',
+  ownedBy: 'lws',
+  notes: '',
   documents: []
 };
