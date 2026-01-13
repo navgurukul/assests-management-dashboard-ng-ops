@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText, X, Check } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import Modal from '@/components/molecules/Modal';
-import GenericForm from '@/components/molecules/GenericForm';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
@@ -13,24 +11,16 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
-  assetFormFields,
-  assetValidationSchema,
-  assetInitialValues,
-} from '@/app/config/formConfigs/assetFormConfig';
-import {
   ASSET_TABLE_ID,
   assetTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/assetTableConfig';
-import { toast } from '@/app/utils/toast';
 
 const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
 const actionOptions = ['View', 'Assign', 'Details'];
 
 export default function AssetsList() {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -285,57 +275,7 @@ export default function AssetsList() {
   };
 
   const handleCreateClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleFormSubmit = async (values) => {
-    setIsSubmitting(true);
-    
-    // Show loading toast
-    const loadingToastId = toast.loading('Creating asset...');
-    
-    try {
-      // Make API call to create asset
-      const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData?.message || `Failed to create asset (Status: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      console.log('Asset created successfully:', result);
-      
-      // Show success toast with green color
-      toast.success('Asset created successfully!');
-      
-      // Close modal and refresh data
-      setIsModalOpen(false);
-      // You might want to refetch the assets list here
-      // queryClient.invalidateQueries(['assets']);
-      
-    } catch (error) {
-      console.error('Error creating asset:', error);
-      
-      // Show error toast with red color
-      toast.error(error?.message || 'Failed to create asset. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    router.push('/assets/create');
   };
 
   // Loading state
@@ -412,24 +352,6 @@ export default function AssetsList() {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
-
-      {/* Create Asset Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Register New Asset"
-        size="large"
-      >
-        <GenericForm
-          fields={assetFormFields}
-          initialValues={assetInitialValues}
-          validationSchema={assetValidationSchema}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCloseModal}
-          submitButtonText="Create Asset"
-          isSubmitting={isSubmitting}
-        />
-      </Modal>
     </div>
   );
 }
