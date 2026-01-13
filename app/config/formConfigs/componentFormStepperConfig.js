@@ -128,14 +128,6 @@ export const componentStepperConfig = [
         showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
       },
       {
-        name: 'vendorName',
-        label: 'Vendor/Supplier Name',
-        type: 'text',
-        placeholder: 'Enter vendor name',
-        required: false,
-        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
-      },
-      {
         name: 'warrantyExpiryDate',
         label: 'Warranty Expiry Date',
         type: 'date',
@@ -319,7 +311,6 @@ export const componentFormValidationSchema = Yup.object().shape({
       then: (schema) => schema.required('Purchase price is required'),
       otherwise: (schema) => schema.notRequired()
     }),
-  vendorName: Yup.string(),
   sourceType: Yup.string()
     .oneOf(['NEW_PURCHASE', 'EXTRACTED'])
     .required('Source type is required'),
@@ -343,7 +334,6 @@ export const componentFormInitialValues = {
   purchaseDate: '',
   warrantyExpiryDate: '',
   purchasePrice: '',
-  vendorName: '',
   sourceType: 'NEW_PURCHASE',
   invoiceNumber: '',
   purchaseOrderNumber: '',
