@@ -61,7 +61,15 @@ export default function StepperForm({
       enableReinitialize
     >
       {(formikProps) => (
-        <Form className="space-y-3">
+        <Form 
+          className="space-y-3"
+          onKeyDown={(event) => {
+            // Prevent Enter key from submitting the form
+            if (event.key === 'Enter' && event.target.type !== 'textarea') {
+              event.preventDefault();
+            }
+          }}
+        >
           {/* Stepper Header */}
           <div className="relative">
             <div className="flex items-center justify-between">
@@ -198,7 +206,8 @@ export default function StepperForm({
                 </Button>
               ) : (
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={() => formikProps.handleSubmit()}
                   color="success"
                   isLoading={isSubmitting}
                   endContent={!isSubmitting && <Check size={18} />}
