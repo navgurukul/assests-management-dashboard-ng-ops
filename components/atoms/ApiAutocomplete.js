@@ -27,9 +27,14 @@ export default function ApiAutocomplete({
   dependentValue = null,
   filterCategory = null, // Filter items by category (e.g., 'COMPONENT', 'DEVICE')
 }) {
-  // Build the API URL with dependent value if exists (append to path)
+  // Build the API URL with dependent value if exists
+  // Check if we should append as query param or path param
   const finalApiUrl = dependsOn && dependentValue
-    ? `${apiUrl}/${dependentValue}`
+    ? apiUrl.includes('?') 
+      ? `${apiUrl}&${dependsOn.paramKey}=${dependentValue}`  // Append as query param
+      : apiUrl.endsWith('/') 
+        ? `${apiUrl}${dependentValue}`  // Append to path (if URL ends with /)
+        : `${apiUrl}?${dependsOn.paramKey}=${dependentValue}`  // Add as query param
     : apiUrl;
 
   // Include dependent value in queryKey to refetch when it changes

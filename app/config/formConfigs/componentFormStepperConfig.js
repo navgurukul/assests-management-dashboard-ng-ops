@@ -58,14 +58,49 @@ export const componentStepperConfig = [
         required: false,
         showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
       },
+      // Location fields
+      {
+        name: 'campusId',
+        label: 'Campus',
+        type: 'api-autocomplete',
+        placeholder: 'Search and select campus',
+        apiUrl: baseUrl + '/campuses',
+        queryKey: ['campuses'],
+        labelKey: 'campusName',
+        valueKey: 'id',
+        required: false,
+      },
+      {
+        name: 'locationId',
+        label: 'Location',
+        type: 'api-autocomplete',
+        placeholder: 'Search and select location',
+        apiUrl: baseUrl + '/locations/campus',
+        queryKey: ['locations'],
+        labelKey: 'name',
+        valueKey: 'id',
+        required: false,
+        dependsOn: {
+          field: 'campusId',
+          paramKey: 'campusId',
+        },
+      },
       // Extracted from device fields
       {
         name: 'sourceDeviceTag',
         label: 'Source Device Tag',
-        type: 'searchable-select',
+        type: 'api-autocomplete',
         placeholder: 'Search and select device',
+        apiUrl: baseUrl + '/assets',
+        queryKey: ['assets'],
+        labelKey: 'assetTag',
+        valueKey: 'id',
         required: false,
-        showIf: { field: 'sourceType', value: 'EXTRACTED' }
+        showIf: { field: 'sourceType', value: 'EXTRACTED' },
+        dependsOn: {
+          field: 'campusId',
+          paramKey: 'campusId',
+        },
       },
       {
         name: 'sourceDeviceType',
@@ -219,34 +254,6 @@ export const componentStepperConfig = [
         ]
       },
       // Location fields - shown when status is IN_STOCK
-      {
-        name: 'campusId',
-        label: 'Campus',
-        type: 'api-autocomplete',
-        placeholder: 'Search and select campus',
-        apiUrl: baseUrl + '/campuses',
-        queryKey: ['campuses'],
-        labelKey: 'campusName',
-        valueKey: 'id',
-        required: false,
-        showIf: { field: 'status', value: 'IN_STOCK' },
-      },
-      {
-        name: 'locationId',
-        label: 'Location',
-        type: 'api-autocomplete',
-        placeholder: 'Search and select location',
-        apiUrl: baseUrl + '/locations/campus',
-        queryKey: ['locations'],
-        labelKey: 'name',
-        valueKey: 'id',
-        required: false,
-        showIf: { field: 'status', value: 'IN_STOCK' },
-        dependsOn: {
-          field: 'campusId',
-          paramKey: 'campusId',
-        },
-      },
       {
         name: 'almirahId',
         label: 'Almirah/Storage ID',
