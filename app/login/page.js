@@ -280,7 +280,7 @@ function LoginContent() {
           />
         </div>
 
-        <div className="w-[80%] py-24 mx-12 relative z-10">
+        <div className="w-[80%] py-28 mx-12 relative z-10">
           <div className="grid grid-cols-1 items-center">
             {/* Left Content */}
             <div className={`transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'}`}>
@@ -423,7 +423,7 @@ function LoginContent() {
       </div>
 
       {/* Stats Section */}
-      <div className={`relative z-10 py-10 px-6 ${isDarkMode ? 'bg-gradient-to-b from-transparent via-slate-950/50 to-transparent border-white/5' : 'bg-gradient-to-b from-transparent via-blue-50/50 to-transparen'}`}>
+      <div className={`relative z-10 py-20 px-6 ${isDarkMode ? 'bg-gradient-to-b from-transparent via-slate-950/50 to-transparent border-white/5' : 'bg-gradient-to-b from-transparent via-blue-50/50 to-transparen'}`}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
