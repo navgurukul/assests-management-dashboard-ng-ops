@@ -22,7 +22,7 @@ function LoginContent() {
   const deviceItems = [
     { text: "Laptop", icon: Laptop },
     { text: "Mobile", icon: Smartphone },
-    { text: "Tablet", icon: Tablet },
+    { text: "Desktop", icon: Tablet },
     { text: "Device", icon: Monitor },
     { text: "Asset", icon: Package },
   ];
@@ -265,7 +265,7 @@ function LoginContent() {
       </div>
       </nav> */}
 
-      <div className="relative z-10 min-h-screen flex items-start justify-center overflow-hidden pt-20">
+      <div className="relative z-10 flex items-start justify-center overflow-hidden">
         {/* Animated Grid Background */}
         <div className={`absolute inset-0 ${isDarkMode ? 'opacity-5' : 'opacity-10'}`}>
           <div 
@@ -279,7 +279,7 @@ function LoginContent() {
           />
         </div>
 
-        <div className="max-w-6xl px-6 w-full relative z-10">
+        <div className="w-[80%] py-24 mx-12 relative z-10">
           <div className="grid grid-cols-1 items-center">
             {/* Left Content */}
             <div className={`transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'}`}>
@@ -299,7 +299,7 @@ function LoginContent() {
 
               {/* Heading */}
               <h1 
-                className={`text-6xl md:text-7xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-6 leading-tight transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`text-8xl md:text-8xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-6 leading-tight transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: '100ms' }}
               >
                 <LayoutGroup>
@@ -334,7 +334,7 @@ function LoginContent() {
 
               {/* Description */}
               <p 
-                className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-8 leading-relaxed transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`w-[75%] text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-8 leading-relaxed transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: '200ms' }}
               >
                 Complete asset tracking solution for your organization. Seamlessly allocate laptops, mobiles, and tablets to students and employees. Monitor device status, manage assignments, handle requests, and maintain full visibility of all organizational assets in one powerful dashboard.
@@ -370,7 +370,7 @@ function LoginContent() {
       </div>
 
       {/* Three Cards Section - Horizontally Aligned */}
-      <div className="relative z-10 mt-8 pb-20 px-6">
+      <div className="relative z-10 pb-10 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 - Total Assets */}
