@@ -28,6 +28,8 @@ export default function TableWrapper({
   paginationData = null, // { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage }
   onPageChange,
   onPageSizeChange,
+  // Loading state
+  isLoading = false,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
@@ -127,11 +129,20 @@ export default function TableWrapper({
           ))}
         </TableHeader>
         <TableBody 
-          items={displayData}
+          items={isLoading ? [] : displayData}
           emptyContent={
-            <div className="flex items-center justify-center py-20">
-              <p className="text-gray-500 text-base font-medium">No data found</p>
-            </div>
+            isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  <p className="text-gray-600">Loading...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-20">
+                <p className="text-gray-500 text-base font-medium">No data found</p>
+              </div>
+            )
           }
         >
           {(item) => (

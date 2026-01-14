@@ -299,20 +299,13 @@ export default function ComponentsList() {
     router.push('/components/create');
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600">Loading components...</p>
-        </div>
-      </div>
-    );
-  }
+  // Loading state - only show full-page loader on initial load (when no data exists)
+  const isInitialLoad = isLoading && !data;
+  
+  
 
-  // Error state
-  if (isError) {
+  // Error state - only show full-page error on initial load
+  if (isError && !data) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -337,6 +330,8 @@ export default function ComponentsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Loading state
+        isLoading={isLoading}
         // Search component
         searchComponent={
           <SearchInput
