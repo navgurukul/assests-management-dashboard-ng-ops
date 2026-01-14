@@ -9,6 +9,9 @@ export default function FilterDropdown({
   campusOptions = [],
   statusOptions = [],
   assetTypeOptions = [],
+  componentTypeOptions = [],
+  sourceOptions = [],
+  conditionOptions = [],
   selectedFilters = {}
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,23 +31,56 @@ export default function FilterDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filterOptions = [
-    { 
+  // Build filter options dynamically based on what props are provided
+  const filterOptions = [];
+  
+  if (campusOptions.length > 0) {
+    filterOptions.push({ 
       key: 'campus', 
       label: 'Campus',
       items: campusOptions
-    },
-    { 
+    });
+  }
+  
+  if (componentTypeOptions.length > 0) {
+    filterOptions.push({ 
+      key: 'componentType', 
+      label: 'Component Type',
+      items: componentTypeOptions
+    });
+  }
+  
+  if (sourceOptions.length > 0) {
+    filterOptions.push({ 
+      key: 'source', 
+      label: 'Source',
+      items: sourceOptions
+    });
+  }
+  
+  if (conditionOptions.length > 0) {
+    filterOptions.push({ 
+      key: 'condition', 
+      label: 'Condition',
+      items: conditionOptions
+    });
+  }
+  
+  if (statusOptions.length > 0) {
+    filterOptions.push({ 
       key: 'status', 
       label: 'Status',
       items: statusOptions
-    },
-    { 
+    });
+  }
+  
+  if (assetTypeOptions.length > 0) {
+    filterOptions.push({ 
       key: 'type', 
       label: 'Asset Type',
       items: assetTypeOptions
-    },
-  ];
+    });
+  }
 
   const handleFilterSelect = (filterKey, value) => {
     const newFilters = { ...selectedFilters };
@@ -74,11 +110,11 @@ export default function FilterDropdown({
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-          <div className="py-2">
+          <div className="py-2 relative">
             {filterOptions.map((filter) => (
               <div
                 key={filter.key}
-                className="relative"
+                className=""
                 onMouseEnter={() => setHoveredItem(filter.key)}
                 onMouseLeave={() => setHoveredItem(null)}
               >
@@ -101,7 +137,7 @@ export default function FilterDropdown({
 
                 {/* Nested dropdown */}
                 {hoveredItem === filter.key && filter.items.length > 0 && (
-                  <div className="absolute right-full top-0 mr-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="absolute right-full top-4 -mr-[2px] w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="py-2 max-h-64 overflow-y-auto">
                       {filter.items.map((item) => (
                         <div
