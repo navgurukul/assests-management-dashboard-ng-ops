@@ -245,12 +245,13 @@ export const componentStepperConfig = [
         placeholder: 'Select status',
         required: true,
         options: [
-          { value: 'WORKING', label: 'Working' },
-          { value: 'IN_STOCK', label: 'In Stock' },
-          { value: 'INSTALLED', label: 'Installed' },
-          { value: 'UNDER_TESTING', label: 'Under Testing' },
-          { value: 'FAULTY', label: 'Faulty' },
-          { value: 'SCRAP', label: 'Scrap' }
+          { value: '', label: '--' },
+          { value: 'IN_STOCK', label: 'IN_STOCK' },
+          { value: 'INSTALLED', label: 'INSTALLED' },
+          { value: 'REPAIR', label: 'REPAIR' },
+          { value: 'SCRAP', label: 'SCRAP' },
+          { value: 'SOLD', label: 'SOLD' },
+          { value: 'LOST', label: 'LOST' }
         ]
       },
       // Location fields - shown when status is IN_STOCK
@@ -346,7 +347,7 @@ export const componentFormValidationSchema = Yup.object().shape({
     .oneOf(['NEW_PURCHASE', 'EXTRACTED'])
     .required('Source type is required'),
   status: Yup.string()
-    .oneOf(['WORKING', 'IN_STOCK', 'INSTALLED', 'UNDER_TESTING', 'FAULTY', 'SCRAP'])
+    .oneOf(['IN_STOCK', 'INSTALLED', 'REPAIR', 'SCRAP', 'SOLD', 'LOST'])
     .required('Status is required'),
   condition: Yup.string()
     .oneOf(['GOOD', 'POOR', 'MODERATE'])
