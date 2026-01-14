@@ -165,7 +165,7 @@ export const componentStepperConfig = [
         label: 'Purchase Date',
         type: 'date',
         placeholder: 'Select purchase date',
-        required: false,
+        required: true,
         showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
       },
       {
@@ -182,7 +182,7 @@ export const componentStepperConfig = [
         label: 'Warranty Expiry Date',
         type: 'date',
         placeholder: 'Select warranty expiry date',
-        required: false,
+        required: true,
         showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
       }
     ]
@@ -245,13 +245,12 @@ export const componentStepperConfig = [
         placeholder: 'Select status',
         required: true,
         options: [
-          { value: '', label: '--' },
-          { value: 'IN_STOCK', label: 'IN_STOCK' },
-          { value: 'INSTALLED', label: 'INSTALLED' },
-          { value: 'REPAIR', label: 'REPAIR' },
-          { value: 'SCRAP', label: 'SCRAP' },
-          { value: 'SOLD', label: 'SOLD' },
-          { value: 'LOST', label: 'LOST' }
+          { value: 'IN_STOCK', label: 'In Stock' },
+          { value: 'INSTALLED', label: 'Installed' },
+          { value: 'REPAIR', label: 'Repair' },
+          { value: 'SCRAP', label: 'Scrap' },
+          { value: 'SOLD', label: 'Sold' },
+          { value: 'LOST', label: 'Lost' }
         ]
       },
       // Location fields - shown when status is IN_STOCK
@@ -286,7 +285,7 @@ export const componentStepperConfig = [
         label: 'Installation Date',
         type: 'date',
         placeholder: 'Select installation date',
-        required: false,
+        required: true,
         showIf: { field: 'status', value: 'INSTALLED' }
       },
       {
@@ -335,7 +334,11 @@ export const componentFormValidationSchema = Yup.object().shape({
     then: (schema) => schema.required('Purchase date is required'),
     otherwise: (schema) => schema.notRequired()
   }),
-  warrantyExpiryDate: Yup.date(),
+  warrantyExpiryDate: Yup.date().when('sourceType', {
+    is: 'NEW_PURCHASE',
+    then: (schema) => schema.required('Warranty expiry date is required'),
+    otherwise: (schema) => schema.notRequired()
+  }),
   purchasePrice: Yup.number()
     .min(0, 'Price cannot be negative')
     .when('sourceType', {
@@ -356,6 +359,11 @@ export const componentFormValidationSchema = Yup.object().shape({
       then: (schema) => schema.required('Condition is required'),
       otherwise: (schema) => schema.notRequired()
     }),
+  installationDate: Yup.date().when('status', {
+    is: 'INSTALLED',
+    then: (schema) => schema.required('Installation date is required'),
+    otherwise: (schema) => schema.notRequired()
+  }),
   notes: Yup.string()
 });
 

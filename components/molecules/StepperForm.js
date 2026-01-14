@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Formik, Form } from 'formik';
 import { Button } from '@nextui-org/react';
 import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import FormField from './FormField';
+
+const STORAGE_KEY = 'componentFormData';
 
 export default function StepperForm({
   steps,
@@ -53,6 +55,15 @@ export default function StepperForm({
   const isStepActive = (stepIndex) => stepIndex === currentStep;
   const isStepAccessible = (stepIndex) => stepIndex <= currentStep || completedSteps.has(stepIndex);
 
+  // Save form values to sessionStorage whenever they change
+  const saveToSessionStorage = (values) => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+    } catch (error) {
+      console.error('Error saving form data to sessionStorage:', error);
+    }
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -60,7 +71,13 @@ export default function StepperForm({
       onSubmit={onSubmit}
       enableReinitialize
     >
-      {(formikProps) => (
+      {(formikProps) => {
+        // Save to sessionStorage whenever form values change
+        useEffect(() => {
+          saveToSessionStorage(formikProps.values);
+        }, [formikProps.values]);
+
+        return (
         <Form 
           className="space-y-3"
           onKeyDown={(event) => {
@@ -218,7 +235,8 @@ export default function StepperForm({
             </div>
           </div>
         </Form>
-      )}
+        );
+      }}
     </Formik>
   );
 }

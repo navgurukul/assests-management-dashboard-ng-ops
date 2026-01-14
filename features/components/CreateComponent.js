@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import StepperForm from '@/components/molecules/StepperForm';
@@ -14,9 +14,34 @@ import {
 } from '@/app/config/formConfigs/componentFormStepperConfig';
 import { toast } from '@/app/utils/toast';
 
+const STORAGE_KEY = 'componentFormData';
+
 export default function CreateComponent() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formInitialValues, setFormInitialValues] = useState(componentFormInitialValues);
+
+  // Load saved form data from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const savedData = sessionStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        setFormInitialValues(parsedData);
+      }
+    } catch (error) {
+      console.error('Error loading form data from sessionStorage:', error);
+    }
+  }, []);
+
+  // Clear sessionStorage helper function
+  const clearFormStorage = () => {
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Error clearing form data from sessionStorage:', error);
+    }
+  };
 
   const handleFormSubmit = async (values) => {
     console.log('Form submitted! Button clicked - Starting component creation...');
@@ -98,6 +123,9 @@ export default function CreateComponent() {
        
       toast.success(`Component created successfully!${docSummary}`);
       
+      // Clear form data from sessionStorage
+      clearFormStorage();
+      
       // Navigate back to components list
       router.push('/components');
       
@@ -107,8 +135,10 @@ export default function CreateComponent() {
       // Dismiss loading toast
       toast.dismiss(loadingToastId);
       
-      // Show error toast
-      const errorMessage = error?.message || error?.errors ? JSON.stringify(error.errors) : 'Failed to create component. Please try again.';
+      // Show error toast - read message from API response
+      const errorMessage = error?.response?.data?.message 
+        || error?.message 
+        || 'Failed to create component. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -116,6 +146,8 @@ export default function CreateComponent() {
   };
 
   const handleCancel = () => {
+    // Clear form data from sessionStorage
+    clearFormStorage();
     router.push('/components');
   };
 
@@ -143,7 +175,7 @@ export default function CreateComponent() {
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 px-8 pt-6">
           <StepperForm
             steps={componentStepperConfig}
-            initialValues={componentFormInitialValues}
+            initialValues={formInitialValues}
             validationSchema={componentFormValidationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}

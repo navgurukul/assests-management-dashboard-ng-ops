@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -18,9 +18,19 @@ import {
 import { transformComponentForTable } from '@/app/utils/dataTransformers';
 
 const actionOptions = ['View', 'Details'];
+const STORAGE_KEY = 'componentFormData';
 
 export default function ComponentsList() {
   const router = useRouter();
+  
+  // Clear component form data from sessionStorage when user navigates to components list
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Error clearing form data from sessionStorage:', error);
+    }
+  }, []);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
