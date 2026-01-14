@@ -22,6 +22,7 @@ export default function TableWrapper({
   filterComponent,
   columnSelectorComponent, // New prop for column selector
   activeFiltersComponent, // New prop for filter chips
+  searchComponent, // New prop for search bar
   // Server-side pagination props
   serverPagination = false,
   paginationData = null, // { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage }
@@ -64,24 +65,35 @@ export default function TableWrapper({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Title/Heading Section */}
       {title && (
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          <div className="flex items-center gap-3">
-            {filterComponent}
-            {columnSelectorComponent}
-            {showCreateButton && (
-              <CustomButton
+        </div>
+      )}
+      
+      {/* Search, Filter, Column Selector, and Create Button Section */}
+      <div className="flex items-center justify-between gap-4 mb-4 px-4">
+        {/* Search on the left */}
+        <div className="flex-1 max-w-md">
+          {searchComponent}
+        </div>
+        
+        {/* Buttons on the right */}
+        <div className="flex items-center gap-3">
+          {filterComponent}
+          {columnSelectorComponent}
+          {showCreateButton && (
+            <CustomButton
               text="Create"
               icon={Plus}
               onClick={onCreateClick}
               variant="primary"
               size="md"
-              />
-            )}
-          </div>
+            />
+          )}
         </div>
-      )}
+      </div>
       
       {/* Active Filters Section */}
       {activeFiltersComponent && (
