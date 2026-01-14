@@ -9,6 +9,7 @@ import { authenticateWithGoogle, updateUserReferrer } from '@/app/services/authS
 import toast from 'react-hot-toast';
 import { LayoutGroup, motion } from 'motion/react';
 import WordListSwap from '@/app/components/WordListSwap';
+import { ScrollTimeline } from '@/components/ui/scroll-timeline';
 
 function LoginContent() {
   const router = useRouter();
@@ -443,40 +444,38 @@ function LoginContent() {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-32">
-        <div className={`text-center mb-20 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '500ms'}}>
-          <h2 className={`text-5xl md:text-6xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-6`}>
-            Everything You Need to <span className={`${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>Track Assets</span>
-          </h2>
-          <p className={`text-xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} max-w-3xl mx-auto`}>Powerful features designed for seamless asset allocation and management</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className={`group relative ${isDarkMode ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/10 hover:border-cyan-500/50 hover:shadow-cyan-500/20' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-cyan-400/50 hover:shadow-cyan-300/30'} backdrop-blur-xl rounded-2xl p-8 border transition-all duration-500 transform hover:scale-105 hover:shadow-2xl cursor-pointer ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
-              style={{transitionDelay: `${600 + index * 80}ms`}}
-              onMouseEnter={() => setActiveFeature(index)}
-            >
-              <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-br from-cyan-500 to-blue-500' : 'bg-gradient-to-br from-cyan-400 to-blue-400'} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 z-0`}></div>
-              
-              <div className="relative z-10">
-                <div className={`${isDarkMode ? 'text-cyan-400 group-hover:text-blue-300' : 'text-cyan-600 group-hover:text-blue-600'} mb-4 transform group-hover:scale-110 transition-all duration-300`}>
-                  {feature.icon}
-                </div>
-                <h3 className={`${isDarkMode ? 'text-white group-hover:text-cyan-300' : 'text-gray-900 group-hover:text-cyan-600'} font-bold text-lg mb-3 transition-colors duration-300`}>{feature.title}</h3>
-                <p className={`${isDarkMode ? 'text-gray-400 group-hover:text-gray-300' : 'text-gray-600 group-hover:text-gray-700'} text-sm leading-relaxed transition-colors duration-300`}>{feature.description}</p>
-                
-                <div className={`mt-6 flex items-center ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'} opacity-0 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all duration-300`}>
-                  <span className="text-sm font-semibold">Explore feature</span>
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Features Section with Scroll Timeline */}
+      <div className="relative z-10">
+        <ScrollTimeline
+          events={features.map((feature, index) => ({
+            id: `feature-${index}`,
+            year: `0${index + 1}`,
+            title: feature.title,
+            description: feature.description,
+            icon: feature.icon,
+          }))}
+          title={
+            <>
+              <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>Everything You Need to </span>
+              <span className={`${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>Track Assets</span>
+            </>
+          }
+          subtitle="Powerful features designed for seamless asset allocation and management"
+          animationOrder="staggered"
+          cardAlignment="alternating"
+          lineColor={isDarkMode ? "bg-white/10" : "bg-gray-300"}
+          progressIndicator={true}
+          cardVariant="elevated"
+          cardEffect="shadow"
+          parallaxIntensity={0.1}
+          progressLineWidth={3}
+          progressLineCap="round"
+          dateFormat="badge"
+          revealAnimation="slide"
+          connectorStyle="line"
+          darkMode={isDarkMode}
+          className={isDarkMode ? "bg-transparent" : "bg-transparent"}
+        />
       </div>
 
       {/* CTA Section */}
