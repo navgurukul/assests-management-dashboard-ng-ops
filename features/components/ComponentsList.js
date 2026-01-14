@@ -8,6 +8,7 @@ import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import CustomButton from '@/components/atoms/CustomButton';
+import SearchInput from '@/components/molecules/SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -23,6 +24,17 @@ const STORAGE_KEY = 'componentFormData';
 export default function ComponentsList() {
   const router = useRouter();
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  
+  // Filter state
+  const [filters, setFilters] = useState({});
+  
+  // Search state
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
   // Clear component form data from sessionStorage when user navigates to components list
   useEffect(() => {
     try {
@@ -32,12 +44,15 @@ export default function ComponentsList() {
     }
   }, []);
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  
-  // Filter state
-  const [filters, setFilters] = useState({});
+  // Debounce search input (800ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
   
   // Column visibility management
   const {
@@ -50,9 +65,13 @@ export default function ComponentsList() {
     alwaysVisibleColumns,
   } = useTableColumns(COMPONENT_TABLE_ID, componentTableColumns, defaultVisibleColumns);
   
-  // Build query string with pagination and filters
+  // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
+    
+    // Add search parameter first
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    
     params.append('page', currentPage);
     params.append('limit', pageSize);
     
@@ -65,10 +84,10 @@ export default function ComponentsList() {
     return params.toString();
   };
   
-  // Fetch components data from API with pagination and filters
+  // Fetch components data from API with pagination, filters, and search
   const { data, isLoading, isError, error } = useFetch({
     url: `/components?${buildQueryString()}`,
-    queryKey: ['components', currentPage, pageSize, filters],
+    queryKey: ['components', currentPage, pageSize, filters, debouncedSearch],
   });
   
   // Fetch campus options from API
@@ -280,20 +299,13 @@ export default function ComponentsList() {
     router.push('/components/create');
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600">Loading components...</p>
-        </div>
-      </div>
-    );
-  }
+  // Loading state - only show full-page loader on initial load (when no data exists)
+  const isInitialLoad = isLoading && !data;
+  
+  
 
-  // Error state
-  if (isError) {
+  // Error state - only show full-page error on initial load
+  if (isError && !data) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -318,6 +330,16 @@ export default function ComponentsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Loading state
+        isLoading={isLoading}
+        // Search component
+        searchComponent={
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search components..."
+          />
+        }
         // Filter component
         filterComponent={
           <FilterDropdown
