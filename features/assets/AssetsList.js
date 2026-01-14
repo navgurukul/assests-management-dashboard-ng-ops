@@ -15,6 +15,7 @@ import {
   assetTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/assetTableConfig';
+import { transformAssetForTable } from '@/app/utils/dataTransformers';
 
 const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
 const actionOptions = ['View', 'Assign', 'Details'];
@@ -157,41 +158,8 @@ export default function AssetsList() {
     if (!data || !data.data) return [];
     
     return data.data.map((asset) => ({
-      id: asset.id,
-      assetTag: asset.assetTag,
-      type: asset.assetType?.name || 'Unknown',
-      brand: asset.brand || 'N/A',
-      model: asset.model || 'N/A',
-      campus: asset.campus?.name || 'N/A',
-      status: asset.status === 'IN_STOCK' ? 'In Stock' : 
-              asset.status === 'ALLOCATED' ? 'Allocated' : 
-              asset.status === 'REPAIR' ? 'Under Repair' : 
-              asset.status === 'SCRAP' ? 'Scrap' : 
-              asset.status === 'PARTED_OUT' ? 'Parted Out' : asset.status,
-      location: asset.location?.name || 'N/A',
-      processor: asset.processor || 'N/A',
-      ramSizeGB: asset.ramSizeGB ? `${asset.ramSizeGB} GB` : 'N/A',
-      storageSizeGB: asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A',
-      serialNumber: asset.serialNumber || 'N/A',
-      condition: asset.condition === 'WORKING' ? 'Working' : 
-                 asset.condition === 'DAMAGED' ? 'Damaged' : 
-                 asset.condition === 'FAULTY' ? 'Faulty' : asset.condition || 'N/A',
-      sourceType: asset.sourceType === 'PURCHASED' ? 'Purchased' : 
-                  asset.sourceType === 'DONATED' ? 'Donated' : 
-                  asset.sourceType === 'LEASED' ? 'Leased' : asset.sourceType || 'N/A',
-      ownedBy: asset.ownedBy || 'N/A',
-      purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : 'N/A',
-      cost: asset.cost ? `₹${asset.cost.toLocaleString()}` : 'N/A',
-      charger: asset.charger,
-      bag: asset.bag,
-      specLabel: asset.specLabel || 'N/A',
-      sourceBy: asset.sourceBy || 'N/A',
-      notes: asset.notes || 'N/A',
-      createdAt: asset.createdAt ? new Date(asset.createdAt).toLocaleDateString() : 'N/A',
-      updatedAt: asset.updatedAt ? new Date(asset.updatedAt).toLocaleDateString() : 'N/A',
+      ...transformAssetForTable(asset),
       actions: actionOptions[0], // Default to 'View'
-      // Store full asset data for details page
-      assetData: asset
     }));
   }, [data]);
 

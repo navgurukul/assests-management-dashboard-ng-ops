@@ -3,11 +3,6 @@ const config = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api',
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://asset-dashboard.navgurukul.org',
   
-  // Environment
-  // env: process.env.NEXT_PUBLIC_ENV || 'production',
-  // isDevelopment: process.env.NEXT_PUBLIC_ENV === 'development',
-  // isProduction: process.env.NEXT_PUBLIC_ENV === 'production',
-  
   // API Endpoints
   endpoints: {
     // Components

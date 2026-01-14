@@ -14,6 +14,7 @@ import {
   allocationInitialValues,
 } from '@/app/config/formConfigs/allocationFormConfig';
 import { toast } from '@/app/utils/toast';
+import { transformAllocationForTable } from '@/app/utils/dataTransformers';
 
 const columns = [
   { key: "allocationId", label: "ALLOCATION ID" },
@@ -39,33 +40,13 @@ export default function AllocationsList() {
     queryKey: ['allocations'],
   });
 
-  // Format reason helper function
-  const formatReason = (reason) => {
-    const reasonMap = {
-      'JOINER': 'Joiner',
-      'REPAIR': 'Repair',
-      'REPLACEMENT': 'Replacement',
-      'LOANER': 'Loaner',
-    };
-    return reasonMap[reason] || reason;
-  };
-
   // Transform API data to match table structure
   const allocationsListData = React.useMemo(() => {
     if (!data || !data.data) return [];
     
     return data.data.map((allocation) => ({
-      id: allocation.id,
-      allocationId: allocation.id || 'N/A',
-      assetTag: allocation.asset?.assetTag || allocation.assetId || 'N/A',
-      userName: allocation.user?.name || allocation.userId || 'N/A',
-      startDate: allocation.startDate ? new Date(allocation.startDate).toLocaleDateString() : 'N/A',
-      endDate: allocation.endDate ? new Date(allocation.endDate).toLocaleDateString() : 'Active',
-      reason: formatReason(allocation.allocationReason),
-      status: allocation.endDate ? 'Returned' : 'Active',
-      isActive: !allocation.endDate,
-      // Store full allocation data
-      allocationData: allocation
+      ...transformAllocationForTable(allocation),
+      actions: actionOptions[0], // Default to 'View'
     }));
   }, [data]);
 

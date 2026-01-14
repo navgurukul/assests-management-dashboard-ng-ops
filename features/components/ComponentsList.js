@@ -15,6 +15,7 @@ import {
   componentTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/componentTableConfig';
+import { transformComponentForTable } from '@/app/utils/dataTransformers';
 
 const actionOptions = ['View', 'Details'];
 
@@ -187,47 +188,8 @@ export default function ComponentsList() {
     if (!data || !data.data || !data.data.items) return [];
     
     return data.data.items.map((component) => ({
-      id: component.id,
-      componentTag: component.componentTag || 'N/A',
-      type: component.componentType?.name || 'N/A',
-      brand: component.brand || 'N/A',
-      model: component.model || 'N/A',
-      specifications: component.specifications || 'N/A',
-      serialNumber: component.serialNumber || 'N/A',
-      source: component.source === 'NEW_PURCHASE' ? 'New Purchase' : 
-              component.source === 'EXTRACTED' ? 'Extracted' : 
-              component.source || 'N/A',
-      status: component.status === 'IN_STOCK' ? 'In Stock' : 
-              component.status === 'INSTALLED' ? 'Installed' : 
-              component.status === 'SCRAP' ? 'Scrap' : 
-              component.status || 'N/A',
-      condition: component.condition === 'NEW' ? 'New' : 
-                 component.condition === 'WORKING' ? 'Working' : 
-                 component.condition === 'DAMAGED' ? 'Damaged' : 
-                 component.condition === 'FAULTY' ? 'Faulty' : 
-                 component.condition || 'N/A',
-      campus: component.campus?.campusName || component.campus?.name || 'N/A',
-      location: component.location?.name || 'N/A',
-      storage: component.storageId || component.storage?.name || 'N/A',
-      shelfNumber: component.shelfNumber || 'N/A',
-      purchaseDate: component.purchaseDetails?.purchaseDate 
-        ? new Date(component.purchaseDetails.purchaseDate).toLocaleDateString() 
-        : 'N/A',
-      purchasePrice: component.purchaseDetails?.purchasePrice 
-        ? `₹${component.purchaseDetails.purchasePrice.toLocaleString()}` 
-        : 'N/A',
-      warrantyExpiryDate: component.purchaseDetails?.warrantyExpiryDate 
-        ? new Date(component.purchaseDetails.warrantyExpiryDate).toLocaleDateString() 
-        : 'N/A',
-      vendorName: component.purchaseDetails?.vendorName || 'N/A',
-      ownedBy: component.ownedBy || 'N/A',
-      notes: component.notes || 'N/A',
-      conditionNotes: component.conditionNotes || 'N/A',
-      createdAt: component.createdAt ? new Date(component.createdAt).toLocaleDateString() : 'N/A',
-      updatedAt: component.updatedAt ? new Date(component.updatedAt).toLocaleDateString() : 'N/A',
+      ...transformComponentForTable(component),
       actions: actionOptions[0], // Default to 'View'
-      // Store full component data for details page
-      componentData: component
     }));
   }, [data]);
 
