@@ -111,11 +111,11 @@ export default function DocumentSelector({
   return (
     <div className="space-y-4">
       {/* Mode Selection */}
-      <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+      <div className="flex gap-3 p-1 bg-gray-100 rounded-lg w-full">
         <button
           type="button"
           onClick={() => setMode('link')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md text-sm font-medium transition-colors ${
             mode === 'link' 
               ? 'bg-white text-blue-600 shadow-sm' 
               : 'text-gray-600 hover:text-gray-900'
@@ -127,7 +127,7 @@ export default function DocumentSelector({
         <button
           type="button"
           onClick={() => setMode('upload')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md text-sm font-medium transition-colors ${
             mode === 'upload' 
               ? 'bg-white text-blue-600 shadow-sm' 
               : 'text-gray-600 hover:text-gray-900'
@@ -142,7 +142,6 @@ export default function DocumentSelector({
       {mode === 'link' && (
         <div className="border border-gray-300 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Search className="w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search Bill/Invoice (Vendor, Date, Invoice Number...)"
@@ -201,8 +200,8 @@ export default function DocumentSelector({
 
       {/* Upload New Documents */}
       {mode === 'upload' && (
-        <div>
-          <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+        <div className="w-full">
+          <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors w-full ${
             isUploading ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-blue-500'
           }`}>
             {isUploading ? (
