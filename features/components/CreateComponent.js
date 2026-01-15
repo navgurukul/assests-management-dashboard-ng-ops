@@ -50,9 +50,7 @@ export default function CreateComponent() {
     // Show loading toast
     const loadingToastId = toast.loading('Creating component...');
     
-    try {
-      console.log('Component form values:', values);
-      
+    try { 
       // Transform form values to match API payload structure
       const payload = {
         assetTypeId: values.componentType, // componentType should be the ID
@@ -114,11 +112,70 @@ export default function CreateComponent() {
         payload
       );
       
-      // Dismiss loading toast
+       
+      // Get the created component ID from response
+      const componentId = response?.data?.id;
+       
+      if (!componentId) {
+        throw new Error('Component ID not found in response');
+      }
+      
+      // Handle document linking after component creation
+      let documentsLinked = 0;
+       
+      if (values.documents && values.documents.length > 0) {
+         
+        // Filter only newly uploaded documents (with isNew flag and url)
+        const newDocuments = values.documents.filter(doc => doc.isNew && doc.url);
+         
+        if (newDocuments.length > 0) {
+           
+          // Update toast to show document linking in progress
+          toast.dismiss(loadingToastId);
+          const documentToastId = toast.loading(`Linking ${newDocuments.length} document(s)...`);
+          
+          try {
+            // Link each document to the component
+            for (let i = 0; i < newDocuments.length; i++) {
+              const document = newDocuments[i];
+               
+              const documentPayload = {
+                documentType: 'INVOICE',
+                fileName: document.name || document.filename || 'Untitled',
+                fileUrl: document.url,
+              };
+              
+               
+              const documentApiUrl = config.endpoints.components.addDocuments(componentId);
+               
+              const docResponse = await apiService.post(
+                documentApiUrl,
+                documentPayload
+              );
+              
+               documentsLinked++;
+            }
+            
+            toast.dismiss(documentToastId);
+            console.log(`✅ Successfully linked ${documentsLinked} documents to component`);
+          } catch (docError) {
+              toast.dismiss(documentToastId);
+            
+            // Show warning but don't fail the whole operation
+            toast.warning(`Component created but failed to link ${newDocuments.length - documentsLinked} document(s)`);
+          }
+        } else {
+            values.documents.forEach((doc, index) => {
+          });
+        }
+      } else {
+        }
+      
+      // Dismiss loading toast if not already dismissed
       toast.dismiss(loadingToastId);
       
-      const docSummary = values.linkedDocuments?.length 
-        ? ` - ${values.linkedDocuments.length} document(s) linked`
+      const docSummary = documentsLinked > 0
+        ? ` - ${documentsLinked} document(s) linked`
         : '';
        
       toast.success(`Component created successfully!${docSummary}`);

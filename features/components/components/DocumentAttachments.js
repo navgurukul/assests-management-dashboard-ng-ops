@@ -1,10 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, FileText, Image, X, Download, Eye } from 'lucide-react';
+import { Upload, FileText, Image, X, Download, Eye, Loader2, AlertCircle } from 'lucide-react';
+import apiService from '@/app/utils/apiService';
+import config from '@/app/config/env.config';
 
 export default function DocumentAttachments({ documents = [], onUpload, onDelete }) {
   const [dragActive, setDragActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -33,9 +37,49 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
     }
   };
 
-  const handleFiles = (files) => {
-    if (onUpload) {
-      onUpload(Array.from(files));
+  const handleFiles = async (files) => {
+    const fileArray = Array.from(files);
+    
+    if (fileArray.length === 0) return;
+    
+    // Reset error state
+    setUploadError(null);
+    setIsUploading(true);
+    
+    try {
+      // Upload files to the API
+      const response = await apiService.upload(
+        config.endpoints.upload,
+        fileArray
+      );
+      
+      // Handle successful upload
+      if (response && response.data) {
+        // Map API response to document format
+        const uploadedDocuments = Array.isArray(response.data) 
+          ? response.data 
+          : [response.data];
+        
+        const newDocuments = uploadedDocuments.map((doc) => ({
+          id: doc.id || doc._id || `DOC-${Date.now()}`,
+          name: doc.name || doc.filename || doc.originalName,
+          url: doc.url || doc.path,
+          size: doc.size,
+          mimeType: doc.mimeType || doc.mimetype,
+          type: doc.type || 'OTHER',
+          uploadedAt: doc.uploadDate || doc.createdAt || new Date().toISOString()
+        }));
+        
+        // Call the onUpload callback with the uploaded documents
+        if (onUpload) {
+          onUpload(newDocuments);
+        }
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError(error.message || 'Failed to upload files. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -66,7 +110,9 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
       {/* Upload area */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive 
+          isUploading 
+            ? 'border-blue-400 bg-blue-50'
+            : dragActive 
             ? 'border-blue-500 bg-blue-50' 
             : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
         }`}
@@ -75,26 +121,59 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-        <p className="text-sm text-gray-600 mb-2">
-          Drag and drop files here, or click to browse
-        </p>
-        <p className="text-xs text-gray-500 mb-4">
-          Supported: PDF, Images, Documents (Max 10MB)
-        </p>
-        <label className="cursor-pointer">
-          <span className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors inline-block">
-            Browse Files
-          </span>
-          <input
-            type="file"
-            className="hidden"
-            multiple
-            onChange={handleChange}
-            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-          />
-        </label>
+        {isUploading ? (
+          <>
+            <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-600 animate-spin" />
+            <p className="text-sm text-blue-600 font-medium mb-2">
+              Uploading files...
+            </p>
+            <p className="text-xs text-gray-500">
+              Please wait while your files are being uploaded
+            </p>
+          </>
+        ) : (
+          <>
+            <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-sm text-gray-600 mb-2">
+              Drag and drop files here, or click to browse
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+              Supported: PDF, Images, Documents (Max 10MB)
+            </p>
+            <label className="cursor-pointer">
+              <span className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors inline-block">
+                Browse Files
+              </span>
+              <input
+                type="file"
+                className="hidden"
+                multiple
+                onChange={handleChange}
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                disabled={isUploading}
+              />
+            </label>
+          </>
+        )}
       </div>
+      
+      {/* Error Message */}
+      {uploadError && (
+        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-red-800 font-medium">Upload Failed</p>
+            <p className="text-xs text-red-600 mt-1">{uploadError}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUploadError(null)}
+            className="text-red-400 hover:text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Documents list */}
       {documents && documents.length > 0 && (
