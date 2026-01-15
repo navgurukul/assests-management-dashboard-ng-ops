@@ -173,17 +173,26 @@ export const assetFormFields = [
 
 export const assetValidationSchema = Yup.object().shape({
   assetTypeId: Yup.string().required('Asset type is required'),
-  brand: Yup.string().required('Brand is required'),
-  model: Yup.string().required('Model is required'),
-  specLabel: Yup.string().required('Specification label is required'),
-  processor: Yup.string(),
+  brand: Yup.string()
+    .required('Brand is required')
+    .min(2, 'Brand must be at least 2 characters'),
+  model: Yup.string()
+    .required('Model is required')
+    .min(2, 'Model must be at least 2 characters'),
+  specLabel: Yup.string()
+    .required('Specification label is required')
+    .min(2, 'Specification must be at least 2 characters'),
+  processor: Yup.string()
+    .min(2, 'Processor must be at least 2 characters'),
   ramSizeGB: Yup.number()
     .nullable()
-    .min(0, 'RAM size must be a positive number'),
+    .min(1, 'RAM size must be at least 1 GB'),
   storageSizeGB: Yup.number()
     .nullable()
-    .min(0, 'Storage size must be a positive number'),
-  serialNumber: Yup.string().required('Serial number is required'),
+    .min(1, 'Storage size must be at least 1 GB'),
+  serialNumber: Yup.string()
+    .required('Serial number is required')
+    .min(2, 'Serial number must be at least 2 characters'),
   campusId: Yup.string().required('Campus is required'),
   currentLocationId: Yup.string().required('Current location is required'),
   status: Yup.string()
@@ -195,11 +204,14 @@ export const assetValidationSchema = Yup.object().shape({
   sourceType: Yup.string()
     .required('Source type is required')
     .oneOf(['PURCHASED', 'DONATED', 'PERSONAL'], 'Invalid source type'),
-  sourceBy: Yup.string().required('Source by is required'),
+  sourceBy: Yup.string()
+    .required('Source by is required')
+    .min(2, 'Source by must be at least 2 characters'),
   purchaseDate: Yup.date().required('Purchase date is required'),
   cost: Yup.number()
     .nullable()
-    .min(0, 'Cost must be a positive number'),
+    .min(0, 'Cost must be a positive number')
+    .max(9999999, 'Cost cannot exceed 99,99,999'),
   notes: Yup.string(),
   charger: Yup.boolean(),
   bag: Yup.boolean(),
