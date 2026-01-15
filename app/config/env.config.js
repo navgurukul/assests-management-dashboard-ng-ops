@@ -12,6 +12,7 @@ const config = {
       update: (id) => `/components/${id}`,
       delete: (id) => `/components/${id}`,
       details: (id) => `/components/${id}`,
+      addDocuments: (id) => `/components/${id}/documents`,
     },
     
     // Assets
@@ -31,6 +32,9 @@ const config = {
       delete: (id) => `/documents/${id}`,
       details: (id) => `/documents/${id}`,
     },
+    
+    // Upload
+    upload: '/upload',
     
     // Tickets
     tickets: {
