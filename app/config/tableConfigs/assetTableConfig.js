@@ -9,6 +9,11 @@ export const ASSET_TABLE_ID = 'assets';
 export const assetTableColumns = [
   // Always visible columns
   { 
+    key: 'status', 
+    label: 'STATUS',
+    description: 'Current status (In Stock, Allocated, etc.)'
+  },
+  { 
     key: 'assetTag', 
     label: 'ASSET TAG', 
     alwaysVisible: true,
@@ -32,14 +37,19 @@ export const assetTableColumns = [
     description: 'Device model'
   },
   { 
+    key: 'serialNumber', 
+    label: 'SERIAL NUMBER',
+    description: 'Device serial number'
+  },
+  { 
+    key: 'condition', 
+    label: 'CONDITION',
+    description: 'Physical condition (Working, Damaged, etc.)'
+  },
+  { 
     key: 'campus', 
     label: 'CAMPUS',
     description: 'Campus location'
-  },
-  { 
-    key: 'status', 
-    label: 'STATUS',
-    description: 'Current status (In Stock, Allocated, etc.)'
   },
   { 
     key: 'location', 
@@ -62,16 +72,6 @@ export const assetTableColumns = [
     key: 'storageSizeGB', 
     label: 'STORAGE (GB)',
     description: 'Storage size in gigabytes'
-  },
-  { 
-    key: 'serialNumber', 
-    label: 'SERIAL NUMBER',
-    description: 'Device serial number'
-  },
-  { 
-    key: 'condition', 
-    label: 'CONDITION',
-    description: 'Physical condition (Working, Damaged, etc.)'
   },
   { 
     key: 'sourceType', 
@@ -125,12 +125,14 @@ export const assetTableColumns = [
 
 // Default visible columns (shown when user first visits or resets)
 export const defaultVisibleColumns = [
+  'status',
   'assetTag',
   'type',
   'brand',
   'model',
+  'serialNumber',
+  'condition',
   'campus',
-  'status',
   'location',
   'actions',
 ];
