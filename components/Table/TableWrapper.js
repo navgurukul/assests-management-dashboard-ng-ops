@@ -104,62 +104,65 @@ export default function TableWrapper({
         </div>
       )}
       
-      <Table 
-        aria-label={ariaLabel}
-        classNames={{
-          wrapper: "shadow-none border-none",
-          base: "overflow-visible",
-          table: "border-collapse",
-          thead: "[&>tr]:first:shadow-none",
-          th: "bg-gray-50 text-gray-700 font-semibold text-sm h-12 border-b-2 border-gray-200",
-          td: "text-gray-600 text-sm h-16 border-b border-gray-200",
-          tr: "hover:bg-gray-50 transition-colors",
-          ...classNames
-        }}
-      >
-        <TableHeader>
-          {columns.map((column) => (
-            <TableColumn 
-              key={column.key}
-              align={column.align || "start"}
-              className={column.className || "text-left"}
-            >
-              {column.label}
-            </TableColumn>
-          ))}
-        </TableHeader>
-        <TableBody 
-          items={isLoading ? [] : displayData}
-          emptyContent={
-            isLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                  <p className="text-gray-600">Loading...</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center py-20">
-                <p className="text-gray-500 text-base font-medium">No data found</p>
-              </div>
-            )
-          }
+      {/* Table Container with Horizontal Scroll */}
+      <div className="overflow-x-auto">
+        <Table 
+          aria-label={ariaLabel}
+          classNames={{
+            wrapper: "shadow-none border-none",
+            base: "min-w-full",
+            table: "border-collapse min-w-full",
+            thead: "[&>tr]:first:shadow-none",
+            th: "bg-gray-50 text-gray-700 font-semibold text-sm h-12 border-b-2 border-gray-200 whitespace-nowrap",
+            td: "text-gray-600 text-sm h-16 border-b border-gray-200",
+            tr: "hover:bg-gray-50 transition-colors",
+            ...classNames
+          }}
         >
-          {(item) => (
-            <TableRow 
-              key={item.id}
-              onClick={() => onRowClick && onRowClick(item)}
-              className={onRowClick ? "cursor-pointer" : ""}
-            >
-              {columns.map((column) => (
-                <TableCell key={column.key}>
-                  {renderCell ? renderCell(item, column.key) : item[column.key]}
-                </TableCell>
-              ))}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          <TableHeader>
+            {columns.map((column) => (
+              <TableColumn 
+                key={column.key}
+                align={column.align || "start"}
+                className={column.className || "text-left"}
+              >
+                {column.label}
+              </TableColumn>
+            ))}
+          </TableHeader>
+          <TableBody 
+            items={isLoading ? [] : displayData}
+            emptyContent={
+              isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p className="text-gray-600">Loading...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-gray-500 text-base font-medium">No data found</p>
+                </div>
+              )
+            }
+          >
+            {(item) => (
+              <TableRow 
+                key={item.id}
+                onClick={() => onRowClick && onRowClick(item)}
+                className={onRowClick ? "cursor-pointer" : ""}
+              >
+                {columns.map((column) => (
+                  <TableCell key={column.key}>
+                    {renderCell ? renderCell(item, column.key) : item[column.key]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Use new Pagination component for server-side pagination, or TableFooter for client-side */}
       {serverPagination && showPagination ? (
