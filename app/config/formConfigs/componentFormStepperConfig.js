@@ -313,10 +313,10 @@ export const componentStepperConfig = [
         name: 'documents',
         label: 'Bills/Invoices/Documents',
         type: 'document-selector',
-        required: false,
+        required: true,
         allowMultiple: true,
         documentType: 'INVOICE',
-        helpText: 'You can link to existing Bills or upload new ones. One bill can be linked to multiple components.'
+        helpText: 'You must upload or link at least one document. You can link to existing Bills or upload new ones. One bill can be linked to multiple components.'
       }
     ]
   }
@@ -364,7 +364,10 @@ export const componentFormValidationSchema = Yup.object().shape({
     then: (schema) => schema.required('Installation date is required'),
     otherwise: (schema) => schema.notRequired()
   }),
-  notes: Yup.string()
+  notes: Yup.string(),
+  documents: Yup.array()
+    .min(1, 'At least one document is required')
+    .required('Please upload or link at least one document')
 });
 
 // Initial values for form
