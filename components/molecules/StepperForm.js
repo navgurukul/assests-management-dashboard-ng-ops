@@ -177,7 +177,7 @@ export default function StepperForm({
                 return (
                   <div
                     key={field.name}
-                    className={field.type === 'textarea' ? 'md:col-span-2' : ''}
+                    className={field.type === 'textarea' || field.type === 'document-selector' ? 'md:col-span-2' : ''}
                   >
                     <FormField field={field} formik={formikProps} />
                   </div>
