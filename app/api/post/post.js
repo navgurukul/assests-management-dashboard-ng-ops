@@ -9,9 +9,16 @@ const post = async ({
     // Get token from localStorage
     const token = getAuthToken();
    
-    const headers = {
-      "Content-Type": "application/json",
-    };
+    const headers = {};
+   
+    // Check if data is FormData (for file uploads)
+    const isFormData = data instanceof FormData;
+    
+    // Only set Content-Type for JSON data
+    // For FormData, browser will set it automatically with boundary
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    }
    
     // Add Authorization header if token exists
     if (token) {
@@ -21,7 +28,7 @@ const post = async ({
     const response = await fetch(url, {
       method,
       headers,
-      body: data ? JSON.stringify(data) : null,
+      body: data ? (isFormData ? data : JSON.stringify(data)) : null,
       credentials: "include"
     });
 
