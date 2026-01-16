@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
+import SLAIndicator from '@/components/molecules/SLAIndicator';
 import useFetch from '@/app/hooks/query/useFetch';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
@@ -90,7 +91,36 @@ export default function TicketDetails({ ticketId, onBack }) {
     assigneeUserId: ticket.assigneeUserId || '',
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
+    timelineDate: ticket.timelineDate || '',
   };
+
+  // Prevent status change if already allocated/assigned
+  const isAllocated = !!ticket.assigneeUserId;
+
+  const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
+    if (field.name === 'status' && isAllocated) {
+      return {
+        ...field,
+        disabled: true,
+        helperText: 'Status cannot be changed after allocation.',
+      };
+    }
+    if (field.name === 'timelineDate' && ticket.timelineDate) {
+      return {
+        ...field,
+        disabled: true,
+        helperText: 'SLA timeline is already set and cannot be changed.',
+      };
+    }
+    if (field.name === 'assigneeUserId' && ticket.assigneeUser) {
+      // Pre-load the selected coordinator to display immediately
+      return {
+        ...field,
+        selectedItem: ticket.assigneeUser,
+      };
+    }
+    return field;
+  });
 
   const leftSections = [
     {
@@ -101,9 +131,11 @@ export default function TicketDetails({ ticketId, onBack }) {
         { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Assigned To', value: ticket.assigneeName || ticket.assigneeUserId || '—' },
+        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || ticket.assigneeUserId || '—') },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
+        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
+        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
       ],
     },
     {
@@ -118,6 +150,17 @@ export default function TicketDetails({ ticketId, onBack }) {
   ];
 
   const rightSections = [
+    {
+      title: 'SLA / TIMELINE',
+      content: (
+        <SLAIndicator 
+          allocationDate={ticket.assignDate}
+          expectedResolutionDate={ticket.timelineDate}
+          status={ticket.status}
+          compact={false}
+        />
+      ),
+    },
     {
       title: 'DESCRIPTION',
       content: <div className="text-sm text-gray-700">{ticket.description || '—'}</div>,
@@ -156,8 +199,15 @@ export default function TicketDetails({ ticketId, onBack }) {
         title="Update Ticket"
         size="medium"
       >
+        {ticket.assigneeUser && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900">
+              <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
+            </p>
+          </div>
+        )}
         <GenericForm
-          fields={ticketUpdateFormFields}
+          fields={updateFormFieldsModified}
           initialValues={updateInitialValues}
           validationSchema={ticketUpdateValidationSchema}
           onSubmit={handleUpdateSubmit}

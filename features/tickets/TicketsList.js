@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
+import SLAIndicator from '@/components/molecules/SLAIndicator';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
@@ -12,15 +13,9 @@ const columns = [
   { key: "type", label: "TYPE" },
   { key: "device", label: "DEVICE" },
   { key: "status", label: "STATUS" },
+  { key: "sla", label: "SLA" },
   { key: "actionTakenBy", label: "ACTION TAKEN BY" },
   { key: "updated", label: "UPDATED" },
-];
-
-const actionTakenByOptions = [
-  'IT coordinator',
-  'Operation associate',
-  'Teach lead',
-  'Repairing team/company',
 ];
 
 export default function TicketsList() {
@@ -44,13 +39,23 @@ export default function TicketsList() {
           })
         : '—';
 
+      // Get action taken by from lastUpdatedByUser
+      const actionTakenBy = ticket.lastUpdatedByUser 
+        ? `${ticket.lastUpdatedByUser.role || ''}`.trim() || ticket.lastUpdatedByUser.email || ''
+        : ticket.assigneeName || ticket.assignee || '—';
+
       return {
         id: ticket.id,
         ticketId: ticket.ticketNumber || ticket.id || '-',
         type: ticket.ticketType || '-',
         device: deviceTag,
         status: ticket.status || '-',
-        actionTakenBy: ticket.assigneeName || ticket.assignee || '',
+        sla: {
+          allocationDate: ticket.assignDate,
+          expectedResolutionDate: ticket.timelineDate,
+          status: ticket.status,
+        },
+        actionTakenBy,
         updated: updatedLabel,
       };
     });
@@ -69,37 +74,33 @@ export default function TicketsList() {
         return <span className="text-gray-700">{deviceTag}</span>;
       case "status":
         const statusColors = {
-          'IN PROGRESS': 'bg-blue-100 text-blue-800',
-          'ESCALATED': 'bg-red-100 text-red-800',
           'OPEN': 'bg-green-100 text-green-800',
-          'PENDING APPROVAL': 'bg-yellow-100 text-yellow-800',
+          'ALLOCATED': 'bg-blue-100 text-blue-800',
+          'IN_PROGRESS': 'bg-cyan-100 text-cyan-800',
+          'PENDING_APPROVAL': 'bg-yellow-100 text-yellow-800',
+          'OVERDUE': 'bg-red-100 text-red-800',
+          'RESOLVED': 'bg-purple-100 text-purple-800',
+          'CLOSED': 'bg-gray-100 text-gray-800',
+          'ESCALATED': 'bg-orange-100 text-orange-800',
         };
         return (
           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
             {cellValue}
           </span>
         );
+      case "sla":
+        return (
+          <SLAIndicator 
+            allocationDate={cellValue.allocationDate}
+            expectedResolutionDate={cellValue.expectedResolutionDate}
+            status={cellValue.status}
+            compact={true}
+          />
+        );
       case "updated":
         return <span className="text-gray-500 text-sm">{cellValue || '—'}</span>;
       case "actionTakenBy":
-        return (
-          <select
-            className="px-2 py-1 text-sm border border-gray-300 rounded-md bg-white hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={cellValue || ''}
-            onChange={(e) => {
-              e.stopPropagation();
-              console.log(`Updated ticket ${item.id} action taken by:`, e.target.value);
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <option value="">Select...</option>
-            {actionTakenByOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
+        return <span className="text-gray-700 text-sm">{cellValue || '—'}</span>;
       default:
         return cellValue;
     }

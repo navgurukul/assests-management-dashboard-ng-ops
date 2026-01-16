@@ -28,6 +28,7 @@ export default function ApiAutocomplete({
   filterCategory = null, // Filter items by category (e.g., 'COMPONENT', 'DEVICE')
   dataPath = null, // Path to nested data in response (e.g., 'data.users')
   formatLabel = null, // Function to format label from item
+  selectedItem = null, // Pre-loaded selected item to display immediately
 }) {
   // Build the API URL with dependent value if exists
   // Check if we should append as query param or path param
@@ -58,9 +59,18 @@ export default function ApiAutocomplete({
 
   // Filter items by category if filterCategory is provided
   const allItems = dataPath ? getNestedData(data, dataPath) : (data?.data || []);
-  const items = filterCategory
+  const filteredItems = filterCategory
     ? allItems.filter((item) => item.category === filterCategory)
     : allItems;
+
+  // Include selectedItem if it exists and isn't already in the list
+  let items = filteredItems;
+  if (selectedItem && value) {
+    const isItemInList = filteredItems.some(item => item[valueKey] === value);
+    if (!isItemInList) {
+      items = [selectedItem, ...filteredItems];
+    }
+  }
 
   return ( 
 
