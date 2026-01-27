@@ -149,6 +149,7 @@ export default function FormField({ field, formik }) {
             filterCategory={field.filterCategory}
             dataPath={field.dataPath}
             formatLabel={field.formatLabel}
+            selectedItem={field.selectedItem}
           />
         );
 
