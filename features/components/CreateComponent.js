@@ -73,15 +73,10 @@ export default function CreateComponent() {
         extractionDate: values.sourceType === 'EXTRACTED' ? (values.extractionDate || '') : '',
         extractionReason: values.sourceType === 'EXTRACTED' ? (values.extractionReason || '') : '',
         extractedByUserId: values.sourceType === 'EXTRACTED' ? (values.extractionTechnician || '') : '',
-        // Status and location
-        status: values.status || 'IN_STOCK',
+        // Location
         condition: values.condition || 'NEW',
         campusId: values.campusId || '',
         locationId: values.locationId || '',
-        storageId: values.almirahId || values.storageId || '',
-        shelfNumber: values.shelfNumber || '',
-        ownedBy: values.ownedBy || 'lws',
-        notes: values.notes || '',
       };
 
       // Remove empty extraction fields if source is NEW_PURCHASE

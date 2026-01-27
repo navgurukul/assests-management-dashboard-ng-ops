@@ -235,77 +235,6 @@ export const componentStepperConfig = [
     ]
   },
   {
-    label: 'Current Status',
-    description: 'Define the component\'s current state and location',
-    fields: [
-      {
-        name: 'status',
-        label: 'Status',
-        type: 'select',
-        placeholder: 'Select status',
-        required: true,
-        options: [
-          { value: 'IN_STOCK', label: 'In Stock' },
-          { value: 'INSTALLED', label: 'Installed' },
-          { value: 'REPAIR', label: 'Repair' },
-          { value: 'SCRAP', label: 'Scrap' },
-          { value: 'SOLD', label: 'Sold' },
-          { value: 'LOST', label: 'Lost' }
-        ]
-      },
-      // Location fields - shown when status is IN_STOCK
-      {
-        name: 'almirahId',
-        label: 'Almirah/Storage ID',
-        type: 'select',
-        placeholder: 'Select almirah',
-        required: false,
-        showIf: { field: 'status', value: 'IN_STOCK' },
-        options: [] // To be populated from API based on campus
-      },
-      {
-        name: 'shelfNumber',
-        label: 'Shelf Number',
-        type: 'text',
-        placeholder: 'Enter shelf number',
-        required: false,
-        showIf: { field: 'status', value: 'IN_STOCK' },
-      },
-      // Installed fields - shown when status is INSTALLED
-      {
-        name: 'installedDeviceTag',
-        label: 'Device Tag',
-        type: 'searchable-select',
-        placeholder: 'Search and select device',
-        required: false,
-        showIf: { field: 'status', value: 'INSTALLED' }
-      },
-      {
-        name: 'installationDate',
-        label: 'Installation Date',
-        type: 'date',
-        placeholder: 'Select installation date',
-        required: true,
-        showIf: { field: 'status', value: 'INSTALLED' }
-      },
-      {
-        name: 'ownedBy',
-        label: 'Owned By',
-        type: 'text',
-        placeholder: 'Enter owner (e.g., lws)',
-        required: false
-      },
-      {
-        name: 'notes',
-        label: 'Notes',
-        type: 'textarea',
-        placeholder: 'Additional notes',
-        required: false,
-        rows: 3
-      }
-    ]
-  },
-  {
     label: 'Documents',
     description: 'Attach bills, invoices, and other documents',
     fields: [
@@ -349,9 +278,6 @@ export const componentFormValidationSchema = Yup.object().shape({
   sourceType: Yup.string()
     .oneOf(['NEW_PURCHASE', 'EXTRACTED'])
     .required('Source type is required'),
-  status: Yup.string()
-    .oneOf(['IN_STOCK', 'INSTALLED', 'REPAIR', 'SCRAP', 'SOLD', 'LOST'])
-    .required('Status is required'),
   condition: Yup.string()
     .oneOf(['GOOD', 'POOR', 'MODERATE'])
     .when('sourceType', {
@@ -359,12 +285,6 @@ export const componentFormValidationSchema = Yup.object().shape({
       then: (schema) => schema.required('Condition is required'),
       otherwise: (schema) => schema.notRequired()
     }),
-  installationDate: Yup.date().when('status', {
-    is: 'INSTALLED',
-    then: (schema) => schema.required('Installation date is required'),
-    otherwise: (schema) => schema.notRequired()
-  }),
-  notes: Yup.string(),
   documents: Yup.array()
     .min(1, 'At least one document is required')
     .required('Please upload or link at least one document')
@@ -391,15 +311,8 @@ export const componentFormInitialValues = {
   extractionDate: '',
   extractionReason: '',
   extractionTechnician: '',
-  status: 'IN_STOCK',
   campusId: '',
-  almirahId: '',
-  shelfNumber: '',
   locationId: '',
-  installedDeviceTag: '',
-  installationDate: '',
   condition: 'GOOD',
-  ownedBy: 'lws',
-  notes: '',
   documents: []
 };

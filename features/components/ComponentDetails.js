@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertTriangle, Calendar, Package, Wrench, Clock, Shield, FileText } from 'lucide-react';
+import { AlertTriangle, Calendar, Package, Wrench, Clock, FileText } from 'lucide-react';
 import ComponentTimeline from './components/ComponentTimeline';
 import { 
   CurrentlyInstalledCard 
@@ -13,7 +13,6 @@ const tabs = [
   { id: 'journey', label: 'Component Journey', icon: Clock },
   { id: 'source', label: 'Component Source', icon: Package },
   { id: 'basic', label: 'Basic Information', icon: FileText },
-  { id: 'status', label: 'Current Status', icon: Shield },
   { id: 'documents', label: 'Documents', icon: FileText },
 ];
 
@@ -421,101 +420,6 @@ export default function ComponentDetails({ componentId, componentData, onBack })
                     <div className="flex flex-col col-span-2">
                       <span className="text-xs text-gray-500 mb-1">Serial Number</span>
                       <span className="text-sm font-medium text-gray-900">{componentDetails.serialNumber}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Current Status Tab */}
-          {activeTab === 'status' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  Current Status
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Status</span>
-                    <span className={`text-sm font-medium px-2 py-1 rounded inline-block w-fit ${
-                      componentDetails.status === 'WORKING' ? 'bg-green-100 text-green-800' :
-                      componentDetails.status === 'IN_STOCK' ? 'bg-blue-100 text-blue-800' :
-                      componentDetails.status === 'INSTALLED' ? 'bg-purple-100 text-purple-800' :
-                      componentDetails.status === 'UNDER_TESTING' ? 'bg-yellow-100 text-yellow-800' :
-                      componentDetails.status === 'FAULTY' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {componentDetails.status || 'N/A'}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Location Type</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {componentDetails.status === 'INSTALLED' ? 'Installed in Device' : 'In Stock'}
-                    </span>
-                  </div>
-
-                  {/* In Stock Location */}
-                  {componentDetails.status !== 'INSTALLED' && (
-                    <>
-                      {componentDetails.campus?.name && (
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-1">Campus Name</span>
-                          <span className="text-sm font-medium text-gray-900">{componentDetails.campus.name}</span>
-                        </div>
-                      )}
-                      
-                      {componentDetails.storage?.name && (
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-1">Almirah/Storage</span>
-                          <span className="text-sm font-medium text-gray-900">{componentDetails.storage.name}</span>
-                        </div>
-                      )}
-
-                      {componentDetails.shelfNumber && (
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-1">Shelf Number</span>
-                          <span className="text-sm font-medium text-gray-900">{componentDetails.shelfNumber}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* Installed Location */}
-                  {componentDetails.status === 'INSTALLED' && (
-                    <>
-                      {componentDetails.currentDevice?.assetTag && (
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-1">Device Tag</span>
-                          <a 
-                            href={`/assets/${componentDetails.currentDevice.id}`}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                          >
-                            {componentDetails.currentDevice.assetTag}
-                          </a>
-                        </div>
-                      )}
-
-                      {componentDetails.installationDate && (
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500 mb-1">Installation Date</span>
-                          <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(componentDetails.installationDate).toLocaleDateString('en-IN')}
-                          </span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {componentDetails.conditionNotes && (
-                    <div className="flex flex-col col-span-2">
-                      <span className="text-xs text-gray-500 mb-1">Condition Notes</span>
-                      <span className="text-sm text-gray-700">{componentDetails.conditionNotes}</span>
                     </div>
                   )}
                 </div>
