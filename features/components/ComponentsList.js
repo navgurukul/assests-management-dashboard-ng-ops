@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import CustomButton from '@/components/atoms/CustomButton';
 import SearchInput from '@/components/molecules/SearchInput';
+import ActionMenu from '@/components/molecules/ActionMenu';
+import FormModal from '@/components/molecules/FormModal';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -17,6 +19,8 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/componentTableConfig';
 import { transformComponentForTable } from '@/app/utils/dataTransformers';
+import { getFieldsByActionType } from '@/app/config/formConfigs/componentActionFormConfig';
+import { getComponentMenuOptions } from '@/app/config/componentMenuOptions';
 
 const actionOptions = ['View', 'Details'];
 const STORAGE_KEY = 'componentFormData';
@@ -34,6 +38,15 @@ export default function ComponentsList() {
   // Search state
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  
+  // Menu state
+  const [openMenuId, setOpenMenuId] = useState(null);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentAction, setCurrentAction] = useState(null);
+  const [currentComponent, setCurrentComponent] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Clear component form data from sessionStorage when user navigates to components list
   useEffect(() => {
@@ -222,7 +235,77 @@ export default function ComponentsList() {
     }));
   }, [data]);
 
-  const renderCell = (item, columnKey) => {
+  const handleViewDetails = React.useCallback((componentId) => {
+    // Find the full component data
+    const component = componentsListData.find(comp => comp.id === componentId);
+    if (component && component.componentData) {
+      // Store component data in sessionStorage for details page
+      sessionStorage.setItem('currentComponentData', JSON.stringify(component.componentData));
+    }
+    router.push(`/components/${componentId}`);
+  }, [componentsListData, router]);
+
+  // Handle opening the action modal
+  const handleOpenActionModal = React.useCallback((actionType, component) => {
+    setCurrentAction(actionType);
+    setCurrentComponent(component);
+    setIsModalOpen(true);
+    setOpenMenuId(null); // Close the action menu
+  }, []);
+
+  // Handle closing the modal
+  const handleCloseModal = React.useCallback(() => {
+    setIsModalOpen(false);
+    setCurrentAction(null);
+    setCurrentComponent(null);
+    setIsSubmitting(false);
+  }, []);
+
+  // Handle form submission
+  const handleFormSubmit = React.useCallback(async (formData) => {
+    setIsSubmitting(true);
+    
+    try {
+      console.log('Form submitted:', {
+        action: currentAction,
+        componentId: currentComponent?.id,
+        componentTag: currentComponent?.componentTag,
+        formData,
+      });
+      
+      // TODO: Make API call here
+      // Example:
+      // const response = await fetch('/api/component-actions', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     action: currentAction,
+      //     componentId: currentComponent?.id,
+      //     ...formData,
+      //   }),
+      // });
+      
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Show success message (you can add a toast notification here)
+      alert(`${currentAction} action completed successfully!`);
+      
+      // Close modal and reset state
+      handleCloseModal();
+      
+      // Optionally refresh the component list
+      // refetch();
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [currentAction, currentComponent, handleCloseModal]);
+
+  const renderCell = React.useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
 
     switch (columnKey) {
@@ -262,30 +345,39 @@ export default function ComponentsList() {
         );
       
       case "actions":
+        const menuOptions = getComponentMenuOptions(handleOpenActionModal, item);
+
+        
         return (
-          <CustomButton
-            text="Details"
-            icon={Eye}
-            onClick={() => handleViewDetails(item.id)}
-            variant="info"
-            size="sm"
-          />
+          <div className="relative flex items-center justify-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();setOpenMenuId(openMenuId === item.id ? null : item.id);
+              }}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Actions menu"
+            >
+              <MoreVertical className="h-5 w-5 text-gray-600" />
+            </button>
+            {openMenuId === item.id && (
+              <>
+                {console.log('Rendering ActionMenu for item:', item.id)}
+                <ActionMenu
+                  menuOptions={menuOptions}
+                  onClose={() => {
+                    console.log('Closing menu');
+                    setOpenMenuId(null);
+                  }}
+                />
+              </>
+            )}
+          </div>
         );
       
       default:
         return <span className="text-gray-700">{cellValue}</span>;
     }
-  };
-
-  const handleViewDetails = (componentId) => {
-    // Find the full component data
-    const component = componentsListData.find(comp => comp.id === componentId);
-    if (component && component.componentData) {
-      // Store component data in sessionStorage for details page
-      sessionStorage.setItem('currentComponentData', JSON.stringify(component.componentData));
-    }
-    router.push(`/components/${componentId}`);
-  };
+  }, [openMenuId, handleViewDetails, handleOpenActionModal]);
 
   const handleRowClick = (item) => {
     // Store full component data in sessionStorage
@@ -318,8 +410,21 @@ export default function ComponentsList() {
 
   return (
     <div className="space-y-6">
+      {/* Form Modal */}
+      <FormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        componentName={currentComponent?.componentTag || ''}
+        actionType={currentAction || ''}
+        fields={getFieldsByActionType(currentAction)}
+        onSubmit={handleFormSubmit}
+        size="medium"
+        isSubmitting={isSubmitting}
+      />
+
       {/* Table */}
       <TableWrapper
+        key={`table-${openMenuId || 'none'}`}
         data={componentsListData}
         columns={visibleColumns}
         title="Components"

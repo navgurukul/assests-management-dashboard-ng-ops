@@ -1,17 +1,6 @@
 import React from 'react';
 
-/**
- * CustomButton Component
- * A reusable button component with customizable colors, sizes, and icons
- * 
- * @param {string} text - Button text
- * @param {React.Component} icon - Icon component from lucide-react
- * @param {function} onClick - Click handler
- * @param {string} variant - Button color variant (primary, secondary, danger, warning, success, info, neutral, purple, disabled)
- * @param {string} size - Button size (sm, md, lg)
- * @param {boolean} disabled - Whether button is disabled
- * @param {string} className - Additional CSS classes
- */
+
 export default function CustomButton({ 
   text, 
   icon: Icon, 
@@ -19,7 +8,9 @@ export default function CustomButton({
   variant = 'primary', 
   size = 'md',
   disabled = false,
-  className = ''
+  className = '',
+  type = 'button',
+  ...rest
 }) {
   
   // Variant styles with professional color palette - Modern tinted style
@@ -61,9 +52,11 @@ export default function CustomButton({
 
   return (
     <button
+      type={type}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       className={buttonClasses}
+      {...rest}
     >
       {Icon && <Icon className={iconSizes[size]} />}
       {text}
