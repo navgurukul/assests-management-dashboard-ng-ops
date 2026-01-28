@@ -3,11 +3,39 @@
 import React from 'react';
 import {
   Autocomplete,
-  AutocompleteSection,
   AutocompleteItem
 } from "@heroui/autocomplete";
-import useFetch from '@/app/hooks/query/useFetch';
+import { useApiAutocomplete } from '@/app/hooks/useApiAutocomplete';
 
+/**
+ * ApiAutocomplete Component
+ * 
+ * A reusable autocomplete component that fetches data from an API endpoint
+ * and displays it in a searchable dropdown format.
+ * 
+ * @param {object} props - Component props
+ * @param {string} props.name - Field name for form handling
+ * @param {string} props.label - Label text displayed above the input
+ * @param {string} props.placeholder - Placeholder text for the input
+ * @param {string} props.apiUrl - Base API URL to fetch data from
+ * @param {array|null} props.queryKey - Custom React Query cache key
+ * @param {any} props.value - Current selected value
+ * @param {function} props.onChange - Callback when selection changes
+ * @param {function} props.onBlur - Callback when field loses focus
+ * @param {boolean} props.isInvalid - Whether the field has validation errors
+ * @param {string} props.errorMessage - Error message to display
+ * @param {boolean} props.isRequired - Whether the field is required
+ * @param {boolean} props.isDisabled - Whether the field is disabled
+ * @param {string} props.labelKey - Key in data object to use as display label
+ * @param {string} props.valueKey - Key in data object to use as value
+ * @param {object|null} props.dependsOn - Dependency config { field, paramKey }
+ * @param {any} props.dependentValue - Value from dependent field
+ * @param {object|null} props.additionalParams - Additional query parameters
+ * @param {string|null} props.filterCategory - Category to filter items by
+ * @param {string|null} props.dataPath - Path to nested data in response
+ * @param {function|null} props.formatLabel - Custom function to format item labels
+ * @param {object|null} props.selectedItem - Pre-selected item to include
+ */
 export default function ApiAutocomplete({
   name,
   label,
@@ -25,103 +53,89 @@ export default function ApiAutocomplete({
   valueKey = 'id',
   dependsOn = null,
   dependentValue = null,
-  filterCategory = null, // Filter items by category (e.g., 'COMPONENT', 'DEVICE')
-  dataPath = null, // Path to nested data in response (e.g., 'data.users')
-  formatLabel = null, // Function to format label from item
-  selectedItem = null, // Pre-loaded selected item to display immediately
+  additionalParams = null,
+  filterCategory = null,
+  dataPath = null,
+  formatLabel = null,
+  selectedItem = null,
 }) {
-  // Build the API URL with dependent value if exists
-  // Check if we should append as query param or path param
-  const finalApiUrl = dependsOn && dependentValue
-    ? apiUrl.includes('?') 
-      ? `${apiUrl}&${dependsOn.paramKey}=${dependentValue}`  // Append as query param
-      : apiUrl.endsWith('/') 
-        ? `${apiUrl}${dependentValue}`  // Append to path (if URL ends with /)
-        : `${apiUrl}?${dependsOn.paramKey}=${dependentValue}`  // Add as query param
-    : apiUrl;
-
-  // Include dependent value in queryKey to refetch when it changes
-  const finalQueryKey = dependsOn && dependentValue
-    ? [...(queryKey || [name]), dependentValue]
-    : queryKey || [name];
-
-  const { data, isLoading, isError } = useFetch({
-    url: finalApiUrl,
-    queryKey: finalQueryKey,
-    enabled: !dependsOn || !!dependentValue, // Only fetch if no dependency or dependent value exists
+  // Use custom hook to handle data fetching and processing
+  const { items, isLoading } = useApiAutocomplete({
+    name,
+    apiUrl,
+    queryKey,
+    dependsOn,
+    dependentValue,
+    additionalParams,
+    filterCategory,
+    dataPath,
+    selectedItem,
+    value,
+    valueKey,
   });
 
-  // Extract data from nested path if dataPath is provided
-  const getNestedData = (obj, path) => {
-    if (!path) return obj?.data || [];
-    return path.split('.').reduce((acc, part) => acc?.[part], obj) || [];
+  // Handle selection change event
+  const handleSelectionChange = (selectedKey) => {
+    onChange({ target: { name, value: selectedKey } });
   };
 
-  // Filter items by category if filterCategory is provided
-  const allItems = dataPath ? getNestedData(data, dataPath) : (data?.data || []);
-  const filteredItems = filterCategory
-    ? allItems.filter((item) => item.category === filterCategory)
-    : allItems;
+  // Format label for display
+  const getItemLabel = (item) => {
+    return formatLabel ? formatLabel(item) : item[labelKey];
+  };
 
-  // Include selectedItem if it exists and isn't already in the list
-  let items = filteredItems;
-  if (selectedItem && value) {
-    const isItemInList = filteredItems.some(item => item[valueKey] === value);
-    if (!isItemInList) {
-      items = [selectedItem, ...filteredItems];
-    }
-  }
+  return (
+    <div className="w-full">
+      {/* Label */}
+      <label className="block text-xs font-medium text-gray-700 mb-1">
+        {label}
+        {isRequired && <span className="text-red-500 ml-1">*</span>}
+      </label>
 
-  return ( 
-
-    <>
-    <label className="block text-xs font-medium text-gray-700 mb-1">
-        {label} {isRequired && <span className="text-red-500 ml-1">*</span>}
-        </label>
-    <div
-      className={`border rounded-lg api-autocomplete-wrapper ${
-        isInvalid ? 'border-red-500' : 'border-gray-300'
-      }`}
-    >
-    
-      <Autocomplete
-      name={name}
-      placeholder={placeholder}
-      isRequired={isRequired}
-      isDisabled={isDisabled || isLoading}
-      isInvalid={isInvalid}
-      errorMessage={errorMessage}
-      defaultItems={items}
-      selectedKey={value || null}
-      onSelectionChange={(key) => {
-        onChange({ target: { name, value: key } });
-      }}
-      onBlur={onBlur}
-      isLoading={isLoading}
-      radius="lg"
-      classNames={{
-        base: "w-full",
-        inputWrapper: "border-0 hover:border-0 focus-within:!border-0 shadow-none bg-white",
-        input: "text-gray-900",
-      }}
-      listboxProps={{
-        itemClasses: {
-          base: "text-gray-900 data-[hover=true]:bg-gray-100 data-[selected=true]:bg-blue-50",
-        },
-      }}
-      popoverProps={{
-        classNames: {
-          content: "bg-white border border-gray-200 rounded-lg",
-        },
-      }}
-    >
-      {(item) => (
-        <AutocompleteItem key={item[valueKey]}>
-          {formatLabel ? formatLabel(item) : item[labelKey]}
-        </AutocompleteItem>
-      )}
-    </Autocomplete>
+      {/* Autocomplete Wrapper */}
+      <div
+        className={`border rounded-lg transition-colors ${
+          isInvalid 
+            ? 'border-red-500 focus-within:border-red-600' 
+            : 'border-gray-300 focus-within:border-blue-500'
+        }`}
+      >
+        <Autocomplete
+          name={name}
+          placeholder={placeholder}
+          isRequired={isRequired}
+          isDisabled={isDisabled || isLoading}
+          isInvalid={isInvalid}
+          errorMessage={errorMessage}
+          defaultItems={items}
+          selectedKey={value || null}
+          onSelectionChange={handleSelectionChange}
+          onBlur={onBlur}
+          isLoading={isLoading}
+          radius="lg"
+          classNames={{
+            base: "w-full",
+            inputWrapper: "border-0 hover:border-0 focus-within:!border-0 shadow-none bg-white",
+            input: "text-gray-900",
+          }}
+          listboxProps={{
+            itemClasses: {
+              base: "text-gray-900 data-[hover=true]:bg-gray-100 data-[selected=true]:bg-blue-50",
+            },
+          }}
+          popoverProps={{
+            classNames: {
+              content: "bg-white border border-gray-200 rounded-lg shadow-lg",
+            },
+          }}
+        >
+          {(item) => (
+            <AutocompleteItem key={item[valueKey]}>
+              {getItemLabel(item)}
+            </AutocompleteItem>
+          )}
+        </Autocomplete>
+      </div>
     </div>
-    </>
   );
 }
