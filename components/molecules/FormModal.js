@@ -15,6 +15,7 @@ export default function FormModal({
   onSubmit,
   size = 'medium',
   isSubmitting = false,
+  componentData = null, // Component data from table row (includes campus.id)
 }) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -205,11 +206,36 @@ export default function FormModal({
         );
 
       case 'api-autocomplete':
+        // Build additional params if field has a function to build them
+        let additionalParams = null;
+        if (field.buildAdditionalParams && typeof field.buildAdditionalParams === 'function') {
+          additionalParams = field.buildAdditionalParams(formData, componentData);
+        } else if (field.additionalParams) {
+          additionalParams = field.additionalParams;
+        }
+        
+        // Get dependent value if field depends on another field
+        const dependentValue = field.dependsOn?.field 
+          ? formData[field.dependsOn.field] 
+          : null;
+        
+        // Check if field should be disabled based on missing dependencies
+        let isFieldDisabled = field.disabled || isSubmitting;
+        if (field.buildAdditionalParams && typeof field.buildAdditionalParams === 'function') {
+          // If field requires componentData but it's not available, disable it
+          if (!componentData || !additionalParams) {
+            isFieldDisabled = true;
+          }
+        }
+        if (field.dependsOn && !dependentValue) {
+          isFieldDisabled = true;
+        }
+        
         return (
           <ApiAutocomplete
             name={field.name}
             label={field.label}
-            placeholder={field.placeholder}
+            placeholder={isFieldDisabled && field.dependsOn ? `Please select ${field.dependsOn.field?.replace('Id', '')} first` : field.placeholder}
             apiUrl={field.apiUrl}
             queryKey={field.queryKey}
             value={value}
@@ -218,10 +244,16 @@ export default function FormModal({
             isInvalid={!!error}
             errorMessage={error || ''}
             isRequired={field.required}
-            isDisabled={field.disabled || isSubmitting}
+            isDisabled={isFieldDisabled}
             labelKey={field.labelKey || 'name'}
             valueKey={field.valueKey || 'id'}
             filterCategory={field.filterCategory}
+            dependsOn={field.dependsOn}
+            dependentValue={dependentValue}
+            additionalParams={additionalParams}
+            dataPath={field.dataPath}
+            formatLabel={field.formatLabel}
+            selectedItem={field.selectedItem}
           />
         );
 

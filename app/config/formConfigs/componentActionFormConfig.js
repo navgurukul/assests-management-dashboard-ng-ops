@@ -11,35 +11,46 @@ const getTodayDate = () => {
 
 
 const assetTypesApiUrl = '/asset-types';
+const assetsApiUrl = '/assets';
 
-export const installUninstallFields = [
-  {
-    name: 'assetTypeId',
-    label: 'Asset Type',
-    type: 'api-autocomplete',
-    placeholder: 'Search and select asset type',
-    apiUrl: assetTypesApiUrl,
-    queryKey: ['asset-types'],
-    labelKey: 'name',
-    valueKey: 'id',
-    filterCategory: 'DEVICE',
-    required: true,
-  },
-  {
-    name: 'deviceId',
-    label: 'Device ID (NG-PN)',
-    type: 'text',
-    placeholder: 'Enter Device ID (e.g., NG-PN-001)',
-    required: true,
-    validation: (value) => {
-      if (!value) return null;
-      const ngPnPattern = /^NG-PN-\d+$/i;
-      if (!ngPnPattern.test(value.trim())) {
-        return 'Device ID must be in format: NG-PN-XXX';
-      }
-      return null;
+// Function to build install/uninstall fields with component data
+export const getInstallUninstallFields = (componentData = null) => {
+  return [
+    {
+      name: 'assetTypeId',
+      label: 'Asset Type',
+      type: 'api-autocomplete',
+      placeholder: 'Search and select asset type',
+      apiUrl: assetTypesApiUrl,
+      queryKey: ['asset-types'],
+      labelKey: 'name',
+      valueKey: 'id',
+      filterCategory: 'DEVICE',
+      required: true,
     },
-  },
+    {
+      name: 'deviceId',
+      label: 'Device ID (NG-PN)',
+      type: 'api-autocomplete',
+      placeholder: 'Search and select device',
+      apiUrl: assetsApiUrl,
+      queryKey: ['assets'],
+      labelKey: 'assetTag',
+      valueKey: 'id',
+      required: true,
+      dependsOn: {
+        field: 'assetTypeId',
+        paramKey: 'type',
+      },
+      buildAdditionalParams: (formData, componentData) => {
+        const params = {};
+        // Get campusId from componentData
+        if (componentData?.campus?.id) {
+          params.campusId = componentData.campus.id;
+        }
+        return Object.keys(params).length > 0 ? params : null;
+      },
+    },
   {
     name: 'person',
     label: 'Person (Logged in user)',
@@ -72,7 +83,8 @@ export const installUninstallFields = [
       return null;
     },
   },
-];
+  ];
+};
 
 
 export const scrapFields = [
@@ -184,11 +196,17 @@ export const lostFields = [
   },
 ];
 
-export const getFieldsByActionType = (actionType) => {
-  switch (actionType?.toUpperCase()) {
+// Legacy export for backward compatibility
+export const installUninstallFields = getInstallUninstallFields();
+
+export const getFieldsByActionType = (actionType, componentData = null) => {
+  if (!actionType) return [];
+  
+  const upperActionType = actionType.toUpperCase();
+  switch (upperActionType) {
     case 'INSTALL':
     case 'UNINSTALL':
-      return installUninstallFields;
+      return getInstallUninstallFields(componentData);
     case 'SCRAP':
       return scrapFields;
     case 'LOST':
