@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import CustomButton from '@/components/atoms/CustomButton';
+import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 
 
 export default function FormModal({
@@ -14,6 +15,7 @@ export default function FormModal({
   onSubmit,
   size = 'medium',
   isSubmitting = false,
+  componentData = null, // Component data from table row (includes campus.id)
 }) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -203,6 +205,58 @@ export default function FormModal({
           />
         );
 
+      case 'api-autocomplete':
+        // Build additional params if field has a function to build them
+        let additionalParams = null;
+        if (field.buildAdditionalParams && typeof field.buildAdditionalParams === 'function') {
+          additionalParams = field.buildAdditionalParams(formData, componentData);
+        } else if (field.additionalParams) {
+          additionalParams = field.additionalParams;
+        }
+        
+        // Get dependent value if field depends on another field
+        const dependentValue = field.dependsOn?.field 
+          ? formData[field.dependsOn.field] 
+          : null;
+        
+        // Check if field should be disabled based on missing dependencies
+        let isFieldDisabled = field.disabled || isSubmitting;
+        if (field.buildAdditionalParams && typeof field.buildAdditionalParams === 'function') {
+          // If field requires componentData but it's not available, disable it
+          if (!componentData || !additionalParams) {
+            isFieldDisabled = true;
+          }
+        }
+        if (field.dependsOn && !dependentValue) {
+          isFieldDisabled = true;
+        }
+        
+        return (
+          <ApiAutocomplete
+            name={field.name}
+            label={field.label}
+            placeholder={isFieldDisabled && field.dependsOn ? `Please select ${field.dependsOn.field?.replace('Id', '')} first` : field.placeholder}
+            apiUrl={field.apiUrl}
+            queryKey={field.queryKey}
+            value={value}
+            onChange={(event) => handleChange(field.name, event.target.value)}
+            onBlur={() => handleBlur(field.name)}
+            isInvalid={!!error}
+            errorMessage={error || ''}
+            isRequired={field.required}
+            isDisabled={isFieldDisabled}
+            labelKey={field.labelKey || 'name'}
+            valueKey={field.valueKey || 'id'}
+            filterCategory={field.filterCategory}
+            dependsOn={field.dependsOn}
+            dependentValue={dependentValue}
+            additionalParams={additionalParams}
+            dataPath={field.dataPath}
+            formatLabel={field.formatLabel}
+            selectedItem={field.selectedItem}
+          />
+        );
+
       default:
         return null;
     }
@@ -227,19 +281,23 @@ export default function FormModal({
         <div className="space-y-4">
           {fields.map((field) => (
             <div key={field.name}>
-              <label
-                htmlFor={field.name}
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {field.label}
-                {field.required && (
-                  <span className="text-red-500 ml-1">*</span>
-                )}
-              </label>
-              {renderField(field)}
-              {touched[field.name] && errors[field.name] && (
-                <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
+              {field.type !== 'api-autocomplete' && (
+                <label
+                  htmlFor={field.name}
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {field.label}
+                  {field.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
+                </label>
               )}
+              {renderField(field)}
+              {field.type !== 'api-autocomplete' &&
+                touched[field.name] &&
+                errors[field.name] && (
+                  <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
+                )}
             </div>
           ))}
         </div>

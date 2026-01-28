@@ -416,10 +416,11 @@ export default function ComponentsList() {
         onClose={handleCloseModal}
         componentName={currentComponent?.componentTag || ''}
         actionType={currentAction || ''}
-        fields={getFieldsByActionType(currentAction)}
+        fields={getFieldsByActionType(currentAction, currentComponent?.componentData)}
         onSubmit={handleFormSubmit}
         size="medium"
         isSubmitting={isSubmitting}
+        componentData={currentComponent?.componentData || null}
       />
 
       {/* Table */}
