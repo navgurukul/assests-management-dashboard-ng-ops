@@ -10,21 +10,20 @@ const getTodayDate = () => {
 };
 
 
+const assetTypesApiUrl = '/asset-types';
+
 export const installUninstallFields = [
   {
-    name: 'deviceType',
-    label: 'Device Type',
-    type: 'select',
-    placeholder: 'Select Device Type',
+    name: 'assetTypeId',
+    label: 'Asset Type',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select asset type',
+    apiUrl: assetTypesApiUrl,
+    queryKey: ['asset-types'],
+    labelKey: 'name',
+    valueKey: 'id',
+    filterCategory: 'DEVICE',
     required: true,
-    options: [
-      { value: 'LAPTOP', label: 'Laptop' },
-      { value: 'DESKTOP', label: 'Desktop' },
-      { value: 'SERVER', label: 'Server' },
-      { value: 'PRINTER', label: 'Printer' },
-      { value: 'MONITOR', label: 'Monitor' },
-      { value: 'OTHER', label: 'Other' },
-    ],
   },
   {
     name: 'deviceId',

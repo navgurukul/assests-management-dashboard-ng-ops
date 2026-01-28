@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import CustomButton from '@/components/atoms/CustomButton';
+import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 
 
 export default function FormModal({
@@ -203,6 +204,27 @@ export default function FormModal({
           />
         );
 
+      case 'api-autocomplete':
+        return (
+          <ApiAutocomplete
+            name={field.name}
+            label={field.label}
+            placeholder={field.placeholder}
+            apiUrl={field.apiUrl}
+            queryKey={field.queryKey}
+            value={value}
+            onChange={(event) => handleChange(field.name, event.target.value)}
+            onBlur={() => handleBlur(field.name)}
+            isInvalid={!!error}
+            errorMessage={error || ''}
+            isRequired={field.required}
+            isDisabled={field.disabled || isSubmitting}
+            labelKey={field.labelKey || 'name'}
+            valueKey={field.valueKey || 'id'}
+            filterCategory={field.filterCategory}
+          />
+        );
+
       default:
         return null;
     }
@@ -227,19 +249,23 @@ export default function FormModal({
         <div className="space-y-4">
           {fields.map((field) => (
             <div key={field.name}>
-              <label
-                htmlFor={field.name}
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {field.label}
-                {field.required && (
-                  <span className="text-red-500 ml-1">*</span>
-                )}
-              </label>
-              {renderField(field)}
-              {touched[field.name] && errors[field.name] && (
-                <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
+              {field.type !== 'api-autocomplete' && (
+                <label
+                  htmlFor={field.name}
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {field.label}
+                  {field.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
+                </label>
               )}
+              {renderField(field)}
+              {field.type !== 'api-autocomplete' &&
+                touched[field.name] &&
+                errors[field.name] && (
+                  <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
+                )}
             </div>
           ))}
         </div>
