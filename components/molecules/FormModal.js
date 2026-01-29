@@ -36,10 +36,26 @@ export default function FormModal({
 
   // Handle input change
   const handleChange = (fieldName, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: value,
-    }));
+    setFormData((prev) => {
+      const updatedData = {
+        ...prev,
+        [fieldName]: value,
+      };
+
+      // Clear dependent fields when their dependency changes
+      fields.forEach((field) => {
+        if (
+          field.dependsOn &&
+          field.dependsOn.field === fieldName &&
+          prev[field.name]
+        ) {
+          // Clear the dependent field value when its dependency changes
+          updatedData[field.name] = '';
+        }
+      });
+
+      return updatedData;
+    });
 
     // Clear error when user starts typing
     if (errors[fieldName]) {
@@ -49,6 +65,21 @@ export default function FormModal({
         return newErrors;
       });
     }
+
+    // Clear errors for dependent fields that were cleared
+    fields.forEach((field) => {
+      if (
+        field.dependsOn &&
+        field.dependsOn.field === fieldName &&
+        errors[field.name]
+      ) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field.name];
+          return newErrors;
+        });
+      }
+    });
   };
 
   // Handle field blur
@@ -231,8 +262,14 @@ export default function FormModal({
           isFieldDisabled = true;
         }
         
+        // Create a unique key that includes dependentValue to force remount when dependency changes
+        const autocompleteKey = field.dependsOn 
+          ? `${field.name}-${dependentValue || 'empty'}` 
+          : field.name;
+
         return (
           <ApiAutocomplete
+            key={autocompleteKey}
             name={field.name}
             label={field.label}
             placeholder={isFieldDisabled && field.dependsOn ? `Please select ${field.dependsOn.field?.replace('Id', '')} first` : field.placeholder}
