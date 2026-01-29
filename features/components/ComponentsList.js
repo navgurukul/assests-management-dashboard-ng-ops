@@ -379,14 +379,6 @@ export default function ComponentsList() {
     }
   }, [openMenuId, handleViewDetails, handleOpenActionModal]);
 
-  const handleRowClick = (item) => {
-    // Store full component data in sessionStorage
-    if (item.componentData) {
-      sessionStorage.setItem('currentComponentData', JSON.stringify(item.componentData));
-    }
-    router.push(`/components/${item.id}`);
-  };
-
   const handleCreateClick = () => {
     router.push('/components/create');
   };
@@ -416,10 +408,11 @@ export default function ComponentsList() {
         onClose={handleCloseModal}
         componentName={currentComponent?.componentTag || ''}
         actionType={currentAction || ''}
-        fields={getFieldsByActionType(currentAction)}
+        fields={getFieldsByActionType(currentAction, currentComponent?.componentData)}
         onSubmit={handleFormSubmit}
         size="medium"
         isSubmitting={isSubmitting}
+        componentData={currentComponent?.componentData || null}
       />
 
       {/* Table */}
@@ -432,7 +425,6 @@ export default function ComponentsList() {
         itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Components table"
-        onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
         // Loading state
