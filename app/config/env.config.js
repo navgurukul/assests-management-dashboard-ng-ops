@@ -13,6 +13,7 @@ const config = {
       delete: (id) => `/components/${id}`,
       details: (id) => `/components/${id}`,
       addDocuments: (id) => `/components/${id}/documents`,
+      install: (id) => `/components/${id}/install`,
     },
     
     // Assets

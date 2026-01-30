@@ -12,6 +12,9 @@ import SearchInput from '@/components/molecules/SearchInput';
 import ActionMenu from '@/components/molecules/ActionMenu';
 import FormModal from '@/components/molecules/FormModal';
 import useFetch from '@/app/hooks/query/useFetch';
+import { useQueryClient } from '@tanstack/react-query';
+import post from '@/app/api/post/post';
+import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   COMPONENT_TABLE_ID,
@@ -21,12 +24,14 @@ import {
 import { transformComponentForTable } from '@/app/utils/dataTransformers';
 import { getFieldsByActionType } from '@/app/config/formConfigs/componentActionFormConfig';
 import { getComponentMenuOptions } from '@/app/config/componentMenuOptions';
+import { toast } from '@/app/utils/toast';
 
 const actionOptions = ['View', 'Details'];
 const STORAGE_KEY = 'componentFormData';
 
 export default function ComponentsList() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -264,46 +269,63 @@ export default function ComponentsList() {
   // Handle form submission
   const handleFormSubmit = React.useCallback(async (formData) => {
     setIsSubmitting(true);
-    
+    let loadingToastId = null;
+
     try {
-      console.log('Form submitted:', {
-        action: currentAction,
-        componentId: currentComponent?.id,
-        componentTag: currentComponent?.componentTag,
-        formData,
-      });
-      
-      // TODO: Make API call here
-      // Example:
-      // const response = await fetch('/api/component-actions', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     action: currentAction,
-      //     componentId: currentComponent?.id,
-      //     ...formData,
-      //   }),
-      // });
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Show success message (you can add a toast notification here)
-      alert(`${currentAction} action completed successfully!`);
-      
-      // Close modal and reset state
-      handleCloseModal();
-      
-      // Optionally refresh the component list
-      // refetch();
-      
+      if (currentAction?.toUpperCase() === 'INSTALL') {
+        const componentId = currentComponent?.id;
+        if (!componentId) {
+          toast.error('Component ID is missing.');
+          return;
+        }
+        if (!formData.deviceId) {
+          toast.error('Please select a device.');
+          return;
+        }
+
+        loadingToastId = toast.loading('Installing component...');
+
+        const installPayload = {
+          assetId: formData.deviceId,
+          slotLabel: formData.slotLabel || '',
+          installationDate: formData.date || new Date().toISOString().split('T')[0],
+          notes: formData.notes?.trim() || (formData.person ? `Installed by: ${formData.person}` : ''),
+        };
+
+        const installUrl = config.getApiUrl(config.endpoints.components.install(componentId));
+        await post({ url: installUrl, method: 'POST', data: installPayload });
+
+        toast.dismiss(loadingToastId);
+        loadingToastId = null;
+        queryClient.invalidateQueries({ queryKey: ['components'] });
+        toast.success('Install action completed successfully!');
+        handleCloseModal();
+      } else {
+        // Non-Install actions: simulate API call for now
+        loadingToastId = toast.loading(`${currentAction} in progress...`);
+        console.log('Form submitted:', {
+          action: currentAction,
+          componentId: currentComponent?.id,
+          componentTag: currentComponent?.componentTag,
+          formData,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        toast.dismiss(loadingToastId);
+        loadingToastId = null;
+        toast.success(`${currentAction} action completed successfully!`);
+        handleCloseModal();
+      }
     } catch (error) {
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
       console.error('Error submitting form:', error);
-      alert('An error occurred. Please try again.');
+      const errorMessage = error?.message || 'An error occurred. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
-  }, [currentAction, currentComponent, handleCloseModal]);
+  }, [currentAction, currentComponent, handleCloseModal, queryClient]);
 
   const renderCell = React.useCallback((item, columnKey) => {
     const cellValue = item[columnKey];

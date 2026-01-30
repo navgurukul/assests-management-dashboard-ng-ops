@@ -13,9 +13,8 @@ const getTodayDate = () => {
 const assetTypesApiUrl = '/asset-types';
 const assetsApiUrl = '/assets';
 
-// Function to build install/uninstall fields with component data
-export const getInstallUninstallFields = (componentData = null) => {
-  return [
+// Base fields shared by Install and Uninstall
+const getInstallUninstallBaseFields = (componentData = null) => [
     {
       name: 'assetTypeId',
       label: 'Asset Type',
@@ -51,20 +50,13 @@ export const getInstallUninstallFields = (componentData = null) => {
         return Object.keys(params).length > 0 ? params : null;
       },
     },
-  {
-    name: 'person',
-    label: 'Person (Logged in user)',
-    type: 'text',
-    placeholder: 'Enter person name',
-    required: true,
-    validation: (value) => {
-      if (!value) return null;
-      if (value.trim().length < 2) {
-        return 'Person name must be at least 2 characters';
-      }
-      return null;
-    },
-  },
+    {
+      name: 'slotLabel',
+      label: 'Slot Label',
+      type: 'text',
+      placeholder: 'e.g. RAM Slot 1, SSD Bay',
+      required: false,
+    }, 
   {
     name: 'date',
     label: 'Date',
@@ -83,9 +75,26 @@ export const getInstallUninstallFields = (componentData = null) => {
       return null;
     },
   },
-  ];
-};
+  {
+    name: 'notes',
+    label: 'Notes',
+    type: 'textarea',
+    placeholder: 'Optional installation notes',
+    required: false,
+    rows: 2,
+  },
+];
 
+// Install-specific fields (includes slotLabel and notes for API)
+export const getInstallFields = (componentData = null) => getInstallUninstallBaseFields(componentData);
+
+// Uninstall fields (no slotLabel, notes - same base fields for now)
+export const getInstallUninstallFields = (componentData = null) => {
+  const baseFields = getInstallUninstallBaseFields(componentData);
+  return baseFields.filter(
+    (field) => field.name !== 'slotLabel' && field.name !== 'notes'
+  );
+};
 
 export const scrapFields = [
   {
@@ -102,20 +111,6 @@ export const scrapFields = [
       }
       if (value.trim().length > 500) {
         return 'Reason must not exceed 500 characters';
-      }
-      return null;
-    },
-  },
-  {
-    name: 'person',
-    label: 'Person (Logged in user)',
-    type: 'text',
-    placeholder: 'Enter person name',
-    required: true,
-    validation: (value) => {
-      if (!value) return null;
-      if (value.trim().length < 2) {
-        return 'Person name must be at least 2 characters';
       }
       return null;
     },
@@ -163,20 +158,6 @@ export const lostFields = [
     },
   },
   {
-    name: 'person',
-    label: 'Person (Logged in user)',
-    type: 'text',
-    placeholder: 'Enter person name',
-    required: true,
-    validation: (value) => {
-      if (!value) return null;
-      if (value.trim().length < 2) {
-        return 'Person name must be at least 2 characters';
-      }
-      return null;
-    },
-  },
-  {
     name: 'date',
     label: 'Date',
     type: 'date',
@@ -205,6 +186,7 @@ export const getFieldsByActionType = (actionType, componentData = null) => {
   const upperActionType = actionType.toUpperCase();
   switch (upperActionType) {
     case 'INSTALL':
+      return getInstallFields(componentData);
     case 'UNINSTALL':
       return getInstallUninstallFields(componentData);
     case 'SCRAP':
