@@ -55,7 +55,7 @@ export default function ReportWrapper({
     <div className="space-y-6">
       {/* Header Section */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
             <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
@@ -138,7 +138,17 @@ export default function ReportWrapper({
         </div>
 
         {/* Filters Section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            {hasActiveFilters && (
+              <ActiveFiltersChips
+                filters={filters}
+                onRemoveFilter={handleRemoveFilter}
+                onClearAll={handleClearAllFilters}
+              />
+            )}
+          </div>
+          
           <FilterDropdown
             onFilterChange={handleFilterChange}
             campusOptions={campusOptions}
@@ -146,14 +156,6 @@ export default function ReportWrapper({
             assetTypeOptions={assetTypeOptions}
             selectedFilters={filters}
           />
-
-          {hasActiveFilters && (
-            <ActiveFiltersChips
-              filters={filters}
-              onRemoveFilter={handleRemoveFilter}
-              onClearAll={handleClearAllFilters}
-            />
-          )}
         </div>
       </div>
 
