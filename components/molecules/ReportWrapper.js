@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Filter, Calendar, Download, X } from 'lucide-react';
 import FilterDropdown from './FilterDropdown';
 import ActiveFiltersChips from './ActiveFiltersChips';
+import CustomButton from '@/components/atoms/CustomButton';
 
 export default function ReportWrapper({
   title,
@@ -63,13 +64,13 @@ export default function ReportWrapper({
           <div className="flex items-center gap-3">
             {showDateRange && (
               <div className="relative">
-                <button
+                <CustomButton
+                  text="Date Range"
+                  icon={Calendar}
                   onClick={() => setShowDatePicker(!showDatePicker)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                >
-                  <Calendar size={18} />
-                  <span className="text-sm">Date Range</span>
-                </button>
+                  variant="secondary"
+                  size="md"
+                />
 
                 {showDatePicker && (
                   <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 w-80">
@@ -117,20 +118,20 @@ export default function ReportWrapper({
 
             {showExport && (
               <>
-                <button
+                <CustomButton
+                  text="Export CSV"
+                  icon={Download}
                   onClick={onExportCSV}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-                >
-                  <Download size={18} />
-                  <span className="text-sm">Export CSV</span>
-                </button>
-                <button
+                  variant="success"
+                  size="md"
+                />
+                <CustomButton
+                  text="Export PDF"
+                  icon={Download}
                   onClick={onExportPDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                >
-                  <Download size={18} />
-                  <span className="text-sm">Export PDF</span>
-                </button>
+                  variant="danger"
+                  size="md"
+                />
               </>
             )}
           </div>
