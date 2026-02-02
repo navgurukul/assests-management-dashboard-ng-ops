@@ -9,35 +9,40 @@ const reportCards = [
     title: 'Allocation Summary',
     subtitle: 'Live device usage',
     icon: BarChart3,
-    bgColor: 'bg-blue-500',
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600',
   },
   {
     id: 'ticket-sla',
     title: 'Ticket SLA',
     subtitle: 'IT performance',
     icon: Clock,
-    bgColor: 'bg-green-500',
+    bgColor: 'bg-green-100',
+    iconColor: 'text-green-600',
   },
   {
     id: 'movement-tracking',
     title: 'Movement Tracking',
     subtitle: 'Audit chain of custody',
     icon: TruckIcon,
-    bgColor: 'bg-purple-500',
+    bgColor: 'bg-purple-100',
+    iconColor: 'text-purple-600',
   },
   {
     id: 'vendor-courier-cost',
     title: 'Vendor + Courier Cost',
     subtitle: 'Finance governance',
     icon: DollarSign,
-    bgColor: 'bg-orange-500',
+    bgColor: 'bg-orange-100',
+    iconColor: 'text-orange-600',
   },
   {
     id: 'parts-utilization',
     title: 'Parts Utilization',
     subtitle: 'Sustainability',
     icon: Recycle,
-    bgColor: 'bg-teal-500',
+    bgColor: 'bg-teal-100',
+    iconColor: 'text-teal-600',
   },
 ];
 
@@ -65,7 +70,7 @@ export default function ReportsList() {
               }`}
             >
               <div className={`w-12 h-12 rounded-full ${report.bgColor} flex items-center justify-center mb-4`}>
-                <IconComponent className="text-white" size={24} />
+                <IconComponent className={report.iconColor} size={24} />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">{report.title}</h3>
               <p className="text-sm text-gray-600">{report.subtitle}</p>
