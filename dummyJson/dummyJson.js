@@ -468,6 +468,106 @@ export const componentStripModalConfig = {
 };
  
 // Component Details Data
+// ============================================
+// REPORTS DATA
+// ============================================
+
+// Allocation Summary Report Data
+export const allocationSummaryKPIs = [
+  { count: 1486, label: 'Total Assets', icon: 'Package', bgColor: 'bg-blue-100', iconColor: 'text-blue-600', borderColor: 'border-blue-200' },
+  { count: 792, label: 'Allocated', icon: 'CheckCircle2', bgColor: 'bg-teal-100', iconColor: 'text-teal-600', borderColor: 'border-teal-200' },
+  { count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-100', iconColor: 'text-blue-600', borderColor: 'border-blue-200' },
+  { count: 22, label: 'Under Repair', icon: 'Wrench', bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600', borderColor: 'border-yellow-200' },
+  { count: 18, label: 'In Courier', icon: 'Truck', bgColor: 'bg-purple-100', iconColor: 'text-purple-600', borderColor: 'border-purple-200' },
+  { count: '3.2%', label: 'Scrap %', icon: 'Trash2', bgColor: 'bg-red-100', iconColor: 'text-red-600', borderColor: 'border-red-200' },
+];
+
+export const assetsByCampusData = [
+  ['Campus', 'Allocated', 'In Stock', 'Under Repair', 'In Courier', 'Scrap'],
+  ['Sarjapura', 180, 25, 5, 3, 2],
+  ['Pune', 156, 30, 8, 4, 3],
+  ['Dharamshala', 98, 18, 3, 2, 1],
+  ['Bangalore', 220, 15, 4, 5, 2],
+  ['Dantewada', 65, 8, 1, 2, 1],
+  ['Jashpur', 73, 9, 1, 2, 1],
+];
+
+export const assetsBySourceData = [
+  ['Source', 'Count'],
+  ['Purchased', 892],
+  ['Donated', 456],
+  ['Personal', 138],
+];
+
+export const allocatedVsInStockData = [
+  ['Month', 'Allocated', 'In Stock'],
+  ['Jan', 750, 120],
+  ['Feb', 768, 115],
+  ['Mar', 775, 110],
+  ['Apr', 780, 108],
+  ['May', 785, 106],
+  ['Jun', 792, 105],
+];
+
+export const allocationTableData = [
+  { id: 1, assetTag: 'NG-SARJ-L-0315', type: 'Laptop', status: 'Under Repair', campus: 'Sarjapura', withWhom: 'Vendor: TechCare', source: 'Purchased', lastAction: 'Sent for repair', lastUpdated: '2 days ago' },
+  { id: 2, assetTag: 'NG-PUNE-L-0210', type: 'Laptop', status: 'Allocated', campus: 'Pune', withWhom: 'Student: Meena', source: 'Donated', lastAction: 'Allocated to student', lastUpdated: '5 days ago' },
+  { id: 3, assetTag: 'NG-DHAR-L-0144', type: 'Laptop', status: 'In Stock', campus: 'Dharamshala', withWhom: 'Store Room', source: 'Purchased', lastAction: 'Returned by student', lastUpdated: '1 week ago' },
+  { id: 4, assetTag: 'NG-BANG-L-0089', type: 'Laptop', status: 'Allocated', campus: 'Bangalore', withWhom: 'Student: Raj', source: 'Donated', lastAction: 'Allocated to student', lastUpdated: '3 days ago' },
+  { id: 5, assetTag: 'NG-DANT-L-0029', type: 'Laptop', status: 'Scrap', campus: 'Dantewada', withWhom: 'Scrap Room', source: 'Purchased', lastAction: 'Marked as scrap', lastUpdated: '2 weeks ago' },
+  { id: 6, assetTag: 'NG-JASH-L-0421', type: 'Laptop', status: 'Allocated', campus: 'Jashpur', withWhom: 'Student: Rahul', source: 'Personal', lastAction: 'Allocated to student', lastUpdated: '1 day ago' },
+  { id: 7, assetTag: 'NG-RAIP-L-0087', type: 'Laptop', status: 'Under Repair', campus: 'Raipur', withWhom: 'Vendor: FixIT', source: 'Purchased', lastAction: 'Sent for repair', lastUpdated: '4 days ago' },
+  { id: 8, assetTag: 'NG-AMAR-L-0298', type: 'Laptop', status: 'Allocated', campus: 'Amaravati', withWhom: 'Student: Priya', source: 'Donated', lastAction: 'Allocated to student', lastUpdated: '6 days ago' },
+  { id: 9, assetTag: 'NG-UDAI-L-0112', type: 'Laptop', status: 'In Stock', campus: 'Udaipur', withWhom: 'Store Room', source: 'Purchased', lastAction: 'Received from vendor', lastUpdated: '3 days ago' },
+  { id: 10, assetTag: 'NG-JABA-L-0045', type: 'Laptop', status: 'Allocated', campus: 'Jabalpur', withWhom: 'Student: Ankit', source: 'Personal', lastAction: 'Allocated to student', lastUpdated: '1 week ago' },
+  { id: 11, assetTag: 'NG-SARJ-L-0420', type: 'Laptop', status: 'In Courier', campus: 'Sarjapura', withWhom: 'Courier: DTDC', source: 'Purchased', lastAction: 'In transit to vendor', lastUpdated: '1 day ago' },
+  { id: 12, assetTag: 'NG-PUNE-D-0156', type: 'Desktop', status: 'Allocated', campus: 'Pune', withWhom: 'Staff: IT Dept', source: 'Purchased', lastAction: 'Allocated to staff', lastUpdated: '2 days ago' },
+  { id: 13, assetTag: 'NG-DHAR-L-0289', type: 'Laptop', status: 'In Stock', campus: 'Dharamshala', withWhom: 'Store Room', source: 'Donated', lastAction: 'Added to inventory', lastUpdated: '5 days ago' },
+  { id: 14, assetTag: 'NG-BANG-L-0512', type: 'Laptop', status: 'Allocated', campus: 'Bangalore', withWhom: 'Student: Amit', source: 'Purchased', lastAction: 'Allocated to student', lastUpdated: '1 day ago' },
+  { id: 15, assetTag: 'NG-JASH-L-0198', type: 'Laptop', status: 'Under Repair', campus: 'Jashpur', withWhom: 'Vendor: TechCare', source: 'Donated', lastAction: 'Sent for repair', lastUpdated: '3 days ago' },
+];
+
+// Ticket SLA Report Data
+export const ticketSLAKPIs = [
+  { count: 156, label: 'Total Tickets', icon: 'Ticket', bgColor: 'bg-blue-400' },
+  { count: 45, label: 'Critical SLA', icon: 'AlertCircle', bgColor: 'bg-red-400' },
+  { count: 68, label: 'Warning SLA', icon: 'Clock', bgColor: 'bg-yellow-400' },
+  { count: 43, label: 'Normal SLA', icon: 'CheckCircle2', bgColor: 'bg-green-400' },
+  { count: '8.5h', label: 'Avg Resolution', icon: 'Timer', bgColor: 'bg-purple-400' },
+  { count: '92%', label: 'SLA Met', icon: 'TrendingUp', bgColor: 'bg-teal-400' },
+];
+
+// Movement Tracking Report Data
+export const movementTrackingKPIs = [
+  { count: 234, label: 'Total Movements', icon: 'TruckIcon', bgColor: 'bg-blue-400' },
+  { count: 56, label: 'In Transit', icon: 'Navigation', bgColor: 'bg-purple-400' },
+  { count: 178, label: 'Delivered', icon: 'CheckCircle2', bgColor: 'bg-green-400' },
+  { count: 12, label: 'Pending Pickup', icon: 'Clock', bgColor: 'bg-yellow-400' },
+  { count: '3.2 days', label: 'Avg Transit', icon: 'Timer', bgColor: 'bg-orange-400' },
+  { count: 2, label: 'Delayed', icon: 'AlertTriangle', bgColor: 'bg-red-400' },
+];
+
+// Vendor + Courier Cost Report Data
+export const vendorCourierCostKPIs = [
+  { count: '₹12.5L', label: 'Total Cost', icon: 'DollarSign', bgColor: 'bg-blue-400' },
+  { count: '₹8.2L', label: 'Vendor Cost', icon: 'Wrench', bgColor: 'bg-purple-400' },
+  { count: '₹4.3L', label: 'Courier Cost', icon: 'Truck', bgColor: 'bg-orange-400' },
+  { count: 45, label: 'Active Vendors', icon: 'Users', bgColor: 'bg-green-400' },
+  { count: '₹15,680', label: 'Avg Repair', icon: 'Settings', bgColor: 'bg-yellow-400' },
+  { count: '₹850', label: 'Avg Shipping', icon: 'Package', bgColor: 'bg-teal-400' },
+];
+
+// Parts Utilization Report Data
+export const partsUtilizationKPIs = [
+  { count: 1842, label: 'Total Parts', icon: 'Component', bgColor: 'bg-blue-400' },
+  { count: 456, label: 'In Stock', icon: 'Archive', bgColor: 'bg-teal-400' },
+  { count: 1286, label: 'Installed', icon: 'CheckCircle2', bgColor: 'bg-green-400' },
+  { count: 100, label: 'Scrapped', icon: 'Trash2', bgColor: 'bg-red-400' },
+  { count: '69%', label: 'Utilization', icon: 'PieChart', bgColor: 'bg-purple-400' },
+  { count: '₹8.5L', label: 'Total Value', icon: 'DollarSign', bgColor: 'bg-orange-400' },
+];
+
+ 
 export const componentDetailsData = {
   'RAM-SARJ-8GB-2311-01': {
     // Basic Information

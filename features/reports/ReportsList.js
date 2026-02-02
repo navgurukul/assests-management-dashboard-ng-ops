@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { BarChart3, Clock, TruckIcon, DollarSign, Recycle } from 'lucide-react';
+import ReportWrapper from '@/components/molecules/ReportWrapper';
+import AllocationSummary from './AllocationSummary';
 
 const reportCards = [
   {
@@ -9,43 +11,102 @@ const reportCards = [
     title: 'Allocation Summary',
     subtitle: 'Live device usage',
     icon: BarChart3,
-    bgColor: 'bg-blue-500',
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600',
   },
   {
     id: 'ticket-sla',
     title: 'Ticket SLA',
     subtitle: 'IT performance',
     icon: Clock,
-    bgColor: 'bg-green-500',
+    bgColor: 'bg-green-100',
+    iconColor: 'text-green-600',
   },
   {
     id: 'movement-tracking',
     title: 'Movement Tracking',
     subtitle: 'Audit chain of custody',
     icon: TruckIcon,
-    bgColor: 'bg-purple-500',
+    bgColor: 'bg-purple-100',
+    iconColor: 'text-purple-600',
   },
   {
     id: 'vendor-courier-cost',
     title: 'Vendor + Courier Cost',
     subtitle: 'Finance governance',
     icon: DollarSign,
-    bgColor: 'bg-orange-500',
+    bgColor: 'bg-orange-100',
+    iconColor: 'text-orange-600',
   },
   {
     id: 'parts-utilization',
     title: 'Parts Utilization',
     subtitle: 'Sustainability',
     icon: Recycle,
-    bgColor: 'bg-teal-500',
+    bgColor: 'bg-teal-100',
+    iconColor: 'text-teal-600',
   },
 ];
 
 export default function ReportsList() {
   const [selectedReport, setSelectedReport] = useState(null);
+  const [filters, setFilters] = useState({});
 
   const handleCardClick = (reportId) => {
     setSelectedReport(reportId === selectedReport ? null : reportId);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleExportCSV = () => {
+    console.log('Exporting CSV...');
+    // Implement CSV export logic
+  };
+
+  const handleExportPDF = () => {
+    console.log('Exporting PDF...');
+    // Implement PDF export logic
+  };
+
+  const campusOptions = ['Sarjapura', 'Pune', 'Dharamshala', 'Bangalore', 'Dantewada', 'Jashpur', 'Raipur', 'Amaravati', 'Udaipur', 'Jabalpur'];
+  const statusOptions = ['Allocated', 'In Stock', 'Under Repair', 'In Courier', 'Scrap'];
+  const assetTypeOptions = ['Laptop', 'Desktop', 'Tablet', 'Monitor'];
+  const vendorOptions = ['TechCare', 'FixIT', 'CompuServe', 'ITSolutions'];
+  const donorOptions = ['CSR Fund', 'Corporate Donation', 'Individual Donor'];
+
+  const renderReportContent = () => {
+    switch (selectedReport) {
+      case 'allocation-summary':
+        return <AllocationSummary filters={filters} />;
+      case 'ticket-sla':
+        return (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-gray-500 text-lg">Ticket SLA report content coming soon...</p>
+          </div>
+        );
+      case 'movement-tracking':
+        return (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-gray-500 text-lg">Movement Tracking report content coming soon...</p>
+          </div>
+        );
+      case 'vendor-courier-cost':
+        return (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-gray-500 text-lg">Vendor + Courier Cost report content coming soon...</p>
+          </div>
+        );
+      case 'parts-utilization':
+        return (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-gray-500 text-lg">Parts Utilization report content coming soon...</p>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -65,7 +126,7 @@ export default function ReportsList() {
               }`}
             >
               <div className={`w-12 h-12 rounded-full ${report.bgColor} flex items-center justify-center mb-4`}>
-                <IconComponent className="text-white" size={24} />
+                <IconComponent className={report.iconColor} size={24} />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">{report.title}</h3>
               <p className="text-sm text-gray-600">{report.subtitle}</p>
@@ -76,39 +137,22 @@ export default function ReportsList() {
 
       {/* Report Details Section */}
       {selectedReport && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {reportCards.find((r) => r.id === selectedReport)?.title}
-            </h2>
-            <button
-              onClick={() => setSelectedReport(null)}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          
-          {/* Content Area - You'll add content here later */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <p className="text-gray-500 text-lg">
-              Content for {reportCards.find((r) => r.id === selectedReport)?.title} will be added here
-            </p>
-          </div>
-        </div>
+        <ReportWrapper
+          title={reportCards.find((r) => r.id === selectedReport)?.title}
+          subtitle={reportCards.find((r) => r.id === selectedReport)?.subtitle}
+          campusOptions={campusOptions}
+          statusOptions={statusOptions}
+          assetTypeOptions={assetTypeOptions}
+          vendorOptions={vendorOptions}
+          donorOptions={donorOptions}
+          onFilterChange={handleFilterChange}
+          onExportCSV={handleExportCSV}
+          onExportPDF={handleExportPDF}
+          showDateRange={true}
+          showExport={true}
+        >
+          {renderReportContent()}
+        </ReportWrapper>
       )}
     </div>
   );
