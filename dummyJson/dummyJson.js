@@ -474,12 +474,12 @@ export const componentStripModalConfig = {
 
 // Allocation Summary Report Data
 export const allocationSummaryKPIs = [
-  { count: 1486, label: 'Total Assets', icon: 'Package', bgColor: 'bg-blue-400' },
-  { count: 792, label: 'Allocated', icon: 'CheckCircle2', bgColor: 'bg-teal-400' },
-  { count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-400' },
-  { count: 22, label: 'Under Repair', icon: 'Wrench', bgColor: 'bg-yellow-400' },
-  { count: 18, label: 'In Courier', icon: 'Truck', bgColor: 'bg-purple-400' },
-  { count: '3.2%', label: 'Scrap %', icon: 'Trash2', bgColor: 'bg-red-400' },
+  { count: 1486, label: 'Total Assets', icon: 'Package', bgColor: 'bg-blue-100', iconColor: 'text-blue-600', borderColor: 'border-blue-200' },
+  { count: 792, label: 'Allocated', icon: 'CheckCircle2', bgColor: 'bg-teal-100', iconColor: 'text-teal-600', borderColor: 'border-teal-200' },
+  { count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-100', iconColor: 'text-blue-600', borderColor: 'border-blue-200' },
+  { count: 22, label: 'Under Repair', icon: 'Wrench', bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600', borderColor: 'border-yellow-200' },
+  { count: 18, label: 'In Courier', icon: 'Truck', bgColor: 'bg-purple-100', iconColor: 'text-purple-600', borderColor: 'border-purple-200' },
+  { count: '3.2%', label: 'Scrap %', icon: 'Trash2', bgColor: 'bg-red-100', iconColor: 'text-red-600', borderColor: 'border-red-200' },
 ];
 
 export const assetsByCampusData = [

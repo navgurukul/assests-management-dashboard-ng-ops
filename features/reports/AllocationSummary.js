@@ -78,6 +78,8 @@ export default function AllocationSummary({ filters }) {
             count={kpi.count}
             label={kpi.label}
             icon={kpi.icon}
+            iconColor={kpi.iconColor}
+            borderColor={kpi.borderColor}
             bgColor={kpi.bgColor}
           />
         ))}
