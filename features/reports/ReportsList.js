@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BarChart3, Clock, TruckIcon, DollarSign, Recycle } from 'lucide-react';
+import { BarChart3, Clock, TruckIcon, DollarSign, Recycle, ArrowLeft } from 'lucide-react';
 import ReportWrapper from '@/components/molecules/ReportWrapper';
 import AllocationSummary from './AllocationSummary';
 
@@ -111,33 +111,54 @@ export default function ReportsList() {
 
   return (
     <div className="space-y-6">
+      {/* Heading Section */}
+      {!selectedReport && (
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Reports</h2>
+          <p className="text-gray-600 mt-2">View and analyze various reports</p>
+        </div>
+      )}
+
+      {/* Back Button */}
+      {selectedReport && (
+        <button
+          onClick={() => setSelectedReport(null)}
+          className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-gray-700 hover:text-blue-600"
+        >
+          <ArrowLeft size={20} />
+          <span className="font-medium">Back to Reports</span>
+        </button>
+      )}
+
       {/* Report Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {reportCards.map((report) => {
-          const IconComponent = report.icon;
-          const isSelected = selectedReport === report.id;
-          
-          return (
-            <div
-              key={report.id}
-              onClick={() => handleCardClick(report.id)}
-              className={`bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 ${
-                isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full ${report.bgColor} flex items-center justify-center flex-shrink-0`}>
-                  <IconComponent className={report.iconColor} size={20} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-gray-800">{report.title}</h3>
-                  <p className="text-xs text-gray-600">{report.subtitle}</p>
+      {!selectedReport && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {reportCards.map((report) => {
+            const IconComponent = report.icon;
+            const isSelected = selectedReport === report.id;
+            
+            return (
+              <div
+                key={report.id}
+                onClick={() => handleCardClick(report.id)}
+                className={`bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 ${
+                  isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full ${report.bgColor} flex items-center justify-center flex-shrink-0`}>
+                    <IconComponent className={report.iconColor} size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-gray-800">{report.title}</h3>
+                    <p className="text-xs text-gray-600">{report.subtitle}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Report Details Section */}
       {selectedReport && (
