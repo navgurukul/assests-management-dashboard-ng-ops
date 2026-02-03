@@ -121,15 +121,19 @@ export default function ReportsList() {
             <div
               key={report.id}
               onClick={() => handleCardClick(report.id)}
-              className={`bg-white rounded-lg shadow-md p-6 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 ${
+              className={`bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 ${
                 isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
               }`}
             >
-              <div className={`w-12 h-12 rounded-full ${report.bgColor} flex items-center justify-center mb-4`}>
-                <IconComponent className={report.iconColor} size={24} />
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full ${report.bgColor} flex items-center justify-center flex-shrink-0`}>
+                  <IconComponent className={report.iconColor} size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-800">{report.title}</h3>
+                  <p className="text-xs text-gray-600">{report.subtitle}</p>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">{report.title}</h3>
-              <p className="text-sm text-gray-600">{report.subtitle}</p>
             </div>
           );
         })}
