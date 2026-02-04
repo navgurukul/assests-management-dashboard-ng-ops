@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText, X, Check } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
+import SearchInput from '@/components/molecules/SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -30,6 +31,10 @@ export default function AssetsList() {
   // Filter state
   const [filters, setFilters] = useState({});
   
+  // Search state
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
   // Column visibility management
   const {
     visibleColumns,
@@ -41,9 +46,23 @@ export default function AssetsList() {
     alwaysVisibleColumns,
   } = useTableColumns(ASSET_TABLE_ID, assetTableColumns, defaultVisibleColumns);
   
-  // Build query string with filters
+  // Debounce search input (800ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+  
+  // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
+    
+    // Add search parameter first
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    
     params.append('page', currentPage);
     params.append('limit', pageSize);
     
@@ -54,10 +73,10 @@ export default function AssetsList() {
     return params.toString();
   };
   
-  // Fetch assets data from API with pagination and filters
+  // Fetch assets data from API with pagination, filters, and search
   const { data, isLoading, isError, error } = useFetch({
     url: `/assets?${buildQueryString()}`,
-    queryKey: ['assets', currentPage, pageSize, filters],
+    queryKey: ['assets', currentPage, pageSize, filters, debouncedSearch],
   });
   
   // Fetch campus options from API
@@ -284,6 +303,14 @@ export default function AssetsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Search component
+        searchComponent={
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search assets..."
+          />
+        }
         // Filter component
         filterComponent={
           <FilterDropdown
