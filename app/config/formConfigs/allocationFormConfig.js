@@ -2,32 +2,80 @@ import * as Yup from 'yup';
 
 export const allocationFormFields = [
   {
+    name: 'allocationType',
+    label: 'Allocation Type',
+    type: 'radio',
+    required: true,
+    options: [
+      { value: 'REMOTE', label: 'Remote (Student, Employee, etc.)' },
+      { value: 'CAMPUS', label: 'Campus (Bulk Allocation)' },
+    ],
+  },
+  // Remote Allocation Fields (shown when allocationType === 'REMOTE')
+  {
+    name: 'userEmail',
+    label: 'User Email',
+    type: 'email',
+    placeholder: 'Enter user email address',
+    required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'userPhone',
+    label: 'Phone Number',
+    type: 'text',
+    placeholder: 'Enter phone number',
+    required: false,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
     name: 'assetId',
     label: 'Asset',
     type: 'text',
-    placeholder: 'Enter asset ID or select from available assets',
+    placeholder: 'Enter asset ID',
     required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  // Campus Allocation Fields (shown when allocationType === 'CAMPUS')
+  {
+    name: 'sourceCampus',
+    label: 'Source Campus',
+    type: 'text',
+    placeholder: 'Enter source campus name',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
   {
-    name: 'userId',
-    label: 'Assign To User',
+    name: 'destinationCampus',
+    label: 'Destination Campus',
     type: 'text',
-    placeholder: 'Enter user ID or search by name',
+    placeholder: 'Enter destination campus name',
     required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
+  {
+    name: 'personRaising',
+    label: 'Person Raising Request',
+    type: 'text',
+    placeholder: 'Enter name of person raising this request',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
+  },
+  {
+    name: 'campusAssets',
+    label: 'Assets',
+    type: 'campus-asset-table',
+    placeholder: 'Add assets with their working conditions',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
+  },
+  // Common Fields
   {
     name: 'startDate',
-    label: 'Start Date',
+    label: 'Allocation Date',
     type: 'date',
-    placeholder: 'Select allocation start date',
+    placeholder: 'Select allocation date',
     required: true,
-  },
-  {
-    name: 'endDate',
-    label: 'End Date (Optional)',
-    type: 'date',
-    placeholder: 'Leave empty for active allocation',
-    required: false,
   },
   {
     name: 'allocationReason',
@@ -40,20 +88,8 @@ export const allocationFormFields = [
       { value: 'REPAIR', label: 'Repair (Temporary Replacement)' },
       { value: 'REPLACEMENT', label: 'Replacement (Permanent Swap)' },
       { value: 'LOANER', label: 'Loaner (Temporary Device)' },
+      { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
     ],
-  },
-  {
-    name: 'isTemporary',
-    label: 'Temporary Allocation',
-    type: 'checkbox',
-    required: false,
-  },
-  {
-    name: 'expectedReturnDate',
-    label: 'Expected Return Date',
-    type: 'date',
-    placeholder: 'For temporary allocations only',
-    required: false,
   },
   {
     name: 'notes',
@@ -65,35 +101,91 @@ export const allocationFormFields = [
 ];
 
 export const allocationValidationSchema = Yup.object().shape({
-  assetId: Yup.string().required('Asset is required'),
-  userId: Yup.string().required('User is required'),
+  allocationType: Yup.string()
+    .required('Allocation type is required')
+    .oneOf(['REMOTE', 'CAMPUS'], 'Invalid allocation type'),
+  
+  // Remote allocation validations
+  userEmail: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.required('User email is required').email('Invalid email format'),
+    }),
+  userName: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.required('User name is required'),
+    }),
+  userPhone: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
+    }),
+  userDepartment: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
+    }),
+  assetId: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.required('Asset is required'),
+    }),
+  
+  // Campus allocation validations
+  sourceCampus: Yup.string()
+    .when('allocationType', {
+      is: 'CAMPUS',
+      then: (schema) => schema.required('Source campus is required'),
+    }),
+  destinationCampus: Yup.string()
+    .when('allocationType', {
+      is: 'CAMPUS',
+      then: (schema) => schema.required('Destination campus is required'),
+    }),
+  personRaising: Yup.string()
+    .when('allocationType', {
+      is: 'CAMPUS',
+      then: (schema) => schema.required('Person raising request is required'),
+    }),
+  campusAssets: Yup.array()
+    .when('allocationType', {
+      is: 'CAMPUS',
+      then: (schema) => schema
+        .of(
+          Yup.object().shape({
+            assetId: Yup.string().required('Asset ID is required'),
+            workingCondition: Yup.string().required('Working condition is required'),
+          })
+        )
+        .min(1, 'At least one asset is required'),
+    }),
+  
+  // Common validations
   startDate: Yup.date()
-    .required('Start date is required')
-    .max(new Date(), 'Start date cannot be in the future'),
-  endDate: Yup.date()
-    .nullable()
-    .min(Yup.ref('startDate'), 'End date must be after start date'),
+    .required('Allocation date is required'),
   allocationReason: Yup.string()
     .required('Allocation reason is required')
-    .oneOf(['JOINER', 'REPAIR', 'REPLACEMENT', 'LOANER'], 'Invalid allocation reason'),
-  isTemporary: Yup.boolean(),
-  expectedReturnDate: Yup.date()
-    .nullable()
-    .when('isTemporary', {
-      is: true,
-      then: (schema) => schema.required('Expected return date is required for temporary allocations'),
-    }),
-  notes: Yup.string(),
+    .oneOf(['JOINER', 'REPAIR', 'REPLACEMENT', 'LOANER', 'CAMPUS_TRANSFER'], 'Invalid allocation reason'),
+  notes: Yup.string().nullable(),
 });
 
 export const allocationInitialValues = {
+  allocationType: 'REMOTE',
+  // Remote fields
+  userEmail: '',
+  userName: '',
+  userPhone: '',
+  userDepartment: '',
   assetId: '',
-  userId: '',
-  startDate: new Date().toISOString().split('T')[0], // Today's date
-  endDate: '',
+  // Campus fields
+  sourceCampus: '',
+  destinationCampus: '',
+  personRaising: '',
+  campusAssets: [],
+  // Common fields
+  startDate: new Date().toISOString().split('T')[0],
   allocationReason: 'JOINER',
-  isTemporary: false,
-  expectedReturnDate: '',
   notes: '',
 };
 
