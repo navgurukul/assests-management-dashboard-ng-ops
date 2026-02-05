@@ -74,6 +74,9 @@ export default function ApiAutocomplete({
     valueKey,
   });
 
+  // Ensure items is always an array to prevent iteration errors
+  const safeItems = Array.isArray(items) ? items : [];
+
   // Handle selection change event
   const handleSelectionChange = (selectedKey) => {
     onChange({ target: { name, value: selectedKey } });
@@ -107,7 +110,7 @@ export default function ApiAutocomplete({
           isDisabled={isDisabled || isLoading}
           isInvalid={isInvalid}
           errorMessage={errorMessage}
-          defaultItems={items}
+          defaultItems={safeItems}
           selectedKey={value || null}
           onSelectionChange={handleSelectionChange}
           onBlur={onBlur}
