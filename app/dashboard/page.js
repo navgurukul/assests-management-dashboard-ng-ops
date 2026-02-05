@@ -5,15 +5,7 @@ import DashboardCard from '@/components/atoms/DashboardCard';
 import PieChart from '@/components/molecules/PieChart';
 import StackedColumnChart from '@/components/molecules/StackedColumnChart';
 import { dashboardCards, locationWiseAssetsData, assetsPerCampusData } from '@/dummyJson/dummyJson';
-import { CheckCircle2, Archive, Settings, Wrench } from 'lucide-react';
 import AssetsTable from '@/components/Table/Table';
-
-const iconMap = {
-  CheckCircle2: CheckCircle2,
-  Archive: Archive,
-  Settings: Settings,
-  Wrench: Wrench,
-};
 
 export default function DashboardPage() {
   const legendLabels = {
@@ -31,21 +23,19 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-6 overflow-y-auto h-full"> 
+    <div className="p-6 overflow-y-auto h-full bg-gradient-to-br from-gray-50 to-blue-50"> 
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {dashboardCards.map((card) => {
-          const IconComponent = iconMap[card.icon];
-          return (
-            <DashboardCard
-              key={card.id}
-              count={card.count}
-              label={card.label}
-              icon={IconComponent ? <IconComponent className="w-6 h-6 text-white" /> : null}
-              bgColor={card.bgColor}
-            />
-          );
-        })}
+        {dashboardCards.map((card) => (
+          <DashboardCard
+            key={card.id}
+            count={card.count}
+            label={card.label}
+            icon={card.icon}
+            bgColor={card.bgColor}
+            iconColor={card.iconColor}
+          />
+        ))}
       </div>
 
       {/* Charts */}
