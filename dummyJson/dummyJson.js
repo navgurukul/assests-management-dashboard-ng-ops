@@ -92,10 +92,10 @@ export const documentsLibrary = [
 ];
 
 export const dashboardCards = [
-  { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-400' },
-  { id: 2, count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-400' },
-  { id: 3, count: 321, label: 'Needs Repair', icon: 'Settings', bgColor: 'bg-slate-500' },
-  { id: 4, count: 22, label: 'In Repair', icon: 'Wrench', bgColor: 'bg-red-400' },
+  { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-100', iconColor: 'text-teal-600' },
+  { id: 2, count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
+  { id: 3, count: 321, label: 'Needs Repair', icon: 'Settings', bgColor: 'bg-slate-100', iconColor: 'text-slate-600' },
+  { id: 4, count: 22, label: 'In Repair', icon: 'Wrench', bgColor: 'bg-red-100', iconColor: 'text-red-600' },
 ];
 
 export const locationWiseAssetsData = [
