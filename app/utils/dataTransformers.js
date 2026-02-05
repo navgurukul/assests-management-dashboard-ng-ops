@@ -66,11 +66,7 @@ export const formatSourceType = (sourceType) => {
   return sourceTypeMap[sourceType] || sourceType || 'N/A';
 };
 
-/**
- * Format allocation reason codes to readable text
- * @param {string} reason - Reason code from API
- * @returns {string} Readable reason text
- */
+
 export const formatAllocationReason = (reason) => {
   const reasonMap = {
     'JOINER': 'Joiner',

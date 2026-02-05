@@ -78,20 +78,6 @@ export const allocationFormFields = [
     required: true,
   },
   {
-    name: 'allocationReason',
-    label: 'Allocation Reason',
-    type: 'select',
-    placeholder: 'Select reason for allocation',
-    required: true,
-    options: [
-      { value: 'JOINER', label: 'Joiner (New Student/Staff)' },
-      { value: 'REPAIR', label: 'Repair (Temporary Replacement)' },
-      { value: 'REPLACEMENT', label: 'Replacement (Permanent Swap)' },
-      { value: 'LOANER', label: 'Loaner (Temporary Device)' },
-      { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
-    ],
-  },
-  {
     name: 'notes',
     label: 'Notes',
     type: 'textarea',
