@@ -52,15 +52,7 @@ export const allocationFormFields = [
     placeholder: 'Enter destination campus name',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  {
-    name: 'personRaising',
-    label: 'Person Raising Request',
-    type: 'text',
-    placeholder: 'Enter name of person raising this request',
-    required: true,
-    showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
+  }, 
   {
     name: 'campusAssets',
     label: 'Assets',
