@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -24,11 +24,34 @@ const actionOptions = ['View', 'Return', 'Details'];
 export default function AllocationsList() {
   const router = useRouter();
   
-  // Fetch allocations data from API
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  
+  // Build query string with pagination
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    return params.toString();
+  };
+  
+  // Fetch allocations data from API with pagination
   const { data, isLoading, isError, error } = useFetch({
-    url: config.getApiUrl(config.endpoints.allocations?.list || '/allocations'),
-    queryKey: ['allocations'],
+    url: `/allocations?${buildQueryString()}`,
+    queryKey: ['allocations', currentPage, pageSize],
   });
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
 
   // Transform API data to match table structure
   const allocationsListData = React.useMemo(() => {
@@ -125,9 +148,9 @@ export default function AllocationsList() {
   };
 
   const handleCreateClick = () => {
-    setIsModalOpen(true);
+    router.push('/allocations/create');
   };
-router.push('/allocations/create');
+
   const handleReturnAllocation = async (allocationId) => {
     const confirmed = confirm('Are you sure you want to mark this allocation as returned?');
     if (!confirmed) return;
@@ -239,40 +262,18 @@ router.push('/allocations/create');
         columns={columns}
         title="Allocations"
         renderCell={renderCell}
-        itemsPerPage={10}
+        itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Allocations table"
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Server-side pagination props
+        serverPagination={true}
+        paginationData={data?.pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
-
-      {/* Create Allocation Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Create New Allocation"
-        size="large"
-      >
-        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-800">
-            <strong>Choose Allocation Type:</strong>
-          </p>
-          <ul className="text-sm text-blue-700 mt-2 ml-4 space-y-1">
-            <li>• <strong>Remote:</strong> Allocate assets to individual users (students, employees) with user details</li>
-            <li>• <strong>Campus:</strong> Bulk transfer of assets between campus locations with working conditions</li>
-          </ul>
-        </div>
-        <GenericForm
-          fields={allocationFormFields}
-          initialValues={allocationInitialValues}
-          validationSchema={allocationValidationSchema}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCloseModal}
-          submitButtonText="Create Allocation"
-          isSubmitting={isSubmitting}
-        />
-      </Modal>
     </div>
   );
 }

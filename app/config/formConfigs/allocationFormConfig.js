@@ -52,15 +52,7 @@ export const allocationFormFields = [
     placeholder: 'Enter destination campus name',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  {
-    name: 'personRaising',
-    label: 'Person Raising Request',
-    type: 'text',
-    placeholder: 'Enter name of person raising this request',
-    required: true,
-    showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
+  }, 
   {
     name: 'campusAssets',
     label: 'Assets',
@@ -76,20 +68,6 @@ export const allocationFormFields = [
     type: 'date',
     placeholder: 'Select allocation date',
     required: true,
-  },
-  {
-    name: 'allocationReason',
-    label: 'Allocation Reason',
-    type: 'select',
-    placeholder: 'Select reason for allocation',
-    required: true,
-    options: [
-      { value: 'JOINER', label: 'Joiner (New Student/Staff)' },
-      { value: 'REPAIR', label: 'Repair (Temporary Replacement)' },
-      { value: 'REPLACEMENT', label: 'Replacement (Permanent Swap)' },
-      { value: 'LOANER', label: 'Loaner (Temporary Device)' },
-      { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
-    ],
   },
   {
     name: 'notes',
