@@ -1,19 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import Modal from '@/components/molecules/Modal';
-import GenericForm from '@/components/molecules/GenericForm';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
-import {
-  allocationFormFields,
-  allocationValidationSchema,
-  allocationInitialValues,
-} from '@/app/config/formConfigs/allocationFormConfig';
-import { toast } from '@/app/utils/toast';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
 
 const columns = [
@@ -31,8 +23,6 @@ const actionOptions = ['View', 'Return', 'Details'];
 
 export default function AllocationsList() {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Fetch allocations data from API
   const { data, isLoading, isError, error } = useFetch({
@@ -42,7 +32,7 @@ export default function AllocationsList() {
 
   // Transform API data to match table structure
   const allocationsListData = React.useMemo(() => {
-    if (!data || !data.data) return [];
+    if (!data || !data.data || !Array.isArray(data.data)) return [];
     
     return data.data.map((allocation) => ({
       ...transformAllocationForTable(allocation),
@@ -137,69 +127,7 @@ export default function AllocationsList() {
   const handleCreateClick = () => {
     setIsModalOpen(true);
   };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleFormSubmit = async (values) => {
-    setIsSubmitting(true);
-    
-    // Show loading toast
-    const loadingToastId = toast.loading('Creating allocation...');
-    
-    try {
-      // Prepare data for API
-      const allocationData = {
-        assetId: values.assetId,
-        userId: values.userId,
-        startDate: values.startDate,
-        endDate: values.endDate || null,
-        allocationReason: values.allocationReason,
-        isTemporary: values.isTemporary,
-        expectedReturnDate: values.isTemporary ? values.expectedReturnDate : null,
-        notes: values.notes,
-      };
-
-      // Make API call to create allocation
-      const response = await fetch(config.getApiUrl(config.endpoints.allocations?.create || '/allocations'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(allocationData),
-      });
-
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || 'Failed to create allocation';
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      console.log('Allocation created successfully:', result);
-      
-      // Show success toast
-      toast.success('Allocation created successfully!');
-      
-      // Close modal and refresh data
-      setIsModalOpen(false);
-      // You might want to refetch the allocations list here
-      // queryClient.invalidateQueries(['allocations']);
-      
-    } catch (error) {
-      console.error('Error creating allocation:', error);
-      
-      // Show error toast
-      toast.error(error?.message || 'Failed to create allocation. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+router.push('/allocations/create');
   const handleReturnAllocation = async (allocationId) => {
     const confirmed = confirm('Are you sure you want to mark this allocation as returned?');
     if (!confirmed) return;
@@ -328,9 +256,12 @@ export default function AllocationsList() {
       >
         <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-800">
-            <strong>Note:</strong> Only one active allocation per asset is allowed at any time. 
-            Make sure the asset is available (status: IN_STOCK) before creating an allocation.
+            <strong>Choose Allocation Type:</strong>
           </p>
+          <ul className="text-sm text-blue-700 mt-2 ml-4 space-y-1">
+            <li>• <strong>Remote:</strong> Allocate assets to individual users (students, employees) with user details</li>
+            <li>• <strong>Campus:</strong> Bulk transfer of assets between campus locations with working conditions</li>
+          </ul>
         </div>
         <GenericForm
           fields={allocationFormFields}
