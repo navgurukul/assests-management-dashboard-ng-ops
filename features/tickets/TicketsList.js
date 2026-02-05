@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
@@ -20,16 +20,40 @@ const columns = [
 
 export default function TicketsList() {
   const router = useRouter();
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
+  // Build query string with pagination
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    return params.toString();
+  };
+
+  // Fetch tickets data from API with pagination
   const { data, isLoading, isError } = useFetch({
-    url: config.getApiUrl('/all-tickets'),
-    queryKey: ['all-tickets'],
+    url: `/tickets?${buildQueryString()}`,
+    queryKey: ['tickets', currentPage, pageSize],
   });
 
-  const ticketsData = React.useMemo(() => {
-    if (!data?.data) return [];
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
-    return data.data.map((ticket) => {
+  // Handle page size change
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
+  const ticketsData = React.useMemo(() => {
+    if (!data?.data?.tickets) return [];
+
+    return data.data.tickets.map((ticket) => {
       const deviceTag = ticket.asset?.assetTag || ticket.assetTag || ticket.assetId || '-';
       const updatedLabel = ticket.updatedAt
         ? new Date(ticket.updatedAt).toLocaleDateString('en-GB', {
@@ -115,11 +139,25 @@ export default function TicketsList() {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading tickets...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading tickets...</p>
+        </div>
+      </div>
+    );
   }
 
   if (isError) {
-    return <div className="p-6 text-red-600">Failed to load tickets.</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 font-medium">Error loading tickets</p>
+          <p className="text-gray-600 mt-2">Something went wrong</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -128,12 +166,17 @@ export default function TicketsList() {
       columns={columns}
       title="Tickets"
       renderCell={renderCell}
-      itemsPerPage={10}
+      itemsPerPage={pageSize}
       showPagination={true}
       ariaLabel="Tickets table"
       onRowClick={handleRowClick}
       showCreateButton={true}
       onCreateClick={handleCreateClick}
+      // Server-side pagination props
+      serverPagination={true}
+      paginationData={data?.data?.pagination}
+      onPageChange={handlePageChange}
+      onPageSizeChange={handlePageSizeChange}
     />
   );
 }
