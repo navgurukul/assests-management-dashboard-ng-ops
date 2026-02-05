@@ -2,6 +2,35 @@ import * as Yup from 'yup';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
 
+// Courier service providers with their tracking URL patterns
+export const courierProviders = [
+  {
+    id: 'dtdc',
+    name: 'DTDC',
+    trackingUrlPattern: 'https://www.dtdc.in/tracking/mobile/search.asp?invoiceno={trackingId}',
+  },
+  {
+    id: 'indianpost',
+    name: 'India Post',
+    trackingUrlPattern: 'https://tracking.indiapost.gov.in/status/trackingid?mailid={trackingId}',
+  },
+  {
+    id: 'bluedart',
+    name: 'Blue Dart',
+    trackingUrlPattern: 'https://www.bluedart.com/onlinetracking.asp?ShipmentNumber={trackingId}',
+  },
+  {
+    id: 'delhivery',
+    name: 'Delhivery',
+    trackingUrlPattern: 'https://track.delhivery.com/track/package/{trackingId}',
+  },
+  {
+    id: 'flipkart',
+    name: 'Flipkart Logistics',
+    trackingUrlPattern: 'https://www.flipkart.com/tracking/order/{trackingId}',
+  },
+];
+
 export const consignmentFormFields = [
   {
     name: 'allocationId',
@@ -17,11 +46,15 @@ export const consignmentFormFields = [
   {
     name: 'assets',
     label: 'Assets',
-    type: 'textarea',
-    placeholder: 'Assets will be loaded from selected allocation',
-    required: false,
-    disabled: true,
-    rows: 2,
+    type: 'api-multi-select',
+    placeholder: 'Select assets from the allocation',
+    apiUrl: baseUrl + '/assets',
+    queryKey: ['assets'],
+    labelKey: 'assetTag',
+    valueKey: 'id',
+    required: true,
+    dependsOn: 'allocationId', // Load assets based on selected allocation
+    filterKey: 'allocationId', // Filter assets by allocation ID
   },
   {
     name: 'source',
@@ -42,27 +75,31 @@ export const consignmentFormFields = [
   {
     name: 'courierServiceId',
     label: 'Courier Service Provider',
-    type: 'api-autocomplete',
+    type: 'select',
     placeholder: 'Select courier service provider',
-    apiUrl: baseUrl + '/courier-services',
-    queryKey: ['courier-services'],
-    labelKey: 'name',
-    valueKey: 'id',
+    options: courierProviders.map(courier => ({
+      value: courier.id,
+      label: courier.name,
+    })),
     required: true,
+    onFieldChange: 'handleCourierChange',
   },
   {
     name: 'trackingLink',
     label: 'Tracking Link',
     type: 'text',
-    placeholder: 'Enter tracking link or leave to auto-populate',
+    placeholder: 'Auto-populated based on courier selection',
     required: false,
+    disabled: false,
+    readOnly: true,
   },
   {
     name: 'trackingId',
     label: 'Tracking ID',
     type: 'text',
-    placeholder: 'Enter tracking ID manually',
+    placeholder: 'Enter tracking ID (will auto-generate tracking link)',
     required: false,
+    onFieldChange: 'handleTrackingIdChange',
   },
   {
     name: 'shippedAt',
@@ -91,6 +128,9 @@ export const consignmentFormFields = [
 export const consignmentValidationSchema = Yup.object().shape({
   allocationId: Yup.string()
     .required('Allocation ID is required'),
+  assets: Yup.array()
+    .min(1, 'At least one asset must be selected')
+    .required('Assets are required'),
   courierServiceId: Yup.string()
     .required('Courier service provider is required'),
   trackingLink: Yup.string()
@@ -112,7 +152,7 @@ export const consignmentValidationSchema = Yup.object().shape({
 
 export const consignmentInitialValues = {
   allocationId: '',
-  assets: '',
+  assets: [],
   source: '',
   destination: '',
   courierServiceId: '',

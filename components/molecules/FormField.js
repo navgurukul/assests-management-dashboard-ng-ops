@@ -5,9 +5,19 @@ import { Field, ErrorMessage } from 'formik';
 import DocumentSelector from './DocumentSelector';
 import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 
-export default function FormField({ field, formik }) {
-  const { name, label, type, placeholder, required, options, min, max } = field;
+export default function FormField({ field, formik, onFieldChange }) {
+  const { name, label, type, placeholder, required, options, min, max, disabled, readOnly } = field;
   const hasError = formik.touched[name] && formik.errors[name];
+
+  // Handle field change with callback
+  const handleFieldChange = (event) => {
+    const value = event.target.value;
+    formik.setFieldValue(name, value);
+    // Call the field-specific callback if provided
+    if (onFieldChange && typeof onFieldChange === 'function') {
+      onFieldChange(value, formik);
+    }
+  };
 
   const renderInput = () => {
     switch (type) {
@@ -55,6 +65,7 @@ export default function FormField({ field, formik }) {
           <Field
             as="select"
             name={name}
+            onChange={handleFieldChange}
             className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               hasError ? 'border-red-500' : 'border-gray-300'
             }`}
