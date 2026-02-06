@@ -5,19 +5,16 @@ import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
+import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
-
-const columns = [
-  { key: "ticketId", label: "TICKET ID" },
-  { key: "type", label: "TYPE" },
-  { key: "device", label: "DEVICE" },
-  { key: "status", label: "STATUS" },
-  { key: "sla", label: "SLA" },
-  { key: "actionTakenBy", label: "ACTION TAKEN BY" },
-  { key: "updated", label: "UPDATED" },
-];
+import { useTableColumns } from '@/app/hooks/useTableColumns';
+import {
+  TICKET_TABLE_ID,
+  ticketTableColumns,
+  defaultVisibleColumns,
+} from '@/app/config/tableConfigs/ticketTableConfig';
 
 export default function TicketsList() {
   const router = useRouter();
@@ -29,6 +26,17 @@ export default function TicketsList() {
   // Search state
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Column visibility management
+  const {
+    visibleColumns,
+    visibleColumnKeys,
+    allColumns,
+    toggleColumn,
+    showAllColumns,
+    resetToDefault,
+    alwaysVisibleColumns,
+  } = useTableColumns(TICKET_TABLE_ID, ticketTableColumns, defaultVisibleColumns);
 
   // Debounce search input (800ms delay)
   useEffect(() => {
@@ -87,6 +95,52 @@ export default function TicketsList() {
         ? `${ticket.lastUpdatedByUser.role || ''}`.trim() || ticket.lastUpdatedByUser.email || ''
         : ticket.assigneeName || ticket.assignee || '—';
 
+      // Get created date
+      const createdAtLabel = ticket.createdAt
+        ? new Date(ticket.createdAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        : '—';
+
+      // Get raised by user
+      const raisedBy = ticket.raisedByUser
+        ? `${ticket.raisedByUser.firstName || ''} ${ticket.raisedByUser.lastName || ''}`.trim() || ticket.raisedByUser.email || ''
+        : '—';
+
+      // Get assigned to user
+      const assignedTo = ticket.assigneeUser
+        ? `${ticket.assigneeUser.firstName || ''} ${ticket.assigneeUser.lastName || ''}`.trim() || ticket.assigneeUser.email || ''
+        : '—';
+
+      // Get assign date
+      const assignDateLabel = ticket.assignDate
+        ? new Date(ticket.assignDate).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        : '—';
+
+      // Get resolved date
+      const resolvedAtLabel = ticket.resolvedAt
+        ? new Date(ticket.resolvedAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        : '—';
+
+      // Get closed date
+      const closedAtLabel = ticket.closedAt
+        ? new Date(ticket.closedAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        : '—';
+
       return {
         id: ticket.id,
         ticketId: ticket.ticketNumber || ticket.id || '-',
@@ -100,6 +154,14 @@ export default function TicketsList() {
         },
         actionTakenBy,
         updated: updatedLabel,
+        priority: ticket.priority || '-',
+        campus: ticket.campus?.name || ticket.campus?.code || '-',
+        raisedBy,
+        assignedTo,
+        createdAt: createdAtLabel,
+        assignDate: assignDateLabel,
+        resolvedAt: resolvedAtLabel,
+        closedAt: closedAtLabel,
       };
     });
   }, [data]);
@@ -113,7 +175,7 @@ export default function TicketsList() {
       case "device":
         // Derive device from details data when available
         const details = ticketDetailsData[item.id];
-        const deviceTag = details?.deviceSummary?.asset || '-';
+        const deviceTag = details?.deviceSummary?.asset || cellValue;
         return <span className="text-gray-700">{deviceTag}</span>;
       case "status":
         const statusColors = {
@@ -131,6 +193,18 @@ export default function TicketsList() {
             {cellValue}
           </span>
         );
+      case "priority":
+        const priorityColors = {
+          'LOW': 'bg-green-100 text-green-800',
+          'MEDIUM': 'bg-yellow-100 text-yellow-800',
+          'HIGH': 'bg-orange-100 text-orange-800',
+          'CRITICAL': 'bg-red-100 text-red-800',
+        };
+        return (
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${priorityColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
+            {cellValue}
+          </span>
+        );
       case "sla":
         return (
           <SLAIndicator 
@@ -141,8 +215,15 @@ export default function TicketsList() {
           />
         );
       case "updated":
+      case "createdAt":
+      case "assignDate":
+      case "resolvedAt":
+      case "closedAt":
         return <span className="text-gray-500 text-sm">{cellValue || '—'}</span>;
       case "actionTakenBy":
+      case "raisedBy":
+      case "assignedTo":
+      case "campus":
         return <span className="text-gray-700 text-sm">{cellValue || '—'}</span>;
       default:
         return cellValue;
@@ -182,7 +263,7 @@ export default function TicketsList() {
   return (
     <TableWrapper
       data={ticketsData}
-      columns={columns}
+      columns={visibleColumns}
       title="Tickets"
       renderCell={renderCell}
       itemsPerPage={pageSize}
@@ -197,6 +278,17 @@ export default function TicketsList() {
           value={searchInput}
           onChange={setSearchInput}
           placeholder="Search tickets..."
+        />
+      }
+      // Column selector component
+      columnSelectorComponent={
+        <ColumnSelector
+          allColumns={allColumns}
+          visibleColumnKeys={visibleColumnKeys}
+          alwaysVisibleColumns={alwaysVisibleColumns}
+          onToggleColumn={toggleColumn}
+          onShowAll={showAllColumns}
+          onResetToDefault={resetToDefault}
         />
       }
       // Server-side pagination props
