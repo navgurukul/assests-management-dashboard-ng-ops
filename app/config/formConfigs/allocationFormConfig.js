@@ -29,6 +29,22 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
   {
+    name: 'userAddress',
+    label: 'User Address',
+    type: 'textarea',
+    placeholder: 'Enter user address',
+    required: false,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'assetSource',
+    label: 'Asset Source',
+    type: 'text',
+    placeholder: 'Enter asset source',
+    required: false,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
     name: 'assetId',
     label: 'Asset',
     type: 'text',
@@ -60,14 +76,6 @@ export const allocationFormFields = [
     placeholder: 'Add assets with their working conditions',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  // Common Fields
-  {
-    name: 'startDate',
-    label: 'Allocation Date',
-    type: 'date',
-    placeholder: 'Select allocation date',
-    required: true,
   },
   {
     name: 'notes',
@@ -104,10 +112,20 @@ export const allocationValidationSchema = Yup.object().shape({
       is: 'REMOTE',
       then: (schema) => schema.nullable(),
     }),
+  userAddress: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
+    }),
   assetId: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
       then: (schema) => schema.required('Asset is required'),
+    }),
+  assetSource: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
     }),
   
   // Campus allocation validations
@@ -155,7 +173,9 @@ export const allocationInitialValues = {
   userName: '',
   userPhone: '',
   userDepartment: '',
+  userAddress: '',
   assetId: '',
+  assetSource: '',
   // Campus fields
   sourceCampus: '',
   destinationCampus: '',
