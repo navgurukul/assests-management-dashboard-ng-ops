@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
+import SearchInput from '@/components/molecules/SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
@@ -25,18 +26,36 @@ export default function TicketsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  // Build query string with pagination
+  // Search state
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce search input (800ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Build query string with pagination and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
+    
+    // Add search parameter first
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    
     params.append('page', currentPage);
     params.append('limit', pageSize);
     return params.toString();
   };
 
-  // Fetch tickets data from API with pagination
+  // Fetch tickets data from API with pagination and search
   const { data, isLoading, isError } = useFetch({
     url: `/tickets?${buildQueryString()}`,
-    queryKey: ['tickets', currentPage, pageSize],
+    queryKey: ['tickets', currentPage, pageSize, debouncedSearch],
   });
 
   // Handle page change
@@ -172,6 +191,14 @@ export default function TicketsList() {
       onRowClick={handleRowClick}
       showCreateButton={true}
       onCreateClick={handleCreateClick}
+      // Search component
+      searchComponent={
+        <SearchInput
+          value={searchInput}
+          onChange={setSearchInput}
+          placeholder="Search tickets..."
+        />
+      }
       // Server-side pagination props
       serverPagination={true}
       paginationData={data?.data?.pagination}
