@@ -37,10 +37,10 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
   {
-    name: 'assetSource',
-    label: 'Asset Source',
+    name: 'campus',
+    label: 'Campus',
     type: 'text',
-    placeholder: 'Enter asset source',
+    placeholder: 'Enter source campus name',
     required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
