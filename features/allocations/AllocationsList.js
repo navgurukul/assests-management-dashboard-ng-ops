@@ -3,10 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
+import SummaryCard from '@/components/atoms/SummaryCard';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
+import { allocationsSummaryCards } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "allocationId", label: "ALLOCATION ID" },
@@ -207,53 +210,19 @@ export default function AllocationsList() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Allocations</p>
-              <p className="text-2xl font-bold text-gray-900">{allocationsListData.length}</p>
-            </div>
-            <UserPlus className="w-8 h-8 text-blue-500" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Active Allocations</p>
-              <p className="text-2xl font-bold text-green-600">
-                {allocationsListData.filter(a => a.isActive).length}
-              </p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-500" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Returned</p>
-              <p className="text-2xl font-bold text-gray-600">
-                {allocationsListData.filter(a => !a.isActive).length}
-              </p>
-            </div>
-            <XCircle className="w-8 h-8 text-gray-500" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">This Month</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {allocationsListData.filter(a => {
-                  const startDate = new Date(a.startDate);
-                  const now = new Date();
-                  return startDate.getMonth() === now.getMonth() && 
-                         startDate.getFullYear() === now.getFullYear();
-                }).length}
-              </p>
-            </div>
-            <Calendar className="w-8 h-8 text-purple-500" />
-          </div>
-        </div>
+        {allocationsSummaryCards.map((card) => {
+          const IconComponent = LucideIcons[card.icon];
+          return (
+            <SummaryCard
+              key={card.id}
+              label={card.label}
+              value={card.getValue(allocationsListData)}
+              Icon={IconComponent}
+              valueColor={card.valueColor}
+              iconColor={card.iconColor}
+            />
+          );
+        })}
       </div>
 
       {/* Table */}
