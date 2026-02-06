@@ -982,3 +982,81 @@ export const componentDetailsData = {
   }
 };
 
+// Summary Cards Configuration
+export const allocationsSummaryCards = [
+  {
+    id: 'total',
+    label: 'Total Allocations',
+    icon: 'UserPlus',
+    valueColor: 'text-gray-900',
+    iconColor: 'text-blue-500',
+    getValue: (data) => data.length,
+  },
+  {
+    id: 'active',
+    label: 'Active Allocations',
+    icon: 'CheckCircle',
+    valueColor: 'text-green-600',
+    iconColor: 'text-green-500',
+    getValue: (data) => data.filter(a => a.isActive).length,
+  },
+  {
+    id: 'returned',
+    label: 'Returned',
+    icon: 'XCircle',
+    valueColor: 'text-gray-600',
+    iconColor: 'text-gray-500',
+    getValue: (data) => data.filter(a => !a.isActive).length,
+  },
+  {
+    id: 'thisMonth',
+    label: 'This Month',
+    icon: 'Calendar',
+    valueColor: 'text-purple-600',
+    iconColor: 'text-purple-500',
+    getValue: (data) => {
+      const now = new Date();
+      return data.filter(a => {
+        const startDate = new Date(a.startDate);
+        return startDate.getMonth() === now.getMonth() && 
+               startDate.getFullYear() === now.getFullYear();
+      }).length;
+    },
+  },
+];
+
+export const ticketsSummaryCards = [
+  {
+    id: 'total',
+    label: 'Total Tickets',
+    icon: 'Ticket',
+    valueColor: 'text-gray-900',
+    iconColor: 'text-blue-500',
+    getValue: (data) => data.length,
+  },
+  {
+    id: 'open',
+    label: 'Open Tickets',
+    icon: 'AlertCircle',
+    valueColor: 'text-green-600',
+    iconColor: 'text-green-500',
+    getValue: (data) => data.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'ALLOCATED').length,
+  },
+  {
+    id: 'overdue',
+    label: 'Overdue',
+    icon: 'AlertTriangle',
+    valueColor: 'text-red-600',
+    iconColor: 'text-red-500',
+    getValue: (data) => data.filter(t => t.status === 'OVERDUE').length,
+  },
+  {
+    id: 'resolved',
+    label: 'Resolved',
+    icon: 'CheckCircle2',
+    valueColor: 'text-purple-600',
+    iconColor: 'text-purple-500',
+    getValue: (data) => data.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length,
+  },
+];
+

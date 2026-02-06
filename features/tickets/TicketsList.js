@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
+import SummaryCard from '@/components/atoms/SummaryCard';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
-import { ticketDetailsData } from '@/dummyJson/dummyJson';
+import { ticketDetailsData, ticketsSummaryCards } from '@/dummyJson/dummyJson';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   TICKET_TABLE_ID,
@@ -261,41 +263,61 @@ export default function TicketsList() {
   }
 
   return (
-    <TableWrapper
-      data={ticketsData}
-      columns={visibleColumns}
-      title="Tickets"
-      renderCell={renderCell}
-      itemsPerPage={pageSize}
-      showPagination={true}
-      ariaLabel="Tickets table"
-      onRowClick={handleRowClick}
-      showCreateButton={true}
-      onCreateClick={handleCreateClick}
-      // Search component
-      searchComponent={
-        <SearchInput
-          value={searchInput}
-          onChange={setSearchInput}
-          placeholder="Search tickets..."
-        />
-      }
-      // Column selector component
-      columnSelectorComponent={
-        <ColumnSelector
-          allColumns={allColumns}
-          visibleColumnKeys={visibleColumnKeys}
-          alwaysVisibleColumns={alwaysVisibleColumns}
-          onToggleColumn={toggleColumn}
-          onShowAll={showAllColumns}
-          onResetToDefault={resetToDefault}
-        />
-      }
-      // Server-side pagination props
-      serverPagination={true}
-      paginationData={data?.data?.pagination}
-      onPageChange={handlePageChange}
-      onPageSizeChange={handlePageSizeChange}
-    />
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {ticketsSummaryCards.map((card) => {
+          const IconComponent = LucideIcons[card.icon];
+          return (
+            <SummaryCard
+              key={card.id}
+              label={card.label}
+              value={card.getValue(ticketsData)}
+              Icon={IconComponent}
+              valueColor={card.valueColor}
+              iconColor={card.iconColor}
+            />
+          );
+        })}
+      </div>
+
+      {/* Table */}
+      <TableWrapper
+        data={ticketsData}
+        columns={visibleColumns}
+        title="Tickets"
+        renderCell={renderCell}
+        itemsPerPage={pageSize}
+        showPagination={true}
+        ariaLabel="Tickets table"
+        onRowClick={handleRowClick}
+        showCreateButton={true}
+        onCreateClick={handleCreateClick}
+        // Search component
+        searchComponent={
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search tickets..."
+          />
+        }
+        // Column selector component
+        columnSelectorComponent={
+          <ColumnSelector
+            allColumns={allColumns}
+            visibleColumnKeys={visibleColumnKeys}
+            alwaysVisibleColumns={alwaysVisibleColumns}
+            onToggleColumn={toggleColumn}
+            onShowAll={showAllColumns}
+            onResetToDefault={resetToDefault}
+          />
+        }
+        // Server-side pagination props
+        serverPagination={true}
+        paginationData={data?.data?.pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
+    </div>
   );
 }
