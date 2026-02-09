@@ -21,19 +21,19 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
   {
-    name: 'campus',
-    label: 'Campus',
-    type: 'text',
-    placeholder: 'Enter source campus name',
-    required: false,
-    showIf: { field: 'allocationType', value: 'REMOTE' },
-  },
-  {
     name: 'assetId',
     label: 'Asset',
     type: 'text',
     placeholder: 'Enter asset ID',
     required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'campus',
+    label: 'Campus',
+    type: 'text',
+    placeholder: 'Enter source campus name',
+    required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
   // Campus Allocation Fields (shown when allocationType === 'CAMPUS')
