@@ -31,7 +31,6 @@ export default function CreateAllocation() {
         // Remote allocation - single user with single asset
         allocationData = {
           allocationType: 'REMOTE',
-          userEmail: values.userEmail,
           userDepartment: values.userDepartment || null,
           userAddress: values.userAddress || null,
           assetId: values.assetId,
