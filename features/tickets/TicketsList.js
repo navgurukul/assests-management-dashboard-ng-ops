@@ -7,6 +7,8 @@ import TableWrapper from '@/components/Table/TableWrapper';
 import SummaryCard from '@/components/atoms/SummaryCard';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
+import FilterDropdown from '@/components/molecules/FilterDropdown';
+import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
@@ -24,6 +26,9 @@ export default function TicketsList() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+
+  // Filter state
+  const [filters, setFilters] = useState({});
 
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -50,7 +55,7 @@ export default function TicketsList() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Build query string with pagination and search
+  // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
     
@@ -59,13 +64,31 @@ export default function TicketsList() {
     
     params.append('page', currentPage);
     params.append('limit', pageSize);
+
+    // Add filters
+    if (filters.campus) params.append('campusId', filters.campus);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.assignee) params.append('assigneeId', filters.assignee);
+    
     return params.toString();
   };
 
-  // Fetch tickets data from API with pagination and search
+  // Fetch tickets data from API with pagination, filters, and search
   const { data, isLoading, isError } = useFetch({
     url: `/tickets?${buildQueryString()}`,
-    queryKey: ['tickets', currentPage, pageSize, debouncedSearch],
+    queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
+  });
+
+  // Fetch campus options from API
+  const { data: campusData } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+  });
+
+  // Fetch users for assignee filter
+  const { data: usersData } = useFetch({
+    url: '/users',
+    queryKey: ['users'],
   });
 
   // Handle page change
@@ -77,6 +100,76 @@ export default function TicketsList() {
   const handlePageSizeChange = (newSize) => {
     setPageSize(newSize);
     setCurrentPage(1); // Reset to first page when changing page size
+  };
+
+  // Handle filter change
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle removing a single filter chip
+  const handleRemoveFilter = (filterKey) => {
+    const newFilters = { ...filters };
+    delete newFilters[filterKey];
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  // Transform campus data from API to filter options
+  const campusOptions = React.useMemo(() => {
+    if (!campusData || !campusData.data) return [];
+    
+    return campusData.data.map((campus) => ({
+      value: campus.id,
+      label: campus.campusName,
+    }));
+  }, [campusData]);
+
+  // Transform users data from API to assignee filter options
+  const assigneeOptions = React.useMemo(() => {
+    if (!usersData || !usersData.data) return [];
+    
+    return usersData.data.map((user) => ({
+      value: user.id,
+      label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+    }));
+  }, [usersData]);
+
+  // Status filter options based on API documentation
+  const filterStatusOptions = [
+    { value: 'OPEN', label: 'Open' },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'RESOLVED', label: 'Resolved' },
+    { value: 'CLOSED', label: 'Closed' },
+    { value: 'REJECTED', label: 'Rejected' },
+  ];
+
+  // Get label for a filter value
+  const getFilterLabel = (filterKey, value) => {
+    if (filterKey === 'campus') {
+      const campus = campusOptions.find(opt => opt.value === value);
+      return campus ? campus.label : value;
+    }
+    if (filterKey === 'status') {
+      const status = filterStatusOptions.find(opt => opt.value === value);
+      return status ? status.label : value;
+    }
+    if (filterKey === 'assignee') {
+      const assignee = assigneeOptions.find(opt => opt.value === value);
+      return assignee ? assignee.label : value;
+    }
+    return value;
+  };
+
+  // Get category name for display
+  const getCategoryName = (filterKey) => {
+    const categoryNames = {
+      campus: 'Campus',
+      status: 'Status',
+      assignee: 'Assigned To'
+    };
+    return categoryNames[filterKey] || filterKey;
   };
 
   const ticketsData = React.useMemo(() => {
@@ -301,6 +394,15 @@ export default function TicketsList() {
             placeholder="Search tickets..."
           />
         }
+        // Filter component
+        filterComponent={
+          <FilterDropdown
+            onFilterChange={handleFilterChange}
+            campusOptions={campusOptions}
+            statusOptions={filterStatusOptions}
+            selectedFilters={filters}
+          />
+        }
         // Column selector component
         columnSelectorComponent={
           <ColumnSelector
@@ -310,6 +412,15 @@ export default function TicketsList() {
             onToggleColumn={toggleColumn}
             onShowAll={showAllColumns}
             onResetToDefault={resetToDefault}
+          />
+        }
+        // Active filters chips component
+        activeFiltersComponent={
+          <ActiveFiltersChips
+            filters={filters}
+            onRemoveFilter={handleRemoveFilter}
+            getCategoryName={getCategoryName}
+            getFilterLabel={getFilterLabel}
           />
         }
         // Server-side pagination props
