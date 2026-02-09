@@ -2,14 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreVertical, ExternalLink, Eye } from 'lucide-react';
+import { MoreVertical, ExternalLink, Eye, ChevronDown, Package, Truck } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
 import ActionMenu from '@/components/molecules/ActionMenu';
+import FormModal from '@/components/molecules/FormModal';
+import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
+import { useQueryClient } from '@tanstack/react-query';
+import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -18,12 +22,20 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/consignmentTableConfig';
 import { transformConsignmentForTable } from '@/app/utils/dataTransformers';
-import { consignmentsListData } from '@/dummyJson/dummyJson';
+import { consignmentsListData, allocationsListData } from '@/dummyJson/dummyJson';
+import {
+  createConsignmentFields,
+  readyToDispatchFields,
+  addTransitFields,
+  courierProviders,
+} from '@/app/config/formConfigs/consignmentFormConfig';
+import { toast } from '@/app/utils/toast';
 
 const actionOptions = ['View', 'Details', 'Update Status'];
 
 export default function ConsignmentsList() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,6 +50,22 @@ export default function ConsignmentsList() {
   
   // Menu state
   const [openMenuId, setOpenMenuId] = useState(null);
+  
+  // Status dropdown state
+  const [openStatusDropdownId, setOpenStatusDropdownId] = useState(null);
+  
+  // Asset list modal state
+  const [openAssetListId, setOpenAssetListId] = useState(null);
+  
+  // Modal states for different actions
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDispatchModalOpen, setIsDispatchModalOpen] = useState(false);
+  const [isTransitModalOpen, setIsTransitModalOpen] = useState(false);
+  const [currentConsignment, setCurrentConsignment] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Dynamic form fields state for create modal
+  const [createFormFields, setCreateFormFields] = useState(createConsignmentFields);
   
   // Column visibility management
   const {
@@ -54,17 +82,33 @@ export default function ConsignmentsList() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
-      setCurrentPage(1); // Reset to first page when search changes
+      setCurrentPage(1);
     }, 800);
     
     return () => clearTimeout(timer);
   }, [searchInput]);
   
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openStatusDropdownId !== null) {
+        setOpenStatusDropdownId(null);
+      }
+      if (openAssetListId !== null) {
+        setOpenAssetListId(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [openStatusDropdownId, openAssetListId]);
+  
   // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
     
-    // Add search parameter first
     if (debouncedSearch) params.append('search', debouncedSearch);
     
     params.append('page', currentPage);
@@ -97,13 +141,13 @@ export default function ConsignmentsList() {
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
     setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
   
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
   
   // Handle removing a single filter chip
@@ -126,12 +170,22 @@ export default function ConsignmentsList() {
   
   // Status filter options
   const statusOptions = [
-    { value: 'PENDING', label: 'Pending' },
-    { value: 'IN_TRANSIT', label: 'In Transit' },
-    { value: 'DELIVERED', label: 'Delivered' },
-    { value: 'CANCELLED', label: 'Cancelled' },
-    { value: 'RETURNED', label: 'Returned' },
+    { value: 'draft', label: 'Draft' },
+    { value: 'dispatched', label: 'Dispatched' },
+    { value: 'in_transit', label: 'In Transit' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'cancelled', label: 'Cancelled' },
   ];
+  
+  // Get category name for filter key
+  const getCategoryName = (filterKey) => {
+    const categoryNames = {
+      status: 'Status',
+      courier: 'Courier Service',
+      allocation: 'Allocation'
+    };
+    return categoryNames[filterKey] || filterKey;
+  };
   
   // Get label for a filter value
   const getFilterLabel = (filterKey, value) => {
@@ -162,11 +216,61 @@ export default function ConsignmentsList() {
   
   // Process API data to table format
   const tableData = React.useMemo(() => {
-    // Use dummy data if API data is not available (for development/testing)
-    const sourceData = (data && data.data) ? data.data : consignmentsListData;
+    let sourceData = (data && data.data) ? data.data : consignmentsListData;
+    
+    // Apply client-side filtering for dummy data
+    if (!data || !data.data) {
+      sourceData = sourceData.filter((consignment) => {
+        // Filter by status
+        if (filters.status && consignment.status !== filters.status) {
+          return false;
+        }
+        
+        // Filter by courier service
+        if (filters.courier) {
+          const courierServiceId = consignment.courierService?.id || consignment.courierServiceId;
+          if (courierServiceId !== filters.courier && courierServiceId !== parseInt(filters.courier)) {
+            return false;
+          }
+        }
+        
+        // Filter by allocation
+        if (filters.allocation) {
+          const allocationId = consignment.allocation?.id || consignment.allocationId;
+          if (allocationId !== filters.allocation && allocationId !== parseInt(filters.allocation)) {
+            return false;
+          }
+        }
+        
+        // Filter by search
+        if (debouncedSearch) {
+          const searchLower = debouncedSearch.toLowerCase();
+          const searchableFields = [
+            consignment.consignmentCode,
+            consignment.code,
+            consignment.trackingId,
+            consignment.allocation?.allocationCode,
+            consignment.allocationCode,
+            consignment.source,
+            consignment.destination,
+            consignment.allocation?.sourceCampus?.name,
+            consignment.allocation?.destinationCampus?.name,
+          ].filter(Boolean);
+          
+          const matchesSearch = searchableFields.some(field => 
+            String(field).toLowerCase().includes(searchLower)
+          );
+          
+          if (!matchesSearch) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
+    }
     
     return sourceData.map((consignment) => {
-      // Use transformer if available, otherwise format directly
       if (typeof transformConsignmentForTable === 'function') {
         return transformConsignmentForTable(consignment);
       }
@@ -178,49 +282,213 @@ export default function ConsignmentsList() {
         status: consignment.status,
         allocationCode: consignment.allocation?.allocationCode || consignment.allocationCode || '-',
         courierService: consignment.courierService?.name || consignment.courierServiceName || '-',
+        courierServiceId: consignment.courierService?.id || consignment.courierServiceId || '',
         source: consignment.source || consignment.allocation?.sourceCampus?.name || '-',
         destination: consignment.destination || consignment.allocation?.destinationCampus?.name || '-',
         shippedAt: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : '-',
         estimatedDeliveryDate: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : '-',
         trackingId: consignment.trackingId || '-',
+        trackingLink: consignment.trackingLink || '',
         assetCount: consignment.assets?.length || consignment.assetCount || 0,
         deliveredAt: consignment.deliveredAt ? new Date(consignment.deliveredAt).toLocaleDateString() : '-',
         createdBy: consignment.createdBy?.name || '-',
         createdAt: consignment.createdAt ? new Date(consignment.createdAt).toLocaleDateString() : '-',
+        allocationId: consignment.allocation?.id || consignment.allocationId || '',
       };
     });
-  }, [data]);
+  }, [data, filters, debouncedSearch]);
   
   // Get pagination metadata
-  const totalItems = data?.pagination?.total || data?.total || consignmentsListData.length;
+  const totalItems = data?.pagination?.total || data?.total || tableData.length;
   const totalPages = data?.pagination?.totalPages || Math.ceil(totalItems / pageSize) || 1;
   
   // Handle row click - navigate to details page
   const handleRowClick = (item) => {
-    // Store consignment data in sessionStorage for details page
     if (typeof window !== 'undefined') {
-      // Find the full consignment data from the original API response or dummy data
       const sourceData = (data && data.data) ? data.data : consignmentsListData;
       const fullConsignment = sourceData.find(c => c.id === item.id);
       if (fullConsignment) {
         sessionStorage.setItem('currentConsignmentData', JSON.stringify(fullConsignment));
       } else if (item.consignmentData) {
-        // Fallback to transformed data if available
         sessionStorage.setItem('currentConsignmentData', JSON.stringify(item.consignmentData));
       }
     }
     router.push(`/consignments/${item.id}`);
   };
   
-  // Handle create button click
+  // ============================================
+  // MODAL HANDLERS
+  // ============================================
+  
+  // Handle create consignment click
   const handleCreateClick = () => {
-    router.push('/consignments/create');
+    setIsCreateModalOpen(true);
+  };
+  
+  // Handle create consignment submit
+  const handleCreateConsignment = async (formData) => {
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading('Creating consignment...');
+    
+    try {
+      const selectedAllocation = allocationsListData.find(
+        alloc => alloc.id === parseInt(formData.allocationId) || alloc.id === formData.allocationId
+      );
+      
+      if (!selectedAllocation) {
+        throw new Error('Allocation not found');
+      }
+      
+      const payload = {
+        allocationId: formData.allocationId,
+        assetIds: formData.assets,
+        status: 'draft',
+        source: formData.source,
+        destination: formData.destination,
+      };
+
+      console.log('Creating consignment with payload:', payload);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.dismiss(loadingToastId);
+      toast.success('Consignment created successfully with status: Draft');
+      
+      setIsCreateModalOpen(false);
+      queryClient.invalidateQueries(['consignments']);
+      
+    } catch (error) {
+      console.error('Error creating consignment:', error);
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to create consignment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Handle dispatch
+  const handleReadyToDispatch = (consignment) => {
+    setCurrentConsignment(consignment);
+    setIsDispatchModalOpen(true);
+  };
+  
+  const handleDispatchConsignment = async (formData) => {
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading('Dispatching consignment...');
+    
+    try {
+      const payload = {
+        consignmentId: currentConsignment.id,
+        courierServiceId: formData.courierServiceId,
+        status: 'dispatched',
+      };
+
+      console.log('Dispatching consignment with payload:', payload);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.dismiss(loadingToastId);
+      toast.success('Consignment dispatched successfully!');
+      
+      setIsDispatchModalOpen(false);
+      setCurrentConsignment(null);
+      queryClient.invalidateQueries(['consignments']);
+      
+    } catch (error) {
+      console.error('Error dispatching consignment:', error);
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to dispatch consignment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Handle add transit
+  const handleAddTransit = (consignment) => {
+    setCurrentConsignment(consignment);
+    setIsTransitModalOpen(true);
+  };
+  
+  const handleStartTransit = async (formData) => {
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading('Starting transit...');
+    
+    try {
+      const payload = {
+        consignmentId: currentConsignment.id,
+        trackingId: formData.trackingId,
+        trackingLink: formData.trackingLink,
+        status: 'in_transit',
+      };
+
+      console.log('Starting transit with payload:', payload);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.dismiss(loadingToastId);
+      toast.success('Transit started successfully!');
+      
+      setIsTransitModalOpen(false);
+      setCurrentConsignment(null);
+      queryClient.invalidateQueries(['consignments']);
+      
+    } catch (error) {
+      console.error('Error starting transit:', error);
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to start transit');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Handle form data change in create modal to populate assets
+  const handleCreateFormDataChange = (formData, field) => {
+    if (field.name === 'allocationId' && formData.allocationId) {
+      const selectedAllocation = allocationsListData.find(
+        alloc => alloc.id === parseInt(formData.allocationId) || alloc.id === formData.allocationId
+      );
+      
+      if (selectedAllocation) {
+        const assets = selectedAllocation.assets || [];
+        const source = selectedAllocation.sourceCampus?.name || '';
+        const destination = selectedAllocation.destinationCampus?.name || '';
+        
+        const assetOptions = assets.map(asset => ({
+          value: asset.id,
+          label: asset.assetTag,
+        }));
+        
+        setCreateFormFields(prev =>
+          prev.map(f => {
+            if (f.name === 'assets') {
+              return { ...f, options: assetOptions };
+            }
+            if (f.name === 'source') {
+              return { ...f, defaultValue: source };
+            }
+            if (f.name === 'destination') {
+              return { ...f, defaultValue: destination };
+            }
+            return f;
+          })
+        );
+      }
+    }
+  };
+  
+  const handleStatusChange = async (consignmentId, newStatus) => {
+    try {
+      setOpenStatusDropdownId(null);
+      console.log(`Updating consignment ${consignmentId} status to ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
-  // Show loading only on initial load (when we're actually waiting for API and not using dummy data)
+  // Show loading only on initial load
   const showLoading = isLoading && !consignmentsListData;
 
-  // Error state - only show warning banner, not full-page error (since we have dummy data fallback)
+  // Error state
   const showErrorBanner = isError && !data;
   
   // Render cell content with custom formatting
@@ -235,38 +503,115 @@ export default function ConsignmentsList() {
           </span>
         );
         
-      case 'status':
-        const statusColors = {
-          'PENDING': 'bg-yellow-100 text-yellow-800',
-          'IN_TRANSIT': 'bg-blue-100 text-blue-800',
-          'DELIVERED': 'bg-green-100 text-green-800',
-          'CANCELLED': 'bg-red-100 text-red-800',
-          'RETURNED': 'bg-orange-100 text-orange-800',
-        };
+      case 'assetCount':
+        const sourceData = (data && data.data) ? data.data : consignmentsListData;
+        const fullConsignment = sourceData.find(c => c.id === item.id);
+        const assets = fullConsignment?.assets || [];
+        
         return (
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue?.replace('_', ' ')}
-          </span>
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenAssetListId(openAssetListId === item.id ? null : item.id);
+              }}
+              className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
+            >
+              {cellValue}
+            </button>
+            
+            {openAssetListId === item.id && (
+              <div className="absolute z-50 mt-1 left-0 w-64 bg-white rounded-md shadow-xl border border-gray-200">
+                <div className="py-2 px-3 bg-gray-50 border-b border-gray-200">
+                  <h4 className="font-semibold text-sm text-gray-700">Asset Tags ({assets.length})</h4>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {assets.length > 0 ? (
+                    <div className="py-1">
+                      {assets.map((asset, index) => (
+                        <div
+                          key={asset.id || index}
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                        >
+                          {asset.assetTag}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                      No assets found
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+        
+      case 'status':
+        const normalizedStatus = cellValue?.toLowerCase().replace(/\s+/g, '_');
+        const statusColors = {
+          'draft': 'bg-gray-100 text-gray-800 border border-gray-300',
+          'dispatched': 'bg-amber-100 text-amber-800 border border-amber-300',
+          'in_transit': 'bg-blue-100 text-blue-800 border border-blue-300',
+          'delivered': 'bg-green-100 text-green-800 border border-green-300',
+          'cancelled': 'bg-red-100 text-red-800 border border-red-300',
+        };
+        
+        return (
+          <div className="relative">
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center ${statusColors[normalizedStatus] || 'bg-gray-100 text-gray-800 border border-gray-300'}`}>
+              {cellValue}
+            </span>
+          </div>
         );
         
       case 'actions':
+        const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
         const menuOptions = [];
         
         // Always add Show Details option
         menuOptions.push({
           label: 'Show Details',
           icon: Eye,
+          iconClassName: 'text-blue-600',
           onClick: () => {
-            router.push(`/consignments/${item.id}`);
+            handleRowClick(item);
             setOpenMenuId(null);
           },
         });
+        
+        // Status-based action options
+        if (normalizedItemStatus === 'draft') {
+          menuOptions.push({
+            label: 'Dispatch',
+            icon: Package,
+            iconClassName: 'text-green-600',
+            onClick: () => {
+              handleReadyToDispatch(item);
+              setOpenMenuId(null);
+            },
+          });
+        }
+        
+        if (normalizedItemStatus === 'dispatched') {
+          menuOptions.push({
+            label: 'Add Transit',
+            icon: Truck,
+            iconClassName: 'text-amber-600',
+            onClick: () => {
+              handleAddTransit(item);
+              setOpenMenuId(null);
+            },
+          });
+        }
         
         // Add Track option if tracking ID exists
         if (item.trackingId && item.trackingId !== '-') {
           menuOptions.push({
             label: 'Track Consignment',
             icon: ExternalLink,
+            iconClassName: 'text-purple-600',
             onClick: () => {
               window.open(`https://www.google.com/search?q=${encodeURIComponent(item.trackingId + ' tracking')}`, '_blank');
               setOpenMenuId(null);
@@ -300,9 +645,24 @@ export default function ConsignmentsList() {
     }
   };
 
+  // Get transit modal fields with pre-filled courier
+  const getTransitModalFields = () => {
+    if (!currentConsignment) return addTransitFields;
+    
+    const courierName = courierProviders.find(
+      c => c.id === currentConsignment.courierServiceId
+    )?.name || currentConsignment.courierService || 'Not Set';
+    
+    return addTransitFields.map(field => {
+      if (field.name === 'courierServiceId') {
+        return { ...field, defaultValue: courierName };
+      }
+      return field;
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Error Banner - show when API fails but we're using dummy data */}
       {showErrorBanner && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
           <div className="flex">
@@ -321,20 +681,17 @@ export default function ConsignmentsList() {
       )}
       
       <TableWrapper
-        key={`table-${openMenuId || 'none'}`}
+        key={`table-${openMenuId || 'none'}-${openStatusDropdownId || 'none'}-${openAssetListId || 'none'}`}
         data={tableData}
         columns={visibleColumns}
         title="Consignments"
         renderCell={renderCell}
-        onRowClick={handleRowClick}
         itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Consignments table"
         showCreateButton={true}
         onCreateClick={handleCreateClick}
-        // Loading state
         isLoading={showLoading}
-        // Search component
         searchComponent={
           <SearchInput
             value={searchInput}
@@ -342,15 +699,13 @@ export default function ConsignmentsList() {
             placeholder="Search consignments..."
           />
         }
-        // Filter component
         filterComponent={
           <FilterDropdown
-            filters={filtersConfig}
-            activeFilters={filters}
+            statusOptions={statusOptions}
+            selectedFilters={filters}
             onFilterChange={handleFilterChange}
           />
         }
-        // Column selector component
         columnSelectorComponent={
           <ColumnSelector
             allColumns={allColumns}
@@ -361,21 +716,63 @@ export default function ConsignmentsList() {
             onReset={resetToDefault}
           />
         }
-        // Active filters chips component
         activeFiltersComponent={
           Object.keys(filters).length > 0 && (
             <ActiveFiltersChips
               filters={filters}
+              getCategoryName={getCategoryName}
               getFilterLabel={getFilterLabel}
               onRemoveFilter={handleRemoveFilter}
             />
           )
         }
-        // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
+      />
+      
+      {/* Create Consignment Modal */}
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        componentName="Consignment"
+        actionType="Create"
+        fields={createFormFields}
+        onSubmit={handleCreateConsignment}
+        size="large"
+        isSubmitting={isSubmitting}
+        onFormDataChange={handleCreateFormDataChange}
+      />
+      
+      {/* Dispatch Modal */}
+      <FormModal
+        isOpen={isDispatchModalOpen}
+        onClose={() => {
+          setIsDispatchModalOpen(false);
+          setCurrentConsignment(null);
+        }}
+        componentName="Consignment"
+        actionType="Dispatch"
+        fields={readyToDispatchFields}
+        onSubmit={handleDispatchConsignment}
+        size="medium"
+        isSubmitting={isSubmitting}
+      />
+      
+      {/* Add Transit Modal */}
+      <FormModal
+        isOpen={isTransitModalOpen}
+        onClose={() => {
+          setIsTransitModalOpen(false);
+          setCurrentConsignment(null);
+        }}
+        componentName="Consignment"
+        actionType="Start Transit"
+        fields={getTransitModalFields()}
+        onSubmit={handleStartTransit}
+        size="medium"
+        isSubmitting={isSubmitting}
       />
     </div>
   );

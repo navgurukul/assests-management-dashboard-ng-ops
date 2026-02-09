@@ -20,7 +20,7 @@ export const consignmentTableColumns = [
   // 2. Asset Tags
   { 
     key: 'assetCount', 
-    label: 'ASSET TAGS',
+    label: 'ASSETS',
     description: 'Number of assets in consignment'
   },
   

@@ -110,18 +110,22 @@ export default function ApiAutocomplete({
           isDisabled={isDisabled || isLoading}
           isInvalid={isInvalid}
           errorMessage={errorMessage}
-          defaultItems={safeItems}
+          items={safeItems}
           selectedKey={value || null}
           onSelectionChange={handleSelectionChange}
           onBlur={onBlur}
           isLoading={isLoading}
           radius="lg"
+          menuTrigger="focus"
+          showScrollIndicators={false}
           classNames={{
             base: "w-full",
             inputWrapper: "border-0 hover:border-0 focus-within:!border-0 shadow-none bg-white",
             input: "text-gray-900",
+            selectorButton: "text-gray-400",
           }}
           listboxProps={{
+            emptyContent: "No results found",
             itemClasses: {
               base: "text-gray-900 data-[hover=true]:bg-gray-100 data-[selected=true]:bg-blue-50",
             },

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import useFetch from '@/app/hooks/query/useFetch';
+import { allocationsListData } from '@/dummyJson/dummyJson';
 
 /**
  * Builds the final API URL with query parameters
@@ -81,11 +82,21 @@ const buildQueryKey = (name, queryKey, dependsOn, dependentValue, additionalPara
  * @returns {array} Extracted data array
  */
 const extractNestedData = (data, dataPath) => {
-  if (!dataPath) {
-    return data?.data || [];
+  if (!data) {
+    return [];
   }
   
-  return dataPath.split('.').reduce((acc, part) => acc?.[part], data) || [];
+  if (!dataPath) {
+    // If data is already an array, return it directly
+    if (Array.isArray(data)) {
+      return data;
+    }
+    // Otherwise try to get data.data property
+    return Array.isArray(data?.data) ? data.data : [];
+  }
+  
+  const extracted = dataPath.split('.').reduce((acc, part) => acc?.[part], data);
+  return Array.isArray(extracted) ? extracted : [];
 };
 
 /**
@@ -158,6 +169,9 @@ export const useApiAutocomplete = ({
   value,
   valueKey = 'id',
 }) => {
+  // For allocation fields, always use dummy data as fallback
+  const isAllocationField = apiUrl?.includes('/allocations');
+  
   // Build final API URL with all parameters
   const finalApiUrl = useMemo(
     () => buildApiUrl(apiUrl, dependsOn, dependentValue, additionalParams),
@@ -183,15 +197,26 @@ export const useApiAutocomplete = ({
 
   // Process and prepare items for display
   const items = useMemo(() => {
+    // For allocation requests, use dummy data immediately as default
+    if (isAllocationField) {
+      return allocationsListData;
+    }
+    
     // Extract data from nested path if specified
     const allItems = extractNestedData(data, dataPath);
+
+    // Use dummy data if API returns no items or has an error
+    const hasData = Array.isArray(allItems) && allItems.length > 0;
+    const shouldUseFallback = (!hasData || isError) && isAllocationField;
+    
+    const finalItems = shouldUseFallback ? allocationsListData : allItems;
     
     // Filter by category if specified
-    const filteredItems = filterByCategory(allItems, filterCategory);
+    const filteredItems = filterByCategory(finalItems, filterCategory);
     
     // Add selected item if needed
     return prepareItems(filteredItems, selectedItem, value, valueKey);
-  }, [data, dataPath, filterCategory, selectedItem, value, valueKey]);
+  }, [data, dataPath, filterCategory, selectedItem, value, valueKey, isAllocationField, isError]);
 
   return {
     items,
