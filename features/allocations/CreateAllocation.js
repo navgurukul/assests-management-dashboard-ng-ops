@@ -32,8 +32,6 @@ export default function CreateAllocation() {
         allocationData = {
           allocationType: 'REMOTE',
           userEmail: values.userEmail,
-          userName: values.userName,
-          userPhone: values.userPhone || null,
           userDepartment: values.userDepartment || null,
           userAddress: values.userAddress || null,
           assetId: values.assetId,
