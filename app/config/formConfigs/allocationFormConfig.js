@@ -13,14 +13,6 @@ export const allocationFormFields = [
   },
   // Remote Allocation Fields (shown when allocationType === 'REMOTE')
   {
-    name: 'userAddress',
-    label: 'User Address',
-    type: 'textarea',
-    placeholder: 'Enter user address',
-    required: false,
-    showIf: { field: 'allocationType', value: 'REMOTE' },
-  },
-  {
     name: 'assetId',
     label: 'Asset',
     type: 'text',
@@ -33,6 +25,14 @@ export const allocationFormFields = [
     label: 'Campus',
     type: 'text',
     placeholder: 'Enter source campus name',
+    required: false,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'userAddress',
+    label: 'User Address',
+    type: 'textarea',
+    placeholder: 'Enter user address',
     required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
