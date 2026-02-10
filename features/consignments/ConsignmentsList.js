@@ -133,6 +133,12 @@ export default function ConsignmentsList() {
     queryKey: ['courier-services'],
   });
 
+  // Fetch campuses from API
+  const { data: campusData } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+  });
+
   // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -167,14 +173,36 @@ export default function ConsignmentsList() {
       label: courier.name,
     }));
   }, [courierData]);
+
+  // Transform campus data from API to filter options
+  const campusOptions = React.useMemo(() => {
+    if (!campusData || !campusData.data) return [];
+    
+    return campusData.data.map((campus) => ({
+      value: campus.id,
+      label: campus.campusName || campus.name,
+    }));
+  }, [campusData]);
+
+  // Update createFormFields when campus options are available
+  useEffect(() => {
+    if (campusOptions.length > 0) {
+      setCreateFormFields(prev =>
+        prev.map(field => {
+          if (field.type === 'filter-group') {
+            return { ...field, campusOptions };
+          }
+          return field;
+        })
+      );
+    }
+  }, [campusOptions]);
   
   // Status filter options
   const statusOptions = [
     { value: 'draft', label: 'Draft' },
     { value: 'dispatched', label: 'Dispatched' },
-    { value: 'in_transit', label: 'In Transit' },
     { value: 'delivered', label: 'Delivered' },
-    { value: 'cancelled', label: 'Cancelled' },
   ];
   
   // Get category name for filter key
@@ -331,20 +359,21 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Creating consignment...');
     
     try {
-      const selectedAllocation = allocationsListData.find(
-        alloc => alloc.id === parseInt(formData.allocationId) || alloc.id === formData.allocationId
-      );
+      // Validate that we have allocation and assets
+      if (!formData.allocationId) {
+        throw new Error('Please select an allocation');
+      }
       
-      if (!selectedAllocation) {
-        throw new Error('Allocation not found');
+      if (!formData.selectedAssets || formData.selectedAssets.length === 0) {
+        throw new Error('Please select at least one asset');
       }
       
       const payload = {
         allocationId: formData.allocationId,
-        assetIds: formData.assets,
+        assetIds: formData.selectedAssets.map(asset => asset.id || asset.assetId),
         status: 'draft',
-        source: formData.source,
-        destination: formData.destination,
+        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.source,
+        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destination,
       };
 
       console.log('Creating consignment with payload:', payload);
@@ -372,6 +401,26 @@ export default function ConsignmentsList() {
     setIsDispatchModalOpen(true);
   };
   
+  // Handle dispatch form data change to auto-populate tracking link
+  const handleDispatchFormDataChange = (formData, field) => {
+    // Only process when courier service changes
+    if (field.name === 'courierServiceId' && formData.courierServiceId) {
+      // Find the selected courier provider
+      const selectedCourier = courierProviders.find(
+        courier => courier.id === formData.courierServiceId
+      );
+      
+      // Auto-populate the tracking link field with the pattern
+      if (selectedCourier && selectedCourier.trackingUrlPattern) {
+        // This will be handled by the FormModal's form data update
+        return {
+          ...formData,
+          trackingLink: selectedCourier.trackingUrlPattern,
+        };
+      }
+    }
+  };
+  
   const handleDispatchConsignment = async (formData) => {
     setIsSubmitting(true);
     const loadingToastId = toast.loading('Dispatching consignment...');
@@ -380,6 +429,8 @@ export default function ConsignmentsList() {
       const payload = {
         consignmentId: currentConsignment.id,
         courierServiceId: formData.courierServiceId,
+        trackingId: formData.trackingId,
+        trackingLink: formData.trackingLink || null,
         status: 'dispatched',
       };
 
@@ -736,13 +787,13 @@ export default function ConsignmentsList() {
       <FormModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        componentName="Consignment"
         actionType="Create"
         fields={createFormFields}
         onSubmit={handleCreateConsignment}
         size="large"
         isSubmitting={isSubmitting}
         onFormDataChange={handleCreateFormDataChange}
+        helpText="Select an allocation and choose assets to create a new consignment"
       />
       
       {/* Dispatch Modal */}
@@ -752,12 +803,13 @@ export default function ConsignmentsList() {
           setIsDispatchModalOpen(false);
           setCurrentConsignment(null);
         }}
-        componentName="Consignment"
         actionType="Dispatch"
         fields={readyToDispatchFields}
         onSubmit={handleDispatchConsignment}
         size="medium"
         isSubmitting={isSubmitting}
+        onFormDataChange={handleDispatchFormDataChange}
+        helpText="Enter courier partner details and tracking information to dispatch the consignment"
       />
       
       {/* Add Transit Modal */}

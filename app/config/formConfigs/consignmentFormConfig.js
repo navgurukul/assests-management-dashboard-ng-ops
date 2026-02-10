@@ -29,6 +29,11 @@ export const courierProviders = [
     name: 'Flipkart Logistics',
     trackingUrlPattern: 'https://www.flipkart.com/tracking/order/{trackingId}',
   },
+  {
+    id: 'shiprocket',
+    name: 'Shiprocket',
+    trackingUrlPattern: 'https://shiprocket.co/tracking/{trackingId}',
+  },
 ];
 
 // ============================================
@@ -37,102 +42,27 @@ export const courierProviders = [
 
 export const createConsignmentFields = [
   {
-    name: 'filterGroup',
-    type: 'filter-group',
-    filters: [
-      {
-        name: 'enableCampusFilter',
-        label: 'Campus',
-        filterFieldName: 'campusId',
-        filterField: {
-          name: 'campusId',
-          label: '',
-          type: 'api-autocomplete',
-          placeholder: 'Select campus',
-          apiUrl: baseUrl + '/campuses',
-          queryKey: ['campuses'],
-          labelKey: 'campusName',
-          valueKey: 'id',
-        },
-      },
-      {
-        name: 'enableDateFilter',
-        label: 'Date',
-        filterFieldName: 'dateFilter',
-        filterField: {
-          name: 'dateFilter',
-          label: '',
-          type: 'date',
-          placeholder: 'Select date',
-        },
-      },
-    ],
-    required: false,
-  },
-  {
-    name: 'allocationId',
-    label: 'Allocation ID',
-    type: 'api-autocomplete',
-    placeholder: 'Search and select allocation',
+    name: 'allocationSelector',
+    label: 'Select Allocation',
+    type: 'allocation-consignment-selector',
+    required: true,
     apiUrl: baseUrl + '/allocations',
     queryKey: ['allocations'],
-    labelKey: 'allocationCode',
-    valueKey: 'id',
-    required: true,
-    buildAdditionalParams: (formData) => {
-      const params = {};
-      if (formData.enableCampusFilter && formData.campusId) {
-        params.campusId = formData.campusId;
-      }
-      if (formData.enableDateFilter && formData.dateFilter) {
-        params.date = formData.dateFilter;
-      }
-      return params;
-    },
-  },
-  {
-    name: 'assets',
-    label: 'Assets',
-    type: 'multi-select',
-    placeholder: 'Select assets from the allocation',
-    options: [], // Will be populated dynamically
-    required: true,
-    description: 'Select one or multiple assets from this allocation',
-  },
-  {
-    name: 'source',
-    label: 'Source',
-    type: 'text',
-    placeholder: 'Auto-populated from allocation',
-    required: false,
-    disabled: true,
-  },
-  {
-    name: 'destination',
-    label: 'Destination',
-    type: 'text',
-    placeholder: 'Auto-populated from allocation',
-    required: false,
-    disabled: true,
+    filterStatus: 'ALLOCATED', // Only show allocations with ALLOCATED status
   },
 ];
 
 export const createConsignmentValidation = Yup.object().shape({
-  allocationId: Yup.string().required('Allocation ID is required'),
-  assets: Yup.array()
+  allocationId: Yup.string().required('Allocation is required'),
+  selectedAssets: Yup.array()
     .min(1, 'At least one asset must be selected')
     .required('Assets are required'),
 });
 
 export const createConsignmentInitialValues = {
-  enableCampusFilter: false,
-  campusId: '',
-  enableDateFilter: false,
-  dateFilter: '',
   allocationId: '',
-  assets: [],
-  source: '',
-  destination: '',
+  selectedAssets: [],
+  allocationDetails: null,
 };
 
 // ============================================
@@ -142,7 +72,7 @@ export const createConsignmentInitialValues = {
 export const readyToDispatchFields = [
   {
     name: 'courierServiceId',
-    label: 'Courier Partner',
+    label: 'Courier Partner Name',
     type: 'select',
     placeholder: 'Select courier service provider',
     options: courierProviders.map(courier => ({
@@ -151,14 +81,31 @@ export const readyToDispatchFields = [
     })),
     required: true,
   },
+  {
+    name: 'trackingId',
+    label: 'Tracking ID',
+    type: 'text',
+    placeholder: 'Enter tracking ID',
+    required: true,
+  },
+  {
+    name: 'trackingLink',
+    label: 'Link (optional)',
+    type: 'text',
+    placeholder: 'Enter tracking link (optional)',
+    required: false,
+  },
 ];
 
 export const readyToDispatchValidation = Yup.object().shape({
   courierServiceId: Yup.string().required('Courier partner is required'),
+  trackingId: Yup.string().required('Tracking ID is required'),
 });
 
 export const readyToDispatchInitialValues = {
   courierServiceId: '',
+  trackingId: '',
+  trackingLink: '',
 };
 
 // ============================================
