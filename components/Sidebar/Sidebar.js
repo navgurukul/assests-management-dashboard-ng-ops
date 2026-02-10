@@ -84,9 +84,9 @@ export default function Sidebar() {
             className='border px-2 border-gray-500 bg-white rounded-md shadow-md'
           >
             <Link
-              href="/profile"
+              href="/userprofile"
               className={`flex items-center justify-center px-4 py-3 rounded-lg transition-colors ${
-                pathname === '/profile'
+                pathname === '/userprofile'
                   ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
@@ -96,9 +96,9 @@ export default function Sidebar() {
           </Tooltip>
         ) : (
           <Link
-            href="/profile"
+            href="/userprofile"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              pathname === '/profile'
+              pathname === '/userprofile'
                 ? 'bg-blue-50 text-blue-600 font-medium'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
