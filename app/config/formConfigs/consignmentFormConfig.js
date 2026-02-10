@@ -109,47 +109,6 @@ export const readyToDispatchInitialValues = {
 };
 
 // ============================================
-// STEP 3: Add Transit (In Transit Status)
-// ============================================
-
-export const addTransitFields = [
-  {
-    name: 'courierServiceId',
-    label: 'Courier Partner',
-    type: 'text',
-    placeholder: 'Courier partner',
-    required: false,
-    disabled: true,
-    description: 'Pre-filled from dispatch step',
-  },
-  {
-    name: 'trackingId',
-    label: 'Tracking ID',
-    type: 'text',
-    placeholder: 'Enter tracking ID',
-    required: true,
-  },
-  {
-    name: 'trackingLink',
-    label: 'Tracking Link',
-    type: 'text',
-    placeholder: 'Enter tracking link',
-    required: false,
-  },
-];
-
-export const addTransitValidation = Yup.object().shape({
-  trackingId: Yup.string().required('Tracking ID is required'),
-  trackingLink: Yup.string().url('Must be a valid URL').nullable(),
-});
-
-export const addTransitInitialValues = {
-  courierServiceId: '',
-  trackingId: '',
-  trackingLink: '',
-};
-
-// ============================================
 // Legacy/Full Form Config (Kept for reference)
 // ============================================
 

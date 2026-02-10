@@ -257,15 +257,15 @@ export const componentsPageData = [
 ];
 
 export const consignmentsPageData = [
-  { id: 1, code: 'CON-SARJ-241119-REPR-001', courier: 'DTDC', fromTo: 'Sarj -> Vendor', status: 'IN TRANSIT' },
+  { id: 1, code: 'CON-SARJ-241119-REPR-001', courier: 'DTDC', fromTo: 'Sarj -> Vendor', status: 'DISPATCHED' },
   { id: 2, code: 'CON-PUNE-221119-TRNF-003', courier: 'Bluedart', fromTo: 'Pune -> Himachal', status: 'DELIVERED' },
-  { id: 3, code: 'CON-HIMA-201119-REPR-005', courier: 'Delhivery', fromTo: 'Himachal -> Vendor', status: 'IN TRANSIT' },
+  { id: 3, code: 'CON-HIMA-201119-REPR-005', courier: 'Delhivery', fromTo: 'Himachal -> Vendor', status: 'DISPATCHED' },
   { id: 4, code: 'CON-DANT-181119-TRNF-007', courier: 'DTDC', fromTo: 'Dantewada -> Pune', status: 'DELIVERED' },
-  { id: 5, code: 'CON-JABA-151119-REPR-009', courier: 'Bluedart', fromTo: 'Jabalpur -> Vendor', status: 'IN TRANSIT' },
+  { id: 5, code: 'CON-JABA-151119-REPR-009', courier: 'Bluedart', fromTo: 'Jabalpur -> Vendor', status: 'DISPATCHED' },
   { id: 6, code: 'CON-UDAI-131119-TRNF-011', courier: 'Delhivery', fromTo: 'Udaipur -> Raipur', status: 'DELIVERED' },
-  { id: 7, code: 'CON-RAIP-111119-REPR-013', courier: 'DTDC', fromTo: 'Raipur -> Vendor', status: 'IN TRANSIT' },
+  { id: 7, code: 'CON-RAIP-111119-REPR-013', courier: 'DTDC', fromTo: 'Raipur -> Vendor', status: 'DISPATCHED' },
   { id: 8, code: 'CON-AMAR-091119-TRNF-015', courier: 'Bluedart', fromTo: 'Amaravati -> Dharamshala', status: 'DELIVERED' },
-  { id: 9, code: 'CON-DHAR-071119-REPR-017', courier: 'Delhivery', fromTo: 'Dharamshala -> Vendor', status: 'IN TRANSIT' },
+  { id: 9, code: 'CON-DHAR-071119-REPR-017', courier: 'Delhivery', fromTo: 'Dharamshala -> Vendor', status: 'DISPATCHED' },
   { id: 10, code: 'CON-KISH-051119-TRNF-019', courier: 'DTDC', fromTo: 'Kishangarh -> Sarjapura', status: 'DELIVERED' },
 ];
 
@@ -299,6 +299,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Sarjapura Campus' },
       destinationCampus: { name: 'Pune Campus' }
     },
+    assignedTo: { id: 1, name: 'Admin User', email: 'admin@navodgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-02-09T08:00:00Z',
     updatedAt: '2026-02-09T08:00:00Z',
@@ -332,6 +333,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Himachal Campus' },
       destinationCampus: { name: 'Dantewada Campus' }
     },
+    assignedTo: { id: 2, name: 'Logistics Manager', email: 'logistics@navodgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-02-09T09:00:00Z',
     updatedAt: '2026-02-09T09:30:00Z',
@@ -340,7 +342,7 @@ export const consignmentsListData = [
     id: 1,
     consignmentCode: 'CON-SARJ-020226-001',
     code: 'CON-SARJ-020226-001',
-    status: 'in_transit',
+    status: 'dispatched',
     allocationCode: 'ALLOC-2026-045',
     trackingId: 'DTDC987654321',
     courierService: { id: 1, name: 'DTDC' },
@@ -364,6 +366,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Sarjapura Campus' },
       destinationCampus: { name: 'TechCare Repairs' }
     },
+    assignedTo: { id: 1, name: 'Admin User', email: 'admin@navodgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-02-01T09:00:00Z',
     updatedAt: '2026-02-01T10:30:00Z',
@@ -398,6 +401,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Pune Campus' },
       destinationCampus: { name: 'Himachal Campus' }
     },
+    assignedTo: { id: 4, name: 'Himachal Coordinator', email: 'himachal@navodgurukul.org' },
     createdBy: { id: 2, name: 'Logistics Manager' },
     createdAt: '2026-01-28T12:00:00Z',
     updatedAt: '2026-02-01T16:45:00Z',
@@ -406,7 +410,7 @@ export const consignmentsListData = [
     id: 3,
     consignmentCode: 'CON-HIMA-013126-003',
     code: 'CON-HIMA-013126-003',
-    status: 'in_transit',
+    status: 'dispatched',
     allocationCode: 'ALLOC-2026-038',
     trackingId: 'DELV456789012',
     courierService: { id: 3, name: 'Delhivery' },
@@ -429,6 +433,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Himachal Campus' },
       destinationCampus: { name: 'FixIT Repairs' }
     },
+    assignedTo: { id: 2, name: 'Logistics Manager', email: 'logistics@navodgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-01-30T07:00:00Z',
     updatedAt: '2026-01-30T08:15:00Z',
@@ -462,6 +467,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Dantewada Campus' },
       destinationCampus: { name: 'Pune Campus' }
     },
+    assignedTo: { id: 5, name: 'Dantewada Lead', email: 'dantewada@navodgurukul.org' },
     createdBy: { id: 3, name: 'Campus Coordinator' },
     createdAt: '2026-01-27T10:00:00Z',
     updatedAt: '2026-01-30T15:30:00Z',
@@ -470,7 +476,7 @@ export const consignmentsListData = [
     id: 5,
     consignmentCode: 'CON-JABA-012726-005',
     code: 'CON-JABA-012726-005',
-    status: 'cancelled',
+    status: 'draft',
     allocationCode: 'ALLOC-2026-033',
     trackingId: '-',
     courierService: { id: 2, name: 'Bluedart' },
@@ -492,6 +498,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Jabalpur Campus' },
       destinationCampus: { name: 'ServiceMax Repairs' }
     },
+    assignedTo: { id: 1, name: 'Admin User', email: 'admin@navodgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-01-27T09:00:00Z',
     updatedAt: '2026-01-27T09:00:00Z',
@@ -500,7 +507,7 @@ export const consignmentsListData = [
     id: 6,
     consignmentCode: 'CON-UDAI-012626-006',
     code: 'CON-UDAI-012626-006',
-    status: 'DELIVERED',
+    status: 'delivered',
     allocationCode: 'ALLOC-2026-030',
     trackingId: 'DELV234567890',
     courierService: { id: 3, name: 'Delhivery' },
@@ -525,6 +532,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Udaipur Campus' },
       destinationCampus: { name: 'Raipur Campus' }
     },
+    assignedTo: { id: 6, name: 'Udaipur Manager', email: 'udaipur@navodgurukul.org' },
     createdBy: { id: 2, name: 'Logistics Manager' },
     createdAt: '2026-01-24T12:00:00Z',
     updatedAt: '2026-01-28T14:20:00Z',
@@ -533,7 +541,7 @@ export const consignmentsListData = [
     id: 7,
     consignmentCode: 'CON-RAIP-012526-007',
     code: 'CON-RAIP-012526-007',
-    status: 'IN_TRANSIT',
+    status: 'dispatched',
     allocationCode: 'ALLOC-2026-028',
     trackingId: 'DTDC345678901',
     courierService: { id: 1, name: 'DTDC' },
@@ -554,6 +562,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Raipur Campus' },
       destinationCampus: { name: 'TechCare Repairs' }
     },
+    assignedTo: { id: 7, name: 'Raipur Coordinator', email: 'raipur@navodgurukul.org' },
     createdBy: { id: 3, name: 'Campus Coordinator' },
     createdAt: '2026-01-25T14:00:00Z',
     updatedAt: '2026-01-25T15:00:00Z',
@@ -562,7 +571,7 @@ export const consignmentsListData = [
     id: 8,
     consignmentCode: 'CON-AMAR-012426-008',
     code: 'CON-AMAR-012426-008',
-    status: 'DELIVERED',
+    status: 'delivered',
     allocationCode: 'ALLOC-2026-025',
     trackingId: 'BLUE567890123',
     courierService: { id: 2, name: 'Bluedart' },
@@ -584,6 +593,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Amaravati Campus' },
       destinationCampus: { name: 'Dharamshala Campus' }
     },
+    assignedTo: { id: 8, name: 'Dharamshala Lead', email: 'dharamshala@navodgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-01-22T09:00:00Z',
     updatedAt: '2026-01-26T13:15:00Z',
@@ -592,7 +602,7 @@ export const consignmentsListData = [
     id: 9,
     consignmentCode: 'CON-DHAR-012326-009',
     code: 'CON-DHAR-012326-009',
-    status: 'CANCELLED',
+    status: 'draft',
     allocationCode: 'ALLOC-2026-022',
     trackingId: '-',
     courierService: { id: 3, name: 'Delhivery' },
@@ -612,6 +622,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Dharamshala Campus' },
       destinationCampus: { name: 'FixIT Repairs' }
     },
+    assignedTo: { id: 8, name: 'Dharamshala Lead', email: 'dharamshala@navodgurukul.org' },
     createdBy: { id: 2, name: 'Logistics Manager' },
     createdAt: '2026-01-23T11:00:00Z',
     updatedAt: '2026-01-24T10:00:00Z',
@@ -620,7 +631,7 @@ export const consignmentsListData = [
     id: 10,
     consignmentCode: 'CON-KISH-012226-010',
     code: 'CON-KISH-012226-010',
-    status: 'DELIVERED',
+    status: 'delivered',
     allocationCode: 'ALLOC-2026-020',
     trackingId: 'DTDC678901234',
     courierService: { id: 1, name: 'DTDC' },
@@ -646,6 +657,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Kishangarh Campus' },
       destinationCampus: { name: 'Sarjapura Campus' }
     },
+    assignedTo: { id: 9, name: 'Kishangarh Manager', email: 'kishangarh@navodgurukul.org' },
     createdBy: { id: 3, name: 'Campus Coordinator' },
     createdAt: '2026-01-20T11:00:00Z',
     updatedAt: '2026-01-24T17:30:00Z',

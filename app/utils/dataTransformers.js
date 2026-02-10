@@ -226,16 +226,18 @@ export const transformAllocationForTable = (allocation) => {
 
 /**
  * Format consignment status codes to readable text
+ * Supported statuses: draft, dispatched, delivered
  * @param {string} status - Status code from API
  * @returns {string} Readable status text
  */
 export const formatConsignmentStatus = (status) => {
   const statusMap = {
-    'PENDING': 'Pending',
-    'IN_TRANSIT': 'In Transit',
+    'DRAFT': 'Draft',
+    'draft': 'Draft',
+    'DISPATCHED': 'Dispatched',
+    'dispatched': 'Dispatched',
     'DELIVERED': 'Delivered',
-    'CANCELLED': 'Cancelled',
-    'RETURNED': 'Returned',
+    'delivered': 'Delivered',
   };
   return statusMap[status] || status || 'N/A';
 };
@@ -259,6 +261,7 @@ export const transformConsignmentForTable = (consignment) => {
     deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
     trackingId: consignment.trackingId || 'N/A',
     assetCount: consignment.assets?.length || consignment.assetCount || 0,
+    assignedTo: consignment.assignedTo || null,
     createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
     createdAt: formatDate(consignment.createdAt),
     updatedAt: formatDate(consignment.updatedAt),

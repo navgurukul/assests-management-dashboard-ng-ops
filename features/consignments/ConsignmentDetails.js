@@ -18,14 +18,12 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
 
   const consignment = consignmentData;
 
-  // Map API status to display format
+  // Map API status to display format - Only draft, dispatched, and delivered are supported
   const formatStatus = (status) => {
     const statusMap = {
-      'PENDING': 'Pending',
-      'IN_TRANSIT': 'In Transit',
-      'DELIVERED': 'Delivered',
-      'CANCELLED': 'Cancelled',
-      'RETURNED': 'Returned',
+      'draft': 'Draft',
+      'dispatched': 'Dispatched',
+      'delivered': 'Delivered',
     };
     return statusMap[status] || status;
   };
@@ -34,16 +32,12 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
 
   const getStatusColor = () => {
     switch (consignment.status) {
-      case 'PENDING':
-        return 'text-yellow-600';
-      case 'IN_TRANSIT':
+      case 'draft':
+        return 'text-gray-600';
+      case 'dispatched':
         return 'text-blue-600';
-      case 'DELIVERED':
+      case 'delivered':
         return 'text-green-600';
-      case 'CANCELLED':
-        return 'text-red-600';
-      case 'RETURNED':
-        return 'text-orange-600';
       default:
         return 'text-gray-900';
     }
@@ -146,7 +140,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
           label: 'Update Status',
           onClick: () => console.log('Update status clicked'),
           variant: 'primary',
-          show: consignment.status !== 'DELIVERED' && consignment.status !== 'CANCELLED',
+          show: consignment.status !== 'delivered',
         },
         {
           label: 'Print Label',

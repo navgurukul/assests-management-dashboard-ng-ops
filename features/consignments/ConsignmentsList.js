@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreVertical, ExternalLink, Eye, ChevronDown, Package, Truck } from 'lucide-react';
+import { ExternalLink, Eye, ChevronDown, Package, Truck } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
-import ActionMenu from '@/components/molecules/ActionMenu';
 import FormModal from '@/components/molecules/FormModal';
+import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useQueryClient } from '@tanstack/react-query';
@@ -26,7 +26,6 @@ import { consignmentsListData, allocationsListData } from '@/dummyJson/dummyJson
 import {
   createConsignmentFields,
   readyToDispatchFields,
-  addTransitFields,
   courierProviders,
 } from '@/app/config/formConfigs/consignmentFormConfig';
 import { toast } from '@/app/utils/toast';
@@ -54,13 +53,13 @@ export default function ConsignmentsList() {
   // Status dropdown state
   const [openStatusDropdownId, setOpenStatusDropdownId] = useState(null);
   
-  // Asset list modal state
-  const [openAssetListId, setOpenAssetListId] = useState(null);
+  // Asset modal state
+  const [assetModalOpen, setAssetModalOpen] = useState(false);
+  const [selectedAssets, setSelectedAssets] = useState([]);
   
   // Modal states for different actions
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDispatchModalOpen, setIsDispatchModalOpen] = useState(false);
-  const [isTransitModalOpen, setIsTransitModalOpen] = useState(false);
   const [currentConsignment, setCurrentConsignment] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -94,16 +93,13 @@ export default function ConsignmentsList() {
       if (openStatusDropdownId !== null) {
         setOpenStatusDropdownId(null);
       }
-      if (openAssetListId !== null) {
-        setOpenAssetListId(null);
-      }
     };
     
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [openStatusDropdownId, openAssetListId]);
+  }, [openStatusDropdownId]);
   
   // Build query string with pagination, filters, and search
   const buildQueryString = () => {
@@ -198,7 +194,7 @@ export default function ConsignmentsList() {
     }
   }, [campusOptions]);
   
-  // Status filter options
+  // Status filter options - Only draft, dispatched, and delivered are supported
   const statusOptions = [
     { value: 'draft', label: 'Draft' },
     { value: 'dispatched', label: 'Dispatched' },
@@ -403,22 +399,41 @@ export default function ConsignmentsList() {
   
   // Handle dispatch form data change to auto-populate tracking link
   const handleDispatchFormDataChange = (formData, field) => {
-    // Only process when courier service changes
+    let updatedFormData = { ...formData };
+    
+    // When courier service changes, auto-populate tracking link template
     if (field.name === 'courierServiceId' && formData.courierServiceId) {
-      // Find the selected courier provider
       const selectedCourier = courierProviders.find(
         courier => courier.id === formData.courierServiceId
       );
       
-      // Auto-populate the tracking link field with the pattern
       if (selectedCourier && selectedCourier.trackingUrlPattern) {
-        // This will be handled by the FormModal's form data update
-        return {
-          ...formData,
-          trackingLink: selectedCourier.trackingUrlPattern,
-        };
+        // Replace {trackingId} with actual tracking ID if available
+        let trackingLink = selectedCourier.trackingUrlPattern;
+        if (formData.trackingId) {
+          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
+        }
+        updatedFormData.trackingLink = trackingLink;
       }
     }
+    
+    // When tracking ID changes, update the link if courier is selected
+    if (field.name === 'trackingId' && formData.courierServiceId) {
+      const selectedCourier = courierProviders.find(
+        courier => courier.id === formData.courierServiceId
+      );
+      
+      if (selectedCourier && selectedCourier.trackingUrlPattern) {
+        // Replace {trackingId} with actual tracking ID
+        let trackingLink = selectedCourier.trackingUrlPattern;
+        if (formData.trackingId) {
+          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
+        }
+        updatedFormData.trackingLink = trackingLink;
+      }
+    }
+    
+    return updatedFormData;
   };
   
   const handleDispatchConsignment = async (formData) => {
@@ -427,7 +442,6 @@ export default function ConsignmentsList() {
     
     try {
       const payload = {
-        consignmentId: currentConsignment.id,
         courierServiceId: formData.courierServiceId,
         trackingId: formData.trackingId,
         trackingLink: formData.trackingLink || null,
@@ -436,7 +450,8 @@ export default function ConsignmentsList() {
 
       console.log('Dispatching consignment with payload:', payload);
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Make API call to update consignment status to dispatched
+      const response = await post(`/consignments/${currentConsignment.id}/dispatch`, payload);
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
@@ -454,43 +469,7 @@ export default function ConsignmentsList() {
     }
   };
   
-  // Handle add transit
-  const handleAddTransit = (consignment) => {
-    setCurrentConsignment(consignment);
-    setIsTransitModalOpen(true);
-  };
-  
-  const handleStartTransit = async (formData) => {
-    setIsSubmitting(true);
-    const loadingToastId = toast.loading('Starting transit...');
-    
-    try {
-      const payload = {
-        consignmentId: currentConsignment.id,
-        trackingId: formData.trackingId,
-        trackingLink: formData.trackingLink,
-        status: 'in_transit',
-      };
 
-      console.log('Starting transit with payload:', payload);
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.dismiss(loadingToastId);
-      toast.success('Transit started successfully!');
-      
-      setIsTransitModalOpen(false);
-      setCurrentConsignment(null);
-      queryClient.invalidateQueries(['consignments']);
-      
-    } catch (error) {
-      console.error('Error starting transit:', error);
-      toast.dismiss(loadingToastId);
-      toast.error(error?.message || 'Failed to start transit');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
   
   // Handle form data change in create modal to populate assets
   const handleCreateFormDataChange = (formData, field) => {
@@ -560,43 +539,16 @@ export default function ConsignmentsList() {
         const assets = fullConsignment?.assets || [];
         
         return (
-          <div className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenAssetListId(openAssetListId === item.id ? null : item.id);
-              }}
-              className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
-            >
-              {cellValue}
-            </button>
-            
-            {openAssetListId === item.id && (
-              <div className="absolute z-50 mt-1 left-0 w-64 bg-white rounded-md shadow-xl border border-gray-200">
-                <div className="py-2 px-3 bg-gray-50 border-b border-gray-200">
-                  <h4 className="font-semibold text-sm text-gray-700">Asset Tags ({assets.length})</h4>
-                </div>
-                <div className="max-h-64 overflow-y-auto">
-                  {assets.length > 0 ? (
-                    <div className="py-1">
-                      {assets.map((asset, index) => (
-                        <div
-                          key={asset.id || index}
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                        >
-                          {asset.assetTag}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                      No assets found
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedAssets(assets);
+              setAssetModalOpen(true);
+            }}
+            className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
+          >
+            {cellValue}
+          </button>
         );
         
       case 'status':
@@ -604,9 +556,7 @@ export default function ConsignmentsList() {
         const statusColors = {
           'draft': 'bg-gray-100 text-gray-800 border border-gray-300',
           'dispatched': 'bg-amber-100 text-amber-800 border border-amber-300',
-          'in_transit': 'bg-blue-100 text-blue-800 border border-blue-300',
           'delivered': 'bg-green-100 text-green-800 border border-green-300',
-          'cancelled': 'bg-red-100 text-red-800 border border-red-300',
         };
         
         return (
@@ -617,76 +567,52 @@ export default function ConsignmentsList() {
           </div>
         );
         
+      case 'assignedTo':
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-900">{item.assignedTo?.name || '-'}</span>
+            <span className="text-xs text-gray-500">{item.assignedTo?.email || ''}</span>
+          </div>
+        );
+        
       case 'actions':
         const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
-        const menuOptions = [];
-        
-        // Always add Show Details option
-        menuOptions.push({
-          label: 'Show Details',
-          icon: Eye,
-          iconClassName: 'text-blue-600',
-          onClick: () => {
-            handleRowClick(item);
-            setOpenMenuId(null);
-          },
-        });
-        
-        // Status-based action options
-        if (normalizedItemStatus === 'draft') {
-          menuOptions.push({
-            label: 'Dispatch',
-            icon: Package,
-            iconClassName: 'text-green-600',
-            onClick: () => {
-              handleReadyToDispatch(item);
-              setOpenMenuId(null);
-            },
-          });
-        }
-        
-        if (normalizedItemStatus === 'dispatched') {
-          menuOptions.push({
-            label: 'Add Transit',
-            icon: Truck,
-            iconClassName: 'text-amber-600',
-            onClick: () => {
-              handleAddTransit(item);
-              setOpenMenuId(null);
-            },
-          });
-        }
-        
-        // Add Track option if tracking ID exists
-        if (item.trackingId && item.trackingId !== '-') {
-          menuOptions.push({
-            label: 'Track Consignment',
-            icon: ExternalLink,
-            iconClassName: 'text-purple-600',
-            onClick: () => {
-              window.open(`https://www.google.com/search?q=${encodeURIComponent(item.trackingId + ' tracking')}`, '_blank');
-              setOpenMenuId(null);
-            },
-          });
-        }
         
         return (
-          <div className="relative flex items-center justify-center">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenMenuId(openMenuId === item.id ? null : item.id);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Actions menu"
-            >
-              <MoreVertical className="h-5 w-5 text-gray-600" />
-            </button>
-            {openMenuId === item.id && (
-              <ActionMenu
-                menuOptions={menuOptions}
-                onClose={() => setOpenMenuId(null)}
-              />
+          <div className="flex items-center justify-center gap-2">
+            {/* Dispatch button for draft status */}
+            {normalizedItemStatus === 'draft' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleReadyToDispatch(item);
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-md text-xs font-medium transition-colors border border-green-200"
+                title="Dispatch consignment"
+              >
+                <Package className="h-4 w-4" />
+                <span>Dispatch</span>
+              </button>
+            )}
+            
+            {/* Track button if tracking ID exists */}
+            {item.trackingId && item.trackingId !== '-' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`https://www.google.com/search?q=${encodeURIComponent(item.trackingId + ' tracking')}`, '_blank');
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-md text-xs font-medium transition-colors border border-purple-200"
+                title="Track consignment"
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span>Track</span>
+              </button>
+            )}
+            
+            {/* Show message if no actions available */}
+            {normalizedItemStatus !== 'draft' && (!item.trackingId || item.trackingId === '-') && (
+              <span className="text-xs text-gray-400">-</span>
             )}
           </div>
         );
@@ -694,22 +620,6 @@ export default function ConsignmentsList() {
       default:
         return cellValue;
     }
-  };
-
-  // Get transit modal fields with pre-filled courier
-  const getTransitModalFields = () => {
-    if (!currentConsignment) return addTransitFields;
-    
-    const courierName = courierProviders.find(
-      c => c.id === currentConsignment.courierServiceId
-    )?.name || currentConsignment.courierService || 'Not Set';
-    
-    return addTransitFields.map(field => {
-      if (field.name === 'courierServiceId') {
-        return { ...field, defaultValue: courierName };
-      }
-      return field;
-    });
   };
 
   return (
@@ -732,11 +642,12 @@ export default function ConsignmentsList() {
       )}
       
       <TableWrapper
-        key={`table-${openMenuId || 'none'}-${openStatusDropdownId || 'none'}-${openAssetListId || 'none'}`}
+        key={`table-${openStatusDropdownId || 'none'}`}
         data={tableData}
         columns={visibleColumns}
         title="Consignments"
         renderCell={renderCell}
+        onRowClick={handleRowClick}
         itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Consignments table"
@@ -812,20 +723,40 @@ export default function ConsignmentsList() {
         helpText="Enter courier partner details and tracking information to dispatch the consignment"
       />
       
-      {/* Add Transit Modal */}
-      <FormModal
-        isOpen={isTransitModalOpen}
+      {/* Asset List Modal */}
+      <Modal
+        isOpen={assetModalOpen}
         onClose={() => {
-          setIsTransitModalOpen(false);
-          setCurrentConsignment(null);
+          setAssetModalOpen(false);
+          setSelectedAssets([]);
         }}
-        componentName="Consignment"
-        actionType="Start Transit"
-        fields={getTransitModalFields()}
-        onSubmit={handleStartTransit}
+        title={`Asset Tags (${selectedAssets.length})`}
         size="medium"
-        isSubmitting={isSubmitting}
-      />
+      >
+        <div className="max-h-96 overflow-y-auto">
+          {selectedAssets.length > 0 ? (
+            <div className="divide-y divide-gray-200">
+              {selectedAssets.map((asset, index) => (
+                <div
+                  key={asset.id || index}
+                  className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-900">{asset.assetTag}</span>
+                    <span className="text-xs text-gray-500">#{index + 1}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-6 py-12 text-center">
+              <Package className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-500">No assets found</p>
+            </div>
+          )}
+        </div>
+      </Modal>
+      
     </div>
   );
 }

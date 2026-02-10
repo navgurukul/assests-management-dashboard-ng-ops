@@ -52,14 +52,21 @@ export const consignmentTableColumns = [
     description: 'Courier tracking ID'
   },
   
-  // 7. Status
+  // 7. Assigned To
+  { 
+    key: 'assignedTo', 
+    label: 'ASSIGNED TO',
+    description: 'User assigned to this consignment'
+  },
+  
+  // 8. Status
   { 
     key: 'status', 
     label: 'STATUS',
     description: 'Current status (In Transit, Delivered, etc.)'
   },
   
-  // 8. Actions
+  // 9. Actions
   { 
     key: 'actions', 
     label: 'ACTIONS', 
@@ -108,6 +115,7 @@ export const defaultVisibleColumns = [
   'destination',        // 4. Destination
   'courierService',     // 5. Courier Partner
   'trackingId',         // 6. Tracking ID
-  'status',             // 7. Status
-  'actions',            // 8. Actions
+  'assignedTo',         // 7. Assigned To
+  'status',             // 8. Status
+  'actions',            // 9. Actions
 ];
