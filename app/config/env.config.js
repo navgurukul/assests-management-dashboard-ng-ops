@@ -46,6 +46,15 @@ const config = {
       details: (id) => `/tickets/${id}`,
     },
     
+    // Allocations
+    allocations: {
+      list: '/allocations',
+      create: '/allocations',
+      update: (id) => `/allocations/${id}`,
+      delete: (id) => `/allocations/${id}`,
+      details: (id) => `/allocations/${id}`,
+    },
+    
     // Dashboard
     dashboard: {
       stats: '/dashboard/stats',

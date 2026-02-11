@@ -21,10 +21,18 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
   {
-    name: 'campus',
-    label: 'Campus',
+    name: 'userEmail',
+    label: 'User Email',
+    type: 'email',
+    placeholder: 'Enter user email',
+    required: false,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'phoneNumber',
+    label: 'Phone Number',
     type: 'text',
-    placeholder: 'Enter source campus name',
+    placeholder: 'Enter phone number',
     required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
@@ -76,6 +84,17 @@ export const allocationValidationSchema = Yup.object().shape({
     .oneOf(['REMOTE', 'CAMPUS'], 'Invalid allocation type'),
   
   // Remote allocation validations
+  userEmail: Yup.string()
+    .email('Invalid email format')
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
+    }),
+  phoneNumber: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
+    }),
   userDepartment: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
@@ -138,9 +157,11 @@ export const allocationValidationSchema = Yup.object().shape({
 export const allocationInitialValues = {
   allocationType: 'REMOTE',
   // Remote fields
+  assetId: '',
+  userEmail: '',
+  phoneNumber: '',
   userDepartment: '',
   userAddress: '',
-  assetId: '',
   assetSource: '',
   // Campus fields
   sourceCampus: '',
