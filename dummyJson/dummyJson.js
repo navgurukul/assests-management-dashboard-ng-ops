@@ -299,7 +299,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Sarjapura Campus' },
       destinationCampus: { name: 'Pune Campus' }
     },
-    assignedTo: { id: 1, name: 'Admin User', email: 'admin@navodgurukul.org' },
+    assignedTo: { id: 1, name: 'Priya Sharma', email: 'priya.sharma@navgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-02-09T08:00:00Z',
     updatedAt: '2026-02-09T08:00:00Z',
@@ -333,7 +333,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Himachal Campus' },
       destinationCampus: { name: 'Dantewada Campus' }
     },
-    assignedTo: { id: 2, name: 'Logistics Manager', email: 'logistics@navodgurukul.org' },
+    assignedTo: { id: 2, name: 'Rahul Verma', email: 'rahul.verma@navgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-02-09T09:00:00Z',
     updatedAt: '2026-02-09T09:30:00Z',
@@ -366,7 +366,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Sarjapura Campus' },
       destinationCampus: { name: 'TechCare Repairs' }
     },
-    assignedTo: { id: 1, name: 'Admin User', email: 'admin@navodgurukul.org' },
+    assignedTo: { id: 1, name: 'Priya Sharma', email: 'priya.sharma@navgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-02-01T09:00:00Z',
     updatedAt: '2026-02-01T10:30:00Z',
@@ -401,7 +401,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Pune Campus' },
       destinationCampus: { name: 'Himachal Campus' }
     },
-    assignedTo: { id: 4, name: 'Himachal Coordinator', email: 'himachal@navodgurukul.org' },
+    assignedTo: { id: 4, name: 'Anjali Singh', email: 'anjali.singh@navgurukul.org' },
     createdBy: { id: 2, name: 'Logistics Manager' },
     createdAt: '2026-01-28T12:00:00Z',
     updatedAt: '2026-02-01T16:45:00Z',
@@ -433,7 +433,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Himachal Campus' },
       destinationCampus: { name: 'FixIT Repairs' }
     },
-    assignedTo: { id: 2, name: 'Logistics Manager', email: 'logistics@navodgurukul.org' },
+    assignedTo: { id: 2, name: 'Rahul Verma', email: 'rahul.verma@navgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-01-30T07:00:00Z',
     updatedAt: '2026-01-30T08:15:00Z',
@@ -467,7 +467,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Dantewada Campus' },
       destinationCampus: { name: 'Pune Campus' }
     },
-    assignedTo: { id: 5, name: 'Dantewada Lead', email: 'dantewada@navodgurukul.org' },
+    assignedTo: { id: 5, name: 'Vikram Patel', email: 'vikram.patel@navgurukul.org' },
     createdBy: { id: 3, name: 'Campus Coordinator' },
     createdAt: '2026-01-27T10:00:00Z',
     updatedAt: '2026-01-30T15:30:00Z',
@@ -498,7 +498,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Jabalpur Campus' },
       destinationCampus: { name: 'ServiceMax Repairs' }
     },
-    assignedTo: { id: 1, name: 'Admin User', email: 'admin@navodgurukul.org' },
+    assignedTo: { id: 1, name: 'Priya Sharma', email: 'priya.sharma@navgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-01-27T09:00:00Z',
     updatedAt: '2026-01-27T09:00:00Z',
@@ -532,7 +532,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Udaipur Campus' },
       destinationCampus: { name: 'Raipur Campus' }
     },
-    assignedTo: { id: 6, name: 'Udaipur Manager', email: 'udaipur@navodgurukul.org' },
+    assignedTo: { id: 6, name: 'Sneha Reddy', email: 'sneha.reddy@navgurukul.org' },
     createdBy: { id: 2, name: 'Logistics Manager' },
     createdAt: '2026-01-24T12:00:00Z',
     updatedAt: '2026-01-28T14:20:00Z',
@@ -562,7 +562,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Raipur Campus' },
       destinationCampus: { name: 'TechCare Repairs' }
     },
-    assignedTo: { id: 7, name: 'Raipur Coordinator', email: 'raipur@navodgurukul.org' },
+    assignedTo: { id: 7, name: 'Ram Mehta', email: 'ram@navgurukul.org' },
     createdBy: { id: 3, name: 'Campus Coordinator' },
     createdAt: '2026-01-25T14:00:00Z',
     updatedAt: '2026-01-25T15:00:00Z',
@@ -593,7 +593,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Amaravati Campus' },
       destinationCampus: { name: 'Dharamshala Campus' }
     },
-    assignedTo: { id: 8, name: 'Dharamshala Lead', email: 'dharamshala@navodgurukul.org' },
+    assignedTo: { id: 8, name: 'Karan Desai', email: 'karan.desai@navgurukul.org' },
     createdBy: { id: 1, name: 'Admin User' },
     createdAt: '2026-01-22T09:00:00Z',
     updatedAt: '2026-01-26T13:15:00Z',
@@ -622,7 +622,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Dharamshala Campus' },
       destinationCampus: { name: 'FixIT Repairs' }
     },
-    assignedTo: { id: 8, name: 'Dharamshala Lead', email: 'dharamshala@navodgurukul.org' },
+    assignedTo: { id: 8, name: 'Karan Desai', email: 'karan.desai@navgurukul.org' },
     createdBy: { id: 2, name: 'Logistics Manager' },
     createdAt: '2026-01-23T11:00:00Z',
     updatedAt: '2026-01-24T10:00:00Z',
@@ -657,7 +657,7 @@ export const consignmentsListData = [
       sourceCampus: { name: 'Kishangarh Campus' },
       destinationCampus: { name: 'Sarjapura Campus' }
     },
-    assignedTo: { id: 9, name: 'Kishangarh Manager', email: 'kishangarh@navodgurukul.org' },
+    assignedTo: { id: 9, name: 'Meera Joshi', email: 'meera.joshi@navgurukul.org' },
     createdBy: { id: 3, name: 'Campus Coordinator' },
     createdAt: '2026-01-20T11:00:00Z',
     updatedAt: '2026-01-24T17:30:00Z',

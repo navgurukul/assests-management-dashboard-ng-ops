@@ -579,35 +579,35 @@ export default function ConsignmentsList() {
         const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
         
         return (
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-start gap-2 flex-wrap">
             {/* Dispatch button for draft status */}
             {normalizedItemStatus === 'draft' && (
-              <button
+              <CustomButton
                 onClick={(e) => {
                   e.stopPropagation();
                   handleReadyToDispatch(item);
                 }}
-                className="flex items-center gap-1 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-md text-xs font-medium transition-colors border border-green-200"
+                variant="success"
+                size="sm"
+                icon={Package}
+                text="Dispatch"
                 title="Dispatch consignment"
-              >
-                <Package className="h-4 w-4" />
-                <span>Dispatch</span>
-              </button>
+              />
             )}
             
             {/* Track button if tracking ID exists */}
             {item.trackingId && item.trackingId !== '-' && (
-              <button
+              <CustomButton
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(`https://www.google.com/search?q=${encodeURIComponent(item.trackingId + ' tracking')}`, '_blank');
                 }}
-                className="flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-md text-xs font-medium transition-colors border border-purple-200"
+                variant="secondary"
+                size="sm"
+                icon={ExternalLink}
+                text="Track"
                 title="Track consignment"
-              >
-                <ExternalLink className="h-4 w-4" />
-                <span>Track</span>
-              </button>
+              />
             )}
             
             {/* Show message if no actions available */}

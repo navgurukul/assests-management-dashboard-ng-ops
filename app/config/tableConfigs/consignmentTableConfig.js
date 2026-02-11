@@ -52,11 +52,11 @@ export const consignmentTableColumns = [
     description: 'Courier tracking ID'
   },
   
-  // 7. Assigned To
+  // 7. Allocated To
   { 
     key: 'assignedTo', 
-    label: 'ASSIGNED TO',
-    description: 'User assigned to this consignment'
+    label: 'ALLOCATED TO',
+    description: 'User allocated to this consignment'
   },
   
   // 8. Status
