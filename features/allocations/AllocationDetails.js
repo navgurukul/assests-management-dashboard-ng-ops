@@ -1,11 +1,15 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import DetailsPage from '@/components/molecules/DetailsPage';
+import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 
 export default function AllocationDetails({ allocationId, onBack }) {
+  const router = useRouter();
+  
   // Fetch allocation details from API
   const { data, isLoading, isError, error } = useFetch({
     url: config.getApiUrl(config.endpoints.allocations?.details?.(allocationId) || `/allocations/${allocationId}`),
@@ -186,6 +190,14 @@ export default function AllocationDetails({ allocationId, onBack }) {
       rightSections={rightSections}
       showTimeline={false}
       onBack={onBack}
+      headerActions={
+        <CustomButton
+          text="View Consignments"
+          variant="primary"
+          size="md"
+          onClick={() => router.push('/consignments')}
+        />
+      }
     />
   );
 }
