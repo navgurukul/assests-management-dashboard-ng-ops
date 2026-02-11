@@ -9,6 +9,7 @@ export default function DetailsPage({
   leftSections = [],
   rightSections = [],
   onBack,
+  headerActions,
 }) {
   const renderSection = (section, index) => {
     return (
@@ -160,6 +161,11 @@ export default function DetailsPage({
                 </p>
               )}
             </div>
+            {headerActions && (
+              <div className="flex gap-2">
+                {headerActions}
+              </div>
+            )}
           </div>
         </div>
 

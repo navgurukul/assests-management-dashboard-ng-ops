@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
+import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
@@ -14,6 +16,7 @@ import {
 } from '@/app/config/formConfigs/ticketUpdateFormConfig';
 
 export default function TicketDetails({ ticketId, onBack }) {
+  const router = useRouter();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -191,6 +194,14 @@ export default function TicketDetails({ ticketId, onBack }) {
         leftSections={leftSections}
         rightSections={rightSections}
         onBack={onBack}
+        headerActions={
+          <CustomButton
+            text="Create Allocation"
+            variant="primary"
+            size="md"
+            onClick={() => router.push('/allocations/create')}
+          />
+        }
       />
 
       <Modal
