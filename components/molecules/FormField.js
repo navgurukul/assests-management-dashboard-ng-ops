@@ -5,6 +5,7 @@ import { Field, ErrorMessage } from 'formik';
 import DocumentSelector from './DocumentSelector';
 import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 import MultiSelect from '@/components/atoms/MultiSelect';
+import CampusAssetTable from './CampusAssetTable';
 
 export default function FormField({ field, formik, onFieldChange }) {
   const { name, label, type, placeholder, required, options, min, max, disabled, readOnly } = field;
@@ -181,6 +182,14 @@ export default function FormField({ field, formik, onFieldChange }) {
             dataPath={field.dataPath}
             formatLabel={field.formatLabel}
             selectedItem={field.selectedItem}
+          />
+        );
+
+      case 'campus-asset-table':
+        return (
+          <CampusAssetTable
+            assets={formik.values[name] || []}
+            onChange={(assets) => formik.setFieldValue(name, assets)}
           />
         );
 

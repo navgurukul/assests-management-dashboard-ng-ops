@@ -65,17 +65,31 @@ export default function GenericForm({
           ) : (
             /* Render fields without sections */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {fields.map((field) => (
-                <div
-                  key={field.name}
-                  className={field.type === 'textarea' ? 'md:col-span-2' : ''}
-                >
-                  <FormField field={field} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
-                  {field.helpText && (
-                    <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
-                  )}
-                </div>
-              ))}
+              {fields.map((field) => {
+                // Handle conditional fields (showIf)
+                if (field.showIf) {
+                  const conditionMet = formik.values[field.showIf.field] === field.showIf.value;
+                  if (!conditionMet) return null;
+                }
+                
+                return (
+                  <div
+                    key={field.name}
+                    className={
+                      field.type === 'textarea' || 
+                      field.type === 'campus-asset-table' || 
+                      field.type === 'radio'
+                        ? 'md:col-span-2' 
+                        : ''
+                    }
+                  >
+                    <FormField field={field} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
+                    {field.helpText && (
+                      <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 

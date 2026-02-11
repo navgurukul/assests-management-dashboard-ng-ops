@@ -13,27 +13,27 @@ export const allocationFormFields = [
   },
   // Remote Allocation Fields (shown when allocationType === 'REMOTE')
   {
-    name: 'userEmail',
-    label: 'User Email',
-    type: 'email',
-    placeholder: 'Enter user email address',
-    required: true,
-    showIf: { field: 'allocationType', value: 'REMOTE' },
-  },
-  {
-    name: 'userPhone',
-    label: 'Phone Number',
-    type: 'text',
-    placeholder: 'Enter phone number',
-    required: false,
-    showIf: { field: 'allocationType', value: 'REMOTE' },
-  },
-  {
     name: 'assetId',
     label: 'Asset',
     type: 'text',
     placeholder: 'Enter asset ID',
     required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'campus',
+    label: 'Campus',
+    type: 'text',
+    placeholder: 'Enter source campus name',
+    required: false,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'userAddress',
+    label: 'User Address',
+    type: 'textarea',
+    placeholder: 'Enter user address',
+    required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
   // Campus Allocation Fields (shown when allocationType === 'CAMPUS')
@@ -52,15 +52,7 @@ export const allocationFormFields = [
     placeholder: 'Enter destination campus name',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  {
-    name: 'personRaising',
-    label: 'Person Raising Request',
-    type: 'text',
-    placeholder: 'Enter name of person raising this request',
-    required: true,
-    showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
+  }, 
   {
     name: 'campusAssets',
     label: 'Assets',
@@ -68,28 +60,6 @@ export const allocationFormFields = [
     placeholder: 'Add assets with their working conditions',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  // Common Fields
-  {
-    name: 'startDate',
-    label: 'Allocation Date',
-    type: 'date',
-    placeholder: 'Select allocation date',
-    required: true,
-  },
-  {
-    name: 'allocationReason',
-    label: 'Allocation Reason',
-    type: 'select',
-    placeholder: 'Select reason for allocation',
-    required: true,
-    options: [
-      { value: 'JOINER', label: 'Joiner (New Student/Staff)' },
-      { value: 'REPAIR', label: 'Repair (Temporary Replacement)' },
-      { value: 'REPLACEMENT', label: 'Replacement (Permanent Swap)' },
-      { value: 'LOANER', label: 'Loaner (Temporary Device)' },
-      { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
-    ],
   },
   {
     name: 'notes',
@@ -106,22 +76,12 @@ export const allocationValidationSchema = Yup.object().shape({
     .oneOf(['REMOTE', 'CAMPUS'], 'Invalid allocation type'),
   
   // Remote allocation validations
-  userEmail: Yup.string()
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.required('User email is required').email('Invalid email format'),
-    }),
-  userName: Yup.string()
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.required('User name is required'),
-    }),
-  userPhone: Yup.string()
+  userDepartment: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
       then: (schema) => schema.nullable(),
     }),
-  userDepartment: Yup.string()
+  userAddress: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
       then: (schema) => schema.nullable(),
@@ -130,6 +90,11 @@ export const allocationValidationSchema = Yup.object().shape({
     .when('allocationType', {
       is: 'REMOTE',
       then: (schema) => schema.required('Asset is required'),
+    }),
+  assetSource: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.nullable(),
     }),
   
   // Campus allocation validations
@@ -173,11 +138,10 @@ export const allocationValidationSchema = Yup.object().shape({
 export const allocationInitialValues = {
   allocationType: 'REMOTE',
   // Remote fields
-  userEmail: '',
-  userName: '',
-  userPhone: '',
   userDepartment: '',
+  userAddress: '',
   assetId: '',
+  assetSource: '',
   // Campus fields
   sourceCampus: '',
   destinationCampus: '',

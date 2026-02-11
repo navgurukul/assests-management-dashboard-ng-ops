@@ -12,7 +12,8 @@ import {
   Ticket, 
   Archive, 
   FileText, 
-  Settings, 
+  Settings,
+  User, 
 } from 'lucide-react';
 import { menuItems } from '@/dummyJson/dummyJson';
 
@@ -33,10 +34,10 @@ export default function Sidebar() {
 
   return (
     <aside 
-      className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-gray-200 shrink-0 overflow-y-auto transition-all duration-300 cursor-pointer`}
+      className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-gray-200 shrink-0 overflow-y-auto transition-all duration-300 cursor-pointer flex flex-col`}
       onClick={() => setIsCollapsed(!isCollapsed)}
     >
-      <nav className="p-4">
+      <nav className="p-4 flex-1">
         <ul className="space-y-1" onClick={(e) => e.stopPropagation()}>
           {menuItems.map((item) => {
             const Icon = iconMap[item.icon];
@@ -72,6 +73,41 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
+
+      {/* User Profile Icon at Bottom */}
+      <div className="p-4 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
+        {isCollapsed ? (
+          <Tooltip 
+            content="User Profile" 
+            placement="right" 
+            delay={0}
+            className='border px-2 border-gray-500 bg-white rounded-md shadow-md'
+          >
+            <Link
+              href="/userprofile"
+              className={`flex items-center justify-center px-4 py-3 rounded-lg transition-colors ${
+                pathname === '/userprofile'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <User className="w-5 h-5 shrink-0" />
+            </Link>
+          </Tooltip>
+        ) : (
+          <Link
+            href="/userprofile"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              pathname === '/userprofile'
+                ? 'bg-blue-50 text-blue-600 font-medium'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <User className="w-5 h-5 shrink-0" />
+            <span>User Profile</span>
+          </Link>
+        )}
+      </div>
     </aside>
   );
 }

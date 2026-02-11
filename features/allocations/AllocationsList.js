@@ -1,20 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import Modal from '@/components/molecules/Modal';
-import GenericForm from '@/components/molecules/GenericForm';
+import SummaryCard from '@/components/atoms/SummaryCard';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
-import {
-  allocationFormFields,
-  allocationValidationSchema,
-  allocationInitialValues,
-} from '@/app/config/formConfigs/allocationFormConfig';
-import { toast } from '@/app/utils/toast';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
+import { allocationsSummaryCards } from '@/dummyJson/dummyJson';
 
 const columns = [
   { key: "allocationId", label: "ALLOCATION ID" },
@@ -31,18 +26,39 @@ const actionOptions = ['View', 'Return', 'Details'];
 
 export default function AllocationsList() {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Fetch allocations data from API
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  
+  // Build query string with pagination
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    return params.toString();
+  };
+  
+  // Fetch allocations data from API with pagination
   const { data, isLoading, isError, error } = useFetch({
-    url: config.getApiUrl(config.endpoints.allocations?.list || '/allocations'),
-    queryKey: ['allocations'],
+    url: `/allocations?${buildQueryString()}`,
+    queryKey: ['allocations', currentPage, pageSize],
   });
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
 
   // Transform API data to match table structure
   const allocationsListData = React.useMemo(() => {
-    if (!data || !data.data) return [];
+    if (!data || !data.data || !Array.isArray(data.data)) return [];
     
     return data.data.map((allocation) => ({
       ...transformAllocationForTable(allocation),
@@ -135,69 +151,7 @@ export default function AllocationsList() {
   };
 
   const handleCreateClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleFormSubmit = async (values) => {
-    setIsSubmitting(true);
-    
-    // Show loading toast
-    const loadingToastId = toast.loading('Creating allocation...');
-    
-    try {
-      // Prepare data for API
-      const allocationData = {
-        assetId: values.assetId,
-        userId: values.userId,
-        startDate: values.startDate,
-        endDate: values.endDate || null,
-        allocationReason: values.allocationReason,
-        isTemporary: values.isTemporary,
-        expectedReturnDate: values.isTemporary ? values.expectedReturnDate : null,
-        notes: values.notes,
-      };
-
-      // Make API call to create allocation
-      const response = await fetch(config.getApiUrl(config.endpoints.allocations?.create || '/allocations'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(allocationData),
-      });
-
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || 'Failed to create allocation';
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      console.log('Allocation created successfully:', result);
-      
-      // Show success toast
-      toast.success('Allocation created successfully!');
-      
-      // Close modal and refresh data
-      setIsModalOpen(false);
-      // You might want to refetch the allocations list here
-      // queryClient.invalidateQueries(['allocations']);
-      
-    } catch (error) {
-      console.error('Error creating allocation:', error);
-      
-      // Show error toast
-      toast.error(error?.message || 'Failed to create allocation. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    router.push('/allocations/create');
   };
 
   const handleReturnAllocation = async (allocationId) => {
@@ -256,53 +210,19 @@ export default function AllocationsList() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Allocations</p>
-              <p className="text-2xl font-bold text-gray-900">{allocationsListData.length}</p>
-            </div>
-            <UserPlus className="w-8 h-8 text-blue-500" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Active Allocations</p>
-              <p className="text-2xl font-bold text-green-600">
-                {allocationsListData.filter(a => a.isActive).length}
-              </p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-500" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Returned</p>
-              <p className="text-2xl font-bold text-gray-600">
-                {allocationsListData.filter(a => !a.isActive).length}
-              </p>
-            </div>
-            <XCircle className="w-8 h-8 text-gray-500" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">This Month</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {allocationsListData.filter(a => {
-                  const startDate = new Date(a.startDate);
-                  const now = new Date();
-                  return startDate.getMonth() === now.getMonth() && 
-                         startDate.getFullYear() === now.getFullYear();
-                }).length}
-              </p>
-            </div>
-            <Calendar className="w-8 h-8 text-purple-500" />
-          </div>
-        </div>
+        {allocationsSummaryCards.map((card) => {
+          const IconComponent = LucideIcons[card.icon];
+          return (
+            <SummaryCard
+              key={card.id}
+              label={card.label}
+              value={card.getValue(allocationsListData)}
+              Icon={IconComponent}
+              valueColor={card.valueColor}
+              iconColor={card.iconColor}
+            />
+          );
+        })}
       </div>
 
       {/* Table */}
@@ -311,37 +231,18 @@ export default function AllocationsList() {
         columns={columns}
         title="Allocations"
         renderCell={renderCell}
-        itemsPerPage={10}
+        itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Allocations table"
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Server-side pagination props
+        serverPagination={true}
+        paginationData={data?.pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
-
-      {/* Create Allocation Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Create New Allocation"
-        size="large"
-      >
-        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> Only one active allocation per asset is allowed at any time. 
-            Make sure the asset is available (status: IN_STOCK) before creating an allocation.
-          </p>
-        </div>
-        <GenericForm
-          fields={allocationFormFields}
-          initialValues={allocationInitialValues}
-          validationSchema={allocationValidationSchema}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCloseModal}
-          submitButtonText="Create Allocation"
-          isSubmitting={isSubmitting}
-        />
-      </Modal>
     </div>
   );
 }

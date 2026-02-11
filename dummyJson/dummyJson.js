@@ -92,10 +92,10 @@ export const documentsLibrary = [
 ];
 
 export const dashboardCards = [
-  { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-400' },
-  { id: 2, count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-400' },
-  { id: 3, count: 321, label: 'Needs Repair', icon: 'Settings', bgColor: 'bg-slate-500' },
-  { id: 4, count: 22, label: 'In Repair', icon: 'Wrench', bgColor: 'bg-red-400' },
+  { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-100', iconColor: 'text-teal-600' },
+  { id: 2, count: 105, label: 'In Stock', icon: 'Archive', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
+  { id: 3, count: 321, label: 'Needs Repair', icon: 'Settings', bgColor: 'bg-slate-100', iconColor: 'text-slate-600' },
+  { id: 4, count: 22, label: 'In Repair', icon: 'Wrench', bgColor: 'bg-red-100', iconColor: 'text-red-600' },
 ];
 
 export const locationWiseAssetsData = [
@@ -114,7 +114,7 @@ export const assetsPerCampusData = [
   ['Kishangarh', 12, 8, 5, 3, 0, 1, 0, 1, 1, 0, 0],
   ['Pune', 55, 40, 25, 18, 4, 6, 3, 8, 6, 3, 2],
   ['Raipur', 58, 38, 20, 14, 3, 4, 2, 5, 4, 2, 1],
-  ['Satlapur', 40, 30, 28, 20, 2, 3, 1, 4, 3, 1, 1],
+  ['Sarjapur', 40, 30, 28, 20, 2, 3, 1, 4, 3, 1, 1],
   ['Udaipur', 60, 45, 18, 12, 3, 5, 2, 7, 5, 2, 1],
 ];
 
@@ -1448,4 +1448,82 @@ export const componentDetailsData = {
     ]
   }
 };
+
+// Summary Cards Configuration
+export const allocationsSummaryCards = [
+  {
+    id: 'total',
+    label: 'Total Allocations',
+    icon: 'UserPlus',
+    valueColor: 'text-gray-900',
+    iconColor: 'text-blue-500',
+    getValue: (data) => data.length,
+  },
+  {
+    id: 'active',
+    label: 'Active Allocations',
+    icon: 'CheckCircle',
+    valueColor: 'text-green-600',
+    iconColor: 'text-green-500',
+    getValue: (data) => data.filter(a => a.isActive).length,
+  },
+  {
+    id: 'returned',
+    label: 'Returned',
+    icon: 'XCircle',
+    valueColor: 'text-gray-600',
+    iconColor: 'text-gray-500',
+    getValue: (data) => data.filter(a => !a.isActive).length,
+  },
+  {
+    id: 'thisMonth',
+    label: 'This Month',
+    icon: 'Calendar',
+    valueColor: 'text-purple-600',
+    iconColor: 'text-purple-500',
+    getValue: (data) => {
+      const now = new Date();
+      return data.filter(a => {
+        const startDate = new Date(a.startDate);
+        return startDate.getMonth() === now.getMonth() && 
+               startDate.getFullYear() === now.getFullYear();
+      }).length;
+    },
+  },
+];
+
+export const ticketsSummaryCards = [
+  {
+    id: 'total',
+    label: 'Total Tickets',
+    icon: 'Ticket',
+    valueColor: 'text-gray-900',
+    iconColor: 'text-blue-500',
+    getValue: (data) => data.length,
+  },
+  {
+    id: 'open',
+    label: 'Open Tickets',
+    icon: 'AlertCircle',
+    valueColor: 'text-green-600',
+    iconColor: 'text-green-500',
+    getValue: (data) => data.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'ALLOCATED').length,
+  },
+  {
+    id: 'overdue',
+    label: 'Overdue',
+    icon: 'AlertTriangle',
+    valueColor: 'text-red-600',
+    iconColor: 'text-red-500',
+    getValue: (data) => data.filter(t => t.status === 'OVERDUE').length,
+  },
+  {
+    id: 'resolved',
+    label: 'Resolved',
+    icon: 'CheckCircle2',
+    valueColor: 'text-purple-600',
+    iconColor: 'text-purple-500',
+    getValue: (data) => data.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length,
+  },
+];
 
