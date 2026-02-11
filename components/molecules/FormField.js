@@ -4,11 +4,22 @@ import React from 'react';
 import { Field, ErrorMessage } from 'formik';
 import DocumentSelector from './DocumentSelector';
 import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
+import MultiSelect from '@/components/atoms/MultiSelect';
 import CampusAssetTable from './CampusAssetTable';
 
-export default function FormField({ field, formik }) {
-  const { name, label, type, placeholder, required, options, min, max } = field;
+export default function FormField({ field, formik, onFieldChange }) {
+  const { name, label, type, placeholder, required, options, min, max, disabled, readOnly } = field;
   const hasError = formik.touched[name] && formik.errors[name];
+
+  // Handle field change with callback
+  const handleFieldChange = (event) => {
+    const value = event.target.value;
+    formik.setFieldValue(name, value);
+    // Call the field-specific callback if provided
+    if (onFieldChange && typeof onFieldChange === 'function') {
+      onFieldChange(value, formik);
+    }
+  };
 
   const renderInput = () => {
     switch (type) {
@@ -56,6 +67,7 @@ export default function FormField({ field, formik }) {
           <Field
             as="select"
             name={name}
+            onChange={handleFieldChange}
             className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               hasError ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -67,6 +79,25 @@ export default function FormField({ field, formik }) {
               </option>
             ))}
           </Field>
+        );
+
+      case 'multi-select':
+        return (
+          <>
+            <MultiSelect
+              name={name}
+              label={label}
+              placeholder={placeholder}
+              options={options || []}
+              value={formik.values[name] || []}
+              onChange={(e) => formik.setFieldValue(name, e.target.value)}
+              onBlur={() => formik.setFieldTouched(name, true)}
+              isInvalid={hasError}
+              errorMessage={hasError ? formik.errors[name] : ''}
+              isRequired={required}
+              isDisabled={disabled}
+            />
+          </>
         );
 
       case 'textarea':
@@ -178,14 +209,14 @@ export default function FormField({ field, formik }) {
 
   return (
     <div className="mb-2">
-      {type !== 'checkbox' && type !== 'api-autocomplete' && (
+      {type !== 'checkbox' && type !== 'api-autocomplete' && type !== 'multi-select' && (
         <label htmlFor={name} className="block text-xs font-medium text-gray-700 mb-1">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       {renderInput()}
-      {type !== 'api-autocomplete' && (
+      {type !== 'api-autocomplete' && type !== 'multi-select' && (
         <ErrorMessage name={name}>
           {(msg) => <div className="text-red-500 text-xs mt-0.5">{msg}</div>}
         </ErrorMessage>

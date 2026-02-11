@@ -14,6 +14,7 @@ export default function GenericForm({
   onCancel,
   isSubmitting = false,
   showSections = false,
+  fieldCallbacks = {},
 }) {
   // Check if fields are grouped by sections
   const hasSection = fields.length > 0 && fields[0].section;
@@ -51,7 +52,7 @@ export default function GenericForm({
                             : ''
                         }
                       >
-                        <FormField field={field} formik={formik} />
+                        <FormField field={field} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
                         {field.helpText && (
                           <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
                         )}
@@ -82,7 +83,7 @@ export default function GenericForm({
                         : ''
                     }
                   >
-                    <FormField field={field} formik={formik} />
+                    <FormField field={field} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
                     {field.helpText && (
                       <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
                     )}

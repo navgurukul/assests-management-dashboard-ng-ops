@@ -42,7 +42,7 @@ export default function ActionMenu({ menuOptions = [], onClose, className = '' }
               }}
               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2"
             >
-              {IconComponent && <IconComponent className="h-4 w-4" />}
+              {IconComponent && <IconComponent className={`h-4 w-4 ${option.iconClassName || ''}`} />}
               <span>{option.label}</span>
             </button>
           );

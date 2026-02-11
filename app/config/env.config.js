@@ -25,6 +25,16 @@ const config = {
       details: (id) => `/assets/${id}`,
     },
     
+    // Consignments
+    consignments: {
+      list: '/consignments',
+      create: '/consignments',
+      update: (id) => `/consignments/${id}`,
+      delete: (id) => `/consignments/${id}`,
+      details: (id) => `/consignments/${id}`,
+      updateStatus: (id) => `/consignments/${id}/status`,
+    },
+    
     // Documents
     documents: {
       list: '/documents',

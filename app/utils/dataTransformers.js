@@ -219,3 +219,50 @@ export const transformAllocationForTable = (allocation) => {
     allocationData: allocation,
   };
 };
+
+/**
+ * Format consignment status codes to readable text
+ * Supported statuses: draft, dispatched, delivered
+ * @param {string} status - Status code from API
+ * @returns {string} Readable status text
+ */
+export const formatConsignmentStatus = (status) => {
+  const statusMap = {
+    'DRAFT': 'Draft',
+    'draft': 'Draft',
+    'DISPATCHED': 'Dispatched',
+    'dispatched': 'Dispatched',
+    'DELIVERED': 'Delivered',
+    'delivered': 'Delivered',
+  };
+  return statusMap[status] || status || 'N/A';
+};
+
+/**
+ * Transform consignment data for table display
+ * @param {object} consignment - Raw consignment data from API
+ * @returns {object} Transformed consignment data
+ */
+export const transformConsignmentForTable = (consignment) => {
+  return {
+    id: consignment.id,
+    consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
+    status: formatConsignmentStatus(consignment.status),
+    allocationCode: getNestedValue(consignment, 'allocation.allocationCode') || consignment.allocationCode || 'N/A',
+    courierService: getNestedValue(consignment, 'courierService.name') || consignment.courierServiceName || 'N/A',
+    source: consignment.source || getNestedValue(consignment, 'allocation.sourceCampus.name') || 'N/A',
+    destination: consignment.destination || getNestedValue(consignment, 'allocation.destinationCampus.name') || 'N/A',
+    shippedAt: formatDate(consignment.shippedAt),
+    estimatedDeliveryDate: formatDate(consignment.estimatedDeliveryDate),
+    deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
+    trackingId: consignment.trackingId || 'N/A',
+    assetCount: consignment.assets?.length || consignment.assetCount || 0,
+    assignedTo: consignment.assignedTo || null,
+    createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
+    createdAt: formatDate(consignment.createdAt),
+    updatedAt: formatDate(consignment.updatedAt),
+    // Store full consignment data for details page
+    consignmentData: consignment,
+  };
+};
+
