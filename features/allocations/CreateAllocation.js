@@ -30,24 +30,26 @@ export default function CreateAllocation() {
       if (values.allocationType === 'REMOTE') {
         // Remote allocation - single user with single asset
         allocationData = {
-          allocationType: 'REMOTE',
-          userDepartment: values.userDepartment || null,
-          userAddress: values.userAddress || null,
-          assetId: values.assetId,
-          assetSource: values.assetSource || null,
-          startDate: values.startDate,
+          allocationType: 'Remote',
+          assetIds: [values.assetId],
           allocationReason: values.allocationReason,
           notes: values.notes || null,
         };
+        
+        // Add optional fields only if they have values
+        if (values.userEmail) allocationData.userEmail = values.userEmail;
+        if (values.phoneNumber) allocationData.phoneNumber = values.phoneNumber;
+        if (values.userAddress) allocationData.userAddress = values.userAddress;
+        
       } else if (values.allocationType === 'CAMPUS') {
         // Campus allocation - bulk assets transfer
+        const assetIds = values.campusAssets.map(asset => asset.assetId);
         allocationData = {
-          allocationType: 'CAMPUS',
-          sourceCampus: values.sourceCampus,
-          destinationCampus: values.destinationCampus,
-          personRaising: values.personRaising,
-          campusAssets: values.campusAssets, // Array of {assetId, workingCondition}
-          startDate: values.startDate,
+          allocationType: 'Campus',
+          assetIds: assetIds,
+          sourceCampusName: values.sourceCampus,
+          destinationCampusName: values.destinationCampus,
+          personRaisingRequest: values.personRaising,
           allocationReason: values.allocationReason,
           notes: values.notes || null,
         };
@@ -55,8 +57,8 @@ export default function CreateAllocation() {
         throw new Error('Invalid allocation type');
       }
 
-      // Make API call to create allocation
-      const response = await fetch(config.getApiUrl(config.endpoints.allocations?.create || '/allocations'), {
+      // Make API call to create allocation using the new endpoint
+      const response = await fetch(config.getApiUrl(config.endpoints.allocations.create), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

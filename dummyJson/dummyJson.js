@@ -6,7 +6,6 @@ export const menuItems = [
   { name: 'Tickets', icon: 'Ticket', path: '/tickets' },
   { name: 'Consignments', icon: 'Archive', path: '/consignments' },
   { name: 'Reports', icon: 'FileText', path: '/reports' },
-  { name: 'Settings', icon: 'Settings', path: '/settings' },
 ];
 
 // Documents/Bills Data - For linking to components
