@@ -85,11 +85,11 @@ export default function TicketsList() {
     queryKey: ['campuses'],
   });
 
-  // Fetch users for assignee filter
-  const { data: usersData } = useFetch({
-    url: '/users',
-    queryKey: ['users'],
-  });
+  // Fetch users for assignee filter - COMMENTED OUT
+  // const { data: usersData } = useFetch({
+  //   url: '/users',
+  //   queryKey: ['users'],
+  // });
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -128,13 +128,16 @@ export default function TicketsList() {
 
   // Transform users data from API to assignee filter options
   const assigneeOptions = React.useMemo(() => {
-    if (!usersData || !usersData.data) return [];
+    // Temporarily disabled - users API commented out
+    return [];
     
-    return usersData.data.map((user) => ({
-      value: user.id,
-      label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-    }));
-  }, [usersData]);
+    // if (!usersData || !usersData.data) return [];
+    // 
+    // return usersData.data.map((user) => ({
+    //   value: user.id,
+    //   label: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+    // }));
+  }, []);
 
   // Status filter options based on API documentation
   const filterStatusOptions = [
