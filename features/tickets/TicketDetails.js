@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import DetailsPage from '@/components/molecules/DetailsPage';
+import { useRouter } from 'next/navigation';import { useDispatch } from 'react-redux';
+import { setSelectedTicket } from '@/app/store/slices/ticketSlice';import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
@@ -17,6 +17,7 @@ import {
 
 export default function TicketDetails({ ticketId, onBack }) {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -189,6 +190,11 @@ export default function TicketDetails({ ticketId, onBack }) {
     },
   ];
 
+  const handleCreateAllocation = () => {
+    dispatch(setSelectedTicket(ticket));
+    router.push('/allocations/create');
+  }
+
   return (
     <>
       <DetailsPage
@@ -202,7 +208,7 @@ export default function TicketDetails({ ticketId, onBack }) {
             text="Create Allocation"
             variant="primary"
             size="md"
-            onClick={() => router.push('/allocations/create')}
+            onClick={handleCreateAllocation}
           />
         }
       />
