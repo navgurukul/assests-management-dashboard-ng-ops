@@ -15,17 +15,9 @@ export default function ProfilePage() {
     avatar: null,
   };
 
-  // Dummy assets data
-  const myAssets = [
-    { id: 1, name: 'Laptop Dell XPS 15', serialNumber: 'DL12345', assignedDate: '2024-01-15', status: 'Active' },
-    { id: 2, name: 'iPhone 14 Pro', serialNumber: 'IP67890', assignedDate: '2024-02-01', status: 'Active' },
-    { id: 3, name: 'Monitor LG 27"', serialNumber: 'LG54321', assignedDate: '2024-01-20', status: 'Active' },
-  ];
-
   return (
     <UserProfileDetails 
       userData={user}
-      userAssets={myAssets}
     />
   );
 }
