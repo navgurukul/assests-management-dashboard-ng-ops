@@ -50,10 +50,10 @@ export default function CampusAssetTable({ assets = [], onChange }) {
         <BulkDeviceSelector selectedAssets={assets} onChange={onChange} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {campusAssetFields.map((field) => (
+          {/* {campusAssetFields.map((field) => (
             <div key={field.name}>
               <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-2">
-                {field.label} {field.required && <span className="text-red-500">*</span>}
+                {field.label} QQQQ {field.required && <span className="text-red-500">*</span>}
               </label>
               <input
                 type={field.type}
@@ -64,7 +64,7 @@ export default function CampusAssetTable({ assets = [], onChange }) {
                 placeholder={field.placeholder}
               />
             </div>
-          ))}
+          ))} */}
         </div>
       )}
     </div>
