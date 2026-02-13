@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Upload, FileText, Image, X, Download, Eye, Loader2, AlertCircle } from 'lucide-react';
 import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
+import CustomButton from '@/components/atoms/CustomButton';
 
 export default function DocumentAttachments({ documents = [], onUpload, onDelete }) {
   const [dragActive, setDragActive] = useState(false);
@@ -141,9 +142,13 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
               Supported: PDF, Images, Documents (Max 10MB)
             </p>
             <label className="cursor-pointer">
-              <span className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors inline-block">
-                Browse Files
-              </span>
+              <CustomButton
+                text="Browse Files"
+                icon={Upload}
+                variant="primary"
+                size="md"
+                disabled={isUploading}
+              />
               <input
                 type="file"
                 className="hidden"
@@ -165,13 +170,13 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
             <p className="text-sm text-red-800 font-medium">Upload Failed</p>
             <p className="text-xs text-red-600 mt-1">{uploadError}</p>
           </div>
-          <button
-            type="button"
+          <CustomButton
+            icon={X}
             onClick={() => setUploadError(null)}
-            className="text-red-400 hover:text-red-600"
-          >
-            <X className="w-4 h-4" />
-          </button>
+            variant="danger"
+            size="sm"
+            className="!p-1.5 !border-0 !shadow-none"
+          />
         </div>
       )}
 
@@ -215,30 +220,33 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
                 <div className="flex items-center gap-2 ml-4">
                   {doc.url && (
                     <>
-                      <button
+                      <CustomButton
+                        icon={Eye}
                         onClick={() => window.open(doc.url, '_blank')}
-                        className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                        variant="info"
+                        size="sm"
                         title="View"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
+                        className="!p-1.5"
+                      />
+                      <CustomButton
+                        icon={Download}
                         onClick={() => window.open(doc.url, '_blank')}
-                        className="p-2 text-gray-600 hover:text-green-600 transition-colors"
+                        variant="success"
+                        size="sm"
                         title="Download"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
+                        className="!p-1.5"
+                      />
                     </>
                   )}
                   {onDelete && (
-                    <button
+                    <CustomButton
+                      icon={X}
                       onClick={() => onDelete(doc.id)}
-                      className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                      variant="danger"
+                      size="sm"
                       title="Delete"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                      className="!p-1.5"
+                    />
                   )}
                 </div>
               </div>

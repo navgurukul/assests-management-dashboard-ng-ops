@@ -218,6 +218,7 @@ export const transformAllocationForTable = (allocation) => {
     id: allocation.id,
     allocationId: allocation.id || 'N/A',
     assetTag: getNestedValue(allocation, 'asset.assetTag') || allocation.assetId || 'N/A',
+    allocationType: allocation.allocationType || 'N/A',
     userName: userName,
     startDate: formatDate(allocation.startDate),
     endDate: allocation.endDate ? formatDate(allocation.endDate) : 'Active',

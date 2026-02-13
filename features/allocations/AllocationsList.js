@@ -7,6 +7,7 @@ import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SummaryCard from '@/components/atoms/SummaryCard';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
+import SearchInput from '@/components/molecules/SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -27,6 +28,10 @@ export default function AllocationsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
+  // Search state
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
   // Column visibility management
   const {
     visibleColumns,
@@ -38,18 +43,32 @@ export default function AllocationsList() {
     alwaysVisibleColumns,
   } = useTableColumns(ALLOCATION_TABLE_ID, allocationTableColumns, defaultVisibleColumns);
   
-  // Build query string with pagination
+  // Debounce search input (800ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+  
+  // Build query string with pagination and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
+    
+    // Add search parameter first
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    
     params.append('page', currentPage);
     params.append('limit', pageSize);
     return params.toString();
   };
   
-  // Fetch allocations data from API with pagination
+  // Fetch allocations data from API with pagination and search
   const { data, isLoading, isError, error } = useFetch({
     url: `/allocations?${buildQueryString()}`,
-    queryKey: ['allocations', currentPage, pageSize],
+    queryKey: ['allocations', currentPage, pageSize, debouncedSearch],
   });
 
   // Handle page change
@@ -81,6 +100,16 @@ export default function AllocationsList() {
         return <span className="font-medium text-blue-600">#{cellValue}</span>;
       case "assetTag":
         return <span className="font-medium text-gray-800">{cellValue}</span>;
+      case "allocationType":
+        const typeColors = {
+          'Campus': 'bg-purple-100 text-purple-800',
+          'User': 'bg-blue-100 text-blue-800',
+        };
+        return (
+          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
+            {cellValue}
+          </span>
+        );
       case "userName":
         if (!cellValue || cellValue === 'N/A') {
           return <span className="text-gray-400">Not assigned</span>;
@@ -247,6 +276,14 @@ export default function AllocationsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Search component
+        searchComponent={
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search allocations..."
+          />
+        }
         // Column selector component
         columnSelectorComponent={
           <ColumnSelector

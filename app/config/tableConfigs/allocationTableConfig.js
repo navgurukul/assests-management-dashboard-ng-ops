@@ -18,6 +18,11 @@ export const allocationTableColumns = [
     description: 'Asset tag assigned'
   },
   { 
+    key: 'allocationType', 
+    label: 'ALLOCATION TYPE',
+    description: 'Type of allocation (Campus/User)'
+  },
+  { 
     key: 'userName', 
     label: 'ASSIGNED TO',
     description: 'User receiving the allocation'
@@ -56,6 +61,7 @@ export const allocationTableColumns = [
 export const defaultVisibleColumns = [
   'allocationId',
   'assetTag',
+  'allocationType',
   'userName',
   'startDate',
   'endDate',
