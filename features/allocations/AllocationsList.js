@@ -82,6 +82,9 @@ export default function AllocationsList() {
       case "assetTag":
         return <span className="font-medium text-gray-800">{cellValue}</span>;
       case "userName":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">Not assigned</span>;
+        }
         return (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">

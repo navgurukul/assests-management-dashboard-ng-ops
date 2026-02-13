@@ -205,11 +205,20 @@ export const transformComponentForTable = (component) => {
  * @returns {object} Transformed allocation data
  */
 export const transformAllocationForTable = (allocation) => {
+  // Try multiple possible field paths for user name
+  const userName = getNestedValue(allocation, 'user.name') || 
+                   getNestedValue(allocation, 'user.userName') ||
+                   getNestedValue(allocation, 'user.fullName') ||
+                   getNestedValue(allocation, 'user.email') ||
+                   allocation.userName ||
+                   allocation.userId || 
+                   'N/A';
+  
   return {
     id: allocation.id,
     allocationId: allocation.id || 'N/A',
     assetTag: getNestedValue(allocation, 'asset.assetTag') || allocation.assetId || 'N/A',
-    userName: getNestedValue(allocation, 'user.name') || allocation.userId || 'N/A',
+    userName: userName,
     startDate: formatDate(allocation.startDate),
     endDate: allocation.endDate ? formatDate(allocation.endDate) : 'Active',
     reason: formatAllocationReason(allocation.allocationReason),
