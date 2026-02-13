@@ -79,6 +79,37 @@ export default function TicketsList() {
     queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
   });
 
+  // Fetch counts for each status
+  const { data: totalCountData } = useFetch({
+    url: '/tickets?page=1&limit=1',
+    queryKey: ['tickets-count-total'],
+  });
+
+  const { data: openCountData } = useFetch({
+    url: '/tickets?status=OPEN&page=1&limit=1',
+    queryKey: ['tickets-count-open'],
+  });
+
+  const { data: inProgressCountData } = useFetch({
+    url: '/tickets?status=IN_PROGRESS&page=1&limit=1',
+    queryKey: ['tickets-count-in-progress'],
+  });
+
+  const { data: resolvedCountData } = useFetch({
+    url: '/tickets?status=RESOLVED&page=1&limit=1',
+    queryKey: ['tickets-count-resolved'],
+  });
+
+  const { data: closedCountData } = useFetch({
+    url: '/tickets?status=CLOSED&page=1&limit=1',
+    queryKey: ['tickets-count-closed'],
+  });
+
+  const { data: rejectedCountData } = useFetch({
+    url: '/tickets?status=REJECTED&page=1&limit=1',
+    queryKey: ['tickets-count-rejected'],
+  });
+
   // Fetch campus options from API
   const { data: campusData } = useFetch({
     url: '/campuses',
@@ -105,6 +136,25 @@ export default function TicketsList() {
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle status card click
+  const handleStatusCardClick = (status) => {
+    if (status === null) {
+      // Total card clicked - remove status filter
+      const newFilters = { ...filters };
+      delete newFilters.status;
+      setFilters(newFilters);
+    } else if (filters.status === status) {
+      // If already filtered by this status, remove the filter
+      const newFilters = { ...filters };
+      delete newFilters.status;
+      setFilters(newFilters);
+    } else {
+      // Apply the status filter
+      setFilters({ ...filters, status });
+    }
     setCurrentPage(1); // Reset to first page when filters change
   };
 
@@ -388,20 +438,47 @@ export default function TicketsList() {
     );
   }
 
+  // Get count for a specific status
+  const getStatusCount = (status) => {
+    if (status === null) {
+      return totalCountData?.data?.pagination?.totalCount || 0;
+    }
+    switch (status) {
+      case 'OPEN':
+        return openCountData?.data?.pagination?.totalCount || 0;
+      case 'IN_PROGRESS':
+        return inProgressCountData?.data?.pagination?.totalCount || 0;
+      case 'RESOLVED':
+        return resolvedCountData?.data?.pagination?.totalCount || 0;
+      case 'CLOSED':
+        return closedCountData?.data?.pagination?.totalCount || 0;
+      case 'REJECTED':
+        return rejectedCountData?.data?.pagination?.totalCount || 0;
+      default:
+        return 0;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Status Cards */}
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
         {ticketsSummaryCards.map((card) => {
           const IconComponent = LucideIcons[card.icon];
+          const isActive = card.status === null 
+            ? !filters.status 
+            : filters.status === card.status;
           return (
             <SummaryCard
               key={card.id}
               label={card.label}
-              value={card.getValue(ticketsData)}
+              value={getStatusCount(card.status)}
               Icon={IconComponent}
               valueColor={card.valueColor}
               iconColor={card.iconColor}
+              clickable={true}
+              onClick={() => handleStatusCardClick(card.status)}
+              isActive={isActive}
             />
           );
         })}
