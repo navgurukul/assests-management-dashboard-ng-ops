@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
+
 export const allocationFormFields = [
   {
     name: 'allocationType',
@@ -13,12 +15,33 @@ export const allocationFormFields = [
   },
   // Remote Allocation Fields (shown when allocationType === 'REMOTE')
   {
-    name: 'assetId',
-    label: 'Asset',
-    type: 'text',
-    placeholder: 'Enter asset ID',
+    name: 'campusId',
+    label: 'Campus',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select campus',
+    apiUrl: baseUrl + '/campuses',
+    queryKey: ['campuses'],
+    labelKey: 'campusName',
+    valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
+  },
+  {
+    name: 'assetId',
+    label: 'Asset',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select asset',
+    apiUrl: baseUrl + '/assets',
+    queryKey: ['assets'],
+    labelKey: 'assetTag',
+    valueKey: 'id',
+    required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+    dependsOn: {
+      field: 'campusId',
+      paramKey: 'campusId',
+    },
+    formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
   },
   {
     name: 'userEmail',
@@ -84,6 +107,11 @@ export const allocationValidationSchema = Yup.object().shape({
     .oneOf(['REMOTE', 'CAMPUS'], 'Invalid allocation type'),
   
   // Remote allocation validations
+  campusId: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.required('Campus is required'),
+    }),
   userEmail: Yup.string()
     .email('Invalid email format')
     .when('allocationType', {
@@ -157,6 +185,7 @@ export const allocationValidationSchema = Yup.object().shape({
 export const allocationInitialValues = {
   allocationType: 'REMOTE',
   // Remote fields
+  campusId: '',
   assetId: '',
   userEmail: '',
   phoneNumber: '',
