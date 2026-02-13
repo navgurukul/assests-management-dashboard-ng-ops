@@ -68,9 +68,6 @@ export default function UserProfileTab({ userData }) {
         <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
           Edit Profile
         </button>
-        <button className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-          Change Password
-        </button>
       </div>
     </div>
   );
