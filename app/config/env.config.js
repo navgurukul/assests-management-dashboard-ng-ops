@@ -64,6 +64,7 @@ const config = {
       update: (id) => `/allocations/${id}`,
       delete: (id) => `/allocations/${id}`,
       details: (id) => `/allocations/${id}`,
+      myAssets: '/allocations/my-assets',
     },
     
     // Dashboard

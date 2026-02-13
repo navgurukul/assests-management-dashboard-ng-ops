@@ -113,23 +113,23 @@ export const allocationFormFields = [
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
-  {
-    name: 'allocationReason',
-    label: 'Allocation Reason',
-    type: 'select',
-    placeholder: 'Select allocation reason',
-    required: true,
-    showIf: { field: 'allocationType', value: 'CAMPUS' },
-    options: [
-      {value: 'JOINER', label: 'Joiner (New User)'},
-      { value: 'NEW_CAMPUS', label: 'New Campus Setup' },
-      { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
-      { value: 'REPLACEMENT', label: 'Replacement' },
-      { value: 'UPGRADE', label: 'Upgrade' },
-      { value: 'MAINTENANCE', label: 'Maintenance' },
-      { value: 'OTHER', label: 'Other' },
-    ],
-  },
+  // {
+  //   name: 'allocationReason',
+  //   label: 'Allocation Reason',
+  //   type: 'select',
+  //   placeholder: 'Select allocation reason',
+  //   required: true,
+  //   showIf: { field: 'allocationType', value: 'CAMPUS' },
+  //   options: [
+  //     {value: 'JOINER', label: 'Joiner (New User)'},
+  //     { value: 'NEW_CAMPUS', label: 'New Campus Setup' },
+  //     { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
+  //     { value: 'REPLACEMENT', label: 'Replacement' },
+  //     { value: 'UPGRADE', label: 'Upgrade' },
+  //     { value: 'MAINTENANCE', label: 'Maintenance' },
+  //     { value: 'OTHER', label: 'Other' },
+  //   ],
+  // },
   {
     name: 'notes',
     label: 'Notes',
@@ -178,12 +178,12 @@ export const allocationValidationSchema = Yup.object().shape({
       then: (schema) => schema.required('Destination campus is required'),
       otherwise: (schema) => schema.nullable(),
     }),
-  allocationReason: Yup.string()
-    .when('allocationType', {
-      is: 'CAMPUS',
-      then: (schema) => schema.required('Allocation reason is required'),
-      otherwise: (schema) => schema.nullable(),
-    }),
+  // allocationReason: Yup.string()
+  //   .when('allocationType', {
+  //     is: 'CAMPUS',
+  //     then: (schema) => schema.required('Allocation reason is required'),
+  //     otherwise: (schema) => schema.nullable(),
+  //   }),
   campusAssets: Yup.array()
     .when('allocationType', {
       is: 'CAMPUS',
