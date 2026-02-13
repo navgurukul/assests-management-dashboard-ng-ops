@@ -35,6 +35,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
       brand: asset.brand,
       model: asset.model,
       condition: asset.condition,
+      workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
       status: asset.status,
     }));
   }, [data]);
