@@ -54,6 +54,7 @@ const config = {
       update: (id) => `/tickets/${id}`,
       delete: (id) => `/tickets/${id}`,
       details: (id) => `/tickets/${id}`,
+      myTickets: '/tickets/my-tickets',
     },
     
     // Allocations
@@ -63,6 +64,7 @@ const config = {
       update: (id) => `/allocations/${id}`,
       delete: (id) => `/allocations/${id}`,
       details: (id) => `/allocations/${id}`,
+      myAssets: '/allocations/my-assets',
     },
     
     // Dashboard
