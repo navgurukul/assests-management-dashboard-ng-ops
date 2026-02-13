@@ -25,14 +25,14 @@ export default function CreateAllocation() {
   const [modifiedInitialValues, setModifiedInitialValues] = useState(allocationInitialValues);
 
   useEffect(() => {
-    if (selectedTicket?.assigneeUser?.email) {
+    if (selectedTicket?.raisedByUser?.email) {
       // Modify form fields to disable userEmail field
       const updatedFields = allocationFormFields.map(field => {
         if (field.name === 'userEmail') {
           return {
             ...field,
             disabled: true,
-            helperText: 'Email pre-populated from ticket assignee',
+            helperText: 'Email pre-populated from ticket raiser',
           };
         }
         return field;
@@ -42,7 +42,7 @@ export default function CreateAllocation() {
       // Set initial value for userEmail
       setModifiedInitialValues({
         ...allocationInitialValues,
-        userEmail: selectedTicket.assigneeUser.email,
+        userEmail: selectedTicket.raisedByUser.email,
       });
     }
 
