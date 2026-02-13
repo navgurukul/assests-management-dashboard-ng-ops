@@ -84,7 +84,6 @@ export default function CreateAllocation() {
           assetIds: assetIds,
           sourceCampusName: values.sourceCampus,
           destinationCampusName: values.destinationCampus,
-          personRaisingRequest: values.personRaising,
           allocationReason: values.allocationReason,
           notes: values.notes || null,
         };
@@ -126,6 +125,14 @@ export default function CreateAllocation() {
     router.push('/allocations');
   };
 
+  // Field callbacks for form field changes
+  const fieldCallbacks = {
+    clearAssetId: (value, formik) => {
+      // Clear assetId when assetType changes
+      formik.setFieldValue('assetId', '');
+    },
+  };
+
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-6xl mx-auto p-6">
@@ -163,6 +170,7 @@ export default function CreateAllocation() {
             onCancel={handleCancel}
             submitButtonText="Create Allocation"
             isSubmitting={isSubmitting}
+            fieldCallbacks={fieldCallbacks}
           />
         </div>
       </div>
