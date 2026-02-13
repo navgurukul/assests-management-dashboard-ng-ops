@@ -2,10 +2,17 @@
 
 import React, { useState } from 'react';
 import BulkDeviceSelector from './BulkDeviceSelector';
+import { allocationFormFields } from '@/app/config/formConfigs/allocationFormConfig';
 
 export default function CampusAssetTable({ assets = [], onChange }) {
   const [selectionMode, setSelectionMode] = useState('single'); // 'single' or 'bulk'
   const [singleAsset, setSingleAsset] = useState({ assetId: '', assetType: '' });
+
+  // Get campus asset fields from config
+  const campusAssetFields = allocationFormFields.filter(
+    field => (field.name === 'assetType' || field.name === 'assetId') && 
+            field.showIf?.field === 'allocationType'
+  );
 
   return (
     <div className="space-y-4">
@@ -43,35 +50,21 @@ export default function CampusAssetTable({ assets = [], onChange }) {
         <BulkDeviceSelector selectedAssets={assets} onChange={onChange} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Asset ID Input */}
-            <div>
-              <label htmlFor="assetId" className="block text-sm font-medium text-gray-700 mb-2">
-                Asset ID <span className="text-red-500">*</span>
+          {/* {campusAssetFields.map((field) => (
+            <div key={field.name}>
+              <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-2">
+                {field.label} QQQQ {field.required && <span className="text-red-500">*</span>}
               </label>
               <input
-                type="text"
-                id="assetId"
-                value={singleAsset.assetId}
-                onChange={(e) => setSingleAsset({ ...singleAsset, assetId: e.target.value })}
+                type={field.type}
+                id={field.name}
+                value={singleAsset[field.name]}
+                onChange={(e) => setSingleAsset({ ...singleAsset, [field.name]: e.target.value })}
                 className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter asset ID"
+                placeholder={field.placeholder}
               />
             </div>
-
-            {/* Asset Type Input */}
-            <div>
-              <label htmlFor="assetType" className="block text-sm font-medium text-gray-700 mb-2">
-                Asset Type <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="assetType"
-                value={singleAsset.assetType}
-                onChange={(e) => setSingleAsset({ ...singleAsset, assetType: e.target.value })}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter asset type (e.g., Laptop, Desktop)"
-              />
-            </div>
+          ))} */}
         </div>
       )}
     </div>
