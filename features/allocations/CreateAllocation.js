@@ -12,6 +12,7 @@ import {
   allocationInitialValues,
 } from '@/app/config/formConfigs/allocationFormConfig';
 import { toast } from '@/app/utils/toast';
+import apiService from '@/app/utils/apiService';
 
 export default function CreateAllocation() {
   const router = useRouter();
@@ -57,25 +58,15 @@ export default function CreateAllocation() {
         throw new Error('Invalid allocation type');
       }
 
-      // Make API call to create allocation using the new endpoint
-      const response = await fetch(config.getApiUrl(config.endpoints.allocations.create), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(allocationData),
-      });
+      // Make API call to create allocation using apiService wrapper
+      const result = await apiService.post(
+        config.endpoints.allocations.create,
+        allocationData
+      );
 
       // Dismiss loading toast
       toast.dismiss(loadingToastId);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || 'Failed to create allocation';
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
       console.log('Allocation created successfully:', result);
       
       // Show success toast

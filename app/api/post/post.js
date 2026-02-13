@@ -22,7 +22,7 @@ const post = async ({
    
     // Add Authorization header if token exists
     if (token) {
-      headers['Authorization'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
     }
    
     const response = await fetch(url, {
