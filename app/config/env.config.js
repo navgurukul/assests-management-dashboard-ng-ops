@@ -54,6 +54,7 @@ const config = {
       update: (id) => `/tickets/${id}`,
       delete: (id) => `/tickets/${id}`,
       details: (id) => `/tickets/${id}`,
+      myTickets: '/tickets/my-tickets',
     },
     
     // Allocations

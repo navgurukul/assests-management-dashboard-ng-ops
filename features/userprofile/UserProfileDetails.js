@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Package, Ticket } from 'lucide-react';
 import { UserProfileTab, MyAssetsTab, TicketStatusTab } from './tabs';
+import apiService from '@/app/utils/apiService';
+import config from '@/app/config/env.config';
 
 const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
@@ -10,8 +12,35 @@ const tabs = [
   { id: 'ticketstatus', label: 'Ticket Status', icon: Ticket, Component: TicketStatusTab },
 ];
 
-export default function UserProfileDetails({ userData, userAssets, userTickets }) {
+export default function UserProfileDetails({ userData, userAssets, userTickets: initialTickets }) {
   const [activeTab, setActiveTab] = useState('userprofile');
+  const [userTickets, setUserTickets] = useState(initialTickets || []);
+  const [isLoadingTickets, setIsLoadingTickets] = useState(false);
+  const [ticketsError, setTicketsError] = useState(null);
+  const [hasTicketsFetched, setHasTicketsFetched] = useState(!!initialTickets);
+
+  // Fetch tickets when the ticket status tab becomes active for the first time
+  useEffect(() => {
+    if (activeTab === 'ticketstatus' && !hasTicketsFetched) {
+      fetchUserTickets();
+    }
+  }, [activeTab]);
+
+  const fetchUserTickets = async () => {
+    setIsLoadingTickets(true);
+    setTicketsError(null);
+    try {
+      const response = await apiService.get(config.endpoints.tickets.myTickets);
+      setUserTickets(response.data || response || []);
+      setHasTicketsFetched(true);
+    } catch (error) {
+      console.error('Error fetching user tickets:', error);
+      setTicketsError(error.message || 'Failed to load tickets');
+      setUserTickets([]);
+    } finally {
+      setIsLoadingTickets(false);
+    }
+  };
 
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
 
@@ -80,6 +109,8 @@ export default function UserProfileDetails({ userData, userAssets, userTickets }
                 userData={userData}
                 userAssets={userAssets}
                 userTickets={userTickets}
+                isLoadingTickets={isLoadingTickets}
+                ticketsError={ticketsError}
               />
             )}
           </div>

@@ -22,18 +22,10 @@ export default function ProfilePage() {
     { id: 3, name: 'Monitor LG 27"', serialNumber: 'LG54321', assignedDate: '2024-01-20', status: 'Active' },
   ];
 
-  // Dummy tickets data
-  const myTickets = [
-    { id: 101, title: 'Laptop Screen Issue', status: 'In Progress', priority: 'High', createdDate: '2024-02-05' },
-    { id: 102, title: 'Software Installation Request', status: 'Resolved', priority: 'Medium', createdDate: '2024-02-01' },
-    { id: 103, title: 'Network Connectivity Problem', status: 'Open', priority: 'Low', createdDate: '2024-02-08' },
-  ];
-
   return (
     <UserProfileDetails 
       userData={user}
       userAssets={myAssets}
-      userTickets={myTickets}
     />
   );
 }
