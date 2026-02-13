@@ -127,33 +127,6 @@ export default function TicketDetails({ ticketId, onBack }) {
 
   const leftSections = [
     {
-      title: 'DETAILS',
-      itemsGrid: true,
-      items: [
-        { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || ticket.assigneeUserId || '—') },
-        { label: 'Priority', value: ticket.priority || '—' },
-        { label: 'Status', value: ticket.status || '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
-      ],
-    },
-    {
-      title: 'DEVICE SUMMARY',
-      items: [
-        { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
-        { label: 'Brand', value: ticket.asset?.brand || '—' },
-        { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
-        { label: 'Condition', value: ticket.asset?.condition || '—' },
-      ],
-    },
-  ];
-
-  const rightSections = [
-    {
       title: 'SLA / TIMELINE',
       content: (
         <SLAIndicator 
@@ -182,6 +155,36 @@ export default function TicketDetails({ ticketId, onBack }) {
       title: 'ACTIONS',
       actions: [
         { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
+      ],
+    },
+  ];
+
+  const rightSections = [
+    {
+      title: 'DETAILS',
+      itemsGrid: true,
+      items: [
+        { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
+        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
+        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
+        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
+        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
+        { label: 'Ticket Type', value: ticket.ticketType || '—' },
+        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || ticket.assigneeUserId || '—') },
+        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
+        { label: 'Priority', value: ticket.priority || '—' },
+        { label: 'Status', value: ticket.status || '—' },
+        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
+        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
+      ],
+    },
+    {
+      title: 'DEVICE SUMMARY',
+      items: [
+        { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
+        { label: 'Brand', value: ticket.asset?.brand || '—' },
+        { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
+        { label: 'Condition', value: ticket.asset?.condition || '—' },
       ],
     },
   ];
