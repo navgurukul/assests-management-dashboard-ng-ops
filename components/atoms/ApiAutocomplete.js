@@ -90,7 +90,7 @@ export default function ApiAutocomplete({
   return (
     <div className="w-full">
       {/* Label */}
-      <label className="block text-xs font-medium text-gray-700 mb-1">
+      <label id={`${name}-label`} className="block text-xs font-medium text-gray-700 mb-1">
         {label}
         {isRequired && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -118,6 +118,7 @@ export default function ApiAutocomplete({
           radius="lg"
           menuTrigger="focus"
           showScrollIndicators={false}
+          aria-labelledby={`${name}-label`}
           classNames={{
             base: "w-full",
             inputWrapper: "border-0 hover:border-0 focus-within:!border-0 shadow-none bg-white",
