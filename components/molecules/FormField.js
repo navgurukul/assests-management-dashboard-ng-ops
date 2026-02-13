@@ -191,6 +191,7 @@ export default function FormField({ field, formik, onFieldChange }) {
           <CampusAssetTable
             assets={formik.values[name] || []}
             onChange={(assets) => formik.setFieldValue(name, assets)}
+            assetTypeId={formik.values.assetType}
           />
         );
 
