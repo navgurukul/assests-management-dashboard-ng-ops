@@ -93,14 +93,6 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   }, 
   {
-    name: 'campusAssets',
-    label: 'Assets',
-    type: 'campus-asset-table',
-    placeholder: 'Add assets with their working conditions',
-    required: true,
-    showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  {
     name: 'assetType',
     label: 'Asset Type',
     type: 'api-autocomplete',
@@ -129,6 +121,14 @@ export const allocationFormFields = [
       paramKey: 'type',
     },
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
+  },
+  {
+    name: 'campusAssets',
+    label: 'Assets',
+    type: 'campus-asset-table',
+    placeholder: 'Add assets with their working conditions',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
   {
     name: 'notes',
@@ -193,11 +193,6 @@ export const allocationValidationSchema = Yup.object().shape({
       is: 'CAMPUS',
       then: (schema) => schema.required('Destination campus is required'),
     }),
-  personRaising: Yup.string()
-    .when('allocationType', {
-      is: 'CAMPUS',
-      then: (schema) => schema.required('Person raising request is required'),
-    }),
   campusAssets: Yup.array()
     .when('allocationType', {
       is: 'CAMPUS',
@@ -211,12 +206,6 @@ export const allocationValidationSchema = Yup.object().shape({
         .min(1, 'At least one asset is required'),
     }),
   
-  // Common validations
-  startDate: Yup.date()
-    .required('Allocation date is required'),
-  allocationReason: Yup.string()
-    .required('Allocation reason is required')
-    .oneOf(['JOINER', 'REPAIR', 'REPLACEMENT', 'LOANER', 'CAMPUS_TRANSFER'], 'Invalid allocation reason'),
   notes: Yup.string().nullable(),
 });
 
