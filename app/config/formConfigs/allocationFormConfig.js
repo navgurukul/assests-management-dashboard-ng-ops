@@ -101,6 +101,22 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
   {
+    name: 'assetType',
+    label: 'Asset Type',
+    type: 'text',
+    placeholder: 'Enter asset type (e.g., Laptop, Desktop)',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
+  },
+  {
+    name: 'assetId',
+    label: 'Asset ID',
+    type: 'text',
+    placeholder: 'Enter asset ID',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
+  },
+  {
     name: 'notes',
     label: 'Notes',
     type: 'textarea',
@@ -209,5 +225,6 @@ export const allocationInitialValues = {
   startDate: new Date().toISOString().split('T')[0],
   allocationReason: 'JOINER',
   notes: '',
+  assetType: '',
+  assetId: '',
 };
-
