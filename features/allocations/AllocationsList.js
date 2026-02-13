@@ -6,21 +6,17 @@ import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SummaryCard from '@/components/atoms/SummaryCard';
+import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
+import { useTableColumns } from '@/app/hooks/useTableColumns';
+import {
+  ALLOCATION_TABLE_ID,
+  allocationTableColumns,
+  defaultVisibleColumns,
+} from '@/app/config/tableConfigs/allocationTableConfig';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
 import { allocationsSummaryCards } from '@/dummyJson/dummyJson';
-
-const columns = [
-  { key: "allocationId", label: "ALLOCATION ID" },
-  { key: "assetTag", label: "ASSET TAG" },
-  { key: "userName", label: "ASSIGNED TO" },
-  { key: "startDate", label: "START DATE" },
-  { key: "endDate", label: "END DATE" },
-  { key: "reason", label: "REASON" },
-  { key: "status", label: "STATUS" },
-  { key: "actions", label: "ACTIONS" },
-];
 
 const actionOptions = ['View', 'Return', 'Details'];
 
@@ -30,6 +26,17 @@ export default function AllocationsList() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  
+  // Column visibility management
+  const {
+    visibleColumns,
+    visibleColumnKeys,
+    allColumns,
+    toggleColumn,
+    showAllColumns,
+    resetToDefault,
+    alwaysVisibleColumns,
+  } = useTableColumns(ALLOCATION_TABLE_ID, allocationTableColumns, defaultVisibleColumns);
   
   // Build query string with pagination
   const buildQueryString = () => {
@@ -228,7 +235,7 @@ export default function AllocationsList() {
       {/* Table */}
       <TableWrapper
         data={allocationsListData}
-        columns={columns}
+        columns={visibleColumns}
         title="Allocations"
         renderCell={renderCell}
         itemsPerPage={pageSize}
@@ -237,6 +244,17 @@ export default function AllocationsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        // Column selector component
+        columnSelectorComponent={
+          <ColumnSelector
+            allColumns={allColumns}
+            visibleColumnKeys={visibleColumnKeys}
+            alwaysVisibleColumns={alwaysVisibleColumns}
+            onToggleColumn={toggleColumn}
+            onShowAll={showAllColumns}
+            onResetToDefault={resetToDefault}
+          />
+        }
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}
