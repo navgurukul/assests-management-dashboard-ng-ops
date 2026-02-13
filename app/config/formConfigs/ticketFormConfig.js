@@ -11,7 +11,6 @@ export const ticketFormFields = [
     options: [
       { value: 'NEW', label: 'New' },
       { value: 'REPAIR', label: 'Repair' },
-      { value: 'MAINTENANCE', label: 'Maintenance' },
       { value: 'REPLACEMENT', label: 'Replacement' },
     ],
   },
