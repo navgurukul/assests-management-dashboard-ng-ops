@@ -26,7 +26,7 @@ const get = async ({
 
     // Add Authorization header if token exists
     if (token) {
-        headers['Authorization'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
     }
 
     jsonData = await fetch(url, {
