@@ -202,15 +202,25 @@ export default function TicketsList() {
           })
         : '—';
 
-      // Get raised by user
+      // Get raised by user with email
       const raisedBy = ticket.raisedByUser
-        ? `${ticket.raisedByUser.firstName || ''} ${ticket.raisedByUser.lastName || ''}`.trim() || ticket.raisedByUser.email || ''
-        : '—';
+        ? {
+            name: `${ticket.raisedByUser.firstName || ''} ${ticket.raisedByUser.lastName || ''}`.trim() || ticket.raisedByUser.email || '',
+            email: ticket.raisedByUser.email || ''
+          }
+        : { name: '—', email: '' };
 
-      // Get assigned to user
+      // Get assigned to user with email
       const assignedTo = ticket.assigneeUser
-        ? `${ticket.assigneeUser.firstName || ''} ${ticket.assigneeUser.lastName || ''}`.trim() || ticket.assigneeUser.email || ''
-        : '—';
+        ? {
+            name: `${ticket.assigneeUser.firstName || ''} ${ticket.assigneeUser.lastName || ''}`.trim() || ticket.assigneeUser.email || '',
+            email: ticket.assigneeUser.email || ''
+          }
+        : { name: '—', email: '' };
+
+      // Get emails
+      const raisedByEmail = ticket.raisedByUser?.email || '—';
+      const assigneeEmail = ticket.assigneeUser?.email || '—';
 
       // Get assign date
       const assignDateLabel = ticket.assignDate
@@ -256,6 +266,8 @@ export default function TicketsList() {
         campus: ticket.campus?.name || ticket.campus?.code || '-',
         raisedBy,
         assignedTo,
+        raisedByEmail,
+        assigneeEmail,
         createdAt: createdAtLabel,
         assignDate: assignDateLabel,
         resolvedAt: resolvedAtLabel,
@@ -318,9 +330,27 @@ export default function TicketsList() {
       case "resolvedAt":
       case "closedAt":
         return <span className="text-gray-500 text-sm">{cellValue || '—'}</span>;
-      case "actionTakenBy":
       case "raisedBy":
+        return (
+          <div className="flex flex-col">
+            <span className="text-gray-700 text-sm font-medium">{cellValue?.name || '—'}</span>
+            {cellValue?.email && (
+              <span className="text-gray-500 text-xs">{cellValue.email}</span>
+            )}
+          </div>
+        );
       case "assignedTo":
+        return (
+          <div className="flex flex-col">
+            <span className="text-gray-700 text-sm font-medium">{cellValue?.name || '—'}</span>
+            {cellValue?.email && (
+              <span className="text-gray-500 text-xs">{cellValue.email}</span>
+            )}
+          </div>
+        );
+      case "actionTakenBy":
+      case "raisedByEmail":
+      case "assigneeEmail":
       case "campus":
         return <span className="text-gray-700 text-sm">{cellValue || '—'}</span>;
       default:
