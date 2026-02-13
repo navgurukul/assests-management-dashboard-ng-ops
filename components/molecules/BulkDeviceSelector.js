@@ -6,23 +6,39 @@ import CustomButton from '../atoms/CustomButton';
 import Modal from './Modal';
 import TableWrapper from '../Table/TableWrapper';
 import SearchInput from './SearchInput';
+import useFetch from '@/app/hooks/query/useFetch';
 
-export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
+
+export default function BulkDeviceSelector({ selectedAssets = [], onChange, assetTypeId = null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [checkedAssets, setCheckedAssets] = useState(new Set(selectedAssets.map(a => a.assetId)));
+  const [checkedAssets, setCheckedAssets] = useState(new Set(selectedAssets.map(a => a.id)));
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock data - replace with actual API call
-  const availableAssets = [
-    { id: 'LAP001', assetId: 'LAP001', assetType: 'Laptop', workingCondition: 'EXCELLENT' },
-    { id: 'LAP002', assetId: 'LAP002', assetType: 'Laptop', workingCondition: 'GOOD' },
-    { id: 'LAP003', assetId: 'LAP003', assetType: 'Laptop', workingCondition: 'FAIR' },
-    { id: 'LAP004', assetId: 'LAP004', assetType: 'Laptop', workingCondition: 'EXCELLENT' },
-    { id: 'LAP005', assetId: 'LAP005', assetType: 'Laptop', workingCondition: 'GOOD' },
-    { id: 'LAP006', assetId: 'LAP006', assetType: 'Laptop', workingCondition: 'POOR' },
-    { id: 'LAP007', assetId: 'LAP007', assetType: 'Laptop', workingCondition: 'EXCELLENT' },
-    { id: 'LAP008', assetId: 'LAP008', assetType: 'Laptop', workingCondition: 'NEEDS_REPAIR' },
-  ];
+  // Build API URL with assetType filter
+  const apiUrl = assetTypeId ? `${baseUrl}/assets?type=${assetTypeId}` : `${baseUrl}/assets`;
+  
+  // Fetch assets from API
+  const { data, isLoading, isError } = useFetch({
+    url: apiUrl,
+    queryKey: ['assets-bulk', assetTypeId],
+    enabled: !!assetTypeId, // Only fetch when assetType is selected
+  });
+
+  // Extract assets from API response
+  const availableAssets = useMemo(() => {
+    if (!data?.data || !Array.isArray(data.data)) return [];
+    return data.data.map(asset => ({
+      id: asset.id,
+      assetId: asset.assetTag,
+      assetType: asset.assetType?.name || 'N/A',
+      brand: asset.brand,
+      model: asset.model,
+      condition: asset.condition,
+      workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
+      status: asset.status,
+    }));
+  }, [data]);
 
   // Filter assets based on search term
   const filteredAssets = useMemo(() => {
@@ -31,23 +47,25 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
     return availableAssets.filter(asset => 
       asset.assetId.toLowerCase().includes(lowerSearch) ||
       asset.assetType.toLowerCase().includes(lowerSearch) ||
-      asset.workingCondition.toLowerCase().includes(lowerSearch)
+      asset.brand?.toLowerCase().includes(lowerSearch) ||
+      asset.model?.toLowerCase().includes(lowerSearch) ||
+      asset.condition?.toLowerCase().includes(lowerSearch)
     );
   }, [searchTerm, availableAssets]);
 
   const handleCheckboxChange = (asset) => {
     const newCheckedAssets = new Set(checkedAssets);
-    if (newCheckedAssets.has(asset.assetId)) {
-      newCheckedAssets.delete(asset.assetId);
+    if (newCheckedAssets.has(asset.id)) {
+      newCheckedAssets.delete(asset.id);
     } else {
-      newCheckedAssets.add(asset.assetId);
+      newCheckedAssets.add(asset.id);
     }
     setCheckedAssets(newCheckedAssets);
   };
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setCheckedAssets(new Set(filteredAssets.map(a => a.assetId)));
+      setCheckedAssets(new Set(filteredAssets.map(a => a.id)));
     } else {
       setCheckedAssets(new Set());
     }
@@ -60,39 +78,39 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
   };
 
   const handleSaveSelection = () => {
-    const selected = availableAssets.filter(asset => checkedAssets.has(asset.assetId));
+    const selected = availableAssets.filter(asset => checkedAssets.has(asset.id));
     onChange(selected);
     setIsModalOpen(false);
   };
 
   const handleOpenModal = () => {
     // Initialize checked assets from current selection
-    setCheckedAssets(new Set(selectedAssets.map(a => a.assetId)));
+    setCheckedAssets(new Set(selectedAssets.map(a => a.id)));
     setSearchTerm('');
     setIsModalOpen(true);
   };
 
   const getConditionBadge = (condition) => {
     const badges = {
-      EXCELLENT: 'bg-green-100 text-green-800',
-      GOOD: 'bg-blue-100 text-blue-800',
-      FAIR: 'bg-yellow-100 text-yellow-800',
-      POOR: 'bg-orange-100 text-orange-800',
-      NEEDS_REPAIR: 'bg-red-100 text-red-800',
+      WORKING: 'bg-green-100 text-green-800',
+      MINOR_ISSUES: 'bg-yellow-100 text-yellow-800',
+      NOT_WORKING: 'bg-red-100 text-red-800',
     };
     return badges[condition] || 'bg-gray-100 text-gray-800';
   };
 
   const getConditionLabel = (condition) => {
-    return condition.replace('_', ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    if (!condition) return 'N/A';
+    return condition.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   };
 
   // Table columns configuration
   const columns = [
     { key: 'select', label: '', className: 'w-12' },
-    { key: 'assetId', label: 'Asset ID' },
-    { key: 'assetType', label: 'Asset Type' },
-    { key: 'workingCondition', label: 'Working Condition' },
+    { key: 'assetId', label: 'Asset Tag' },
+    { key: 'brand', label: 'Brand' },
+    { key: 'model', label: 'Model' },
+    { key: 'condition', label: 'Condition' },
   ];
 
   // Custom render for table cells
@@ -103,7 +121,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
           <div onClick={(e) => e.stopPropagation()}>
             <input
               type="checkbox"
-              checked={checkedAssets.has(asset.assetId)}
+              checked={checkedAssets.has(asset.id)}
               onChange={() => handleCheckboxChange(asset)}
               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
             />
@@ -111,12 +129,14 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
         );
       case 'assetId':
         return <span className="font-medium text-gray-900">{asset.assetId}</span>;
-      case 'assetType':
-        return <span className="text-gray-700">{asset.assetType}</span>;
-      case 'workingCondition':
+      case 'brand':
+        return <span className="text-gray-700">{asset.brand || 'N/A'}</span>;
+      case 'model':
+        return <span className="text-gray-700">{asset.model || 'N/A'}</span>;
+      case 'condition':
         return (
-          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getConditionBadge(asset.workingCondition)}`}>
-            {getConditionLabel(asset.workingCondition)}
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getConditionBadge(asset.condition)}`}>
+            {getConditionLabel(asset.condition)}
           </span>
         );
       default:
@@ -134,23 +154,26 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
             text="Select Bulk Devices"
             onClick={handleOpenModal}
             variant="secondary"
-            size="sm"
-            icon={Package}
+            disabled={!assetTypeId}
           />
         </div>
 
-        {selectedAssets.length > 0 ? (
+        {!assetTypeId && (
+          <p className="text-sm text-amber-600 mt-2">Please select Asset Type first to enable bulk device selection.</p>
+        )}
+
+        {assetTypeId && selectedAssets.length > 0 ? (
           <div className="flex flex-wrap gap-2 mt-3">
             {selectedAssets.map((asset) => (
               <div
-                key={asset.assetId}
+                key={asset.id}
                 className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium"
               >
                 <span>{asset.assetId}</span>
                 <button
                   type="button"
                   onClick={() => {
-                    const updated = selectedAssets.filter(a => a.assetId !== asset.assetId);
+                    const updated = selectedAssets.filter(a => a.id !== asset.id);
                     onChange(updated);
                   }}
                   className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
@@ -161,9 +184,9 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
               </div>
             ))}
           </div>
-        ) : (
+        ) : assetTypeId ? (
           <p className="text-sm text-gray-500 mt-2">No assets selected. Click "Select Bulk Devices" to choose assets.</p>
-        )}
+        ) : null}
       </div>
 
       {/* Modal for Bulk Selection */}
@@ -181,45 +204,64 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange }) {
                 Selected Assets ({checkedAssets.size})
               </h5>
               <div className="flex flex-wrap gap-2">
-                {Array.from(checkedAssets).map((assetId) => (
-                  <div
-                    key={assetId}
-                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm font-medium"
-                  >
-                    <span>{assetId}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveChip(assetId)}
-                      className="hover:bg-blue-700 rounded-full p-0.5 transition-colors"
-                      title="Remove asset"
+                {Array.from(checkedAssets).map((assetId) => {
+                  const asset = availableAssets.find(a => a.id === assetId);
+                  return (
+                    <div
+                      key={assetId}
+                      className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm font-medium"
                     >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                      <span>{asset?.assetId || assetId}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveChip(assetId)}
+                        className="hover:bg-blue-700 rounded-full p-0.5 transition-colors"
+                        title="Remove asset"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Loading assets...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {isError && (
+            <div className="text-center py-8">
+              <p className="text-red-600">Failed to load assets. Please try again.</p>
+            </div>
+          )}
+
           {/* TableWrapper with Search */}
-          <TableWrapper
-            data={filteredAssets}
-            columns={columns}
-            renderCell={renderCell}
-            showPagination={false}
-            ariaLabel="Asset selection table"
-            onRowClick={handleCheckboxChange}
-            searchComponent={
-              <SearchInput
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Search by Asset ID, Type, or Condition..."
-              />
-            }
-            classNames={{
-              tr: "hover:bg-blue-50 cursor-pointer"
-            }}
-          />
+          {!isLoading && !isError && (
+            <TableWrapper
+              data={filteredAssets}
+              columns={columns}
+              renderCell={renderCell}
+              showPagination={false}
+              ariaLabel="Asset selection table"
+              onRowClick={handleCheckboxChange}
+              searchComponent={
+                <SearchInput
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Search by Asset Tag, Brand, Model, or Condition..."
+                />
+              }
+              classNames={{
+                tr: "hover:bg-blue-50 cursor-pointer"
+              }}
+            />
+          )}
         </div>
 
         {/* Footer Buttons */}

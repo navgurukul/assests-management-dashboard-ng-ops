@@ -93,6 +93,19 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   }, 
   {
+    name: 'assetType',
+    label: 'Asset Type',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select asset type',
+    apiUrl: baseUrl + '/asset-types',
+    queryKey: ['asset-types-campus'],
+    labelKey: 'name',
+    valueKey: 'id',
+    filterCategory: 'DEVICE',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
+  },
+  {
     name: 'campusAssets',
     label: 'Assets',
     type: 'campus-asset-table',
@@ -101,20 +114,21 @@ export const allocationFormFields = [
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
   {
-    name: 'assetType',
-    label: 'Asset Type',
-    type: 'text',
-    placeholder: 'Enter asset type (e.g., Laptop, Desktop)',
+    name: 'allocationReason',
+    label: 'Allocation Reason',
+    type: 'select',
+    placeholder: 'Select allocation reason',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-  },
-  {
-    name: 'assetId',
-    label: 'Asset ID',
-    type: 'text',
-    placeholder: 'Enter asset ID',
-    required: true,
-    showIf: { field: 'allocationType', value: 'CAMPUS' },
+    options: [
+      {value: 'JOINER', label: 'Joiner (New User)'},
+      { value: 'NEW_CAMPUS', label: 'New Campus Setup' },
+      { value: 'CAMPUS_TRANSFER', label: 'Campus Transfer' },
+      { value: 'REPLACEMENT', label: 'Replacement' },
+      { value: 'UPGRADE', label: 'Upgrade' },
+      { value: 'MAINTENANCE', label: 'Maintenance' },
+      { value: 'OTHER', label: 'Other' },
+    ],
   },
   {
     name: 'notes',
@@ -130,59 +144,45 @@ export const allocationValidationSchema = Yup.object().shape({
     .required('Allocation type is required')
     .oneOf(['REMOTE', 'CAMPUS'], 'Invalid allocation type'),
   
-  // Remote allocation validations
+  // Remote allocation validations - only when allocationType is REMOTE
   campusId: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
       then: (schema) => schema.required('Campus is required'),
-    }),
-  userEmail: Yup.string()
-    .email('Invalid email format')
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.nullable(),
-    }),
-  phoneNumber: Yup.string()
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.nullable(),
-    }),
-  userDepartment: Yup.string()
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.nullable(),
-    }),
-  userAddress: Yup.string()
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.nullable(),
+      otherwise: (schema) => schema.nullable(),
     }),
   assetId: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
       then: (schema) => schema.required('Asset is required'),
+      otherwise: (schema) => schema.nullable(),
     }),
-  assetSource: Yup.string()
-    .when('allocationType', {
-      is: 'REMOTE',
-      then: (schema) => schema.nullable(),
-    }),
+  userEmail: Yup.string()
+    .nullable()
+    .email('Invalid email format'),
+  phoneNumber: Yup.string().nullable(),
+  userDepartment: Yup.string().nullable(),
+  userAddress: Yup.string().nullable(),
+  assetSource: Yup.string().nullable(),
   
-  // Campus allocation validations
+  // Campus allocation validations - only when allocationType is CAMPUS
   sourceCampus: Yup.string()
     .when('allocationType', {
       is: 'CAMPUS',
       then: (schema) => schema.required('Source campus is required'),
+      otherwise: (schema) => schema.nullable(),
     }),
   destinationCampus: Yup.string()
     .when('allocationType', {
       is: 'CAMPUS',
       then: (schema) => schema.required('Destination campus is required'),
+      otherwise: (schema) => schema.nullable(),
     }),
-  personRaising: Yup.string()
+  allocationReason: Yup.string()
     .when('allocationType', {
       is: 'CAMPUS',
-      then: (schema) => schema.required('Person raising request is required'),
+      then: (schema) => schema.required('Allocation reason is required'),
+      otherwise: (schema) => schema.nullable(),
     }),
   campusAssets: Yup.array()
     .when('allocationType', {
@@ -195,14 +195,13 @@ export const allocationValidationSchema = Yup.object().shape({
           })
         )
         .min(1, 'At least one asset is required'),
+      otherwise: (schema) => schema.nullable(),
     }),
   
-  // Common validations
-  startDate: Yup.date()
-    .required('Allocation date is required'),
-  allocationReason: Yup.string()
-    .required('Allocation reason is required')
-    .oneOf(['JOINER', 'REPAIR', 'REPLACEMENT', 'LOANER', 'CAMPUS_TRANSFER'], 'Invalid allocation reason'),
+  // Helper fields for Campus - not validated for submission
+  assetType: Yup.string().nullable(),
+  
+  // Common fields
   notes: Yup.string().nullable(),
 });
 
