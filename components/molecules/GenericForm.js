@@ -39,7 +39,10 @@ export default function GenericForm({
                   {section.fields.map((field) => {
                     // Handle conditional fields (showIf)
                     if (field.showIf) {
-                      const conditionMet = formik.values[field.showIf.field] === field.showIf.value;
+                      const fieldValue = formik.values[field.showIf.field];
+                      const conditionMet = Array.isArray(field.showIf.value)
+                        ? field.showIf.value.includes(fieldValue)
+                        : fieldValue === field.showIf.value;
                       if (!conditionMet) return null;
                     }
                     
@@ -68,7 +71,10 @@ export default function GenericForm({
               {fields.map((field) => {
                 // Handle conditional fields (showIf)
                 if (field.showIf) {
-                  const conditionMet = formik.values[field.showIf.field] === field.showIf.value;
+                  const fieldValue = formik.values[field.showIf.field];
+                  const conditionMet = Array.isArray(field.showIf.value)
+                    ? field.showIf.value.includes(fieldValue)
+                    : fieldValue === field.showIf.value;
                   if (!conditionMet) return null;
                 }
                 

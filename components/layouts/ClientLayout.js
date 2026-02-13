@@ -6,14 +6,6 @@ import { useAuth } from '@/app/context/AuthContext';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Header from '@/components/Header/Header';
 
-/**
- * Centralized Client Layout for Route Protection
- * 
- * This component handles:
- * 1. Route protection - redirect unauthenticated users to login
- * 2. Login redirect - redirect authenticated users away from login page
- * 3. Conditional layout - show Sidebar/Header only on protected routes
- */
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
