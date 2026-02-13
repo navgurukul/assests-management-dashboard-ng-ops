@@ -1,10 +1,10 @@
 export const menuItems = [
   { name: 'Dashboard', icon: 'LayoutDashboard', path: '/dashboard' },
+  { name: 'Tickets', icon: 'Ticket', path: '/tickets' },
+  { name: 'Allocations', icon: 'Share2', path: '/allocations' },
+  { name: 'Consignments', icon: 'Archive', path: '/consignments' },
   { name: 'Assets', icon: 'Package', path: '/assets' },
   { name: 'Components', icon: 'Component', path: '/components' },
-  { name: 'Allocations', icon: 'Share2', path: '/allocations' },
-  { name: 'Tickets', icon: 'Ticket', path: '/tickets' },
-  { name: 'Consignments', icon: 'Archive', path: '/consignments' },
   { name: 'Reports', icon: 'FileText', path: '/reports' },
 ];
 

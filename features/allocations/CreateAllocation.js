@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectTicket, clearSelectedTicket } from '@/app/store/slices/ticketSlice';
 import { ArrowLeft } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -16,7 +18,39 @@ import apiService from '@/app/utils/apiService';
 
 export default function CreateAllocation() {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const selectedTicket = useSelector(selectTicket);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modifiedFormFields, setModifiedFormFields] = useState(allocationFormFields);
+  const [modifiedInitialValues, setModifiedInitialValues] = useState(allocationInitialValues);
+
+  useEffect(() => {
+    if (selectedTicket?.assigneeUser?.email) {
+      // Modify form fields to disable userEmail field
+      const updatedFields = allocationFormFields.map(field => {
+        if (field.name === 'userEmail') {
+          return {
+            ...field,
+            disabled: true,
+            helperText: 'Email pre-populated from ticket assignee',
+          };
+        }
+        return field;
+      });
+      setModifiedFormFields(updatedFields);
+
+      // Set initial value for userEmail
+      setModifiedInitialValues({
+        ...allocationInitialValues,
+        userEmail: selectedTicket.assigneeUser.email,
+      });
+    }
+
+    // Cleanup: clear selected ticket when component unmounts
+    return () => {
+      dispatch(clearSelectedTicket());
+    };
+  }, [selectedTicket, dispatch]);
 
   const handleFormSubmit = async (values) => {
     setIsSubmitting(true);
@@ -122,8 +156,8 @@ export default function CreateAllocation() {
         {/* Form Container */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
           <GenericForm
-            fields={allocationFormFields}
-            initialValues={allocationInitialValues}
+            fields={modifiedFormFields}
+            initialValues={modifiedInitialValues}
             validationSchema={allocationValidationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}

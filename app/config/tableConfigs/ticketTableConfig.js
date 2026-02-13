@@ -63,6 +63,16 @@ export const ticketTableColumns = [
     description: 'User assigned to the ticket'
   },
   { 
+    key: 'raisedByEmail', 
+    label: 'RAISED BY EMAIL',
+    description: 'Email of user who raised the ticket'
+  },
+  { 
+    key: 'assigneeEmail', 
+    label: 'ASSIGNEE EMAIL',
+    description: 'Email of user assigned to the ticket'
+  },
+  { 
     key: 'createdAt', 
     label: 'CREATED AT',
     description: 'Ticket creation date'

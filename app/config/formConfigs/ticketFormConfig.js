@@ -11,7 +11,6 @@ export const ticketFormFields = [
     options: [
       { value: 'NEW', label: 'New' },
       { value: 'REPAIR', label: 'Repair' },
-      { value: 'MAINTENANCE', label: 'Maintenance' },
       { value: 'REPLACEMENT', label: 'Replacement' },
     ],
   },
@@ -25,6 +24,10 @@ export const ticketFormFields = [
     labelKey: 'assetTag',
     valueKey: 'id',
     required: true,
+    showIf: {
+      field: 'ticketType',
+      value: ['REPAIR', 'REPLACEMENT'],
+    },
   },
   {
     name: 'campusId',
@@ -36,6 +39,10 @@ export const ticketFormFields = [
     labelKey: 'campusName',
     valueKey: 'id',
     required: true,
+    showIf: {
+      field: 'ticketType',
+      value: ['REPAIR', 'REPLACEMENT'],
+    },
   },
   {
     name: 'priority',
@@ -61,8 +68,16 @@ export const ticketFormFields = [
 
 export const ticketValidationSchema = Yup.object().shape({
   ticketType: Yup.string().required('Ticket type is required'),
-  assetId: Yup.string().required('Asset is required'),
-  campusId: Yup.string().required('Campus is required'),
+  assetId: Yup.string().when('ticketType', {
+    is: (val) => val === 'REPAIR' || val === 'REPLACEMENT',
+    then: (schema) => schema.required('Asset is required'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  campusId: Yup.string().when('ticketType', {
+    is: (val) => val === 'REPAIR' || val === 'REPLACEMENT',
+    then: (schema) => schema.required('Campus is required'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   priority: Yup.string().required('Priority is required'),
   description: Yup.string()
     .required('Description is required')

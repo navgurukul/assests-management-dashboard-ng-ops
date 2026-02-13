@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import DetailsPage from '@/components/molecules/DetailsPage';
+import { useRouter } from 'next/navigation';import { useDispatch } from 'react-redux';
+import { setSelectedTicket } from '@/app/store/slices/ticketSlice';import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
@@ -17,6 +17,7 @@ import {
 
 export default function TicketDetails({ ticketId, onBack }) {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -127,33 +128,6 @@ export default function TicketDetails({ ticketId, onBack }) {
 
   const leftSections = [
     {
-      title: 'DETAILS',
-      itemsGrid: true,
-      items: [
-        { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || ticket.assigneeUserId || '—') },
-        { label: 'Priority', value: ticket.priority || '—' },
-        { label: 'Status', value: ticket.status || '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
-      ],
-    },
-    {
-      title: 'DEVICE SUMMARY',
-      items: [
-        { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
-        { label: 'Brand', value: ticket.asset?.brand || '—' },
-        { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
-        { label: 'Condition', value: ticket.asset?.condition || '—' },
-      ],
-    },
-  ];
-
-  const rightSections = [
-    {
       title: 'SLA / TIMELINE',
       content: (
         <SLAIndicator 
@@ -186,6 +160,41 @@ export default function TicketDetails({ ticketId, onBack }) {
     },
   ];
 
+  const rightSections = [
+    {
+      title: 'DETAILS',
+      itemsGrid: true,
+      items: [
+        { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
+        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
+        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
+        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
+        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
+        { label: 'Ticket Type', value: ticket.ticketType || '—' },
+        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || ticket.assigneeUserId || '—') },
+        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
+        { label: 'Priority', value: ticket.priority || '—' },
+        { label: 'Status', value: ticket.status || '—' },
+        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
+        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
+      ],
+    },
+    {
+      title: 'DEVICE SUMMARY',
+      items: [
+        { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
+        { label: 'Brand', value: ticket.asset?.brand || '—' },
+        { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
+        { label: 'Condition', value: ticket.asset?.condition || '—' },
+      ],
+    },
+  ];
+
+  const handleCreateAllocation = () => {
+    dispatch(setSelectedTicket(ticket));
+    router.push('/allocations/create');
+  }
+
   return (
     <>
       <DetailsPage
@@ -199,7 +208,7 @@ export default function TicketDetails({ ticketId, onBack }) {
             text="Create Allocation"
             variant="primary"
             size="md"
-            onClick={() => router.push('/allocations/create')}
+            onClick={handleCreateAllocation}
           />
         }
       />

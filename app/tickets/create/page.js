@@ -27,11 +27,18 @@ export default function CreateTicketPage() {
     try {
       console.log('Creating ticket with values:', values);
       
+      // Prepare payload - exclude assetId and campusId for NEW tickets
+      const payload = { ...values };
+      if (values.ticketType === 'NEW') {
+        delete payload.assetId;
+        delete payload.campusId;
+      }
+      
       // Make API call to create ticket using post helper with auth
       const result = await post({
         url: config.getApiUrl(config.endpoints.tickets.create),
         method: 'POST',
-        data: values,
+        data: payload,
       });
 
       console.log('Ticket created successfully:', result);
