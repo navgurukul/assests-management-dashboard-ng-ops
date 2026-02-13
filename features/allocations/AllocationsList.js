@@ -259,6 +259,7 @@ export default function AllocationsList() {
               Icon={IconComponent}
               valueColor={card.valueColor}
               iconColor={card.iconColor}
+              borderColor={card.borderColor}
             />
           );
         })}

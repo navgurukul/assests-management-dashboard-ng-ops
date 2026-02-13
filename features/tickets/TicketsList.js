@@ -476,6 +476,7 @@ export default function TicketsList() {
               Icon={IconComponent}
               valueColor={card.valueColor}
               iconColor={card.iconColor}
+              borderColor={card.borderColor}
               clickable={true}
               onClick={() => handleStatusCardClick(card.status)}
               isActive={isActive}
