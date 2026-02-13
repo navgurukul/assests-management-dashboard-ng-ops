@@ -54,13 +54,16 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   }, [searchTerm, availableAssets]);
 
   const handleCheckboxChange = (asset) => {
-    const newCheckedAssets = new Set(checkedAssets);
-    if (newCheckedAssets.has(asset.id)) {
-      newCheckedAssets.delete(asset.id);
-    } else {
-      newCheckedAssets.add(asset.id);
-    }
-    setCheckedAssets(newCheckedAssets);
+    console.log('handleCheckboxChange called for asset:', asset.id);
+    setCheckedAssets((prevCheckedAssets) => {
+      const newCheckedAssets = new Set(prevCheckedAssets);
+      if (newCheckedAssets.has(asset.id)) {
+        newCheckedAssets.delete(asset.id);
+      } else {
+        newCheckedAssets.add(asset.id);
+      }
+      return newCheckedAssets;
+    });
   };
 
   const handleSelectAll = (checked) => {
@@ -122,7 +125,10 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
             <input
               type="checkbox"
               checked={checkedAssets.has(asset.id)}
-              onChange={() => handleCheckboxChange(asset)}
+              onChange={(e) => {
+                e.stopPropagation();
+                handleCheckboxChange(asset);
+              }}
               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
             />
           </div>
@@ -244,6 +250,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
           {/* TableWrapper with Search */}
           {!isLoading && !isError && (
             <TableWrapper
+              key={checkedAssets.size}
               data={filteredAssets}
               columns={columns}
               renderCell={renderCell}
