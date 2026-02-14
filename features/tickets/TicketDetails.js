@@ -22,7 +22,7 @@ export default function TicketDetails({ ticketId, onBack }) {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data, isLoading, isError, refetch } = useFetch({
+  const { data, isLoading, isError, error, refetch } = useFetch({
     url: config.getApiUrl(config.endpoints.tickets.details(ticketId)),
     queryKey: ['ticket', ticketId],
   });
