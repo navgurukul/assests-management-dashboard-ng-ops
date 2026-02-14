@@ -57,6 +57,19 @@ export const ticketFormFields = [
     ],
   },
   {
+    name: 'managerEmail',
+    label: 'Manager Email',
+    type: 'select',
+    placeholder: 'Select manager email',
+    required: true,
+    options: [
+      { value: 'john.smith@company.com', label: 'John Smith - john.smith@company.com' },
+      { value: 'sarah.johnson@company.com', label: 'Sarah Johnson - sarah.johnson@company.com' },
+      { value: 'michael.brown@company.com', label: 'Michael Brown - michael.brown@company.com' },
+      { value: 'emily.davis@company.com', label: 'Emily Davis - emily.davis@company.com' },
+    ],
+  },
+  {
     name: 'description',
     label: 'Description',
     type: 'textarea',
@@ -83,6 +96,9 @@ export const ticketValidationSchema = Yup.object().shape({
     .required('Description is required')
     .min(10, 'Description must be at least 10 characters')
     .max(500, 'Description must not exceed 500 characters'),
+  managerEmail: Yup.string()
+    .required('Manager email is required')
+    .email('Must be a valid email address'),
 });
 
 export const ticketInitialValues = {
@@ -91,4 +107,5 @@ export const ticketInitialValues = {
   campusId: '',
   priority: '',
   description: '',
+  managerEmail: '',
 };
