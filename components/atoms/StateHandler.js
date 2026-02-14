@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
+import './Loader.css';
 
 
 export default function StateHandler({
@@ -18,7 +19,7 @@ export default function StateHandler({
     return (
       <div className={`flex items-center justify-center ${className}`}>
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto" />
+          <div className="loader"></div>
           <p className="mt-4 text-gray-600">{loadingMessage}</p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Header from '@/components/Header/Header';
+import '@/components/atoms/Loader.css';
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -49,7 +50,7 @@ export default function ClientLayout({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="loader"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
