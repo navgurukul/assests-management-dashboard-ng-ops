@@ -45,7 +45,23 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   }, [userDataResponse]);
 
   // Extract user data from response or use fallback
-  const userData = userDataResponse?.data || userDataResponse || {
+  const rawUserData = userDataResponse?.data || userDataResponse || null;
+  
+  // Transform API response to match component expectations
+  const userData = rawUserData ? {
+    name: `${rawUserData.firstName || ''} ${rawUserData.lastName || ''}`.trim() || 'User',
+    email: rawUserData.email || '',
+    phone: rawUserData.phone || '',
+    role: rawUserData.role || '',
+    department: rawUserData.department || '',
+    location: rawUserData.location || '',
+    joinDate: rawUserData.createdAt ? new Date(rawUserData.createdAt).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '',
+    avatar: null,
+  } : {
     name: 'Loading...',
     email: '',
     phone: '',
