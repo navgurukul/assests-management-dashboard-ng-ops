@@ -471,7 +471,7 @@ export default function TicketsList() {
             <div
               key={card.id}
               onClick={() => handleStatusCardClick(card.status)}
-              className={`cursor-pointer transition-all hover:scale-105 ${isActive ? 'ring-2 ring-orange-500 rounded-lg' : ''}`}
+              className={`cursor-pointer transition-all hover:scale-105 ${isActive ? 'border-l-4 border-gray-500 rounded-lg' : ''}`}
             >
               <DashboardCard
                 count={getStatusCount(card.status)}
@@ -479,7 +479,7 @@ export default function TicketsList() {
                 icon={card.icon}
                 bgColor={card.bgColor || 'bg-gray-100'}
                 iconColor={card.iconColor}
-                borderColor={isActive ? 'border-orange-500' : card.borderColor}
+                borderColor={card.borderColor}
               />
             </div>
           );
