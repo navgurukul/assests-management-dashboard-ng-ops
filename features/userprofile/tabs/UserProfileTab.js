@@ -1,6 +1,7 @@
 'use client';
 
 import { Mail, Phone, MapPin, Calendar, Building } from 'lucide-react';
+import CustomButton from '@/components/atoms/CustomButton';
 
 export default function UserProfileTab({ userData }) {
   return (
@@ -65,9 +66,11 @@ export default function UserProfileTab({ userData }) {
 
       {/* Actions */}
       <div className="mt-6 flex gap-3">
-        <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Edit Profile
-        </button>
+        <CustomButton 
+          text="Edit Profile" 
+          variant="primary" 
+          size="md"
+        />
       </div>
     </div>
   );

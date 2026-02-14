@@ -25,7 +25,6 @@ export default function CreateTicket() {
     const loadingToastId = toast.loading('Creating ticket...');
     
     try {
-      console.log('Creating ticket with values:', values);
       
       // Prepare payload - exclude assetId and campusId for NEW tickets
       const payload = { ...values };
@@ -40,8 +39,6 @@ export default function CreateTicket() {
         method: 'POST',
         data: payload,
       });
-
-      console.log('Ticket created successfully:', result);
       
       // Dismiss loading toast
       toast.dismiss(loadingToastId);

@@ -44,7 +44,6 @@ export default function CreateComponent() {
   };
 
   const handleFormSubmit = async (values) => {
-    console.log('Form submitted! Button clicked - Starting component creation...');
     setIsSubmitting(true);
     
     // Show loading toast
@@ -99,7 +98,6 @@ export default function CreateComponent() {
         delete payload.warrantyExpiryDate;
       }
 
-      console.log('Component API payload:', payload);
       
       // Make API call to create component
       const response = await apiService.post(
@@ -152,7 +150,6 @@ export default function CreateComponent() {
             }
             
             toast.dismiss(documentToastId);
-            console.log(`✅ Successfully linked ${documentsLinked} documents to component`);
           } catch (docError) {
               toast.dismiss(documentToastId);
             

@@ -303,12 +303,7 @@ export default function ComponentsList() {
       } else {
         // Non-Install actions: simulate API call for now
         loadingToastId = toast.loading(`${currentAction} in progress...`);
-        console.log('Form submitted:', {
-          action: currentAction,
-          componentId: currentComponent?.id,
-          componentTag: currentComponent?.componentTag,
-          formData,
-        });
+        
         await new Promise((resolve) => setTimeout(resolve, 1000));
         toast.dismiss(loadingToastId);
         loadingToastId = null;
@@ -383,11 +378,9 @@ export default function ComponentsList() {
             </button>
             {openMenuId === item.id && (
               <>
-                {console.log('Rendering ActionMenu for item:', item.id)}
                 <ActionMenu
                   menuOptions={menuOptions}
                   onClose={() => {
-                    console.log('Closing menu');
                     setOpenMenuId(null);
                   }}
                 />
