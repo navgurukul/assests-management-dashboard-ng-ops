@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText, X, Check } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
+import StateHandler from '@/components/atoms/StateHandler';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
@@ -265,27 +266,16 @@ export default function AssetsList() {
     router.push('/assets/create');
   };
 
-  // Loading state
-  if (isLoading) {
+  // Handle loading and error states
+  if (isLoading || isError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading assets...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Error loading assets</p>
-          <p className="text-gray-600 mt-2">{error?.message || 'Something went wrong'}</p>
-        </div>
-      </div>
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading assets..."
+        errorMessage="Error loading assets"
+      />
     );
   }
 

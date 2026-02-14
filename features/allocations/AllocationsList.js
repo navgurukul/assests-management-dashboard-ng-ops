@@ -6,6 +6,7 @@ import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SummaryCard from '@/components/atoms/SummaryCard';
+import StateHandler from '@/components/atoms/StateHandler';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -221,27 +222,16 @@ export default function AllocationsList() {
     }
   };
 
-  // Loading state
-  if (isLoading) {
+  // Handle loading and error states
+  if (isLoading || isError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading allocations...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Error loading allocations</p>
-          <p className="text-gray-600 mt-2">{error?.message || 'Something went wrong'}</p>
-        </div>
-      </div>
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading allocations..."
+        errorMessage="Error loading allocations"
+      />
     );
   }
 

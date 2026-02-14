@@ -2,6 +2,7 @@
 
 import { Ticket, Check, X } from 'lucide-react';
 import { useState } from 'react';
+import CustomButton from '@/components/atoms/CustomButton';
 
 // Dummy data for testing
 const dummyApprovalTickets = [
@@ -201,22 +202,22 @@ export default function TicketApprovalTab() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button
+                        <CustomButton
+                          text="Approve"
+                          icon={Check}
+                          variant="success"
+                          size="sm"
                           onClick={() => handleApproval(ticket.id, 'approve')}
                           disabled={processingTicket === ticket.id}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          Approve
-                        </button>
-                        <button
+                        />
+                        <CustomButton
+                          text="Reject"
+                          icon={X}
+                          variant="danger"
+                          size="sm"
                           onClick={() => handleApproval(ticket.id, 'reject')}
                           disabled={processingTicket === ticket.id}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                          Reject
-                        </button>
+                        />
                       </div>
                     </td>
                   </tr>

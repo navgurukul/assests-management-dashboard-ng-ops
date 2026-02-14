@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import DashboardCard from '@/components/atoms/DashboardCard';
+import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -74,7 +75,7 @@ export default function TicketsList() {
   };
 
   // Fetch tickets data from API with pagination, filters, and search
-  const { data, isLoading, isError } = useFetch({
+  const { data, isLoading, isError, error } = useFetch({
     url: `/tickets?${buildQueryString()}`,
     queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
   });
@@ -416,25 +417,16 @@ export default function TicketsList() {
     router.push('/tickets/create');
   };
 
-  if (isLoading) {
+  // Handle loading and error states
+  if (isLoading || isError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading tickets...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Error loading tickets</p>
-          <p className="text-gray-600 mt-2">Something went wrong</p>
-        </div>
-      </div>
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading tickets..."
+        errorMessage="Error loading tickets"
+      />
     );
   }
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';import { useDispatch } from 'react-r
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
+import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -26,15 +27,18 @@ export default function TicketDetails({ ticketId, onBack }) {
     queryKey: ['ticket', ticketId],
   });
 
-  if (isLoading) {
-    return <div className="p-6">Loading ticket...</div>;
-  }
-
-  if (isError || !data?.data) {
+  // Handle loading, error, and not found states
+  if (isLoading || isError || !data?.data) {
     return (
-      <div className="p-6">
-        <p>Ticket not found</p>
-      </div>
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        isEmpty={!data?.data}
+        loadingMessage="Loading ticket..."
+        errorMessage="Error loading ticket"
+        emptyMessage="Ticket not found"
+      />
     );
   }
 
