@@ -75,7 +75,7 @@ export default function TicketsList() {
   };
 
   // Fetch tickets data from API with pagination, filters, and search
-  const { data, isLoading, isError } = useFetch({
+  const { data, isLoading, isError, error } = useFetch({
     url: `/tickets?${buildQueryString()}`,
     queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
   });
