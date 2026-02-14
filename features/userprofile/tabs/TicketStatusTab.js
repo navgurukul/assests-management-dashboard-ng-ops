@@ -1,6 +1,7 @@
 'use client';
 
 import { Ticket } from 'lucide-react';
+import StateHandler from '@/components/atoms/StateHandler';
 
 const getStatusColor = (status) => {
   switch (status?.toUpperCase()) {
@@ -34,27 +35,19 @@ const getPriorityColor = (priority) => {
 };
 
 export default function TicketStatusTab({ userTickets, isLoadingTickets, ticketsError }) {
-  if (isLoadingTickets) {
+  if (isLoadingTickets || ticketsError) {
     return (
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Status</h2>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-sm text-gray-500">Loading tickets...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (ticketsError) {
-    return (
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Status</h2>
-        <div className="text-center py-12">
-          <Ticket className="mx-auto h-12 w-12 text-red-400" />
-          <p className="mt-2 text-sm text-red-600">{ticketsError}</p>
-          <p className="mt-1 text-xs text-gray-500">Please try again later</p>
-        </div>
+        <StateHandler
+          isLoading={isLoadingTickets}
+          isError={!!ticketsError}
+          error={ticketsError}
+          loadingMessage="Loading tickets..."
+          errorMessage="Error loading tickets"
+          icon={Ticket}
+          className="py-12"
+        />
       </div>
     );
   }

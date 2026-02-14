@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import CustomButton from '@/components/atoms/CustomButton';
+import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 
@@ -17,35 +18,18 @@ export default function AllocationDetails({ allocationId, onBack }) {
     enabled: !!allocationId,
   });
 
-  // Loading state
-  if (isLoading) {
+  // Handle loading, error, and not found states
+  if (isLoading || isError || !data || !data.data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading allocation details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Error loading allocation details</p>
-          <p className="text-gray-600 mt-2">{error?.message || 'Something went wrong'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data || !data.data) {
-    return (
-      <div className="p-6">
-        <p>Allocation not found</p>
-      </div>
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        isEmpty={!data || !data.data}
+        loadingMessage="Loading allocation details..."
+        errorMessage="Error loading allocation details"
+        emptyMessage="Allocation not found"
+      />
     );
   }
 
