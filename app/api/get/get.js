@@ -36,11 +36,10 @@ const get = async ({
     });
 
     if(jsonData.status >=500){
-        throw{
-            code: jsonData.status,
-            info: "Something went wrong from server side",
-            message: "Internal Server Error, please contact administrator"
-        }
+        const error = new Error("Internal Server Error, please contact administrator");
+        error.code = jsonData.status;
+        error.info = "Something went wrong from server side";
+        throw error;
     }
 
     const res = contentType === 'application/json' ? await jsonData.json() : await jsonData.blob();
@@ -49,7 +48,10 @@ const get = async ({
         return res;
     }
 
-    const error = await defaultErrorHandler({data: res, statusCode: jsonData.status});
+    const errorData = await defaultErrorHandler({data: res, statusCode: jsonData.status});
+    const error = new Error(errorData.message);
+    error.code = errorData.code;
+    error.info = errorData.info;
     throw error;
    
 }
