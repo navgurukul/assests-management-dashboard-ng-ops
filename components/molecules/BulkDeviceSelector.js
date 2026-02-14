@@ -54,7 +54,6 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   }, [searchTerm, availableAssets]);
 
   const handleCheckboxChange = (asset) => {
-    console.log('handleCheckboxChange called for asset:', asset.id);
     setCheckedAssets((prevCheckedAssets) => {
       const newCheckedAssets = new Set(prevCheckedAssets);
       if (newCheckedAssets.has(asset.id)) {

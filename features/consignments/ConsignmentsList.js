@@ -372,7 +372,6 @@ export default function ConsignmentsList() {
         destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destination,
       };
 
-      console.log('Creating consignment with payload:', payload);
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       
@@ -448,7 +447,6 @@ export default function ConsignmentsList() {
         status: 'dispatched',
       };
 
-      console.log('Dispatching consignment with payload:', payload);
       
       // Make API call to update consignment status to dispatched
       const response = await post(`/consignments/${currentConsignment.id}/dispatch`, payload);
@@ -509,7 +507,6 @@ export default function ConsignmentsList() {
   const handleStatusChange = async (consignmentId, newStatus) => {
     try {
       setOpenStatusDropdownId(null);
-      console.log(`Updating consignment ${consignmentId} status to ${newStatus}`);
     } catch (error) {
       console.error('Error updating status:', error);
     }

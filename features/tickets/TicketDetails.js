@@ -71,7 +71,6 @@ export default function TicketDetails({ ticketId, onBack }) {
         data: payload,
       });
 
-      console.log('Ticket updated successfully:', result);
       alert('Ticket updated successfully!');
       
       setIsUpdateModalOpen(false);

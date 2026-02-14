@@ -43,7 +43,6 @@ export default function CreateAsset() {
       }
 
       const result = await response.json();
-      console.log('Asset created successfully:', result);
       
       // Show success toast
       toast.success('Asset created successfully!');

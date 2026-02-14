@@ -100,7 +100,6 @@ export default function CreateAllocation() {
       // Dismiss loading toast
       toast.dismiss(loadingToastId);
 
-      console.log('Allocation created successfully:', result);
       
       // Show success toast
       const successMessage = values.allocationType === 'CAMPUS' 

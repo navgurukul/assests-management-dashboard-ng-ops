@@ -97,12 +97,10 @@ export default function ComponentDetails({ componentId, componentData, onBack })
 
   // Document handlers (still needed for DocumentAttachments component)
   const handleUploadDocuments = (files) => {
-    console.log('Upload documents:', files);
     // Upload files to server
   };
 
   const handleDeleteDocument = (docId) => {
-    console.log('Delete document:', docId);
     // Delete document from server
   };
 

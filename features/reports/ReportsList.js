@@ -61,12 +61,10 @@ export default function ReportsList() {
   };
 
   const handleExportCSV = () => {
-    console.log('Exporting CSV...');
     // Implement CSV export logic
   };
 
   const handleExportPDF = () => {
-    console.log('Exporting PDF...');
     // Implement PDF export logic
   };
 
