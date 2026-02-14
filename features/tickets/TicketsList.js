@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import SummaryCard from '@/components/atoms/SummaryCard';
+import DashboardCard from '@/components/atoms/DashboardCard';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -464,23 +464,24 @@ export default function TicketsList() {
       {/* Status Cards */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
         {ticketsSummaryCards.map((card) => {
-          const IconComponent = LucideIcons[card.icon];
           const isActive = card.status === null 
             ? !filters.status 
             : filters.status === card.status;
           return (
-            <SummaryCard
+            <div
               key={card.id}
-              label={card.label}
-              value={getStatusCount(card.status)}
-              Icon={IconComponent}
-              valueColor={card.valueColor}
-              iconColor={card.iconColor}
-              borderColor={card.borderColor}
-              clickable={true}
               onClick={() => handleStatusCardClick(card.status)}
-              isActive={isActive}
-            />
+              className={`cursor-pointer transition-all hover:scale-105 ${isActive ? 'ring-2 ring-orange-500 rounded-lg' : ''}`}
+            >
+              <DashboardCard
+                count={getStatusCount(card.status)}
+                label={card.label}
+                icon={card.icon}
+                bgColor={card.bgColor || 'bg-gray-100'}
+                iconColor={card.iconColor}
+                borderColor={isActive ? 'border-orange-500' : card.borderColor}
+              />
+            </div>
           );
         })}
       </div>
