@@ -55,6 +55,7 @@ const config = {
       delete: (id) => `/tickets/${id}`,
       details: (id) => `/tickets/${id}`,
       myTickets: '/tickets/my-tickets',
+      pendingApproval: '/tickets/pending-approval',
     },
     
     // Allocations

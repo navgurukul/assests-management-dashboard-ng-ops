@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, Package, Ticket } from 'lucide-react';
-import { UserProfileTab, MyAssetsTab, TicketStatusTab } from './tabs';
+import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab } from './tabs';
 import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -11,6 +11,7 @@ const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
   { id: 'myassets', label: 'My Assets', icon: Package, Component: MyAssetsTab },
   { id: 'ticketstatus', label: 'Ticket Status', icon: Ticket, Component: TicketStatusTab },
+  { id: 'ticketforapproval', label: 'Ticket for Approval', icon: Ticket, Component: TicketApprovalTab },
 ];
 
 export default function UserProfileDetails({ userAssets: initialAssets, userTickets: initialTickets }) {
@@ -19,6 +20,12 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
   const [ticketsError, setTicketsError] = useState(null);
   const [hasTicketsFetched, setHasTicketsFetched] = useState(!!initialTickets);
+  
+  // State for approval tickets
+  const [approvalTickets, setApprovalTickets] = useState([]);
+  const [isLoadingApprovalTickets, setIsLoadingApprovalTickets] = useState(false);
+  const [approvalTicketsError, setApprovalTicketsError] = useState(null);
+  const [hasApprovalTicketsFetched, setHasApprovalTicketsFetched] = useState(false);
   // Fetch user data using React Query
   const { 
     data: userDataResponse, 
@@ -64,6 +71,9 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     if (activeTab === 'ticketstatus' && !hasTicketsFetched) {
       fetchUserTickets();
     }
+    if (activeTab === 'ticketforapproval' && !hasApprovalTicketsFetched) {
+      fetchApprovalTickets();
+    }
   }, [activeTab]);
 
   const fetchUserTickets = async () => {
@@ -79,6 +89,22 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
       setUserTickets([]);
     } finally {
       setIsLoadingTickets(false);
+    }
+  };
+
+  const fetchApprovalTickets = async () => {
+    setIsLoadingApprovalTickets(true);
+    setApprovalTicketsError(null);
+    try {
+      const response = await apiService.get(config.endpoints.tickets.pendingApproval);
+      setApprovalTickets(response.data || response || []);
+      setHasApprovalTicketsFetched(true);
+    } catch (error) {
+      console.error('Error fetching approval tickets:', error);
+      setApprovalTicketsError(error.message || 'Failed to load approval tickets');
+      setApprovalTickets([]);
+    } finally {
+      setIsLoadingApprovalTickets(false);
     }
   };
 
@@ -153,6 +179,10 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
                 ticketsError={ticketsError}
                 isLoadingAssets={isLoadingAssets}
                 assetsError={assetsError?.message || (assetsError ? 'Failed to load assets' : null)}
+                approvalTickets={approvalTickets}
+                isLoadingApprovalTickets={isLoadingApprovalTickets}
+                approvalTicketsError={approvalTicketsError}
+                onRefresh={fetchApprovalTickets}
               />
             )}
           </div>
