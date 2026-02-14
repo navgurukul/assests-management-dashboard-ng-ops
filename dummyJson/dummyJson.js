@@ -1456,6 +1456,7 @@ export const allocationsSummaryCards = [
     icon: 'UserPlus',
     valueColor: 'text-gray-900',
     iconColor: 'text-blue-500',
+    borderColor: 'border-blue-200',
     getValue: (data) => data.length,
   },
   {
@@ -1464,6 +1465,7 @@ export const allocationsSummaryCards = [
     icon: 'CheckCircle',
     valueColor: 'text-green-600',
     iconColor: 'text-green-500',
+    borderColor: 'border-green-200',
     getValue: (data) => data.filter(a => a.isActive).length,
   },
   {
@@ -1472,6 +1474,7 @@ export const allocationsSummaryCards = [
     icon: 'XCircle',
     valueColor: 'text-gray-600',
     iconColor: 'text-gray-500',
+    borderColor: 'border-gray-200',
     getValue: (data) => data.filter(a => !a.isActive).length,
   },
   {
@@ -1480,6 +1483,7 @@ export const allocationsSummaryCards = [
     icon: 'Calendar',
     valueColor: 'text-purple-600',
     iconColor: 'text-purple-500',
+    borderColor: 'border-purple-200',
     getValue: (data) => {
       const now = new Date();
       return data.filter(a => {
@@ -1499,6 +1503,7 @@ export const ticketsSummaryCards = [
     icon: 'Ticket',
     valueColor: 'text-blue-600',
     iconColor: 'text-blue-500',
+    borderColor: 'border-blue-200',
   },
   {
     id: 'open',
@@ -1507,6 +1512,7 @@ export const ticketsSummaryCards = [
     icon: 'AlertCircle',
     valueColor: 'text-green-600',
     iconColor: 'text-green-500',
+    borderColor: 'border-green-200',
   },
   {
     id: 'in_progress',
@@ -1515,6 +1521,7 @@ export const ticketsSummaryCards = [
     icon: 'Clock',
     valueColor: 'text-cyan-600',
     iconColor: 'text-cyan-500',
+    borderColor: 'border-cyan-200',
   },
   {
     id: 'resolved',
@@ -1523,6 +1530,7 @@ export const ticketsSummaryCards = [
     icon: 'CheckCircle2',
     valueColor: 'text-purple-600',
     iconColor: 'text-purple-500',
+    borderColor: 'border-purple-200',
   },
   {
     id: 'closed',
@@ -1531,6 +1539,7 @@ export const ticketsSummaryCards = [
     icon: 'XCircle',
     valueColor: 'text-gray-600',
     iconColor: 'text-gray-500',
+    borderColor: 'border-gray-200',
   },
   {
     id: 'rejected',
@@ -1539,6 +1548,7 @@ export const ticketsSummaryCards = [
     icon: 'Ban',
     valueColor: 'text-red-600',
     iconColor: 'text-red-500',
+    borderColor: 'border-red-200',
   },
 ];
 

@@ -5,6 +5,7 @@ export default function SummaryCard({
   Icon, 
   valueColor = 'text-gray-900',
   iconColor = 'text-gray-500',
+  borderColor = 'border-gray-200',
   clickable = false,
   onClick = null,
   isActive = false
@@ -13,7 +14,7 @@ export default function SummaryCard({
   const clickableClasses = clickable 
     ? "cursor-pointer transition-all hover:shadow-md hover:scale-105" 
     : "";
-  const activeClasses = isActive ? "ring-2 ring-blue-500" : "";
+  const borderClasses = isActive ? "border border-orange-500" : `border-2 ${borderColor}`;
   
   const handleClick = () => {
     if (clickable && onClick) {
@@ -23,7 +24,7 @@ export default function SummaryCard({
 
   return (
     <div 
-      className={`${baseClasses} ${clickableClasses} ${activeClasses}`}
+      className={`${baseClasses} ${borderClasses} ${clickableClasses}`}
       onClick={handleClick}
     >
       <div className="flex items-center justify-between">
