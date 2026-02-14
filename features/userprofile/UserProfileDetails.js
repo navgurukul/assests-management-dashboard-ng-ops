@@ -13,13 +13,41 @@ const tabs = [
   { id: 'ticketstatus', label: 'Ticket Status', icon: Ticket, Component: TicketStatusTab },
 ];
 
-export default function UserProfileDetails({ userData, userAssets: initialAssets, userTickets: initialTickets }) {
+export default function UserProfileDetails({ userAssets: initialAssets, userTickets: initialTickets }) {
   const [activeTab, setActiveTab] = useState('userprofile');
   const [userTickets, setUserTickets] = useState(initialTickets || []);
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
   const [ticketsError, setTicketsError] = useState(null);
   const [hasTicketsFetched, setHasTicketsFetched] = useState(!!initialTickets);
+  // Fetch user data using React Query
+  const { 
+    data: userDataResponse, 
+    isLoading: isLoadingUserData, 
+    error: userDataError 
+  } = useFetch({
+    url: config.endpoints.user.me,
+    queryKey: ['userMe'],
+    enabled: true
+  });
 
+  // Console log the user data response
+  useEffect(() => {
+    if (userDataResponse) {
+      console.log('User data response:', userDataResponse);
+    }
+  }, [userDataResponse]);
+
+  // Extract user data from response or use fallback
+  const userData = userDataResponse?.data || userDataResponse || {
+    name: 'Loading...',
+    email: '',
+    phone: '',
+    role: '',
+    department: '',
+    location: '',
+    joinDate: '',
+    avatar: null,
+  };
   // Use React Query hook for assets with lazy loading
   const { 
     data: userAssets = [], 

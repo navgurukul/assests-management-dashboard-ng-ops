@@ -72,6 +72,11 @@ const config = {
       stats: '/dashboard/stats',
       charts: '/dashboard/charts',
     },
+    
+    // User
+    user: {
+      me: '/user/me',
+    },
   },
   
   // Helper function to get full API URL
