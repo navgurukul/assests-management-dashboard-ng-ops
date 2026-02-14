@@ -3,7 +3,7 @@
 import { Mail, Phone, MapPin, Calendar, Building } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 
-export default function UserProfileTab({ userData }) {
+export default function UserProfileTab({ userData, onEditProfile }) {
   return (
     <div>
       {/* Information Grid */}
@@ -70,6 +70,7 @@ export default function UserProfileTab({ userData }) {
           text="Edit Profile" 
           variant="primary" 
           size="md"
+          onClick={onEditProfile}
         />
       </div>
     </div>

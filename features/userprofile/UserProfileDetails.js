@@ -6,6 +6,9 @@ import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab } from 
 import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
+import FormModal from '@/components/molecules/FormModal';
+import post from '@/app/api/post/post';
+import { toast } from '@/app/utils/toast';
 
 const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
@@ -20,6 +23,8 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
   const [ticketsError, setTicketsError] = useState(null);
   const [hasTicketsFetched, setHasTicketsFetched] = useState(!!initialTickets);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // State for approval tickets
   const [approvalTickets, setApprovalTickets] = useState([]);
@@ -30,7 +35,8 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const { 
     data: userDataResponse, 
     isLoading: isLoadingUserData, 
-    error: userDataError 
+    error: userDataError,
+    refetch: refetchUserData
   } = useFetch({
     url: config.endpoints.user.me,
     queryKey: ['userMe'],
@@ -124,10 +130,66 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     }
   };
 
+  const handleEditSubmit = async (formData) => {
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading('Updating profile...');
+    
+    try {
+      await post({
+        url: config.getApiUrl(config.endpoints.user.me),
+        method: 'PUT',
+        data: formData,
+      });
+      
+      toast.dismiss(loadingToastId);
+      toast.success('Profile updated successfully');
+      setIsEditModalOpen(false);
+      
+      // Refetch user data without page reload
+      refetchUserData();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to update profile');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const editProfileFields = [
+    {
+      name: 'phone',
+      label: 'Phone',
+      type: 'text',
+      placeholder: 'Enter phone number',
+      required: false,
+      defaultValue: userData.phone || '',
+    },
+    {
+      name: 'location',
+      label: 'Location',
+      type: 'text',
+      placeholder: 'Enter location',
+      required: false,
+      defaultValue: userData.location || '',
+    },
+  ];
+
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-4">
+    <>
+      <FormModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        componentName=""
+        actionType="Edit User Details"
+        fields={editProfileFields}
+        onSubmit={handleEditSubmit}
+        size="small"
+        isSubmitting={isSubmitting}
+      />
+      <div className="h-full overflow-y-auto bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <div className="mb-3 text-xs text-gray-600">
@@ -199,11 +261,13 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
                 isLoadingApprovalTickets={isLoadingApprovalTickets}
                 approvalTicketsError={approvalTicketsError}
                 onRefresh={fetchApprovalTickets}
+                onEditProfile={() => setIsEditModalOpen(true)}
               />
             )}
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 }
