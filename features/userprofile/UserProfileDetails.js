@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Package, Ticket } from 'lucide-react';
-import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab } from './tabs';
+import { User, Package, Ticket, Building2 } from 'lucide-react';
+import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab } from './tabs';
 import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -15,6 +15,7 @@ const tabs = [
   { id: 'myassets', label: 'My Assets', icon: Package, Component: MyAssetsTab },
   { id: 'ticketstatus', label: 'Ticket Status', icon: Ticket, Component: TicketStatusTab },
   { id: 'ticketforapproval', label: 'Ticket for Approval', icon: Ticket, Component: TicketApprovalTab },
+  { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
 ];
 
 export default function UserProfileDetails({ userAssets: initialAssets, userTickets: initialTickets }) {

@@ -11,7 +11,6 @@ export const ticketFormFields = [
     options: [
       { value: 'NEW', label: 'New' },
       { value: 'REPAIR', label: 'Repair' },
-      { value: 'REPLACEMENT', label: 'Replacement' },
     ],
   },
   {
@@ -26,22 +25,7 @@ export const ticketFormFields = [
     required: true,
     showIf: {
       field: 'ticketType',
-      value: ['REPAIR', 'REPLACEMENT'],
-    },
-  },
-  {
-    name: 'campusId',
-    label: 'Campus',
-    type: 'api-autocomplete',
-    placeholder: 'Search and select campus',
-    apiUrl: baseUrl + '/campuses',
-    queryKey: ['campuses'],
-    labelKey: 'campusName',
-    valueKey: 'id',
-    required: true,
-    showIf: {
-      field: 'ticketType',
-      value: ['REPAIR', 'REPLACEMENT'],
+      value: ['REPAIR'],
     },
   },
   {
@@ -70,6 +54,13 @@ export const ticketFormFields = [
     ],
   },
   {
+    name: 'address',
+    label: 'Address',
+    type: 'textarea',
+    placeholder: 'Enter address',
+    required: false,
+  },
+  {
     name: 'description',
     label: 'Description',
     type: 'textarea',
@@ -82,13 +73,8 @@ export const ticketFormFields = [
 export const ticketValidationSchema = Yup.object().shape({
   ticketType: Yup.string().required('Ticket type is required'),
   assetId: Yup.string().when('ticketType', {
-    is: (val) => val === 'REPAIR' || val === 'REPLACEMENT',
+    is: (val) => val === 'REPAIR',
     then: (schema) => schema.required('Asset is required'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  campusId: Yup.string().when('ticketType', {
-    is: (val) => val === 'REPAIR' || val === 'REPLACEMENT',
-    then: (schema) => schema.required('Campus is required'),
     otherwise: (schema) => schema.notRequired(),
   }),
   priority: Yup.string().required('Priority is required'),
@@ -96,6 +82,7 @@ export const ticketValidationSchema = Yup.object().shape({
     .required('Description is required')
     .min(10, 'Description must be at least 10 characters')
     .max(500, 'Description must not exceed 500 characters'),
+  address: Yup.string().max(200, 'Address must not exceed 200 characters'),
   managerEmail: Yup.string()
     .required('Manager email is required')
     .email('Must be a valid email address'),
@@ -104,8 +91,8 @@ export const ticketValidationSchema = Yup.object().shape({
 export const ticketInitialValues = {
   ticketType: '',
   assetId: '',
-  campusId: '',
   priority: '',
+  address: '',
   description: '',
   managerEmail: '',
 };

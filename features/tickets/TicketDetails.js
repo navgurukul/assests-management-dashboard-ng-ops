@@ -93,6 +93,14 @@ export default function TicketDetails({ ticketId, onBack }) {
     setIsUpdateModalOpen(false);
   };
 
+  const handleResolvedClick = (values) => {
+    // No action needed
+  };
+
+  const handleEscalationClick = (values) => {
+    // No action needed
+  };
+
   const updateInitialValues = {
     status: ticket.status || '',
     assigneeUserId: ticket.assigneeUserId || '',
@@ -236,8 +244,11 @@ export default function TicketDetails({ ticketId, onBack }) {
           onSubmit={handleUpdateSubmit}
           onCancel={handleCloseModal}
           isSubmitting={isSubmitting}
-          submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
+          customActions={[
+            { label: 'Resolved', variant: 'success', onClick: handleResolvedClick },
+            { label: 'Escalation', variant: 'warning', onClick: handleEscalationClick },
+          ]}
         />
       </Modal>
     </>
