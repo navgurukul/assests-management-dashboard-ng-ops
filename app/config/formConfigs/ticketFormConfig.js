@@ -29,21 +29,6 @@ export const ticketFormFields = [
     },
   },
   {
-    name: 'campusId',
-    label: 'Campus',
-    type: 'api-autocomplete',
-    placeholder: 'Search and select campus',
-    apiUrl: baseUrl + '/campuses',
-    queryKey: ['campuses'],
-    labelKey: 'campusName',
-    valueKey: 'id',
-    required: true,
-    showIf: {
-      field: 'ticketType',
-      value: ['REPAIR'],
-    },
-  },
-  {
     name: 'priority',
     label: 'Priority',
     type: 'select',
@@ -92,11 +77,6 @@ export const ticketValidationSchema = Yup.object().shape({
     then: (schema) => schema.required('Asset is required'),
     otherwise: (schema) => schema.notRequired(),
   }),
-  campusId: Yup.string().when('ticketType', {
-    is: (val) => val === 'REPAIR',
-    then: (schema) => schema.required('Campus is required'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
   priority: Yup.string().required('Priority is required'),
   description: Yup.string()
     .required('Description is required')
@@ -111,7 +91,6 @@ export const ticketValidationSchema = Yup.object().shape({
 export const ticketInitialValues = {
   ticketType: '',
   assetId: '',
-  campusId: '',
   priority: '',
   address: '',
   description: '',
