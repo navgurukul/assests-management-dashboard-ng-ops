@@ -176,7 +176,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
       onBack={onBack}
       headerActions={
         <CustomButton
-          text="View Consignments"
+          text="Create Consignments"
           variant="primary"
           size="md"
           onClick={() => router.push('/consignments')}
