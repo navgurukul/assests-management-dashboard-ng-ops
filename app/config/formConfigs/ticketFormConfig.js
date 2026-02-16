@@ -70,6 +70,13 @@ export const ticketFormFields = [
     ],
   },
   {
+    name: 'address',
+    label: 'Address',
+    type: 'textarea',
+    placeholder: 'Enter address',
+    required: false,
+  },
+  {
     name: 'description',
     label: 'Description',
     type: 'textarea',
@@ -96,6 +103,7 @@ export const ticketValidationSchema = Yup.object().shape({
     .required('Description is required')
     .min(10, 'Description must be at least 10 characters')
     .max(500, 'Description must not exceed 500 characters'),
+  address: Yup.string().max(200, 'Address must not exceed 200 characters'),
   managerEmail: Yup.string()
     .required('Manager email is required')
     .email('Must be a valid email address'),
@@ -106,6 +114,7 @@ export const ticketInitialValues = {
   assetId: '',
   campusId: '',
   priority: '',
+  address: '',
   description: '',
   managerEmail: '',
 };
