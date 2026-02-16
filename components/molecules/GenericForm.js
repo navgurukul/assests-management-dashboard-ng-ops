@@ -3,6 +3,7 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
 import FormField from './FormField';
+import CustomButton from '@/components/atoms/CustomButton';
 
 export default function GenericForm({
   fields,
@@ -15,6 +16,7 @@ export default function GenericForm({
   isSubmitting = false,
   showSections = false,
   fieldCallbacks = {},
+  customActions = null, // Array of custom action buttons
 }) {
   // Check if fields are grouped by sections
   const hasSection = fields.length > 0 && fields[0].section;
@@ -102,22 +104,38 @@ export default function GenericForm({
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
             {onCancel && (
-              <button
-                type="button"
+              <CustomButton
+                text={cancelButtonText}
+                variant="secondary"
+                size="lg"
                 onClick={onCancel}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 disabled={isSubmitting || formik.isSubmitting}
-              >
-                {cancelButtonText}
-              </button>
+                type="button"
+              />
             )}
-            <button
-              type="submit"
-              disabled={isSubmitting || formik.isSubmitting || !formik.isValid}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting || formik.isSubmitting ? 'Submitting...' : submitButtonText}
-            </button>
+            {customActions ? (
+              // Render custom action buttons
+              customActions.map((action, index) => (
+                <CustomButton
+                  key={index}
+                  text={isSubmitting || formik.isSubmitting ? 'Processing...' : action.label}
+                  variant={action.variant || 'primary'}
+                  size="lg"
+                  onClick={() => action.onClick(formik.values)}
+                  disabled={isSubmitting || formik.isSubmitting || action.disabled}
+                  type="button"
+                />
+              ))
+            ) : (
+              // Render default submit button
+              <CustomButton
+                text={isSubmitting || formik.isSubmitting ? 'Submitting...' : submitButtonText}
+                variant="primary"
+                size="lg"
+                type="submit"
+                disabled={isSubmitting || formik.isSubmitting || !formik.isValid}
+              />
+            )}
           </div>
         </Form>
       )}
