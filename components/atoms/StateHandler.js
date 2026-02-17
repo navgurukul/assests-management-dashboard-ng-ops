@@ -18,9 +18,9 @@ export default function StateHandler({
   if (isLoading) {
     return (
       <div className={`flex items-center justify-center ${className}`}>
-        <div className="text-center">
+        <div className="flex flex-col items-center justify-center gap-4">
           <div className="loader"></div>
-          <p className="mt-4 text-gray-600">{loadingMessage}</p>
+          <p className="text-gray-600">{loadingMessage}</p>
         </div>
       </div>
     );

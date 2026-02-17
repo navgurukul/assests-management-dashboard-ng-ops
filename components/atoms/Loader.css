@@ -4,6 +4,7 @@
   aspect-ratio: 1;
   position: relative;
   border: 3px solid #0000;
+  margin: 0 auto;
 }
 .loader:before {
   content: "";
