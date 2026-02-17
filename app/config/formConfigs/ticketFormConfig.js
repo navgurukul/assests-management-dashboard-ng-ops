@@ -24,11 +24,7 @@ export const ticketFormFields = [
     valueKey: 'id',
     dataPath: 'data.assets',
     formatLabel: (asset) => {
-      const assetTag = asset?.assetTag || 'N/A';
-      const brand = asset?.brand || '';
-      const model = asset?.model || '';
-      const serialNumber = asset?.serialNumber || '';
-      return `${assetTag} - ${brand} ${model} (${serialNumber})`;
+      return asset?.assetTag || 'N/A';
     },
     required: true,
     showIf: {
@@ -67,6 +63,10 @@ export const ticketFormFields = [
     type: 'textarea',
     placeholder: 'Enter address',
     required: false,
+    showIf: {
+      field: 'ticketType',
+      value: ['NEW'],
+    },
   },
   {
     name: 'description',

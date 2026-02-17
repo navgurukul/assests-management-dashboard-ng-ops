@@ -75,12 +75,7 @@ const buildQueryKey = (name, queryKey, dependsOn, dependentValue, additionalPara
   return keyParts;
 };
 
-/**
- * Extracts nested data from API response using dot notation path
- * @param {object} data - API response data
- * @param {string|null} dataPath - Dot notation path (e.g., 'data.users')
- * @returns {array} Extracted data array
- */
+
 const extractNestedData = (data, dataPath) => {
   if (!data) {
     return [];
@@ -170,7 +165,9 @@ export const useApiAutocomplete = ({
   valueKey = 'id',
 }) => {
   // For allocation fields, always use dummy data as fallback
-  const isAllocationField = apiUrl?.includes('/allocations');
+  // Exception: my-assets endpoint should use real API data
+  const isMyAssetsEndpoint = apiUrl?.includes('/my-assets');
+  const isAllocationField = apiUrl?.includes('/allocations') && !isMyAssetsEndpoint;
   
   // Build final API URL with all parameters
   const finalApiUrl = useMemo(
@@ -215,8 +212,9 @@ export const useApiAutocomplete = ({
     const filteredItems = filterByCategory(finalItems, filterCategory);
     
     // Add selected item if needed
-    return prepareItems(filteredItems, selectedItem, value, valueKey);
-  }, [data, dataPath, filterCategory, selectedItem, value, valueKey, isAllocationField, isError]);
+    const result = prepareItems(filteredItems, selectedItem, value, valueKey);
+    return result;
+  }, [data, dataPath, filterCategory, selectedItem, value, valueKey, isAllocationField, isError, apiUrl, name]);
 
   return {
     items,
