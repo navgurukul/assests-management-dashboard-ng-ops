@@ -67,6 +67,10 @@ export const ticketFormFields = [
     type: 'textarea',
     placeholder: 'Enter address',
     required: false,
+    showIf: {
+      field: 'ticketType',
+      value: ['NEW'],
+    },
   },
   {
     name: 'description',
