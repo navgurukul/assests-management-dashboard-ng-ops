@@ -97,7 +97,7 @@ export default function ApiAutocomplete({
 
       {/* Autocomplete Wrapper */}
       <div
-        className={`border rounded-lg transition-colors ${
+        className={`api-autocomplete-wrapper border rounded-lg transition-colors ${
           isInvalid 
             ? 'border-red-500 focus-within:border-red-600' 
             : 'border-gray-300 focus-within:border-blue-500'
