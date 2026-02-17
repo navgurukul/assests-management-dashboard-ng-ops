@@ -18,10 +18,18 @@ export const ticketFormFields = [
     label: 'Asset',
     type: 'api-autocomplete',
     placeholder: 'Search and select asset',
-    apiUrl: baseUrl + '/assets',
-    queryKey: ['assets'],
+    apiUrl: baseUrl + '/allocations/my-assets',
+    queryKey: ['myAssets'],
     labelKey: 'assetTag',
     valueKey: 'id',
+    dataPath: 'data.assets',
+    formatLabel: (asset) => {
+      const assetTag = asset?.assetTag || 'N/A';
+      const brand = asset?.brand || '';
+      const model = asset?.model || '';
+      const serialNumber = asset?.serialNumber || '';
+      return `${assetTag} - ${brand} ${model} (${serialNumber})`;
+    },
     required: true,
     showIf: {
       field: 'ticketType',
