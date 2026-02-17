@@ -31,6 +31,8 @@ export default function CreateTicket() {
       if (values.ticketType === 'NEW') {
         delete payload.assetId;
         delete payload.campusId;
+      } else if (values.ticketType === 'REPAIR') {
+        delete payload.address;
       }
       
       // Make API call to create ticket using post helper with auth

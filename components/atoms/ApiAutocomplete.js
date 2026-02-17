@@ -84,7 +84,8 @@ export default function ApiAutocomplete({
 
   // Format label for display
   const getItemLabel = (item) => {
-    return formatLabel ? formatLabel(item) : item[labelKey];
+    const label = formatLabel ? formatLabel(item) : item[labelKey];
+    return label;
   };
 
   return (
