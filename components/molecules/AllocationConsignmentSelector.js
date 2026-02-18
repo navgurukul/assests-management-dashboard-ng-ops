@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
-import useFetch from '@/app/hooks/query/useFetch';
 import { allocationsListData } from '@/dummyJson/dummyJson';
 
 export default function AllocationConsignmentSelector({
@@ -12,30 +11,27 @@ export default function AllocationConsignmentSelector({
   queryKey,
   filterStatus = 'ALLOCATED',
   isDisabled = false,
+  hideDropdown = false, // New prop to hide the dropdown
 }) {
   const [selectedAllocation, setSelectedAllocation] = useState(value.allocationId || '');
   const [selectedAssets, setSelectedAssets] = useState(value.selectedAssets || []);
   const [allocationDetails, setAllocationDetails] = useState(value.allocationDetails || null);
 
-  // Fetch allocations data
-  const { data: allocationsData } = useFetch({
-    url: apiUrl ? apiUrl.replace(/^.*\/api/, '') : '/allocations',
-    queryKey: queryKey || ['allocations'],
-  });
-
-  // Filter allocations by status
+  // Filter allocations by status - directly using dummy data
   const allocations = React.useMemo(() => {
-    let sourceData = (allocationsData && allocationsData.data) ? allocationsData.data : allocationsListData;
+    // Use dummy data directly
+    let sourceData = [...allocationsListData];
     
     // Filter by status if specified
     if (filterStatus) {
-      sourceData = sourceData.filter(alloc => 
-        alloc.status === filterStatus || alloc.status === filterStatus.toUpperCase()
-      );
+      sourceData = sourceData.filter(alloc => {
+        const matches = alloc.status === filterStatus || alloc.status === filterStatus.toUpperCase();
+        return matches;
+      });
     }
     
     return sourceData;
-  }, [allocationsData, filterStatus]);
+  }, [filterStatus]);
 
   // Handle allocation selection
   const handleAllocationChange = (e) => {
@@ -96,34 +92,95 @@ export default function AllocationConsignmentSelector({
 
   // Update state when value prop changes from parent
   useEffect(() => {
-    if (value.allocationId !== selectedAllocation) {
-      setSelectedAllocation(value.allocationId || '');
-      setSelectedAssets(value.selectedAssets || []);
-      setAllocationDetails(value.allocationDetails || null);
+    const newAllocationId = value?.allocationId ? String(value.allocationId) : '';
+    const currentAllocationId = selectedAllocation ? String(selectedAllocation) : '';
+
+    if (newAllocationId !== currentAllocationId || value?.allocationDetails !== allocationDetails) {
+      setSelectedAllocation(newAllocationId);
+      setSelectedAssets(value?.selectedAssets || []);
+      setAllocationDetails(value?.allocationDetails || null);
     }
-  }, [value]);
+  }, [value, hideDropdown]);
+
+  const allocationAssets = React.useMemo(() => {
+    const assets =
+      allocationDetails?.assets ||
+      allocationDetails?.assetList ||
+      allocationDetails?.assetIds ||
+      allocationDetails?.assetIDs ||
+      [];
+    if (!Array.isArray(assets)) return [];
+
+    return assets.map((asset) => {
+      if (typeof asset === 'string') {
+        return { id: asset, assetId: asset, assetTag: asset };
+      }
+      return asset;
+    });
+  }, [allocationDetails]);
+
+  const assignedTo =
+    allocationDetails?.user?.email ||
+    allocationDetails?.userEmail ||
+    allocationDetails?.assignedTo?.email ||
+    allocationDetails?.userId ||
+    'Not assigned';
+
+  const sourceLabel =
+    allocationDetails?.sourceCampus?.name ||
+    allocationDetails?.source ||
+    allocationDetails?.sourceCampusId ||
+    'N/A';
+
+  const destinationLabel =
+    allocationDetails?.destinationCampus?.name ||
+    allocationDetails?.destination ||
+    allocationDetails?.destinationCampusId ||
+    'N/A';
 
   return (
     <div className="space-y-4">
-      {/* Allocation ID Dropdown */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Allocation ID <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={selectedAllocation}
-          onChange={handleAllocationChange}
-          disabled={isDisabled}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">Select an allocation</option>
-          {allocations.map((allocation) => (
-            <option key={allocation.id} value={allocation.id}>
-              {allocation.allocationCode || `ALLOC-${allocation.id}`}
+      {/* Allocation ID - Dropdown or Read-only display */}
+      {!hideDropdown ? (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Allocation ID <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={selectedAllocation}
+            onChange={handleAllocationChange}
+            disabled={isDisabled}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">
+              {allocations.length === 0 ? 'No allocations available' : 'Select an allocation'}
             </option>
-          ))}
-        </select>
-      </div>
+            {allocations.map((allocation) => (
+              <option key={allocation.id} value={allocation.id}>
+                {allocation.id}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        allocationDetails && (
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Allocation ID
+                </label>
+                <p className="text-lg font-semibold text-gray-900">
+                  {allocationDetails.id}
+                </p>
+              </div>
+              <div className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                {allocationDetails.status}
+              </div>
+            </div>
+          </div>
+        )
+      )}
 
       {/* Allocation Details Section */}
       {allocationDetails && (
@@ -133,26 +190,19 @@ export default function AllocationConsignmentSelector({
             <div>
               <p className="text-xs text-gray-600 mb-1">Assigned To</p>
               <p className="text-sm font-medium text-gray-900">
-                {allocationDetails.user?.email || 
-                 allocationDetails.userEmail || 
-                 allocationDetails.assignedTo?.email ||
-                 'Not assigned'}
+                {assignedTo}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-600 mb-1">Source</p>
               <p className="text-sm font-medium text-gray-900">
-                {allocationDetails.sourceCampus?.name || 
-                 allocationDetails.source || 
-                 'N/A'}
+                {sourceLabel}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-600 mb-1">Destination</p>
               <p className="text-sm font-medium text-gray-900">
-                {allocationDetails.destinationCampus?.name || 
-                 allocationDetails.destination || 
-                 'N/A'}
+                {destinationLabel}
               </p>
             </div>
           </div>
@@ -188,7 +238,7 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* Assets Table */}
-      {allocationDetails && allocationDetails.assets && allocationDetails.assets.length > 0 && (
+      {allocationDetails && allocationAssets.length > 0 && (
         <div className="border border-gray-300 rounded-lg overflow-hidden">
           <div className="bg-gray-100 px-4 py-3 border-b border-gray-300">
             <h4 className="text-sm font-semibold text-gray-900">
@@ -203,13 +253,13 @@ export default function AllocationConsignmentSelector({
                   <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedAssets.length === allocationDetails.assets.length}
+                      checked={selectedAssets.length === allocationAssets.length}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedAssets([...allocationDetails.assets]);
+                          setSelectedAssets([...allocationAssets]);
                           onChange({
                             allocationId: selectedAllocation,
-                            selectedAssets: [...allocationDetails.assets],
+                            selectedAssets: [...allocationAssets],
                             allocationDetails,
                           });
                         } else {
@@ -237,7 +287,7 @@ export default function AllocationConsignmentSelector({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {allocationDetails.assets.map((asset) => {
+                {allocationAssets.map((asset) => {
                   const assetId = asset.id || asset.assetId;
                   const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
                   
@@ -266,7 +316,7 @@ export default function AllocationConsignmentSelector({
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-700">
-                          {asset.assetType || asset.type || 'Laptop'}
+                          {asset.assetType || asset.type || 'Asset'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -285,7 +335,7 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* No Assets Message */}
-      {allocationDetails && (!allocationDetails.assets || allocationDetails.assets.length === 0) && (
+      {allocationDetails && allocationAssets.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>No assets found in this allocation.</p>
         </div>

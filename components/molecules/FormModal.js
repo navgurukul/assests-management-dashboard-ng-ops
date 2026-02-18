@@ -22,24 +22,52 @@ export default function FormModal({
   componentData = null, // Component data from table row (includes campus.id)
   onFormDataChange = null, // Optional callback when form data changes
   helpText = '', // Optional help text to display instead of component name
+  initialValues = {}, // Initial values for form fields
 }) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [filters, setFilters] = useState({});
+  const lastInitRef = useRef({ key: '', wasOpen: false });
 
   // Initialize form data when modal opens or fields change
   useEffect(() => {
-    if (isOpen) {
-      const initialData = {};
-      fields.forEach((field) => {
-        initialData[field.name] = field.defaultValue || '';
-      });
-      setFormData(initialData);
-      setErrors({});
-      setTouched({});
-      setFilters({});
+    if (!isOpen) {
+      lastInitRef.current.wasOpen = false;
+      return;
     }
+
+    const initialKey = JSON.stringify(initialValues || {});
+    if (lastInitRef.current.wasOpen && lastInitRef.current.key === initialKey) {
+      return;
+    }
+
+    lastInitRef.current = { key: initialKey, wasOpen: true };
+
+    const initialData = {};
+    fields.forEach((field) => {
+      // Priority: initialValues > defaultValue > empty string
+      if (initialValues && Object.prototype.hasOwnProperty.call(initialValues, field.name)) {
+        initialData[field.name] = initialValues[field.name];
+      } else {
+        initialData[field.name] = field.defaultValue || '';
+      }
+    });
+    
+    // Also include any additional initialValues that might not be in fields
+    // (like allocationId, selectedAssets, allocationDetails for allocation-consignment-selector)
+    if (initialValues) {
+      Object.keys(initialValues).forEach((key) => {
+        if (!Object.prototype.hasOwnProperty.call(initialData, key)) {
+          initialData[key] = initialValues[key];
+        }
+      });
+    }
+    
+    setFormData(initialData);
+    setErrors({});
+    setTouched({});
+    setFilters({});
   }, [isOpen, fields]);
 
   // Handle input change
@@ -300,7 +328,11 @@ export default function FormModal({
       case 'allocation-consignment-selector':
         return (
           <AllocationConsignmentSelector
-            value={value || {}}
+            value={{
+              allocationId: formData.allocationId || '',
+              selectedAssets: formData.selectedAssets || [],
+              allocationDetails: formData.allocationDetails || null,
+            }}
             onChange={(newValue) => {
               handleChange(field.name, newValue);
               // Also update allocationId and selectedAssets in form data
@@ -314,6 +346,7 @@ export default function FormModal({
             apiUrl={field.apiUrl}
             queryKey={field.queryKey}
             filterStatus={field.filterStatus}
+            hideDropdown={field.hideDropdown || false}
             isDisabled={isSubmitting}
           />
         );

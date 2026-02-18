@@ -52,6 +52,20 @@ export const createConsignmentFields = [
   },
 ];
 
+// For use in Allocation Details page - hides dropdown
+export const createConsignmentFieldsFromAllocation = [
+  {
+    name: 'allocationSelector',
+    label: 'Select Allocation',
+    type: 'allocation-consignment-selector',
+    required: true,
+    apiUrl: baseUrl + '/allocations',
+    queryKey: ['allocations'],
+    filterStatus: 'ALLOCATED',
+    hideDropdown: true, // Hide dropdown when used in allocation details context
+  },
+];
+
 export const createConsignmentValidation = Yup.object().shape({
   allocationId: Yup.string().required('Allocation is required'),
   selectedAssets: Yup.array()

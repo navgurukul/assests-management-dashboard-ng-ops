@@ -1,15 +1,26 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import CustomButton from '@/components/atoms/CustomButton';
 import StateHandler from '@/components/atoms/StateHandler';
+import FormModal from '@/components/molecules/FormModal';
 import useFetch from '@/app/hooks/query/useFetch';
+import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
+import { createConsignmentFieldsFromAllocation } from '@/app/config/formConfigs/consignmentFormConfig';
+import { toast } from '@/app/utils/toast';
+import { allocationsListData } from '@/dummyJson/dummyJson';
 
 export default function AllocationDetails({ allocationId, onBack }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  
+  // Modal states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Fetch allocation details from API
   const { data, isLoading, isError, error } = useFetch({
@@ -165,24 +176,91 @@ export default function AllocationDetails({ allocationId, onBack }) {
     },
   ];
 
-  return (
-    <DetailsPage
-      title={`ALLOCATION #${allocationDetails.id}`}
-      subtitle={`Status: ${displayStatus} | Assigned to: ${allocationDetails.user?.name || allocationDetails.userId || 'Unknown'}`}
-      subtitleColor={getStatusColor()}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      showTimeline={false}
-      onBack={onBack}
-      headerActions={
-        <CustomButton
-          text="Create Consignments"
-          variant="primary"
-          size="md"
-          onClick={() => router.push('/consignments')}
-        />
+  // Handle create consignment
+  const handleCreateConsignment = async (formData) => {
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading('Creating consignment...');
+    
+    try {
+      // Validate that we have allocation and assets
+      if (!formData.allocationId) {
+        throw new Error('Please select an allocation');
       }
-    />
+      
+      if (!formData.selectedAssets || formData.selectedAssets.length === 0) {
+        throw new Error('Please select at least one asset');
+      }
+      
+      const payload = {
+        allocationId: formData.allocationId,
+        assetIds: formData.selectedAssets.map(asset => asset.id || asset.assetId),
+      };
+
+      const response = await post({
+        url: config.getApiUrl(config.endpoints.consignments.create),
+        data: payload,
+      });
+      
+      toast.dismiss(loadingToastId);
+      toast.success(response?.message || 'Consignment created successfully with status: Draft');
+      
+      setIsCreateModalOpen(false);
+      queryClient.invalidateQueries(['consignments']);
+      
+    } catch (error) {
+      console.error('Error creating consignment:', error);
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to create consignment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Use API allocation details to pre-populate the modal
+  const currentAllocation = allocationDetails;
+
+  return (
+    <>
+      <DetailsPage
+        title={`ALLOCATION #${allocationDetails.id}`}
+        subtitle={`Status: ${displayStatus} | Assigned to: ${allocationDetails.user?.name || allocationDetails.userId || 'Unknown'}`}
+        subtitleColor={getStatusColor()}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        showTimeline={false}
+        onBack={onBack}
+        headerActions={
+          <CustomButton
+            text="Create Consignment"
+            variant="primary"
+            size="md"
+            onClick={() => setIsCreateModalOpen(true)}
+          />
+        }
+      />
+
+      {/* Create Consignment Modal */}
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        actionType="Create"
+        fields={createConsignmentFieldsFromAllocation}
+        onSubmit={handleCreateConsignment}
+        size="large"
+        isSubmitting={isSubmitting}
+        initialValues={{
+          allocationSelector: {
+            allocationId: String(allocationDetails.id || allocationId),
+            selectedAssets: [],
+            allocationDetails: currentAllocation,
+          },
+          allocationId: String(allocationDetails.id || allocationId),
+          selectedAssets: [],
+          allocationDetails: currentAllocation,
+        }}
+        helpText="Select assets from this allocation to create a new consignment. The allocation is pre-selected and locked."
+      />
+    </>
   );
 }
 
