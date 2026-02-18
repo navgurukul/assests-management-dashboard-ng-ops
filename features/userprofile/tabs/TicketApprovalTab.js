@@ -1,77 +1,18 @@
 'use client';
 
-import { Ticket, Check, X } from 'lucide-react';
-import { useState } from 'react';
+import { Ticket, Check, X, MoreVertical } from 'lucide-react';
+import { useState, useCallback } from 'react';
 import CustomButton from '@/components/atoms/CustomButton';
+import TableWrapper from '@/components/Table/TableWrapper';
+import ActionMenu from '@/components/molecules/ActionMenu';
+import FormModal from '@/components/molecules/FormModal';
+import { toast } from '@/app/utils/toast';
+import { useAuth } from '@/app/context/AuthContext';
+import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
+import StateHandler from '@/components/atoms/StateHandler';
 
-// Dummy data for testing
-const dummyApprovalTickets = [
-  {
-    id: 1,
-    ticketNumber: 'TKT-2024-001',
-    description: 'Request for new laptop - HP EliteBook for development work',
-    ticketType: 'ASSET_REQUEST',
-    priority: 'HIGH',
-    status: 'WAITING_FOR_APPROVAL',
-    requesterUser: {
-      firstName: 'Rahul',
-      lastName: 'Sharma'
-    },
-    createdAt: '2024-02-10T10:30:00Z'
-  },
-  {
-    id: 2,
-    ticketNumber: 'TKT-2024-002',
-    description: 'Mouse not working properly, need replacement',
-    ticketType: 'MAINTENANCE',
-    priority: 'MEDIUM',
-    status: 'PENDING',
-    requesterUser: {
-      firstName: 'Priya',
-      lastName: 'Verma'
-    },
-    createdAt: '2024-02-11T14:15:00Z'
-  },
-  {
-    id: 3,
-    ticketNumber: 'TKT-2024-003',
-    description: 'Additional monitor required for dual screen setup',
-    ticketType: 'ASSET_REQUEST',
-    priority: 'LOW',
-    status: 'WAITING_FOR_APPROVAL',
-    createdByUser: {
-      firstName: 'Amit',
-      lastName: 'Kumar'
-    },
-    createdAt: '2024-02-12T09:45:00Z'
-  },
-  {
-    id: 4,
-    ticketNumber: 'TKT-2024-004',
-    description: 'Keyboard keys are sticky, needs cleaning or replacement',
-    ticketType: 'MAINTENANCE',
-    priority: 'MEDIUM',
-    status: 'PENDING',
-    requesterUser: {
-      firstName: 'Sneha',
-      lastName: 'Patel'
-    },
-    createdAt: '2024-02-13T11:20:00Z'
-  },
-  {
-    id: 5,
-    ticketNumber: 'TKT-2024-005',
-    description: 'Projector in Conference Room B not displaying properly',
-    ticketType: 'REPAIR',
-    priority: 'HIGH',
-    status: 'WAITING_FOR_APPROVAL',
-    requesterUser: {
-      firstName: 'Vikram',
-      lastName: 'Singh'
-    },
-    createdAt: '2024-02-14T08:00:00Z'
-    }
-];
+
 
 const getStatusColor = (status) => {
   switch (status?.toUpperCase()) {
@@ -102,136 +43,285 @@ const getPriorityColor = (priority) => {
   }
 };
 
-export default function TicketApprovalTab() {
-  const [processingTicket, setProcessingTicket] = useState(null);
-  
-  // Using dummy data (API not yet implemented)
-  const ticketsToDisplay = dummyApprovalTickets;
+// Define columns configuration
+const columns = [
+  { key: 'ticketNumber', label: 'TICKET NUMBER', align: 'start' },
+  { key: 'description', label: 'DESCRIPTION', align: 'start' },
+  { key: 'ticketType', label: 'TYPE', align: 'start' },
+  { key: 'priority', label: 'PRIORITY', align: 'start' },
+  { key: 'status', label: 'STATUS', align: 'start' },
+  { key: 'requester', label: 'REQUESTED BY', align: 'start' },
+  { key: 'createdAt', label: 'CREATED DATE', align: 'start' },
+  { key: 'actions', label: 'ACTIONS', align: 'center' },
+];
 
-  const handleApproval = async (ticketId, action) => {
+export default function TicketApprovalTab() {
+  const { user } = useAuth();
+  const [processingTicket, setProcessingTicket] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentAction, setCurrentAction] = useState(null);
+  const [currentTicket, setCurrentTicket] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Build query string with pagination
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    return params.toString();
+  };
+  
+  // Fetch pending approval tickets from API
+  // TODO: Replace hardcoded email with user?.email when ready
+  const managerEmail = 'sarah.johnson@company.com';
+  const { data, isLoading, isError, error, refetch } = useFetch({
+    url: `${config.endpoints.tickets.pendingApproval}/${encodeURIComponent(managerEmail)}?${buildQueryString()}`,
+    queryKey: ['pending-approval-tickets', managerEmail, currentPage, pageSize],
+    enabled: true,
+  });
+  
+  // Extract tickets from API response
+  const ticketsToDisplay = data?.data?.tickets || [];
+  const paginationData = data?.data?.pagination || null;
+
+  // Handle opening the action modal
+  const handleOpenActionModal = useCallback((actionType, ticket) => {
+    setCurrentAction(actionType);
+    setCurrentTicket(ticket);
+    setIsModalOpen(true);
+    setOpenMenuId(null); // Close the action menu
+  }, []);
+
+  // Handle closing the modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setCurrentAction(null);
+    setCurrentTicket(null);
+    setIsSubmitting(false);
+  }, []);
+
+  // Handle form submission
+  const handleFormSubmit = useCallback(async (formData) => {
+    setIsSubmitting(true);
+    let loadingToastId = null;
+
     try {
-      setProcessingTicket(ticketId);
+      const action = currentAction?.toLowerCase();
+      loadingToastId = toast.loading(`${currentAction} in progress...`);
       
-      // Simulate approval action
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Show success message
-      const message = action === 'approve' ? 'Ticket approved successfully' : 'Ticket rejected successfully';
-      alert(message);
+      // Here you would make the actual API call
+      // const payload = {
+      //   ticketId: currentTicket.id,
+      //   action: action,
+      //   remarks: formData.remarks || ''
+      // };
+      // await post({ url: apiUrl, method: 'POST', data: payload });
+      
+      toast.dismiss(loadingToastId);
+      loadingToastId = null;
+      toast.success(`Ticket ${action}d successfully!`);
+      
+      // Refetch the pending approval tickets
+      refetch();
+      
+      handleCloseModal();
       
     } catch (error) {
-      console.error(`Error ${action}ing ticket:`, error);
-      alert(`Failed to ${action} ticket`);
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
+      console.error(`Error ${currentAction}ing ticket:`, error);
+      const errorMessage = error?.message || 'An error occurred. Please try again.';
+      toast.error(errorMessage);
     } finally {
-      setProcessingTicket(null);
+      setIsSubmitting(false);
     }
+  }, [currentAction, currentTicket, handleCloseModal, refetch]);
+
+  // Handle cell rendering
+  const renderCell = useCallback((ticket, columnKey) => {
+    switch (columnKey) {
+      case 'ticketNumber':
+        return <span className="font-medium text-blue-600">{ticket.ticketNumber}</span>;
+      
+      case 'description':
+        return (
+          <span className="text-gray-900 max-w-xs truncate block">
+            {ticket.description || '-'}
+          </span>
+        );
+      
+      case 'ticketType':
+        return (
+          <span className="text-gray-700">
+            {ticket.ticketType?.replace('_', ' ')}
+          </span>
+        );
+      
+      case 'priority':
+        return (
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityColor(ticket.priority)}`}>
+            {ticket.priority}
+          </span>
+        );
+      
+      case 'status':
+        return (
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getStatusColor(ticket.status)}`}>
+            {ticket.status}
+          </span>
+        );
+      
+      case 'requester':
+        return (
+          <span className="text-gray-700">
+            {ticket.raisedByUser 
+              ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}` 
+              : ticket.requesterUser 
+              ? `${ticket.requesterUser.firstName} ${ticket.requesterUser.lastName}` 
+              : ticket.createdByUser
+              ? `${ticket.createdByUser.firstName} ${ticket.createdByUser.lastName}`
+              : 'Unknown'}
+          </span>
+        );
+      
+      case 'createdAt':
+        return (
+          <span className="text-gray-500">
+            {new Date(ticket.createdAt).toLocaleDateString('en-IN')}
+          </span>
+        );
+      
+      case 'actions':
+        const menuOptions = [
+          {
+            label: 'Approve',
+            icon: Check,
+            iconClassName: 'text-green-600',
+            onClick: () => handleOpenActionModal('Approve', ticket)
+          },
+          {
+            label: 'Reject',
+            icon: X,
+            iconClassName: 'text-red-600',
+            onClick: () => handleOpenActionModal('Reject', ticket)
+          }
+        ];
+
+        return (
+          <div className="relative flex items-center justify-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenMenuId(openMenuId === ticket.id ? null : ticket.id);
+              }}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Actions menu"
+              disabled={processingTicket === ticket.id}
+            >
+              <MoreVertical className="h-5 w-5 text-gray-600" />
+            </button>
+            {openMenuId === ticket.id && (
+              <ActionMenu
+                menuOptions={menuOptions}
+                onClose={() => setOpenMenuId(null)}
+              />
+            )}
+          </div>
+        );
+      
+      default:
+        return ticket[columnKey];
+    }
+  }, [openMenuId, processingTicket, handleOpenActionModal]);
+
+  // Define form fields based on action
+  const getFormFields = () => {
+    if (!currentAction) return [];
+    
+    return [
+      {
+        name: 'remarks',
+        label: 'Remarks',
+        type: 'textarea',
+        placeholder: `Enter remarks for ${currentAction.toLowerCase()}ing this ticket...`,
+        required: false,
+        rows: 4
+      }
+    ];
   };
+  
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
+  
+  // Loading state
+  if (isLoading && currentPage === 1) {
+    return <StateHandler loading={true} />;
+  }
+  
+  // Error state
+  if (isError) {
+    return <StateHandler error={error?.message || 'Failed to load pending approval tickets'} />;
+  }
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-        Tickets for Approval
-        <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-          {ticketsToDisplay.length} pending
-        </span>
-      </h2>
-      
-      {ticketsToDisplay && ticketsToDisplay.length > 0 ? (
-        <div className="overflow-x-auto -mx-6">
-          <div className="inline-block min-w-full align-middle px-6">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ticket Number
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Priority
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Requested By
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created Date
-                  </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {ticketsToDisplay.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600">
-                      {ticket.ticketNumber}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
-                      {ticket.description || '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                      {ticket.ticketType?.replace('_', ' ')}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityColor(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getStatusColor(ticket.status)}`}>
-                        {ticket.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                      {ticket.requesterUser 
-                        ? `${ticket.requesterUser.firstName} ${ticket.requesterUser.lastName}` 
-                        : ticket.createdByUser
-                        ? `${ticket.createdByUser.firstName} ${ticket.createdByUser.lastName}`
-                        : 'Unknown'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(ticket.createdAt).toLocaleDateString('en-IN')}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <CustomButton
-                          text="Approve"
-                          icon={Check}
-                          variant="success"
-                          size="sm"
-                          onClick={() => handleApproval(ticket.id, 'approve')}
-                          disabled={processingTicket === ticket.id}
-                        />
-                        <CustomButton
-                          text="Reject"
-                          icon={X}
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleApproval(ticket.id, 'reject')}
-                          disabled={processingTicket === ticket.id}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Action Modal */}
+      <FormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        componentName={currentTicket?.ticketNumber || ''}
+        actionType={currentAction || ''}
+        fields={getFormFields()}
+        onSubmit={handleFormSubmit}
+        size="medium"
+        isSubmitting={isSubmitting}
+        componentData={currentTicket}
+        helpText={currentTicket?.description || ''}
+      />
+
+      {/* Table */}
+      <TableWrapper
+        key={`table-${openMenuId || 'none'}`}
+        data={ticketsToDisplay}
+        columns={columns}
+        title={
+          <div className="flex items-center gap-2">
+            Tickets for Approval
+            <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+              {paginationData?.totalCount || ticketsToDisplay.length} pending
+            </span>
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Ticket className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-500">No tickets waiting for approval</p>
-        </div>
-      )}
+        }
+        renderCell={renderCell}
+        showPagination={true}
+        itemsPerPage={pageSize}
+        ariaLabel="Tickets for approval table"
+        isLoading={isLoading}
+        // Server-side pagination props
+        serverPagination={true}
+        paginationData={paginationData}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
     </div>
   );
 }
