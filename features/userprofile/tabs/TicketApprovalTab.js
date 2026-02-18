@@ -3,6 +3,7 @@
 import { Ticket, Check, X } from 'lucide-react';
 import { useState } from 'react';
 import CustomButton from '@/components/atoms/CustomButton';
+import TableWrapper from '@/components/Table/TableWrapper';
 
 // Dummy data for testing
 const dummyApprovalTickets = [
@@ -102,6 +103,18 @@ const getPriorityColor = (priority) => {
   }
 };
 
+// Define columns configuration
+const columns = [
+  { key: 'ticketNumber', label: 'TICKET NUMBER', align: 'start' },
+  { key: 'description', label: 'DESCRIPTION', align: 'start' },
+  { key: 'ticketType', label: 'TYPE', align: 'start' },
+  { key: 'priority', label: 'PRIORITY', align: 'start' },
+  { key: 'status', label: 'STATUS', align: 'start' },
+  { key: 'requester', label: 'REQUESTED BY', align: 'start' },
+  { key: 'createdAt', label: 'CREATED DATE', align: 'start' },
+  { key: 'actions', label: 'ACTIONS', align: 'center' },
+];
+
 export default function TicketApprovalTab() {
   const [processingTicket, setProcessingTicket] = useState(null);
   
@@ -127,111 +140,109 @@ export default function TicketApprovalTab() {
     }
   };
 
+  // Handle cell rendering
+  const renderCell = (ticket, columnKey) => {
+    switch (columnKey) {
+      case 'ticketNumber':
+        return <span className="font-medium text-blue-600">{ticket.ticketNumber}</span>;
+      
+      case 'description':
+        return (
+          <span className="text-gray-900 max-w-xs truncate block">
+            {ticket.description || '-'}
+          </span>
+        );
+      
+      case 'ticketType':
+        return (
+          <span className="text-gray-700">
+            {ticket.ticketType?.replace('_', ' ')}
+          </span>
+        );
+      
+      case 'priority':
+        return (
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityColor(ticket.priority)}`}>
+            {ticket.priority}
+          </span>
+        );
+      
+      case 'status':
+        return (
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getStatusColor(ticket.status)}`}>
+            {ticket.status}
+          </span>
+        );
+      
+      case 'requester':
+        return (
+          <span className="text-gray-700">
+            {ticket.requesterUser 
+              ? `${ticket.requesterUser.firstName} ${ticket.requesterUser.lastName}` 
+              : ticket.createdByUser
+              ? `${ticket.createdByUser.firstName} ${ticket.createdByUser.lastName}`
+              : 'Unknown'}
+          </span>
+        );
+      
+      case 'createdAt':
+        return (
+          <span className="text-gray-500">
+            {new Date(ticket.createdAt).toLocaleDateString('en-IN')}
+          </span>
+        );
+      
+      case 'actions':
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <CustomButton
+              text="Approve"
+              icon={Check}
+              variant="success"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproval(ticket.id, 'approve');
+              }}
+              disabled={processingTicket === ticket.id}
+            />
+            <CustomButton
+              text="Reject"
+              icon={X}
+              variant="danger"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproval(ticket.id, 'reject');
+              }}
+              disabled={processingTicket === ticket.id}
+            />
+          </div>
+        );
+      
+      default:
+        return ticket[columnKey];
+    }
+  };
+
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-        Tickets for Approval
-        <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-          {ticketsToDisplay.length} pending
-        </span>
-      </h2>
-      
-      {ticketsToDisplay && ticketsToDisplay.length > 0 ? (
-        <div className="overflow-x-auto -mx-6">
-          <div className="inline-block min-w-full align-middle px-6">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ticket Number
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Priority
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Requested By
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created Date
-                  </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {ticketsToDisplay.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600">
-                      {ticket.ticketNumber}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
-                      {ticket.description || '-'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                      {ticket.ticketType?.replace('_', ' ')}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityColor(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getStatusColor(ticket.status)}`}>
-                        {ticket.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                      {ticket.requesterUser 
-                        ? `${ticket.requesterUser.firstName} ${ticket.requesterUser.lastName}` 
-                        : ticket.createdByUser
-                        ? `${ticket.createdByUser.firstName} ${ticket.createdByUser.lastName}`
-                        : 'Unknown'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(ticket.createdAt).toLocaleDateString('en-IN')}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <CustomButton
-                          text="Approve"
-                          icon={Check}
-                          variant="success"
-                          size="sm"
-                          onClick={() => handleApproval(ticket.id, 'approve')}
-                          disabled={processingTicket === ticket.id}
-                        />
-                        <CustomButton
-                          text="Reject"
-                          icon={X}
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleApproval(ticket.id, 'reject')}
-                          disabled={processingTicket === ticket.id}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <TableWrapper
+        data={ticketsToDisplay}
+        columns={columns}
+        title={
+          <div className="flex items-center gap-2">
+            Tickets for Approval
+            <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+              {ticketsToDisplay.length} pending
+            </span>
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Ticket className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-500">No tickets waiting for approval</p>
-        </div>
-      )}
+        }
+        renderCell={renderCell}
+        showPagination={true}
+        itemsPerPage={10}
+        ariaLabel="Tickets for approval table"
+      />
     </div>
   );
 }
