@@ -3,10 +3,10 @@
 import React from 'react';
 import BulkDeviceSelector from './BulkDeviceSelector';
 
-export default function CampusAssetTable({ assets = [], onChange, assetTypeId = null }) {
+export default function CampusAssetTable({ assets = [], onChange, assetTypeId = null, sourceCampusId = null }) {
   return (
     <div className="space-y-4">
-      <BulkDeviceSelector selectedAssets={assets} onChange={onChange} assetTypeId={assetTypeId} />
+      <BulkDeviceSelector selectedAssets={assets} onChange={onChange} assetTypeId={assetTypeId} sourceCampusId={sourceCampusId} />
     </div>
   );
 }

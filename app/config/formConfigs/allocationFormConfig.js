@@ -76,7 +76,7 @@ export const allocationFormFields = [
     apiUrl: baseUrl + '/campuses',
     queryKey: ['campuses-source'],
     labelKey: 'campusName',
-    valueKey: 'campusName',
+    valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
