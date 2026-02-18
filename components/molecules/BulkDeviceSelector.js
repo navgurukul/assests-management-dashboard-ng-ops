@@ -10,18 +10,24 @@ import useFetch from '@/app/hooks/query/useFetch';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
 
-export default function BulkDeviceSelector({ selectedAssets = [], onChange, assetTypeId = null }) {
+export default function BulkDeviceSelector({ selectedAssets = [], onChange, assetTypeId = null, sourceCampusId = null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [checkedAssets, setCheckedAssets] = useState(new Set(selectedAssets.map(a => a.id)));
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Build API URL with assetType filter
-  const apiUrl = assetTypeId ? `${baseUrl}/assets?type=${assetTypeId}` : `${baseUrl}/assets`;
+  // Build API URL with assetType and sourceCampus filter
+  const apiUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (assetTypeId) params.set('type', assetTypeId);
+    if (sourceCampusId) params.set('campusId', sourceCampusId);
+    const queryString = params.toString();
+    return queryString ? `${baseUrl}/assets?${queryString}` : `${baseUrl}/assets`;
+  }, [assetTypeId, sourceCampusId]);
   
   // Fetch assets from API
   const { data, isLoading, isError } = useFetch({
     url: apiUrl,
-    queryKey: ['assets-bulk', assetTypeId],
+    queryKey: ['assets-bulk', assetTypeId, sourceCampusId],
     enabled: !!assetTypeId, // Only fetch when assetType is selected
   });
 

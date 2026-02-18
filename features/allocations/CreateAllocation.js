@@ -82,7 +82,7 @@ export default function CreateAllocation() {
         allocationData = {
           allocationType: 'Campus',
           assetIds: assetIds,
-          sourceCampusName: values.sourceCampus,
+          sourceCampusName: values.sourceCampusName,
           destinationCampusName: values.destinationCampus,
           allocationReason: values.allocationReason,
           notes: values.notes || null,

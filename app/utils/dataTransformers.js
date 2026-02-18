@@ -111,13 +111,7 @@ export const formatStorageSize = (sizeGB) => {
   return `${sizeGB} GB`;
 };
 
-/**
- * Get nested property value with fallback
- * @param {object} obj - Object to get value from
- * @param {string} path - Dot notation path (e.g., 'campus.name')
- * @param {string} fallback - Fallback value if not found
- * @returns {any} Property value or fallback
- */
+
 export const getNestedValue = (obj, path, fallback = 'N/A') => {
   if (!obj || !path) return fallback;
   
@@ -199,11 +193,7 @@ export const transformComponentForTable = (component) => {
   };
 };
 
-/**
- * Transform allocation data for table display
- * @param {object} allocation - Raw allocation data from API
- * @returns {object} Transformed allocation data
- */
+
 export const transformAllocationForTable = (allocation) => {
   // Try multiple possible field paths for user name
   const userName = getNestedValue(allocation, 'user.name') || 
@@ -214,17 +204,49 @@ export const transformAllocationForTable = (allocation) => {
                    allocation.userId || 
                    'N/A';
   
+  // Handle asset display - supports both single asset and multiple assets
+  let assetDisplay = 'N/A';
+  if (allocation.assetIds && Array.isArray(allocation.assetIds) && allocation.assetIds.length > 0) {
+    // Multiple assets or bulk allocation
+    assetDisplay = allocation.assetIds.length === 1 
+      ? allocation.assetIds[0] 
+      : `${allocation.assetIds.length} Assets`;
+  } else if (getNestedValue(allocation, 'asset.assetTag')) {
+    assetDisplay = allocation.asset.assetTag;
+  } else if (allocation.assetId) {
+    assetDisplay = allocation.assetId;
+  }
+  
+  // Format campus display — prefer nested object name, fallback to ID
+  const sourceCampus = getNestedValue(allocation, 'sourceCampus.name') ||
+                       getNestedValue(allocation, 'sourceCampus.campusName') ||
+                       allocation.sourceCampusId || 'N/A';
+
+  const destinationCampus = getNestedValue(allocation, 'destinationCampus.name') ||
+                             getNestedValue(allocation, 'destinationCampus.campusName') ||
+                             allocation.destinationCampusId || 'N/A';
+
   return {
     id: allocation.id,
     allocationId: allocation.id || 'N/A',
-    assetTag: getNestedValue(allocation, 'asset.assetTag') || allocation.assetId || 'N/A',
+    assetTag: assetDisplay,
     allocationType: allocation.allocationType || 'N/A',
     userName: userName,
-    startDate: formatDate(allocation.startDate),
-    endDate: allocation.endDate ? formatDate(allocation.endDate) : 'Active',
+    startDate: formatDate(allocation.createdAt || allocation.startDate),
+    endDate: allocation.status === 'ACTIVE' ? 'Active' : formatDate(allocation.updatedAt || allocation.endDate),
     reason: formatAllocationReason(allocation.allocationReason),
-    status: allocation.endDate ? 'Returned' : 'Active',
-    isActive: !allocation.endDate,
+    status: allocation.status === 'ACTIVE' ? 'Active' : 'Returned',
+    isActive: allocation.status === 'ACTIVE',
+    assetCount: allocation.assetIds?.length || 1,
+    assetIds: allocation.assetIds || [],
+    deviceSelectionMode: allocation.deviceSelectionMode || 'N/A',
+    sourceCampus,
+    destinationCampus,
+    isTemporary: allocation.isTemporary ? 'Yes' : 'No',
+    expectedReturnDate: allocation.expectedReturnDate ? formatDate(allocation.expectedReturnDate) : 'N/A',
+    ticketId: allocation.ticketId || 'N/A',
+    notes: allocation.notes || 'N/A',
+    createdAt: formatDate(allocation.createdAt),
     // Store full allocation data
     allocationData: allocation,
   };

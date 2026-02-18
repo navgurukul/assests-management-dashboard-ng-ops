@@ -76,9 +76,11 @@ export const allocationFormFields = [
     apiUrl: baseUrl + '/campuses',
     queryKey: ['campuses-source'],
     labelKey: 'campusName',
-    valueKey: 'campusName',
+    valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
+    companionField: 'sourceCampusName',
+    companionKey: 'campusName',
   },
   {
     name: 'destinationCampus',
@@ -91,6 +93,7 @@ export const allocationFormFields = [
     valueKey: 'campusName',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
+    excludeField: 'sourceCampusName',
   }, 
   {
     name: 'assetType',
@@ -175,7 +178,16 @@ export const allocationValidationSchema = Yup.object().shape({
   destinationCampus: Yup.string()
     .when('allocationType', {
       is: 'CAMPUS',
-      then: (schema) => schema.required('Destination campus is required'),
+      then: (schema) =>
+        schema
+          .required('Destination campus is required')
+          .test(
+            'not-same-as-source',
+            'Destination campus cannot be the same as source campus',
+            function (value) {
+              return value !== this.parent.sourceCampus;
+            }
+          ),
       otherwise: (schema) => schema.nullable(),
     }),
   // allocationReason: Yup.string()
@@ -199,6 +211,7 @@ export const allocationValidationSchema = Yup.object().shape({
     }),
   
   // Helper fields for Campus - not validated for submission
+  sourceCampusName: Yup.string().nullable(),
   assetType: Yup.string().nullable(),
   
   // Common fields
@@ -217,6 +230,7 @@ export const allocationInitialValues = {
   assetSource: '',
   // Campus fields
   sourceCampus: '',
+  sourceCampusName: '',
   destinationCampus: '',
   personRaising: '',
   campusAssets: [],
