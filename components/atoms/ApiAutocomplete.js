@@ -58,6 +58,8 @@ export default function ApiAutocomplete({
   dataPath = null,
   formatLabel = null,
   selectedItem = null,
+  excludeValue = null,
+  onItemSelect = null,
 }) {
   // Use custom hook to handle data fetching and processing
   const { items, isLoading } = useApiAutocomplete({
@@ -75,11 +77,18 @@ export default function ApiAutocomplete({
   });
 
   // Ensure items is always an array to prevent iteration errors
-  const safeItems = Array.isArray(items) ? items : [];
+  const allItems = Array.isArray(items) ? items : [];
+  const safeItems = excludeValue
+    ? allItems.filter((item) => item[valueKey] !== excludeValue)
+    : allItems;
 
   // Handle selection change event
   const handleSelectionChange = (selectedKey) => {
     onChange({ target: { name, value: selectedKey } });
+    if (onItemSelect) {
+      const selectedItem = allItems.find((item) => String(item[valueKey]) === String(selectedKey));
+      if (selectedItem) onItemSelect(selectedItem);
+    }
   };
 
   // Format label for display

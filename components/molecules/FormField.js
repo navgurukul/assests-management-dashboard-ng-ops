@@ -170,6 +170,7 @@ export default function FormField({ field, formik, onFieldChange }) {
             queryKey={field.queryKey}
             value={formik.values[name] || ''}
             onChange={(e) => formik.setFieldValue(name, e.target.value)}
+            onItemSelect={field.companionField ? (item) => formik.setFieldValue(field.companionField, item[field.companionKey] || '') : null}
             onBlur={() => formik.setFieldTouched(name, true)}
             isInvalid={hasError}
             errorMessage={hasError ? formik.errors[name] : ''}
@@ -183,6 +184,7 @@ export default function FormField({ field, formik, onFieldChange }) {
             dataPath={field.dataPath}
             formatLabel={field.formatLabel}
             selectedItem={field.selectedItem}
+            excludeValue={field.excludeField ? formik.values[field.excludeField] : null}
           />
         );
 
