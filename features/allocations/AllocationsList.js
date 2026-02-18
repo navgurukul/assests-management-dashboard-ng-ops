@@ -154,6 +154,49 @@ export default function AllocationsList() {
           return <span className="text-green-600 font-medium">{cellValue}</span>;
         }
         return cellValue;
+      case "deviceSelectionMode":
+        const modeColors = {
+          'BULK': 'bg-indigo-50 text-indigo-700',
+          'MANUAL': 'bg-teal-50 text-teal-700',
+        };
+        return (
+          <span className={`px-2 py-1 rounded text-xs font-medium ${modeColors[cellValue] || 'bg-gray-50 text-gray-700'}`}>
+            {cellValue}
+          </span>
+        );
+      case "sourceCampus":
+      case "destinationCampus":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
+        return <span className="text-gray-700 text-sm">{cellValue}</span>;
+      case "isTemporary":
+        return (
+          <span className={`px-2 py-1 rounded text-xs font-medium ${cellValue === 'Yes' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-600'}`}>
+            {cellValue}
+          </span>
+        );
+      case "expectedReturnDate":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
+        return <span className="text-gray-700">{cellValue}</span>;
+      case "ticketId":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
+        return <span className="font-medium text-purple-600">#{cellValue}</span>;
+      case "notes":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
+        return (
+          <span className="text-gray-700 text-sm max-w-[180px] truncate block" title={cellValue}>
+            {cellValue}
+          </span>
+        );
+      case "createdAt":
+        return <span className="text-gray-600 text-sm">{cellValue}</span>;
       case "actions":
         return (
           <div className="flex items-center gap-2">

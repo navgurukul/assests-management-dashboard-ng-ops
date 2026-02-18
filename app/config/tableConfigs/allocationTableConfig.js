@@ -7,15 +7,14 @@ export const allocationTableColumns = [
   { 
     key: 'allocationId', 
     label: 'ALLOCATION ID',
-    alwaysVisible: true,
     description: 'Unique allocation identifier'
   },
   
   // Default visible columns
   { 
     key: 'assetTag', 
-    label: 'ASSET TAG',
-    description: 'Asset tag assigned'
+    label: 'ASSET WRAPPED',
+    description: 'Asset wrapped'
   },
   { 
     key: 'allocationType', 
@@ -47,6 +46,48 @@ export const allocationTableColumns = [
     label: 'STATUS',
     description: 'Current allocation status'
   },
+
+  // Optional / extra columns from API
+  { 
+    key: 'deviceSelectionMode', 
+    label: 'SELECTION MODE',
+    description: 'How devices were selected (Bulk/Manual)'
+  },
+  { 
+    key: 'sourceCampus', 
+    label: 'SOURCE CAMPUS',
+    description: 'Campus from which assets are allocated'
+  },
+  { 
+    key: 'destinationCampus', 
+    label: 'DESTINATION CAMPUS',
+    description: 'Campus to which assets are allocated'
+  },
+  { 
+    key: 'isTemporary', 
+    label: 'TEMPORARY',
+    description: 'Whether allocation is temporary'
+  },
+  { 
+    key: 'expectedReturnDate', 
+    label: 'EXPECTED RETURN',
+    description: 'Expected return date for temporary allocations'
+  },
+  { 
+    key: 'ticketId', 
+    label: 'TICKET ID',
+    description: 'Associated ticket ID'
+  },
+  { 
+    key: 'notes', 
+    label: 'NOTES',
+    description: 'Additional notes'
+  },
+  { 
+    key: 'createdAt', 
+    label: 'CREATED AT',
+    description: 'Date allocation was created'
+  },
   
   // Actions column - always visible
   { 
@@ -59,14 +100,15 @@ export const allocationTableColumns = [
 
 // Default visible columns (shown when user first visits or resets)
 export const defaultVisibleColumns = [
-  'allocationId',
   'assetTag',
   'allocationType',
   'userName',
   'startDate',
-  'endDate',
   'reason',
   'status',
+  'deviceSelectionMode',
+  'sourceCampus',
+  'destinationCampus',
   'actions',
 ];
 
