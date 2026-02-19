@@ -13,6 +13,7 @@ import {
   Archive, 
   FileText, 
   User, 
+  Users,
 } from 'lucide-react';
 import { menuItems } from '@/dummyJson/dummyJson';
 
@@ -24,6 +25,7 @@ const iconMap = {
   Ticket,
   Archive,
   FileText,
+  Users,
 };
 
 export default function Sidebar() {
