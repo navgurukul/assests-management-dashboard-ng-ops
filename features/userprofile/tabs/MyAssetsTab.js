@@ -1,6 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import FormModal from '@/components/molecules/FormModal';
+
+const extendLeaseFields = [
+  {
+    name: 'extendUntil',
+    label: 'Extend Until',
+    type: 'date',
+    required: true,
+    placeholder: 'Select date',
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    required: false,
+    placeholder: 'Reason for extending lease...',
+  },
+];
 
 const getStatusColor = (status) => {
   switch (status?.toUpperCase()) {
@@ -31,6 +50,27 @@ const getConditionColor = (condition) => {
 };
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
+  const [extendModalOpen, setExtendModalOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleExtendLease = (asset) => {
+    setSelectedAsset(asset);
+    setExtendModalOpen(true);
+  };
+
+  const handleExtendSubmit = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      // TODO: wire up to API
+      console.log('Extend lease payload:', { assetId: selectedAsset?.id, ...formData });
+    } finally {
+      setIsSubmitting(false);
+      setExtendModalOpen(false);
+      setSelectedAsset(null);
+    }
+  };
+
   // Extract assets from the API response structure
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
   const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
@@ -100,6 +140,12 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                   <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusColor(asset.status)}`}>
                     {asset.status}
                   </span>
+                  <button
+                    onClick={() => handleExtendLease(asset)}
+                    className="ml-2 px-2 py-1 text-xs font-semibold rounded border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  >
+                    Extend Lease
+                  </button>
                 </div>
 
                 {/* Specs */}
@@ -177,6 +223,17 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
           <p className="mt-2 text-sm text-gray-500">No assets assigned</p>
         </div>
       )}
+
+      <FormModal
+        isOpen={extendModalOpen}
+        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); }}
+        componentName=""
+        actionType="Extend Lease"
+        fields={extendLeaseFields}
+        onSubmit={handleExtendSubmit}
+        isSubmitting={isSubmitting}
+        size="small"
+      />
     </div>
   );
 }
