@@ -1,9 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
+import FormModal from '@/components/molecules/FormModal';
+import CustomButton from '@/components/atoms/CustomButton';
 
 export default function AssetDetails({ assetId, assetData, onBack }) {
+  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
+
+  const handleStatusUpdate = (formData) => {
+    console.log('Status update submitted:', { action: modalAction, description: formData.description });
+    setModalAction(null);
+  };
+
+  const repairFields = [
+    {
+      name: 'description',
+      label: 'Reason for Repair',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Describe the issue or reason this asset needs repair...',
+    },
+  ];
+
+  const scrapFields = [
+    {
+      name: 'description',
+      label: 'Reason for Scrapping',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Describe why this asset is being scrapped...',
+    },
+  ];
+
   // If no asset data is passed, show error
   if (!assetData) {
     return (
@@ -150,14 +179,43 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
   ];
 
   return (
-    <DetailsPage
-      title={`ASSET: ${assetDetails.assetTag}`}
-      subtitle={`Status: ${displayStatus} | Condition: ${formatCondition(assetDetails.condition)}`}
-      subtitleColor={getStatusColor()}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      showTimeline={false}
-      onBack={onBack}
-    />
+    <>
+      <FormModal
+        isOpen={modalAction !== null}
+        onClose={() => setModalAction(null)}
+        componentName={assetDetails.assetTag}
+        actionType={modalAction === 'REPAIR' ? 'Put in Repair' : 'Scrap this Device'}
+        fields={modalAction === 'REPAIR' ? repairFields : scrapFields}
+        onSubmit={handleStatusUpdate}
+        helpText={
+          modalAction === 'REPAIR'
+            ? 'Provide details about the issue. The asset status will be updated to Under Repair.'
+            : 'Provide a reason for scrapping. This will mark the asset as no longer in service.'
+        }
+      />
+      <DetailsPage
+        title={`ASSET: ${assetDetails.assetTag}`}
+        subtitle={`Status: ${displayStatus} | Condition: ${formatCondition(assetDetails.condition)}`}
+        subtitleColor={getStatusColor()}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        showTimeline={false}
+        onBack={onBack}
+        headerActions={
+          <>
+            <CustomButton
+              text="Moved to Repair"
+              variant="warning"
+              onClick={() => setModalAction('REPAIR')}
+            />
+            <CustomButton
+              text="Mark as Scrap"
+              variant="danger"
+              onClick={() => setModalAction('SCRAP')}
+            />
+          </>
+        }
+      />
+    </>
   );
 }
