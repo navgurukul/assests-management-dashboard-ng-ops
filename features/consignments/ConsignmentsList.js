@@ -122,12 +122,6 @@ export default function ConsignmentsList() {
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
-  
-  // Fetch courier services from API
-  const { data: courierData } = useFetch({
-    url: '/courier-services',
-    queryKey: ['courier-services'],
-  });
 
   // Fetch campuses from API
   const { data: campusData } = useFetch({
@@ -160,15 +154,13 @@ export default function ConsignmentsList() {
     setCurrentPage(1);
   };
   
-  // Transform courier data from API to filter options
+  // Use static courier providers for filter options
   const courierOptions = React.useMemo(() => {
-    if (!courierData || !courierData.data) return [];
-    
-    return courierData.data.map((courier) => ({
+    return courierProviders.map((courier) => ({
       value: courier.id,
       label: courier.name,
     }));
-  }, [courierData]);
+  }, []);
 
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -440,8 +432,11 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Dispatching consignment...');
     
     try {
+      const freightCost = formData.freightCost === '' ? null : Number(formData.freightCost);
+
       const payload = {
         courierServiceId: formData.courierServiceId,
+        freightCost,
         trackingId: formData.trackingId,
         trackingLink: formData.trackingLink || null,
         status: 'dispatched',

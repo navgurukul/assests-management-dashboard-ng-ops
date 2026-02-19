@@ -96,6 +96,14 @@ export const readyToDispatchFields = [
     required: true,
   },
   {
+    name: 'freightCost',
+    label: 'Freight Cost',
+    type: 'number',
+    placeholder: 'Enter freight cost',
+    required: true,
+    min: 0,
+  },
+  {
     name: 'trackingId',
     label: 'Tracking ID',
     type: 'text',
@@ -113,11 +121,16 @@ export const readyToDispatchFields = [
 
 export const readyToDispatchValidation = Yup.object().shape({
   courierServiceId: Yup.string().required('Courier partner is required'),
+  freightCost: Yup.number()
+    .typeError('Freight cost must be a number')
+    .min(0, 'Freight cost cannot be negative')
+    .required('Freight cost is required'),
   trackingId: Yup.string().required('Tracking ID is required'),
 });
 
 export const readyToDispatchInitialValues = {
   courierServiceId: '',
+  freightCost: '',
   trackingId: '',
   trackingLink: '',
 };

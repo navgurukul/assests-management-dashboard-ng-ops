@@ -438,6 +438,7 @@ export default function FormModal({
       
       case 'text':
       case 'date':
+      case 'number':
         return (
           <input
             type={field.type}
@@ -447,6 +448,9 @@ export default function FormModal({
             onChange={(e) => handleChange(field.name, e.target.value)}
             onBlur={() => handleBlur(field.name)}
             placeholder={field.placeholder}
+            min={field.min}
+            max={field.max}
+            step={field.step}
             className={baseInputClasses}
             disabled={field.disabled || isSubmitting}
           />
