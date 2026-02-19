@@ -51,10 +51,12 @@ export const ticketFormFields = [
     placeholder: 'Select manager email',
     required: true,
     options: [
-      { value: 'john.smith@company.com', label: 'John Smith - john.smith@company.com' },
-      { value: 'sarah.johnson@company.com', label: 'Sarah Johnson - sarah.johnson@company.com' },
-      { value: 'michael.brown@company.com', label: 'Michael Brown - michael.brown@company.com' },
-      { value: 'emily.davis@company.com', label: 'Emily Davis - emily.davis@company.com' },
+      { value: 'prabhat@navgurukul.org', label: 'Prabhat - prabhat@navgurukul.org' },
+      { value: 'mubin@nav', label: 'Mubin - mubin@navgurukul.org' },
+      { value: 'alimausmani@navgurukul.org', label: 'Ali Mausmani - alimausmani@navgurukul.org' },
+      { value: 'geetashriyadav@navgurukul.org', label: 'Geetha Shri Yadav - geetashriyadav@navgurukul.org' },
+      { value: 'anjani.k@navgurukul.org', label: 'Anjani K - anjani.k@navgurukul.org' },
+      { value: 'sanjana@navgurukul.org', label: 'Sanjana - sanjana@navgurukul.org' },
     ],
   },
   {
