@@ -19,6 +19,11 @@ export const assetTableColumns = [
     alwaysVisible: true,
     description: 'Unique asset identifier'
   },
+  { 
+    key: 'ownedBy', 
+    label: 'OWNED BY',
+    description: 'Organization owning the asset'
+  },
   
   // Default visible columns
   { 
@@ -32,14 +37,34 @@ export const assetTableColumns = [
     description: 'Manufacturer brand'
   },
   { 
-    key: 'model', 
-    label: 'MODEL',
-    description: 'Device model'
-  },
-  { 
     key: 'serialNumber', 
     label: 'SERIAL NUMBER',
     description: 'Device serial number'
+  },
+  { 
+    key: 'model', 
+    label: 'MODEL', 
+    description: 'Device model'
+  },
+  { 
+    key: 'ramSizeGB', 
+    label: 'RAM (GB)',
+    description: 'RAM size in gigabytes'
+  },
+  { 
+    key: 'storageSizeGB', 
+    label: 'STORAGE (GB)',
+    description: 'Storage size in gigabytes'
+  },
+  { 
+    key: 'processor', 
+    label: 'PROCESSOR',
+    description: 'CPU processor type'
+  },
+  { 
+    key: 'specLabel', 
+    label: 'SPEC LABEL',
+    description: 'Specification label'
   },
   { 
     key: 'condition', 
@@ -59,29 +84,9 @@ export const assetTableColumns = [
   
   // Optional columns (not visible by default)
   { 
-    key: 'processor', 
-    label: 'PROCESSOR',
-    description: 'CPU processor type'
-  },
-  { 
-    key: 'ramSizeGB', 
-    label: 'RAM (GB)',
-    description: 'RAM size in gigabytes'
-  },
-  { 
-    key: 'storageSizeGB', 
-    label: 'STORAGE (GB)',
-    description: 'Storage size in gigabytes'
-  },
-  { 
     key: 'sourceType', 
     label: 'SOURCE TYPE',
     description: 'How asset was acquired (Purchased, Donated, etc.)'
-  },
-  { 
-    key: 'ownedBy', 
-    label: 'OWNED BY',
-    description: 'Organization owning the asset'
   },
   { 
     key: 'purchaseDate', 
@@ -92,11 +97,6 @@ export const assetTableColumns = [
     key: 'cost', 
     label: 'COST',
     description: 'Purchase cost'
-  },
-  { 
-    key: 'specLabel', 
-    label: 'SPEC LABEL',
-    description: 'Specification label'
   },
   { 
     key: 'sourceBy', 
@@ -127,10 +127,15 @@ export const assetTableColumns = [
 export const defaultVisibleColumns = [
   'status',
   'assetTag',
+  'ownedBy',
   'type',
   'brand',
-  'model',
   'serialNumber',
+  'model',
+  'ramSizeGB',
+  'storageSizeGB',
+  'processor',
+  'specLabel',
   'condition',
   'campus',
   'location',
