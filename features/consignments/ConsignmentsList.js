@@ -22,7 +22,6 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/consignmentTableConfig';
 import { transformConsignmentForTable } from '@/app/utils/dataTransformers';
-import { consignmentsListData, allocationsListData } from '@/dummyJson/dummyJson';
 import {
   createConsignmentFields,
   readyToDispatchFields,
@@ -240,59 +239,7 @@ export default function ConsignmentsList() {
   
   // Process API data to table format
   const tableData = React.useMemo(() => {
-    let sourceData = (data && data.data) ? data.data : consignmentsListData;
-    
-    // Apply client-side filtering for dummy data
-    if (!data || !data.data) {
-      sourceData = sourceData.filter((consignment) => {
-        // Filter by status
-        if (filters.status && consignment.status !== filters.status) {
-          return false;
-        }
-        
-        // Filter by courier service
-        if (filters.courier) {
-          const courierServiceId = consignment.courierService?.id || consignment.courierServiceId;
-          if (courierServiceId !== filters.courier && courierServiceId !== parseInt(filters.courier)) {
-            return false;
-          }
-        }
-        
-        // Filter by allocation
-        if (filters.allocation) {
-          const allocationId = consignment.allocation?.id || consignment.allocationId;
-          if (allocationId !== filters.allocation && allocationId !== parseInt(filters.allocation)) {
-            return false;
-          }
-        }
-        
-        // Filter by search
-        if (debouncedSearch) {
-          const searchLower = debouncedSearch.toLowerCase();
-          const searchableFields = [
-            consignment.consignmentCode,
-            consignment.code,
-            consignment.trackingId,
-            consignment.allocation?.allocationCode,
-            consignment.allocationCode,
-            consignment.source,
-            consignment.destination,
-            consignment.allocation?.sourceCampus?.name,
-            consignment.allocation?.destinationCampus?.name,
-          ].filter(Boolean);
-          
-          const matchesSearch = searchableFields.some(field => 
-            String(field).toLowerCase().includes(searchLower)
-          );
-          
-          if (!matchesSearch) {
-            return false;
-          }
-        }
-        
-        return true;
-      });
-    }
+    const sourceData = Array.isArray(data?.data) ? data.data : [];
     
     return sourceData.map((consignment) => {
       if (typeof transformConsignmentForTable === 'function') {
@@ -320,7 +267,7 @@ export default function ConsignmentsList() {
         allocationId: consignment.allocation?.id || consignment.allocationId || '',
       };
     });
-  }, [data, filters, debouncedSearch]);
+  }, [data]);
   
   // Get pagination metadata
   const totalItems = data?.pagination?.total || data?.total || tableData.length;
@@ -329,7 +276,7 @@ export default function ConsignmentsList() {
   // Handle row click - navigate to details page
   const handleRowClick = (item) => {
     if (typeof window !== 'undefined') {
-      const sourceData = (data && data.data) ? data.data : consignmentsListData;
+      const sourceData = Array.isArray(data?.data) ? data.data : [];
       const fullConsignment = sourceData.find(c => c.id === item.id);
       if (fullConsignment) {
         sessionStorage.setItem('currentConsignmentData', JSON.stringify(fullConsignment));
@@ -469,41 +416,6 @@ export default function ConsignmentsList() {
   
 
   
-  // Handle form data change in create modal to populate assets
-  const handleCreateFormDataChange = (formData, field) => {
-    if (field.name === 'allocationId' && formData.allocationId) {
-      const selectedAllocation = allocationsListData.find(
-        alloc => alloc.id === parseInt(formData.allocationId) || alloc.id === formData.allocationId
-      );
-      
-      if (selectedAllocation) {
-        const assets = selectedAllocation.assets || [];
-        const source = selectedAllocation.sourceCampus?.name || '';
-        const destination = selectedAllocation.destinationCampus?.name || '';
-        
-        const assetOptions = assets.map(asset => ({
-          value: asset.id,
-          label: asset.assetTag,
-        }));
-        
-        setCreateFormFields(prev =>
-          prev.map(f => {
-            if (f.name === 'assets') {
-              return { ...f, options: assetOptions };
-            }
-            if (f.name === 'source') {
-              return { ...f, defaultValue: source };
-            }
-            if (f.name === 'destination') {
-              return { ...f, defaultValue: destination };
-            }
-            return f;
-          })
-        );
-      }
-    }
-  };
-  
   const handleStatusChange = async (consignmentId, newStatus) => {
     try {
       setOpenStatusDropdownId(null);
@@ -513,7 +425,7 @@ export default function ConsignmentsList() {
   };
 
   // Show loading only on initial load
-  const showLoading = isLoading && !consignmentsListData;
+  const showLoading = isLoading && !data;
 
   // Error state
   const showErrorBanner = isError && !data;
@@ -531,8 +443,8 @@ export default function ConsignmentsList() {
         );
         
       case 'assetCount':
-        const sourceData = (data && data.data) ? data.data : consignmentsListData;
-        const fullConsignment = sourceData.find(c => c.id === item.id);
+        const sourceData = Array.isArray(data?.data) ? data.data : [];
+        const fullConsignment = sourceData.find(c => c.id === item.id) || item.consignmentData;
         const assets = fullConsignment?.assets || [];
         
         return (
@@ -631,7 +543,7 @@ export default function ConsignmentsList() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>Using sample data:</strong> Unable to connect to server. Displaying sample consignments for demonstration.
+                <strong>Unable to load consignments:</strong> Please try again or check your network connection.
               </p>
             </div>
           </div>
@@ -700,7 +612,6 @@ export default function ConsignmentsList() {
         onSubmit={handleCreateConsignment}
         size="large"
         isSubmitting={isSubmitting}
-        onFormDataChange={handleCreateFormDataChange}
         helpText="Select an allocation and choose assets to create a new consignment"
       />
       
