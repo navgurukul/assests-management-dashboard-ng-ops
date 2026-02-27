@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Eye, ChevronDown, Package, Truck } from 'lucide-react';
+import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle } from 'lucide-react';
+import { inTransitColumns, renderInTransitCell } from '@/features/consignments/InTransitReturns';
+import { inTransitReturnsDummyData } from '@/dummyJson/dummyJson';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
@@ -62,6 +64,10 @@ export default function ConsignmentsList() {
   const [currentConsignment, setCurrentConsignment] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // In-transit returns modal state
+  const [showInTransit, setShowInTransit] = useState(false);
+  const [inTransitSearch, setInTransitSearch] = useState('');
+
   // Dynamic form fields state for create modal
   const [createFormFields, setCreateFormFields] = useState(createConsignmentFields);
   
@@ -272,7 +278,20 @@ export default function ConsignmentsList() {
   // Get pagination metadata
   const totalItems = data?.pagination?.total || data?.total || tableData.length;
   const totalPages = data?.pagination?.totalPages || Math.ceil(totalItems / pageSize) || 1;
-  
+
+  // Filtered in-transit data (client-side search)
+  const filteredInTransitData = React.useMemo(() => {
+    if (!inTransitSearch.trim()) return inTransitReturnsDummyData;
+    const q = inTransitSearch.toLowerCase();
+    return inTransitReturnsDummyData.filter((row) =>
+      row.consignmentCode.toLowerCase().includes(q) ||
+      row.assetTag.toLowerCase().includes(q) ||
+      row.model.toLowerCase().includes(q) ||
+      row.userName.toLowerCase().includes(q) ||
+      row.trackingId.toLowerCase().includes(q)
+    );
+  }, [inTransitSearch]);
+
   // Handle row click - navigate to details page
   const handleRowClick = (item) => {
     if (typeof window !== 'undefined') {
@@ -533,7 +552,7 @@ export default function ConsignmentsList() {
 
   return (
     <div className="space-y-6">
-      {showErrorBanner && (
+      {showErrorBanner && !showInTransit && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -549,46 +568,67 @@ export default function ConsignmentsList() {
           </div>
         </div>
       )}
-      
+
       <TableWrapper
-        key={`table-${openStatusDropdownId || 'none'}`}
-        data={tableData}
-        columns={visibleColumns}
-        title="Consignments"
-        renderCell={renderCell}
-        onRowClick={handleRowClick}
-        itemsPerPage={pageSize}
+        key={showInTransit ? 'transit' : `consignments-${openStatusDropdownId || 'none'}`}
+        data={showInTransit ? filteredInTransitData : tableData}
+        columns={showInTransit ? inTransitColumns : visibleColumns}
+        title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
+        renderCell={showInTransit ? renderInTransitCell : renderCell}
+        onRowClick={showInTransit ? undefined : handleRowClick}
+        itemsPerPage={showInTransit ? 10 : pageSize}
         showPagination={true}
-        ariaLabel="Consignments table"
-        showCreateButton={true}
+        ariaLabel={showInTransit ? 'In-transit returns table' : 'Consignments table'}
+        showCreateButton={!showInTransit}
         onCreateClick={handleCreateClick}
-        isLoading={showLoading}
+        isLoading={showInTransit ? false : showLoading}
         searchComponent={
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            placeholder="Search consignments..."
-          />
+          showInTransit ? (
+            <SearchInput
+              value={inTransitSearch}
+              onChange={setInTransitSearch}
+              placeholder="Search by asset, user, tracking..."
+            />
+          ) : (
+            <SearchInput
+              value={searchInput}
+              onChange={setSearchInput}
+              placeholder="Search consignments..."
+            />
+          )
         }
         filterComponent={
-          <FilterDropdown
-            statusOptions={statusOptions}
-            selectedFilters={filters}
-            onFilterChange={handleFilterChange}
-          />
+          <>
+            {!showInTransit && (
+              <FilterDropdown
+                statusOptions={statusOptions}
+                selectedFilters={filters}
+                onFilterChange={handleFilterChange}
+              />
+            )}
+            <CustomButton
+              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
+              icon={ArrowLeftCircle}
+              onClick={() => setShowInTransit(!showInTransit)}
+              variant={showInTransit ? 'secondary' : 'warning'}
+              size="md"
+            />
+          </>
         }
         columnSelectorComponent={
-          <ColumnSelector
-            allColumns={allColumns}
-            visibleColumnKeys={visibleColumnKeys}
-            alwaysVisibleColumns={alwaysVisibleColumns}
-            onToggleColumn={toggleColumn}
-            onShowAll={showAllColumns}
-            onReset={resetToDefault}
-          />
+          !showInTransit && (
+            <ColumnSelector
+              allColumns={allColumns}
+              visibleColumnKeys={visibleColumnKeys}
+              alwaysVisibleColumns={alwaysVisibleColumns}
+              onToggleColumn={toggleColumn}
+              onShowAll={showAllColumns}
+              onReset={resetToDefault}
+            />
+          )
         }
         activeFiltersComponent={
-          Object.keys(filters).length > 0 && (
+          !showInTransit && Object.keys(filters).length > 0 && (
             <ActiveFiltersChips
               filters={filters}
               getCategoryName={getCategoryName}
@@ -597,10 +637,10 @@ export default function ConsignmentsList() {
             />
           )
         }
-        serverPagination={true}
-        paginationData={data?.pagination}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+        serverPagination={!showInTransit}
+        paginationData={showInTransit ? null : data?.pagination}
+        onPageChange={showInTransit ? undefined : handlePageChange}
+        onPageSizeChange={showInTransit ? undefined : handlePageSizeChange}
       />
       
       {/* Create Consignment Modal */}
@@ -664,7 +704,6 @@ export default function ConsignmentsList() {
           )}
         </div>
       </Modal>
-      
     </div>
   );
 }
