@@ -1772,3 +1772,56 @@ export const ticketsSummaryCards = [
   },
 ];
 
+export const inTransitReturnsDummyData = [
+  {
+    id: 1,
+    consignmentCode: 'CON-1021',
+    assetTag:        'NG-LP-00451',
+    model:           'Dell Latitude 5520',
+    userName:        'Arjun Mehta',
+    userEmail:       'arjun.mehta@ng.com',
+    trackingId:      'DTDC-8834712',
+    estimatedArrival:'02 Mar 2026',
+  },
+  {
+    id: 2,
+    consignmentCode: 'CON-1021',
+    assetTag:        'NG-LP-00512',
+    model:           'HP EliteBook 840 G8',
+    userName:        'Arjun Mehta',
+    userEmail:       'arjun.mehta@ng.com',
+    trackingId:      'DTDC-8834712',
+    estimatedArrival:'02 Mar 2026',
+  },
+  {
+    id: 3,
+    consignmentCode: 'CON-1027',
+    assetTag:        'NG-LP-00389',
+    model:           'Lenovo ThinkPad E15',
+    userName:        'Priya Sharma',
+    userEmail:       'priya.sharma@ng.com',
+    trackingId:      'BLUEDART-99112',
+    estimatedArrival:'04 Mar 2026',
+  },
+  {
+    id: 4,
+    consignmentCode: 'CON-1031',
+    assetTag:        'NG-LP-00601',
+    model:           'Apple MacBook Air M2',
+    userName:        'Rohan Verma',
+    userEmail:       'rohan.verma@ng.com',
+    trackingId:      'ECOM-47762301',
+    estimatedArrival:'05 Mar 2026',
+  },
+  {
+    id: 5,
+    consignmentCode: 'CON-1031',
+    assetTag:        'NG-LP-00744',
+    model:           'Apple MacBook Pro M3',
+    userName:        'Rohan Verma',
+    userEmail:       'rohan.verma@ng.com',
+    trackingId:      'ECOM-47762301',
+    estimatedArrival:'05 Mar 2026',
+  },
+];
+
