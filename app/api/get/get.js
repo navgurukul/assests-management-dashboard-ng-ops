@@ -1,4 +1,9 @@
-import { getAuthToken } from '@/app/utils/authUtils';
+import { getAuthToken, clearAuthData } from '@/app/utils/authUtils';
+
+const handleUnauthorized = () => {
+  clearAuthData();
+  window.dispatchEvent(new Event('auth:unauthorized'));
+};
 
 const defaultErrorHandler = async ({ data, statusCode}) => {
     return {
@@ -39,6 +44,13 @@ const get = async ({
         const error = new Error("Internal Server Error, please contact administrator");
         error.code = jsonData.status;
         error.info = "Something went wrong from server side";
+        throw error;
+    }
+
+    if (jsonData.status === 401) {
+        handleUnauthorized();
+        const error = new Error('Session expired. Please login again.');
+        error.code = 401;
         throw error;
     }
 

@@ -1,4 +1,4 @@
-import { AUTH_KEY } from '@/app/context/AuthContext';
+import { AUTH_KEY } from '@/app/utils/authConstants';
 
 /**
  * Get authentication token from localStorage
@@ -63,6 +63,34 @@ export const isAuthenticated = () => {
   } catch (error) {
     console.error('Error checking authentication:', error);
     return false;
+  }
+};
+
+/**
+ * Check if a JWT token is expired by decoding its payload
+ * @param {string} token - JWT token string
+ * @returns {boolean} - True if expired or invalid
+ */
+export const isTokenExpired = (token) => {
+  try {
+    if (!token) return true;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload.exp) return false; // No exp claim — treat as valid
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true; // Malformed token → treat as expired
+  }
+};
+
+/**
+ * Clear all auth data from localStorage and cookies (used on logout / 401)
+ */
+export const clearAuthData = () => {
+  try {
+    localStorage.removeItem(AUTH_KEY);
+    document.cookie = `${AUTH_KEY}=; path=/; max-age=0`;
+  } catch (error) {
+    console.error('Error clearing auth data:', error);
   }
 };
 
