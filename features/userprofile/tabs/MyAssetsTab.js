@@ -7,6 +7,16 @@ import CustomButton from '@/components/atoms/CustomButton';
 
 const extendLeaseFields = [
   {
+    name: 'leaseType',
+    label: 'Lease Type',
+    type: 'radio',
+    required: true,
+    options: [
+      { label: 'Bond', value: 'BOND' },
+      { label: 'Deposit', value: 'DEPOSIT' },
+    ],
+  },
+  {
     name: 'extendUntil',
     label: 'Extend Until',
     type: 'date',
