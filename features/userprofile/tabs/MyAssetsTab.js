@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
+import CustomButton from '@/components/atoms/CustomButton';
 
 const extendLeaseFields = [
   {
@@ -140,12 +141,12 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                   <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusColor(asset.status)}`}>
                     {asset.status}
                   </span>
-                  <button
+                  <CustomButton
+                    text="Extend Lease"
                     onClick={() => handleExtendLease(asset)}
-                    className="ml-2 px-2 py-1 text-xs font-semibold rounded border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap"
-                  >
-                    Extend Lease
-                  </button>
+                    variant="primary"
+                    size="sm"
+                  />
                 </div>
 
                 {/* Specs */}
