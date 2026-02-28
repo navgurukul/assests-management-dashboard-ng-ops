@@ -160,6 +160,9 @@ export default function FormField({ field, formik, onFieldChange }) {
         const dependsOnField = field.dependsOn?.field;
         const dependentValue = dependsOnField ? formik.values[dependsOnField] : null;
         const isDependentDisabled = dependsOnField && !dependentValue;
+        const additionalParams = typeof field.buildAdditionalParams === 'function'
+          ? field.buildAdditionalParams(formik.values)
+          : field.additionalParams;
         
         return (
           <ApiAutocomplete
@@ -169,7 +172,13 @@ export default function FormField({ field, formik, onFieldChange }) {
             apiUrl={field.apiUrl}
             queryKey={field.queryKey}
             value={formik.values[name] || ''}
-            onChange={(e) => formik.setFieldValue(name, e.target.value)}
+            onChange={(e) => {
+              const selectedValue = e.target.value;
+              formik.setFieldValue(name, selectedValue);
+              if (onFieldChange && typeof onFieldChange === 'function') {
+                onFieldChange(selectedValue, formik);
+              }
+            }}
             onItemSelect={field.companionField ? (item) => formik.setFieldValue(field.companionField, item[field.companionKey] || '') : null}
             onBlur={() => formik.setFieldTouched(name, true)}
             isInvalid={hasError}
@@ -180,6 +189,7 @@ export default function FormField({ field, formik, onFieldChange }) {
             valueKey={field.valueKey || 'id'}
             dependsOn={field.dependsOn}
             dependentValue={dependentValue}
+            additionalParams={additionalParams}
             filterCategory={field.filterCategory}
             dataPath={field.dataPath}
             formatLabel={field.formatLabel}
