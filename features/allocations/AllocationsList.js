@@ -3,6 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import StatusChip from '@/components/atoms/StatusChip';
+import {
+  getAllocationTypeChipColor,
+  getAllocationReasonChipColor,
+  getDeviceModeChipColor,
+  CHIP_CLASSES,
+} from '@/app/utils/statusHelpers';
 import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SummaryCard from '@/components/atoms/SummaryCard';
@@ -102,15 +109,7 @@ export default function AllocationsList() {
       case "assetTag":
         return <span className="font-medium text-gray-800">{cellValue}</span>;
       case "allocationType":
-        const typeColors = {
-          'Campus': 'bg-purple-100 text-purple-800',
-          'User': 'bg-blue-100 text-blue-800',
-        };
-        return (
-          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} colorFn={getAllocationTypeChipColor} />;
       case "userName":
         if (!cellValue || cellValue === 'N/A') {
           return <span className="text-gray-400">Not assigned</span>;
@@ -126,44 +125,19 @@ export default function AllocationsList() {
           </div>
         );
       case "status":
-        const statusColors = {
-          'Active': 'bg-green-100 text-green-800',
-          'Returned': 'bg-gray-100 text-gray-800',
-        };
         const StatusIcon = item.isActive ? CheckCircle : XCircle;
         return (
-          <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${statusColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            <StatusIcon className="w-3 h-3" />
-            {cellValue}
-          </span>
+          <StatusChip value={cellValue} icon={<StatusIcon className="w-3 h-3" />} />
         );
       case "reason":
-        const reasonColors = {
-          'Joiner': 'bg-blue-50 text-blue-700',
-          'Repair': 'bg-red-50 text-red-700',
-          'Replacement': 'bg-orange-50 text-orange-700',
-          'Loaner': 'bg-purple-50 text-purple-700',
-        };
-        return (
-          <span className={`px-2 py-1 rounded text-xs font-medium ${reasonColors[cellValue] || 'bg-gray-50 text-gray-700'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} colorFn={getAllocationReasonChipColor} />;
       case "endDate":
         if (cellValue === 'Active') {
           return <span className="text-green-600 font-medium">{cellValue}</span>;
         }
         return cellValue;
       case "deviceSelectionMode":
-        const modeColors = {
-          'BULK': 'bg-indigo-50 text-indigo-700',
-          'MANUAL': 'bg-teal-50 text-teal-700',
-        };
-        return (
-          <span className={`px-2 py-1 rounded text-xs font-medium ${modeColors[cellValue] || 'bg-gray-50 text-gray-700'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} colorFn={getDeviceModeChipColor} />;
       case "sourceCampus":
       case "destinationCampus":
         if (!cellValue || cellValue === 'N/A') {
@@ -172,9 +146,10 @@ export default function AllocationsList() {
         return <span className="text-gray-700 text-sm">{cellValue}</span>;
       case "isTemporary":
         return (
-          <span className={`px-2 py-1 rounded text-xs font-medium ${cellValue === 'Yes' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-600'}`}>
-            {cellValue}
-          </span>
+          <StatusChip
+            value={cellValue}
+            colorFn={() => cellValue === 'Yes' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-600'}
+          />
         );
       case "expectedReturnDate":
         if (!cellValue || cellValue === 'N/A') {

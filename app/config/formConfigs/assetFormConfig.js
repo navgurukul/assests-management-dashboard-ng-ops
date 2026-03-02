@@ -163,12 +163,6 @@ export const assetFormFields = [
     type: 'checkbox',
     required: false,
   },
-  {
-    name: 'bag',
-    label: 'Bag',
-    type: 'checkbox',
-    required: false,
-  },
 ];
 
 export const assetValidationSchema = Yup.object().shape({
@@ -214,7 +208,6 @@ export const assetValidationSchema = Yup.object().shape({
     .max(9999999, 'Cost cannot exceed 99,99,999'),
   notes: Yup.string(),
   charger: Yup.boolean(),
-  bag: Yup.boolean(),
 });
 
 export const assetInitialValues = {
@@ -236,5 +229,4 @@ export const assetInitialValues = {
   cost: '',
   notes: '',
   charger: false,
-  bag: false,
 };

@@ -13,6 +13,7 @@ import SearchInput from '@/components/molecules/SearchInput';
 import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
+import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useQueryClient } from '@tanstack/react-query';
 import post from '@/app/api/post/post';
@@ -480,18 +481,9 @@ export default function ConsignmentsList() {
         );
         
       case 'status':
-        const normalizedStatus = cellValue?.toLowerCase().replace(/\s+/g, '_');
-        const statusColors = {
-          'draft': 'bg-gray-100 text-gray-800 border border-gray-300',
-          'dispatched': 'bg-amber-100 text-amber-800 border border-amber-300',
-          'delivered': 'bg-green-100 text-green-800 border border-green-300',
-        };
-        
         return (
           <div className="relative">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center ${statusColors[normalizedStatus] || 'bg-gray-100 text-gray-800 border border-gray-300'}`}>
-              {cellValue}
-            </span>
+            <StatusChip value={cellValue} />
           </div>
         );
         
