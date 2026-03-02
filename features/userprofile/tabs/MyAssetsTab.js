@@ -4,6 +4,8 @@ import { useState, useMemo } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
+import StatusChip from '@/components/atoms/StatusChip';
+import { getConditionChipColor } from '@/app/utils/statusHelpers';
 
 const returnAssetFields = [
   {
@@ -94,34 +96,6 @@ const extendLeaseFields = [
     placeholder: 'Reason for extending lease...',
   },
 ];
-
-const getStatusColor = (status) => {
-  switch (status?.toUpperCase()) {
-    case 'ALLOCATED':
-      return 'bg-green-100 text-green-800';
-    case 'AVAILABLE':
-      return 'bg-blue-100 text-blue-800';
-    case 'IN_REPAIR':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'RETIRED':
-      return 'bg-gray-100 text-gray-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getConditionColor = (condition) => {
-  switch (condition?.toUpperCase()) {
-    case 'WORKING':
-      return 'bg-green-100 text-green-800';
-    case 'NEEDS_REPAIR':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'DAMAGED':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
@@ -241,9 +215,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                       <p className="text-xs text-gray-500">{asset.assetTag}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusColor(asset.status)}`}>
-                    {asset.status}
-                  </span>
+                  <StatusChip value={asset.status} />
                   <div className="flex items-center gap-2">
                     <CustomButton
                       text="Return Asset"
