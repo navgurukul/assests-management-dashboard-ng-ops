@@ -11,37 +11,8 @@ import { useAuth } from '@/app/context/AuthContext';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import StateHandler from '@/components/atoms/StateHandler';
-
-
-
-const getStatusColor = (status) => {
-  switch (status?.toUpperCase()) {
-    case 'PENDING':
-    case 'WAITING_FOR_APPROVAL':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'APPROVED':
-      return 'bg-green-100 text-green-800';
-    case 'REJECTED':
-      return 'bg-red-100 text-red-800';
-    case 'OPEN':
-      return 'bg-orange-100 text-orange-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getPriorityColor = (priority) => {
-  switch (priority?.toUpperCase()) {
-    case 'HIGH':
-      return 'bg-red-100 text-red-800';
-    case 'MEDIUM':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'LOW':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
+import StatusChip from '@/components/atoms/StatusChip';
+import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 
 // Define columns configuration
 const columns = [
@@ -170,16 +141,12 @@ export default function TicketApprovalTab() {
       
       case 'priority':
         return (
-          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityColor(ticket.priority)}`}>
-            {ticket.priority}
-          </span>
+          <StatusChip value={ticket.priority} colorFn={getPriorityChipColor} />
         );
       
       case 'status':
         return (
-          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getStatusColor(ticket.status)}`}>
-            {ticket.status}
-          </span>
+          <StatusChip value={ticket.status} />
         );
       
       case 'requester':
