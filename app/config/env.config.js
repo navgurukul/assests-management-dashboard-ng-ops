@@ -78,6 +78,12 @@ const config = {
     user: {
       me: '/user/me',
     },
+
+    // Users
+    users: {
+      list: '/users',
+      details: (id) => `/users/${id}`,
+    },
   },
   
   // Helper function to get full API URL
