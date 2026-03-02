@@ -260,7 +260,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-500">Condition:</span>
-                    <span className={`px-2 py-0.5 font-semibold rounded ${getConditionColor(asset.condition)}`}>
+                    <span className={`px-2 py-0.5 font-semibold rounded ${getConditionChipColor(asset.condition)}`}>
                       {asset.condition}
                     </span>
                   </div>
