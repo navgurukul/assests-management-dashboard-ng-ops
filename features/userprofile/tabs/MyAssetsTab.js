@@ -1,9 +1,72 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
+
+const returnAssetFields = [
+  {
+    name: 'assetId',
+    label: 'Asset ID',
+    type: 'text',
+    required: false,
+    disabled: true,
+    placeholder: '',
+  },
+  {
+    name: 'assetSource',
+    label: 'Asset Source (Campus)',
+    type: 'text',
+    required: false,
+    disabled: true,
+    placeholder: '',
+  },
+  {
+    name: 'campusItCoordinator',
+    label: 'Campus IT Co-ordinator Email',
+    type: 'email',
+    required: true,
+    placeholder: 'IT coordinator email',
+  },
+  {
+    name: 'exactAddress',
+    label: 'Exact Address',
+    type: 'textarea',
+    required: true,
+    placeholder: 'Enter exact pickup / drop address...',
+  },
+  {
+    name: 'vendorName',
+    label: 'Vendor Name',
+    type: 'text',
+    required: true,
+    placeholder: 'e.g. Bluedart',
+  },
+  {
+    name: 'vendorReceipt',
+    label: 'Vendor Receipt (Photo / PDF)',
+    type: 'file',
+    required: false,
+    accept: 'image/*,application/pdf',
+    multiple: true,
+    hint: 'Accepted formats: JPG, PNG, PDF',
+  },
+  {
+    name: 'managerEmail',
+    label: 'Manager Email (Loop In)',
+    type: 'email',
+    required: true,
+    placeholder: 'Manager email to loop in',
+  },
+  {
+    name: 'expectedDeliveryDate',
+    label: 'Expected Delivery Date',
+    type: 'date',
+    required: true,
+    placeholder: 'Select date',
+  },
+];
 
 const extendLeaseFields = [
   {
@@ -62,12 +125,42 @@ const getConditionColor = (condition) => {
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
+  const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const computedReturnFields = useMemo(
+    () =>
+      returnAssetFields.map((f) => {
+        if (f.name === 'assetId')
+          return { ...f, defaultValue: selectedAsset?.assetTag || selectedAsset?.id || '' };
+        if (f.name === 'assetSource')
+          return { ...f, defaultValue: selectedAsset?.campus?.name || selectedAsset?.campusName || '' };
+        return f;
+      }),
+    [selectedAsset]
+  );
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
     setExtendModalOpen(true);
+  };
+
+  const handleReturnAsset = (asset) => {
+    setSelectedAsset(asset);
+    setReturnModalOpen(true);
+  };
+
+  const handleReturnSubmit = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      // TODO: wire up to API
+      console.log('Return asset payload:', { assetId: selectedAsset?.id, ...formData });
+    } finally {
+      setIsSubmitting(false);
+      setReturnModalOpen(false);
+      setSelectedAsset(null);
+    }
   };
 
   const handleExtendSubmit = async (formData) => {
@@ -151,12 +244,20 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                   <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusColor(asset.status)}`}>
                     {asset.status}
                   </span>
-                  <CustomButton
-                    text="Extend Lease"
-                    onClick={() => handleExtendLease(asset)}
-                    variant="primary"
-                    size="sm"
-                  />
+                  <div className="flex items-center gap-2">
+                    <CustomButton
+                      text="Return Asset"
+                      onClick={() => handleReturnAsset(asset)}
+                      variant="danger"
+                      size="sm"
+                    />
+                    <CustomButton
+                      text="Extend Lease"
+                      onClick={() => handleExtendLease(asset)}
+                      variant="primary"
+                      size="sm"
+                    />
+                  </div>
                 </div>
 
                 {/* Specs */}
@@ -244,6 +345,17 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         onSubmit={handleExtendSubmit}
         isSubmitting={isSubmitting}
         size="small"
+      />
+
+      <FormModal
+        isOpen={returnModalOpen}
+        onClose={() => { setReturnModalOpen(false); setSelectedAsset(null); }}
+        componentName=""
+        actionType="Return Asset"
+        fields={computedReturnFields}
+        onSubmit={handleReturnSubmit}
+        isSubmitting={isSubmitting}
+        size="medium"
       />
     </div>
   );

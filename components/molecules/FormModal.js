@@ -426,6 +426,7 @@ export default function FormModal({
 
       case 'text':
       case 'date':
+      case 'email':
         return (
           <input
             type={field.type}
@@ -437,7 +438,28 @@ export default function FormModal({
             placeholder={field.placeholder}
             className={baseInputClasses}
             disabled={field.disabled || isSubmitting}
+            readOnly={field.readOnly}
           />
+        );
+
+      case 'file':
+        return (
+          <div className="space-y-2">
+            <input
+              type="file"
+              id={field.name}
+              name={field.name}
+              accept={field.accept || 'image/*,application/pdf'}
+              multiple={field.multiple || false}
+              onChange={(e) => handleChange(field.name, field.multiple ? e.target.files : e.target.files[0])}
+              onBlur={() => handleBlur(field.name)}
+              className="block w-full text-sm text-gray-700 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+              disabled={field.disabled || isSubmitting}
+            />
+            {field.hint && (
+              <p className="text-xs text-gray-500">{field.hint}</p>
+            )}
+          </div>
         );
 
       case 'select':
