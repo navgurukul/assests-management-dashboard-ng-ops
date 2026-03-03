@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertTriangle, Calendar, Package, Wrench, Clock, FileText } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Calendar, Package, Wrench, Clock, FileText } from 'lucide-react';
+import CustomButton from '@/components/atoms/CustomButton';
 import ComponentTimeline from './components/ComponentTimeline';
 import { 
   CurrentlyInstalledCard 
@@ -110,13 +111,15 @@ export default function ComponentDetails({ componentId, componentData, onBack })
   return (
     <div className="h-full overflow-y-auto bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="mb-3 text-xs text-gray-600">
-          <span className="hover:text-blue-600 cursor-pointer" onClick={onBack}>Components</span>
-          <span className="mx-2">›</span>
-          <span>Component Details</span>
-          <span className="mx-2">›</span>
-          <span className="font-medium text-gray-900">{componentDetails.componentTag}</span>
+        {/* Back Button */}
+        <div className="mb-4">
+          <CustomButton
+            text="Back to Components"
+            icon={ArrowLeft}
+            onClick={onBack}
+            variant="secondary"
+            size="sm"
+          />
         </div>
 
         {/* Header with alerts */}
