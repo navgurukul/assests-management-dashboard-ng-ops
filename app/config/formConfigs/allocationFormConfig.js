@@ -47,7 +47,6 @@ export const allocationFormFields = [
     type: 'api-autocomplete',
     placeholder: 'Search and select asset',
     apiUrl: baseUrl + '/assets',
-    queryKey: ['assets'],
     labelKey: 'assetTag',
     valueKey: 'id',
     required: true,
