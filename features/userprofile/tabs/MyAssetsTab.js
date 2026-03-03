@@ -6,6 +6,8 @@ import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import usePost from '@/app/hooks/query/usePost';
+import { toast } from '@/app/utils/toast';
 
 const returnAssetFields = [
   {
@@ -101,7 +103,29 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedAllocationId, setSelectedAllocationId] = useState(null);
+
+  // React Query mutation — isPending replaces manual isSubmitting state
+  const { mutateAsync: extendLease, isPending: isExtending } = usePost();
+
+  // Extract assets and build allocationMap early so handlers can access it
+  const assets = userAssets?.data?.assets || userAssets?.assets || [];
+  const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
+
+  const allocationMap = useMemo(() => {
+    const map = {};
+    allocations.forEach((allocation) => {
+      allocation.assetIds?.forEach((assetId) => {
+        map[assetId] = {
+          id: allocation.id,
+          createdAt: allocation.createdAt,
+          allocationType: allocation.allocationType,
+          allocationReason: allocation.allocationReason,
+        };
+      });
+    });
+    return map;
+  }, [allocations]);
 
   const computedReturnFields = useMemo(
     () =>
@@ -117,6 +141,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
+    setSelectedAllocationId(allocationMap[asset.id]?.id || null);
     setExtendModalOpen(true);
   };
 
@@ -138,32 +163,31 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   };
 
   const handleExtendSubmit = async (formData) => {
-    setIsSubmitting(true);
+    if (!selectedAllocationId) {
+      toast.error('Could not determine allocation for this asset.');
+      return;
+    }
+
     try {
-      // TODO: wire up to API
-      console.log('Extend lease payload:', { assetId: selectedAsset?.id, ...formData });
-    } finally {
-      setIsSubmitting(false);
+      await extendLease({
+        endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
+        body: {
+          leaseType: formData.leaseType,
+          extendUntil: formData.extendUntil,
+          description: formData.description || undefined,
+        },
+      });
+
+      toast.success('Lease extension request submitted successfully.');
       setExtendModalOpen(false);
       setSelectedAsset(null);
+      setSelectedAllocationId(null);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to submit lease extension request.');
     }
   };
 
-  // Extract assets from the API response structure
-  const assets = userAssets?.data?.assets || userAssets?.assets || [];
-  const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
-
-  // Create a map of allocation dates for quick lookup
-  const allocationMap = {};
-  allocations.forEach(allocation => {
-    allocation.assetIds?.forEach(assetId => {
-      allocationMap[assetId] = {
-        createdAt: allocation.createdAt,
-        allocationType: allocation.allocationType,
-        allocationReason: allocation.allocationReason,
-      };
-    });
-  });
+  // allocationMap and assets are computed via useMemo above
 
   if (isLoadingAssets) {
     return (
@@ -310,12 +334,12 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
       <FormModal
         isOpen={extendModalOpen}
-        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); }}
+        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); }}
         componentName=""
         actionType="Extend Lease"
         fields={extendLeaseFields}
         onSubmit={handleExtendSubmit}
-        isSubmitting={isSubmitting}
+        isSubmitting={isExtending}
         size="small"
       />
 
@@ -326,7 +350,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Return Asset"
         fields={computedReturnFields}
         onSubmit={handleReturnSubmit}
-        isSubmitting={isSubmitting}
+        isSubmitting={false}
         size="medium"
       />
     </div>
