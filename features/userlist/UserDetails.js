@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import FormModal from '@/components/molecules/FormModal';
+import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
@@ -174,12 +175,12 @@ export default function UserDetails({ userId, userData, onBack }) {
         showTimeline={false}
         onBack={onBack}
         headerActions={
-          <button
+          <CustomButton
+            text="Change Role"
             onClick={() => setRoleModalOpen(true)}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Change Role
-          </button>
+            variant="primary"
+            size="sm"
+          />
         }
       />
 
