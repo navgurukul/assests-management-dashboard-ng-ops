@@ -1,9 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
+import FormModal from '@/components/molecules/FormModal';
+import CustomButton from '@/components/atoms/CustomButton';
+import post from '@/app/api/post/post';
+import { toast } from '@/app/utils/toast';
+import config from '@/app/config/env.config';
+
+const ROLE_OPTIONS = [
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'EMPLOYEE', label: 'Employee' },
+  { value: 'RESIDENTIAL_TEAM', label: 'Residential Team' },
+  { value: 'STUDENT', label: 'Student' },
+];
 
 export default function UserDetails({ userId, userData, onBack }) {
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
+  const [roleChanging, setRoleChanging] = useState(false);
+
+  const handleChangeRole = async (formData) => {
+    setRoleChanging(true);
+    try {
+      await post({
+        url: config.getApiUrl(config.endpoints.users.changeRole(userId)),
+        method: 'PATCH',
+        data: { role: formData.role },
+      });
+      toast.success('Role updated successfully');
+      setRoleModalOpen(false);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to update role');
+    } finally {
+      setRoleChanging(false);
+    }
+  };
+
   if (!userData) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -133,14 +165,44 @@ export default function UserDetails({ userId, userData, onBack }) {
   ];
 
   return (
-    <DetailsPage
-      title={`USER: ${fullName}`}
-      subtitle={`Role: ${formatRole(userData.role)} | Status: ${userData.isActive ? 'Active' : 'Inactive'}`}
-      subtitleColor={getRoleColor(userData.role)}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      showTimeline={false}
-      onBack={onBack}
-    />
+    <>
+      <DetailsPage
+        title={`USER: ${fullName}`}
+        subtitle={`Role: ${formatRole(userData.role)} | Status: ${userData.isActive ? 'Active' : 'Inactive'}`}
+        subtitleColor={getRoleColor(userData.role)}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        showTimeline={false}
+        onBack={onBack}
+        headerActions={
+          <CustomButton
+            text="Change Role"
+            onClick={() => setRoleModalOpen(true)}
+            variant="primary"
+            size="sm"
+          />
+        }
+      />
+
+      <FormModal
+        isOpen={roleModalOpen}
+        onClose={() => setRoleModalOpen(false)}
+        actionType="Change Role"
+        helpText={`Current role: ${formatRole(userData.role)}`}
+        fields={[
+          {
+            name: 'role',
+            label: 'New Role',
+            type: 'select',
+            required: true,
+            placeholder: 'Select a role',
+            options: ROLE_OPTIONS,
+          },
+        ]}
+        onSubmit={handleChangeRole}
+        isSubmitting={roleChanging}
+        size="small"
+      />
+    </>
   );
 }

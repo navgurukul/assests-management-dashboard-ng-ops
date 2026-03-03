@@ -24,7 +24,7 @@ export default function UserDetailsPage() {
   }, []);
 
   return (
-    <div className="p-6 overflow-y-auto h-full">
+    <div className="overflow-y-auto h-full">
       <UserDetails
         userId={userData?.id}
         userData={userData}
