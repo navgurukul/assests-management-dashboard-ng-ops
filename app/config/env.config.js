@@ -83,6 +83,7 @@ const config = {
     users: {
       list: '/users',
       details: (id) => `/users/${id}`,
+      changeRole: (id) => `/users/${id}/role`,
     },
   },
   
