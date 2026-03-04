@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle } from 'lucide-react';
+import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
+import ActionMenu from '@/components/molecules/ActionMenu';
 import { inTransitColumns, renderInTransitCell } from '@/features/consignments/InTransitReturns';
 import { inTransitReturnsDummyData } from '@/dummyJson/dummyJson';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -29,6 +30,7 @@ import {
   createConsignmentFields,
   readyToDispatchFields,
   courierProviders,
+  getAcceptReturnFields,
 } from '@/app/config/formConfigs/consignmentFormConfig';
 import { toast } from '@/app/utils/toast';
 
@@ -68,6 +70,14 @@ export default function ConsignmentsList() {
   // In-transit returns modal state
   const [showInTransit, setShowInTransit] = useState(false);
   const [inTransitSearch, setInTransitSearch] = useState('');
+  
+  // In-transit action menu state
+  const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
+
+  // Accept return modal state
+  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+  const [currentInTransitItem, setCurrentInTransitItem] = useState(null);
+  const [isAcceptSubmitting, setIsAcceptSubmitting] = useState(false);
 
   // Dynamic form fields state for create modal
   const [createFormFields, setCreateFormFields] = useState(createConsignmentFields);
@@ -444,6 +454,83 @@ export default function ConsignmentsList() {
     }
   };
 
+  // Accept return form fields (built dynamically so campusOptions are available)
+  const acceptReturnFields = React.useMemo(
+    () => getAcceptReturnFields(campusOptions),
+    [campusOptions]
+  );
+
+  // Handle accept return form submit
+  const handleAcceptSubmit = async (formData) => {
+    setIsAcceptSubmitting(true);
+    const loadingToastId = toast.loading('Processing acceptance...');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.dismiss(loadingToastId);
+      toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
+      setIsAcceptModalOpen(false);
+      setCurrentInTransitItem(null);
+    } catch (error) {
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to accept return');
+    } finally {
+      setIsAcceptSubmitting(false);
+    }
+  };
+
+  // In-transit action handlers
+  const handleInTransitAction = React.useCallback((action, item) => {
+    setOpenInTransitMenuId(null);
+    if (action === 'Accepted') {
+      setCurrentInTransitItem(item);
+      setIsAcceptModalOpen(true);
+    } else {
+      toast.success(`Marked as ${action}: ${item.assetTag}`);
+    }
+  }, []);
+
+  // Render cell for in-transit table (with actions column)
+  const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
+    if (columnKey === 'actions') {
+      const menuOptions = [
+        {
+          label: 'Accepted',
+          icon: CheckCircle,
+          iconClassName: 'text-green-600',
+          onClick: () => handleInTransitAction('Accepted', item),
+        },
+        {
+          label: 'Rejected',
+          icon: XCircle,
+          iconClassName: 'text-red-500',
+          onClick: () => handleInTransitAction('Rejected', item),
+        },
+      ];
+
+      return (
+        <div className="relative flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenInTransitMenuId(openInTransitMenuId === item.id ? null : item.id);
+            }}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Actions menu"
+          >
+            <MoreVertical className="h-5 w-5 text-gray-600" />
+          </button>
+          {openInTransitMenuId === item.id && (
+            <ActionMenu
+              menuOptions={menuOptions}
+              onClose={() => setOpenInTransitMenuId(null)}
+            />
+          )}
+        </div>
+      );
+    }
+    return renderInTransitCell(item, columnKey);
+  }, [openInTransitMenuId, handleInTransitAction]);
+
   // Show loading only on initial load
   const showLoading = isLoading && !data;
 
@@ -562,11 +649,11 @@ export default function ConsignmentsList() {
       )}
 
       <TableWrapper
-        key={showInTransit ? 'transit' : `consignments-${openStatusDropdownId || 'none'}`}
+        key={showInTransit ? `transit-${openInTransitMenuId || 'none'}` : `consignments-${openStatusDropdownId || 'none'}`}
         data={showInTransit ? filteredInTransitData : tableData}
         columns={showInTransit ? inTransitColumns : visibleColumns}
         title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
-        renderCell={showInTransit ? renderInTransitCell : renderCell}
+        renderCell={showInTransit ? renderInTransitCellWithActions : renderCell}
         onRowClick={showInTransit ? undefined : handleRowClick}
         itemsPerPage={showInTransit ? 10 : pageSize}
         showPagination={true}
@@ -635,6 +722,22 @@ export default function ConsignmentsList() {
         onPageSizeChange={showInTransit ? undefined : handlePageSizeChange}
       />
       
+      {/* Accept Return Modal */}
+      <FormModal
+        isOpen={isAcceptModalOpen}
+        onClose={() => {
+          setIsAcceptModalOpen(false);
+          setCurrentInTransitItem(null);
+        }}
+        actionType="Accept Return"
+        componentName={currentInTransitItem?.assetTag || ''}
+        fields={acceptReturnFields}
+        onSubmit={handleAcceptSubmit}
+        size="medium"
+        isSubmitting={isAcceptSubmitting}
+        helpText={`Asset: ${currentInTransitItem?.assetTag || ''} — ${currentInTransitItem?.model || ''}`}
+      />
+
       {/* Create Consignment Modal */}
       <FormModal
         isOpen={isCreateModalOpen}
