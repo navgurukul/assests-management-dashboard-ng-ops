@@ -678,6 +678,13 @@ export default function ConsignmentsList() {
         }
         filterComponent={
           <>
+          <CustomButton
+              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
+              icon={ArrowLeftCircle}
+              onClick={() => setShowInTransit(!showInTransit)}
+              variant={showInTransit ? 'secondary' : 'warning'}
+              size="md"
+            />
             {!showInTransit && (
               <FilterDropdown
                 statusOptions={statusOptions}
@@ -685,13 +692,7 @@ export default function ConsignmentsList() {
                 onFilterChange={handleFilterChange}
               />
             )}
-            <CustomButton
-              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
-              icon={ArrowLeftCircle}
-              onClick={() => setShowInTransit(!showInTransit)}
-              variant={showInTransit ? 'secondary' : 'warning'}
-              size="md"
-            />
+            
           </>
         }
         columnSelectorComponent={

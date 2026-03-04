@@ -5,8 +5,8 @@ export const menuItems = [
   { name: 'Consignments', icon: 'Archive', path: '/consignments' },
   { name: 'Assets', icon: 'Package', path: '/assets' },
   { name: 'Components', icon: 'Component', path: '/components' },
-  { name: 'Reports', icon: 'FileText', path: '/reports' },
   { name: 'User List', icon: 'Users', path: '/userlist' },
+  { name: 'Reports', icon: 'FileText', path: '/reports' },
 ];
 
 export const userListData = [
