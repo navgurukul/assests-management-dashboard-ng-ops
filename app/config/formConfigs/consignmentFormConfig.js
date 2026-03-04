@@ -109,6 +109,29 @@ export const readyToDispatchInitialValues = {
 };
 
 // ============================================
+// STEP 3: Accept Return
+// ============================================
+
+export const getAcceptReturnFields = (campusOptions = []) => [
+  {
+    name: 'storedIn',
+    label: 'Stored In',
+    type: 'select',
+    placeholder: 'Select storage location',
+    required: true,
+    options: campusOptions,
+  },
+  {
+    name: 'comment',
+    label: 'Comment',
+    type: 'textarea',
+    placeholder: 'Enter any comments...',
+    rows: 3,
+    required: false,
+  },
+];
+
+// ============================================
 // Legacy/Full Form Config (Kept for reference)
 // ============================================
 

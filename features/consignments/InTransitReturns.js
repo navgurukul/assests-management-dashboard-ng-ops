@@ -7,6 +7,7 @@ export const inTransitColumns = [
   { key: 'userName',        label: 'Returned By'       },
   { key: 'trackingId',      label: 'Tracking ID'       },
   { key: 'estimatedArrival',label: 'Est. Arrival Date' },
+  { key: 'actions',         label: 'Action'            },
 ];
 
 export function renderInTransitCell(item, columnKey) {
