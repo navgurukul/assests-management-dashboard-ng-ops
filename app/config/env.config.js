@@ -33,6 +33,7 @@ const config = {
       delete: (id) => `/consignments/${id}`,
       details: (id) => `/consignments/${id}`,
       updateStatus: (id) => `/consignments/${id}/status`,
+      dispatch: (id) => `/consignments/${id}/dispatch`,
     },
     
     // Documents
