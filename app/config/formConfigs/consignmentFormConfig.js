@@ -90,9 +90,13 @@ export const readyToDispatchFields = [
   },
   {
     name: 'trackingLink',
-    label: 'Link (optional)',
-    type: 'text',
-    placeholder: 'Enter tracking link (optional)',
+    label: 'Tracking Link',
+    type: 'select',
+    placeholder: 'Select tracking link',
+    options: courierProviders.map(courier => ({
+      value: courier.trackingUrlPattern.replace('{trackingId}', ''),
+      label: courier.name,
+    })),
     required: false,
   },
 ];
@@ -105,7 +109,7 @@ export const readyToDispatchValidation = Yup.object().shape({
 export const readyToDispatchInitialValues = {
   courierServiceId: '',
   trackingId: '',
-  trackingLink: '',
+  trackingLink: 'https://www.shiprocket.in/shipment-tracking/',
 };
 
 // ============================================
