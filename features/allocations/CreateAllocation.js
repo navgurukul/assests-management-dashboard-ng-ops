@@ -126,6 +126,10 @@ export default function CreateAllocation() {
 
   // Field callbacks for form field changes
   const fieldCallbacks = {
+    clearAssetSelections: (value, formik) => {
+      formik.setFieldValue('assetTypeId', '');
+      formik.setFieldValue('assetId', '');
+    },
     clearAssetId: (value, formik) => {
       // Clear assetId when assetType changes
       formik.setFieldValue('assetId', '');

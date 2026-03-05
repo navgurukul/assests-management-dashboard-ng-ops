@@ -25,7 +25,7 @@ export const allocationFormFields = [
     valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
-    onFieldChange: 'clearAssetId',
+    onFieldChange: 'clearAssetSelections',
   },
   {
     name: 'assetTypeId',
@@ -39,6 +39,10 @@ export const allocationFormFields = [
     filterCategory: 'DEVICE',
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
+    dependsOn: {
+      field: 'campusId',
+      paramKey: 'campusId',
+    },
     onFieldChange: 'clearAssetId',
   },
   {
