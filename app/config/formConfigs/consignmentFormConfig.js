@@ -91,8 +91,12 @@ export const readyToDispatchFields = [
   {
     name: 'trackingLink',
     label: 'Link (optional)',
-    type: 'text',
-    placeholder: 'Enter tracking link (optional)',
+    type: 'select',
+    placeholder: 'Select tracking link (optional)',
+    options: courierProviders.map(courier => ({
+      value: courier.trackingUrlPattern,
+      label: `${courier.name} Tracking Link`,
+    })),
     required: false,
   },
 ];
