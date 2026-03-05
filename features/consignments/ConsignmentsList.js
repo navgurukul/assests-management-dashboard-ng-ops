@@ -116,7 +116,7 @@ export default function ConsignmentsList() {
   };
   
   // Fetch consignments data from API with pagination, filters, and search
-  const { data, isLoading, isError, error } = useFetch({
+  const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
@@ -415,6 +415,9 @@ export default function ConsignmentsList() {
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
+
+      // Refresh list so updated status is reflected in the table immediately
+      await refetchConsignments();
       
       setIsDispatchModalOpen(false);
       setCurrentConsignment(null);
