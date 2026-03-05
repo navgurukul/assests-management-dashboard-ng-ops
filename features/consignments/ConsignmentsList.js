@@ -13,7 +13,7 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useQueryClient } from '@tanstack/react-query';
-import patch from '@/app/api/patch/patch';
+import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -122,6 +122,12 @@ export default function ConsignmentsList() {
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
+  
+  // Fetch courier services from API
+  const { data: courierData } = useFetch({
+    url: '/courier-services',
+    queryKey: ['courier-services'],
+  });
 
   // Fetch campuses from API
   const { data: campusData } = useFetch({
@@ -154,13 +160,15 @@ export default function ConsignmentsList() {
     setCurrentPage(1);
   };
   
-  // Use static courier providers for filter options
+  // Transform courier data from API to filter options
   const courierOptions = React.useMemo(() => {
-    return courierProviders.map((courier) => ({
+    if (!courierData || !courierData.data) return [];
+    
+    return courierData.data.map((courier) => ({
       value: courier.id,
       label: courier.name,
     }));
-  }, []);
+  }, [courierData]);
 
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -390,7 +398,41 @@ export default function ConsignmentsList() {
   
   // Handle dispatch form data change to auto-populate tracking link
   const handleDispatchFormDataChange = (formData, field) => {
-    return { ...formData };
+    let updatedFormData = { ...formData };
+    
+    // When courier service changes, auto-populate tracking link template
+    if (field.name === 'courierServiceId' && formData.courierServiceId) {
+      const selectedCourier = courierProviders.find(
+        courier => courier.id === formData.courierServiceId
+      );
+      
+      if (selectedCourier && selectedCourier.trackingUrlPattern) {
+        // Replace {trackingId} with actual tracking ID if available
+        let trackingLink = selectedCourier.trackingUrlPattern;
+        if (formData.trackingId) {
+          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
+        }
+        updatedFormData.trackingLink = trackingLink;
+      }
+    }
+    
+    // When tracking ID changes, update the link if courier is selected
+    if (field.name === 'trackingId' && formData.courierServiceId) {
+      const selectedCourier = courierProviders.find(
+        courier => courier.id === formData.courierServiceId
+      );
+      
+      if (selectedCourier && selectedCourier.trackingUrlPattern) {
+        // Replace {trackingId} with actual tracking ID
+        let trackingLink = selectedCourier.trackingUrlPattern;
+        if (formData.trackingId) {
+          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
+        }
+        updatedFormData.trackingLink = trackingLink;
+      }
+    }
+    
+    return updatedFormData;
   };
   
   const handleDispatchConsignment = async (formData) => {
@@ -398,27 +440,16 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Dispatching consignment...');
     
     try {
-      const selectedCourier = courierProviders.find(
-        (courier) => String(courier.id) === String(formData.courierServiceId)
-      );
-
-      const selectedTrackingLink = formData.trackingLink?.trim();
-      const resolvedTrackingLink = selectedTrackingLink
-        ? selectedTrackingLink.replace('{trackingId}', formData.trackingId)
-        : 'https://www.shiprocket.in/shipment-tracking/';
-
       const payload = {
-        courierPartnerName: selectedCourier?.name || '',
+        courierServiceId: formData.courierServiceId,
         trackingId: formData.trackingId,
-        link: resolvedTrackingLink,
+        trackingLink: formData.trackingLink || null,
+        status: 'dispatched',
       };
 
       
       // Make API call to update consignment status to dispatched
-      await patch({
-        url: config.getApiUrl(`/consignments/${currentConsignment.id}/dispatch`),
-        data: payload,
-      });
+      const response = await post(`/consignments/${currentConsignment.id}/dispatch`, payload);
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
