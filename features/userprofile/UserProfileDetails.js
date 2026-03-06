@@ -13,7 +13,7 @@ import { toast } from '@/app/utils/toast';
 const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
   { id: 'myassets', label: 'My Assets', icon: Package, Component: MyAssetsTab },
-  { id: 'ticketstatus', label: 'Ticket Status', icon: Ticket, Component: TicketStatusTab },
+  { id: 'ticketstatus', label: 'My Ticket Status', icon: Ticket, Component: TicketStatusTab },
   { id: 'ticketforapproval', label: 'Ticket for Approval', icon: Ticket, Component: TicketApprovalTab },
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
 ];
