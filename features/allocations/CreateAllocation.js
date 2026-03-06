@@ -97,10 +97,6 @@ export default function CreateAllocation() {
         allocationData
       );
 
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      
       // Show success toast
       const successMessage = values.allocationType === 'CAMPUS' 
         ? `Campus allocation created successfully! ${values.campusAssets.length} asset(s) allocated.`
@@ -116,6 +112,7 @@ export default function CreateAllocation() {
       // Show error toast
       toast.error(error?.message || 'Failed to create allocation. Please try again.');
     } finally {
+      toast.dismiss(loadingToastId);
       setIsSubmitting(false);
     }
   };

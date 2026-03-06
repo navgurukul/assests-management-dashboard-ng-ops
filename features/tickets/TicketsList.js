@@ -13,6 +13,8 @@ import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
+import StatusChip from '@/components/atoms/StatusChip';
+import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 import { ticketDetailsData, ticketsSummaryCards } from '@/dummyJson/dummyJson';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -339,33 +341,9 @@ export default function TicketsList() {
         const deviceTag = details?.deviceSummary?.asset || cellValue;
         return <span className="text-gray-700">{deviceTag}</span>;
       case "status":
-        const statusColors = {
-          'OPEN': 'bg-green-100 text-green-800',
-          'ALLOCATED': 'bg-blue-100 text-blue-800',
-          'IN_PROGRESS': 'bg-cyan-100 text-cyan-800',
-          'PENDING_APPROVAL': 'bg-yellow-100 text-yellow-800',
-          'OVERDUE': 'bg-red-100 text-red-800',
-          'RESOLVED': 'bg-purple-100 text-purple-800',
-          'CLOSED': 'bg-gray-100 text-gray-800',
-          'ESCALATED': 'bg-orange-100 text-orange-800',
-        };
-        return (
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} />;
       case "priority":
-        const priorityColors = {
-          'LOW': 'bg-green-100 text-green-800',
-          'MEDIUM': 'bg-yellow-100 text-yellow-800',
-          'HIGH': 'bg-orange-100 text-orange-800',
-          'CRITICAL': 'bg-red-100 text-red-800',
-        };
-        return (
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${priorityColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} colorFn={getPriorityChipColor} />;
       case "sla":
         return (
           <SLAIndicator 

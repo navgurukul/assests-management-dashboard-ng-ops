@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
 import useFetch from '@/app/hooks/query/useFetch';
-import { allocationsListData } from '@/dummyJson/dummyJson';
 
 export default function AllocationConsignmentSelector({
   value = {},
@@ -25,7 +24,7 @@ export default function AllocationConsignmentSelector({
 
   // Filter allocations by status
   const allocations = React.useMemo(() => {
-    let sourceData = (allocationsData && allocationsData.data) ? allocationsData.data : allocationsListData;
+    let sourceData = Array.isArray(allocationsData?.data) ? allocationsData.data : [];
     
     // Filter by status if specified
     if (filterStatus) {

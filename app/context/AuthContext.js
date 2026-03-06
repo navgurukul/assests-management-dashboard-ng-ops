@@ -2,10 +2,13 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { isTokenExpired, clearAuthData } from '@/app/utils/authUtils';
+import { AUTH_KEY as _AUTH_KEY } from '@/app/utils/authConstants';
 
 const AuthContext = createContext({});
 
-export const AUTH_KEY = '__AUTH__';
+// Re-export for existing callers
+export const AUTH_KEY = _AUTH_KEY;
 
 export function AuthProvider({ children }) {
   const [authState, setAuthState] = useState({
@@ -21,11 +24,13 @@ export function AuthProvider({ children }) {
       const storedAuth = localStorage.getItem(AUTH_KEY);
       if (storedAuth) {
         const parsedAuth = JSON.parse(storedAuth);
-        setAuthState({
-          loading: false,
-          error: null,
-          data: parsedAuth,
-        });
+        // If the JWT is expired, clear stale data and treat as logged out
+        if (isTokenExpired(parsedAuth?.token)) {
+          clearAuthData();
+          setAuthState({ loading: false, error: null, data: null });
+        } else {
+          setAuthState({ loading: false, error: null, data: parsedAuth });
+        }
       } else {
         setAuthState({
           loading: false,
@@ -41,6 +46,16 @@ export function AuthProvider({ children }) {
         data: null,
       });
     }
+  }, []);
+
+  // Listen for 401 Unauthorized events from API calls
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      saveAuthState(null);
+      router.push('/login');
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
   // Save auth state to localStorage and cookies whenever it changes

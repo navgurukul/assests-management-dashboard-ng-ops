@@ -1,10 +1,88 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
+import CustomButton from '@/components/atoms/CustomButton';
+import StatusChip from '@/components/atoms/StatusChip';
+import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import usePost from '@/app/hooks/query/usePost';
+import { toast } from '@/app/utils/toast';
+
+const returnAssetFields = [
+  {
+    name: 'assetId',
+    label: 'Asset ID',
+    type: 'text',
+    required: false,
+    disabled: true,
+    placeholder: '',
+  },
+  {
+    name: 'assetSource',
+    label: 'Asset Source (Campus)',
+    type: 'text',
+    required: false,
+    disabled: true,
+    placeholder: '',
+  },
+  {
+    name: 'campusItCoordinator',
+    label: 'Campus IT Co-ordinator Email',
+    type: 'email',
+    required: true,
+    placeholder: 'IT coordinator email',
+  },
+  {
+    name: 'exactAddress',
+    label: 'Exact Address',
+    type: 'textarea',
+    required: true,
+    placeholder: 'Enter exact pickup / drop address...',
+  },
+  {
+    name: 'vendorName',
+    label: 'Vendor Name',
+    type: 'text',
+    required: true,
+    placeholder: 'e.g. Bluedart',
+  },
+  {
+    name: 'vendorReceipt',
+    label: 'Vendor Receipt (Photo / PDF)',
+    type: 'file',
+    required: false,
+    accept: 'image/*,application/pdf',
+    multiple: true,
+    hint: 'Accepted formats: JPG, PNG, PDF',
+  },
+  {
+    name: 'managerEmail',
+    label: 'Manager Email (Loop In)',
+    type: 'email',
+    required: true,
+    placeholder: 'Manager email to loop in',
+  },
+  {
+    name: 'expectedDeliveryDate',
+    label: 'Expected Delivery Date',
+    type: 'date',
+    required: true,
+    placeholder: 'Select date',
+  },
+];
 
 const extendLeaseFields = [
+  {
+    name: 'leaseType',
+    label: 'Lease Type',
+    type: 'radio',
+    required: true,
+    options: [
+      { label: 'Bond', value: 'BOND' },
+      { label: 'Deposit', value: 'DEPOSIT' },
+    ],
+  },
   {
     name: 'extendUntil',
     label: 'Extend Until',
@@ -21,71 +99,95 @@ const extendLeaseFields = [
   },
 ];
 
-const getStatusColor = (status) => {
-  switch (status?.toUpperCase()) {
-    case 'ALLOCATED':
-      return 'bg-green-100 text-green-800';
-    case 'AVAILABLE':
-      return 'bg-blue-100 text-blue-800';
-    case 'IN_REPAIR':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'RETIRED':
-      return 'bg-gray-100 text-gray-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getConditionColor = (condition) => {
-  switch (condition?.toUpperCase()) {
-    case 'WORKING':
-      return 'bg-green-100 text-green-800';
-    case 'NEEDS_REPAIR':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'DAMAGED':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
+  const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedAllocationId, setSelectedAllocationId] = useState(null);
+
+  // React Query mutation — isPending replaces manual isSubmitting state
+  const { mutateAsync: extendLease, isPending: isExtending } = usePost();
+
+  // Extract assets and build allocationMap early so handlers can access it
+  const assets = userAssets?.data?.assets || userAssets?.assets || [];
+  const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
+
+  const allocationMap = useMemo(() => {
+    const map = {};
+    allocations.forEach((allocation) => {
+      allocation.assetIds?.forEach((assetId) => {
+        map[assetId] = {
+          id: allocation.id,
+          createdAt: allocation.createdAt,
+          allocationType: allocation.allocationType,
+          allocationReason: allocation.allocationReason,
+        };
+      });
+    });
+    return map;
+  }, [allocations]);
+
+  const computedReturnFields = useMemo(
+    () =>
+      returnAssetFields.map((f) => {
+        if (f.name === 'assetId')
+          return { ...f, defaultValue: selectedAsset?.assetTag || selectedAsset?.id || '' };
+        if (f.name === 'assetSource')
+          return { ...f, defaultValue: selectedAsset?.campus?.name || selectedAsset?.campusName || '' };
+        return f;
+      }),
+    [selectedAsset]
+  );
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
+    setSelectedAllocationId(allocationMap[asset.id]?.id || null);
     setExtendModalOpen(true);
   };
 
-  const handleExtendSubmit = async (formData) => {
+  const handleReturnAsset = (asset) => {
+    setSelectedAsset(asset);
+    setReturnModalOpen(true);
+  };
+
+  const handleReturnSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
       // TODO: wire up to API
-      console.log('Extend lease payload:', { assetId: selectedAsset?.id, ...formData });
+      console.log('Return asset payload:', { assetId: selectedAsset?.id, ...formData });
     } finally {
       setIsSubmitting(false);
-      setExtendModalOpen(false);
+      setReturnModalOpen(false);
       setSelectedAsset(null);
     }
   };
 
-  // Extract assets from the API response structure
-  const assets = userAssets?.data?.assets || userAssets?.assets || [];
-  const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
+  const handleExtendSubmit = async (formData) => {
+    if (!selectedAllocationId) {
+      toast.error('Could not determine allocation for this asset.');
+      return;
+    }
 
-  // Create a map of allocation dates for quick lookup
-  const allocationMap = {};
-  allocations.forEach(allocation => {
-    allocation.assetIds?.forEach(assetId => {
-      allocationMap[assetId] = {
-        createdAt: allocation.createdAt,
-        allocationType: allocation.allocationType,
-        allocationReason: allocation.allocationReason,
-      };
-    });
-  });
+    try {
+      await extendLease({
+        endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
+        body: {
+          leaseType: formData.leaseType,
+          extendUntil: formData.extendUntil,
+          description: formData.description || undefined,
+        },
+      });
+
+      toast.success('Lease extension request submitted successfully.');
+      setExtendModalOpen(false);
+      setSelectedAsset(null);
+      setSelectedAllocationId(null);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to submit lease extension request.');
+    }
+  };
+
+  // allocationMap and assets are computed via useMemo above
 
   if (isLoadingAssets) {
     return (
@@ -137,15 +239,21 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                       <p className="text-xs text-gray-500">{asset.assetTag}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusColor(asset.status)}`}>
-                    {asset.status}
-                  </span>
-                  <button
-                    onClick={() => handleExtendLease(asset)}
-                    className="ml-2 px-2 py-1 text-xs font-semibold rounded border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap"
-                  >
-                    Extend Lease
-                  </button>
+                  <StatusChip value={asset.status} />
+                  <div className="flex items-center gap-2">
+                    <CustomButton
+                      text="Return Asset"
+                      onClick={() => handleReturnAsset(asset)}
+                      variant="danger"
+                      size="sm"
+                    />
+                    <CustomButton
+                      text="Extend Lease"
+                      onClick={() => handleExtendLease(asset)}
+                      variant="primary"
+                      size="sm"
+                    />
+                  </div>
                 </div>
 
                 {/* Specs */}
@@ -176,7 +284,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-500">Condition:</span>
-                    <span className={`px-2 py-0.5 font-semibold rounded ${getConditionColor(asset.condition)}`}>
+                    <span className={`px-2 py-0.5 font-semibold rounded ${getConditionChipColor(asset.condition)}`}>
                       {asset.condition}
                     </span>
                   </div>
@@ -226,13 +334,24 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
       <FormModal
         isOpen={extendModalOpen}
-        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); }}
+        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); }}
         componentName=""
         actionType="Extend Lease"
         fields={extendLeaseFields}
         onSubmit={handleExtendSubmit}
-        isSubmitting={isSubmitting}
+        isSubmitting={isExtending}
         size="small"
+      />
+
+      <FormModal
+        isOpen={returnModalOpen}
+        onClose={() => { setReturnModalOpen(false); setSelectedAsset(null); }}
+        componentName=""
+        actionType="Return Asset"
+        fields={computedReturnFields}
+        onSubmit={handleReturnSubmit}
+        isSubmitting={false}
+        size="medium"
       />
     </div>
   );
