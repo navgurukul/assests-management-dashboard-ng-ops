@@ -88,6 +88,19 @@ export default function UsersList() {
     queryKey: ['users', currentPage, pageSize, filters, debouncedSearch],
   });
 
+  // Fetch allocations with details
+  const { data: allocationsWithDetails } = useFetch({
+    url: '/allocations/with-details',
+    queryKey: ['allocationsWithDetails'],
+  });
+
+  // Console log the allocations-with-details response
+  useEffect(() => {
+    if (allocationsWithDetails !== undefined) {
+      console.log('[allocations/with-details] response:', allocationsWithDetails);
+    }
+  }, [allocationsWithDetails]);
+
   // Fetch campus options from API
   const { data: campusData } = useFetch({
     url: '/campuses',
