@@ -18,8 +18,8 @@ export const assetFormFields = [
     label: 'Brand',
     type: 'api-autocomplete',
     placeholder: 'Search and select brand',
-    apiUrl: baseUrl + '/asset-types',
-    queryKey: ['asset-brands'],
+    apiUrl: '',// No API URL since we are using static items for brands
+    queryKey: [],
     labelKey: 'label',
     valueKey: 'value',
     staticItems: [
@@ -62,8 +62,8 @@ export const assetFormFields = [
     label: 'RAM Size (GB)',
     type: 'api-autocomplete',
     placeholder: 'Search and select RAM size (GB)',
-    apiUrl: baseUrl + '/asset-types',
-    queryKey: ['asset-ram-sizes'],
+    apiUrl: '', // No API URL since we are using static items for RAM sizes 
+    queryKey: [],
     labelKey: 'label',
     valueKey: 'value',
     staticItems: [
