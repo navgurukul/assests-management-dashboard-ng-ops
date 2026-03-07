@@ -144,6 +144,7 @@ const prepareItems = (filteredItems, selectedItem, value, valueKey) => {
  * @param {object|null} config.selectedItem - Pre-selected item
  * @param {any} config.value - Current selected value
  * @param {string} config.valueKey - Key for value comparison
+ * @param {array|null} config.staticItems - Static items array (bypasses API call if provided)
  * 
  * @returns {object} Hook return object
  * @returns {array} returns.items - Processed items for autocomplete
@@ -163,6 +164,7 @@ export const useApiAutocomplete = ({
   selectedItem,
   value,
   valueKey = 'id',
+  staticItems = null,
 }) => {
   // For allocation fields, always use dummy data as fallback
   // Exception: my-assets endpoint should use real API data
@@ -182,8 +184,9 @@ export const useApiAutocomplete = ({
   );
 
   // Determine if fetch should be enabled
+  // Skip API call if staticItems are provided
   // Only fetch if no dependency exists OR dependent value is available
-  const shouldEnableFetch = !dependsOn || !!dependentValue;
+  const shouldEnableFetch = !staticItems && (!dependsOn || !!dependentValue);
 
   // Fetch data from API
   const { data, isLoading, isError } = useFetch({
@@ -194,6 +197,13 @@ export const useApiAutocomplete = ({
 
   // Process and prepare items for display
   const items = useMemo(() => {
+    // If static items are provided, use them directly
+    if (staticItems && Array.isArray(staticItems)) {
+      const filteredItems = filterByCategory(staticItems, filterCategory);
+      const result = prepareItems(filteredItems, selectedItem, value, valueKey);
+      return result;
+    }
+    
     // For allocation requests, use dummy data immediately as default
     if (isAllocationField) {
       return allocationsListData;
@@ -214,11 +224,11 @@ export const useApiAutocomplete = ({
     // Add selected item if needed
     const result = prepareItems(filteredItems, selectedItem, value, valueKey);
     return result;
-  }, [data, dataPath, filterCategory, selectedItem, value, valueKey, isAllocationField, isError, apiUrl, name]);
+  }, [staticItems, data, dataPath, filterCategory, selectedItem, value, valueKey, isAllocationField, isError, apiUrl, name]);
 
   return {
     items,
-    isLoading,
+    isLoading: staticItems ? false : isLoading,
     isError,
     shouldEnableFetch,
   };

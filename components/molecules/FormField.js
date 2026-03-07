@@ -196,6 +196,7 @@ export default function FormField({ field, formik, onFieldChange }) {
             formatLabel={field.formatLabel}
             selectedItem={field.selectedItem}
             excludeValue={field.excludeField ? formik.values[field.excludeField] : null}
+            staticItems={field.staticItems}
           />
         );
 
