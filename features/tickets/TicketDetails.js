@@ -16,7 +16,7 @@ import {
   ticketUpdateValidationSchema,
 } from '@/app/config/formConfigs/ticketUpdateFormConfig';
 
-export default function TicketDetails({ ticketId, onBack }) {
+export default function TicketDetails({ ticketId, ticketData, onBack }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -42,7 +42,8 @@ export default function TicketDetails({ ticketId, onBack }) {
     );
   }
 
-  const ticket = data.data;
+  // Merge API data with table row data (ticketData) to fill in fields like address, managerEmail
+  const ticket = { ...ticketData, ...data.data };
   const historyEntries = (ticket.historyLogs || []).map((log) => ({
     time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
     text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
@@ -178,6 +179,8 @@ export default function TicketDetails({ ticketId, onBack }) {
       items: [
         { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
         { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
+        { label: 'Address', value: ticket.address || '—' },
+        { label: 'Manager Email', value: ticket.managerEmail || '—' },
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
         { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
         { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },

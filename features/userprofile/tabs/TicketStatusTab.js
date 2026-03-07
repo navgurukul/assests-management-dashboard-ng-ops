@@ -9,7 +9,7 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
   if (isLoadingTickets || ticketsError) {
     return (
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Status</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">My Ticket Status</h2>
         <StateHandler
           isLoading={isLoadingTickets}
           isError={!!ticketsError}
@@ -25,7 +25,7 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Status</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">My Ticket Status</h2>
       
       {userTickets && userTickets.length > 0 ? (
         <div className="overflow-x-auto -mx-6">

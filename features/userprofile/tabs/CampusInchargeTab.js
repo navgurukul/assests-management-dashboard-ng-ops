@@ -1,60 +1,43 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { Building2, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
+import FormModal from '@/components/molecules/FormModal';
+import StateHandler from '@/components/atoms/StateHandler';
+import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
+import { campusInchargeFormFields, campusInchargeColumns } from '@/dummyJson/dummyJson';
 
-// Sample data - this should eventually come from an API
-const campusInchargeData = [
-  {
-    id: 1,
-    campus: 'PUNE',
-    itCoordinator: {
-      name: 'Rajesh Sharma',
-      email: 'rajesh.sharma@navgurukul.org',
-      phone: '+91 98765 43210'
-    },
-    operation: {
-      name: 'Priya Deshmukh',
-      email: 'priya.d@navgurukul.org',
-      phone: '+91 98765 43211'
-    },
-    itLead: {
-      name: 'Amit Patil',
-      email: 'amit.patil@navgurukul.org',
-      phone: '+91 98765 43212'
-    }
-  },
-  {
-    id: 2,
-    campus: 'DELHI',
-    itCoordinator: {
-      name: 'Vikram Singh',
-      email: 'vikram.singh@navgurukul.org',
-      phone: '+91 98765 43213'
-    },
-    operation: {
-      name: 'Anjali Kumar',
-      email: 'anjali.k@navgurukul.org',
-      phone: '+91 98765 43214'
-    },
-    itLead: {
-      name: 'Rahul Verma',
-      email: 'rahul.verma@navgurukul.org',
-      phone: '+91 98765 43215'
-    }
-  }
-];
-
-// Define columns configuration
-const columns = [
-  { key: 'campus', label: 'CAMPUS', align: 'start' },
-  { key: 'itCoordinator', label: 'IT COORDINATOR', align: 'start' },
-  { key: 'operation', label: 'OPERATION', align: 'start' },
-  { key: 'itLead', label: 'IT LEAD', align: 'start' },
-  { key: 'actions', label: 'ACTION', align: 'center' },
-];
 
 export default function CampusInchargeTab() {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: apiResponse, isLoading, isError, error } = useFetch({
+    url: config.endpoints.campusIncharge.list,
+    queryKey: ['campus-incharge'],
+  });
+
+  const campusInchargeData = useMemo(() => {
+    const records = apiResponse?.data ?? [];
+    return records.map((item) => ({
+      ...item,
+      campus: item.campusName,
+    }));
+  }, [apiResponse]);
+
+  const handleCreateSubmit = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      // TODO: replace with actual API call
+      console.log('Create Campus Incharge:', formData);
+      setIsCreateModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Render person details (Name, Email, Phone)
   const renderPersonDetails = (person) => (
     <div className="space-y-1.5">
@@ -112,15 +95,18 @@ export default function CampusInchargeTab() {
   };
 
   const handleCreateClick = () => {
-    // Handle create campus
-    console.log('Create new campus');
+    setIsCreateModalOpen(true);
   };
+
+  if (isLoading || isError) {
+    return <StateHandler isLoading={isLoading} isError={isError} error={error} />;
+  }
 
   return (
     <div>
       <TableWrapper
         data={campusInchargeData}
-        columns={columns}
+        columns={campusInchargeColumns}
         title="Campus Incharge"
         renderCell={renderCell}
         showPagination={false}
@@ -128,7 +114,17 @@ export default function CampusInchargeTab() {
         showCreateButton={true}
         onCreateClick={handleCreateClick}
       />
-       
+
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        componentName="Campus Incharge"
+        actionType="Create"
+        fields={campusInchargeFormFields}
+        onSubmit={handleCreateSubmit}
+        isSubmitting={isSubmitting}
+        size="large"
+      />
     </div>
   );
 }

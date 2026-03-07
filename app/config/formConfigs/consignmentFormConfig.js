@@ -90,9 +90,13 @@ export const readyToDispatchFields = [
   },
   {
     name: 'trackingLink',
-    label: 'Link (optional)',
-    type: 'text',
-    placeholder: 'Enter tracking link (optional)',
+    label: 'Tracking Link',
+    type: 'select',
+    placeholder: 'Select tracking link',
+    options: courierProviders.map(courier => ({
+      value: courier.trackingUrlPattern.replace('{trackingId}', ''),
+      label: courier.name,
+    })),
     required: false,
   },
 ];
@@ -105,8 +109,31 @@ export const readyToDispatchValidation = Yup.object().shape({
 export const readyToDispatchInitialValues = {
   courierServiceId: '',
   trackingId: '',
-  trackingLink: '',
+  trackingLink: 'https://www.shiprocket.in/shipment-tracking/',
 };
+
+// ============================================
+// STEP 3: Accept Return
+// ============================================
+
+export const getAcceptReturnFields = (campusOptions = []) => [
+  {
+    name: 'storedIn',
+    label: 'Stored In',
+    type: 'select',
+    placeholder: 'Select storage location',
+    required: true,
+    options: campusOptions,
+  },
+  {
+    name: 'comment',
+    label: 'Comment',
+    type: 'textarea',
+    placeholder: 'Enter any comments...',
+    rows: 3,
+    required: false,
+  },
+];
 
 // ============================================
 // Legacy/Full Form Config (Kept for reference)

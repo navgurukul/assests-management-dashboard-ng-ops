@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle } from 'lucide-react';
+import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
+import ActionMenu from '@/components/molecules/ActionMenu';
 import { inTransitColumns, renderInTransitCell } from '@/features/consignments/InTransitReturns';
 import { inTransitReturnsDummyData } from '@/dummyJson/dummyJson';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -15,9 +16,8 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
-import { useQueryClient } from '@tanstack/react-query';
-import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
+import apiService from '@/app/utils/apiService';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   CONSIGNMENT_TABLE_ID,
@@ -29,6 +29,7 @@ import {
   createConsignmentFields,
   readyToDispatchFields,
   courierProviders,
+  getAcceptReturnFields,
 } from '@/app/config/formConfigs/consignmentFormConfig';
 import { toast } from '@/app/utils/toast';
 
@@ -36,7 +37,6 @@ const actionOptions = ['View', 'Details', 'Update Status'];
 
 export default function ConsignmentsList() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,6 +68,14 @@ export default function ConsignmentsList() {
   // In-transit returns modal state
   const [showInTransit, setShowInTransit] = useState(false);
   const [inTransitSearch, setInTransitSearch] = useState('');
+  
+  // In-transit action menu state
+  const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
+
+  // Accept return modal state
+  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+  const [currentInTransitItem, setCurrentInTransitItem] = useState(null);
+  const [isAcceptSubmitting, setIsAcceptSubmitting] = useState(false);
 
   // Dynamic form fields state for create modal
   const [createFormFields, setCreateFormFields] = useState(createConsignmentFields);
@@ -124,17 +132,11 @@ export default function ConsignmentsList() {
   };
   
   // Fetch consignments data from API with pagination, filters, and search
-  const { data, isLoading, isError, error } = useFetch({
+  const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
   
-  // Fetch courier services from API
-  const { data: courierData } = useFetch({
-    url: '/courier-services',
-    queryKey: ['courier-services'],
-  });
-
   // Fetch campuses from API
   const { data: campusData } = useFetch({
     url: '/campuses',
@@ -166,15 +168,13 @@ export default function ConsignmentsList() {
     setCurrentPage(1);
   };
   
-  // Transform courier data from API to filter options
+  // Use static courier providers for filter options
   const courierOptions = React.useMemo(() => {
-    if (!courierData || !courierData.data) return [];
-    
-    return courierData.data.map((courier) => ({
+    return courierProviders.map((courier) => ({
       value: courier.id,
       label: courier.name,
     }));
-  }, [courierData]);
+  }, []);
 
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -346,7 +346,6 @@ export default function ConsignmentsList() {
       toast.success('Consignment created successfully with status: Draft');
       
       setIsCreateModalOpen(false);
-      queryClient.invalidateQueries(['consignments']);
       
     } catch (error) {
       console.error('Error creating consignment:', error);
@@ -365,41 +364,7 @@ export default function ConsignmentsList() {
   
   // Handle dispatch form data change to auto-populate tracking link
   const handleDispatchFormDataChange = (formData, field) => {
-    let updatedFormData = { ...formData };
-    
-    // When courier service changes, auto-populate tracking link template
-    if (field.name === 'courierServiceId' && formData.courierServiceId) {
-      const selectedCourier = courierProviders.find(
-        courier => courier.id === formData.courierServiceId
-      );
-      
-      if (selectedCourier && selectedCourier.trackingUrlPattern) {
-        // Replace {trackingId} with actual tracking ID if available
-        let trackingLink = selectedCourier.trackingUrlPattern;
-        if (formData.trackingId) {
-          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
-        }
-        updatedFormData.trackingLink = trackingLink;
-      }
-    }
-    
-    // When tracking ID changes, update the link if courier is selected
-    if (field.name === 'trackingId' && formData.courierServiceId) {
-      const selectedCourier = courierProviders.find(
-        courier => courier.id === formData.courierServiceId
-      );
-      
-      if (selectedCourier && selectedCourier.trackingUrlPattern) {
-        // Replace {trackingId} with actual tracking ID
-        let trackingLink = selectedCourier.trackingUrlPattern;
-        if (formData.trackingId) {
-          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
-        }
-        updatedFormData.trackingLink = trackingLink;
-      }
-    }
-    
-    return updatedFormData;
+    return formData;
   };
   
   const handleDispatchConsignment = async (formData) => {
@@ -407,23 +372,32 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Dispatching consignment...');
     
     try {
+      const selectedCourier = courierProviders.find(
+        (courier) => courier.id === formData.courierServiceId
+      );
+
       const payload = {
-        courierServiceId: formData.courierServiceId,
+        courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
         trackingId: formData.trackingId,
-        trackingLink: formData.trackingLink || null,
-        status: 'dispatched',
+        link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
       };
 
       
       // Make API call to update consignment status to dispatched
-      const response = await post(`/consignments/${currentConsignment.id}/dispatch`, payload);
+      await apiService.patch(
+        config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
+          `/consignments/${currentConsignment.id}/dispatch`,
+        payload
+      );
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
+
+      // Refresh list so updated status is reflected in the table immediately
+      await refetchConsignments();
       
       setIsDispatchModalOpen(false);
       setCurrentConsignment(null);
-      queryClient.invalidateQueries(['consignments']);
       
     } catch (error) {
       console.error('Error dispatching consignment:', error);
@@ -443,6 +417,83 @@ export default function ConsignmentsList() {
       console.error('Error updating status:', error);
     }
   };
+
+  // Accept return form fields (built dynamically so campusOptions are available)
+  const acceptReturnFields = React.useMemo(
+    () => getAcceptReturnFields(campusOptions),
+    [campusOptions]
+  );
+
+  // Handle accept return form submit
+  const handleAcceptSubmit = async (formData) => {
+    setIsAcceptSubmitting(true);
+    const loadingToastId = toast.loading('Processing acceptance...');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.dismiss(loadingToastId);
+      toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
+      setIsAcceptModalOpen(false);
+      setCurrentInTransitItem(null);
+    } catch (error) {
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to accept return');
+    } finally {
+      setIsAcceptSubmitting(false);
+    }
+  };
+
+  // In-transit action handlers
+  const handleInTransitAction = React.useCallback((action, item) => {
+    setOpenInTransitMenuId(null);
+    if (action === 'Accepted') {
+      setCurrentInTransitItem(item);
+      setIsAcceptModalOpen(true);
+    } else {
+      toast.success(`Marked as ${action}: ${item.assetTag}`);
+    }
+  }, []);
+
+  // Render cell for in-transit table (with actions column)
+  const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
+    if (columnKey === 'actions') {
+      const menuOptions = [
+        {
+          label: 'Accepted',
+          icon: CheckCircle,
+          iconClassName: 'text-green-600',
+          onClick: () => handleInTransitAction('Accepted', item),
+        },
+        {
+          label: 'Rejected',
+          icon: XCircle,
+          iconClassName: 'text-red-500',
+          onClick: () => handleInTransitAction('Rejected', item),
+        },
+      ];
+
+      return (
+        <div className="relative flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenInTransitMenuId(openInTransitMenuId === item.id ? null : item.id);
+            }}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Actions menu"
+          >
+            <MoreVertical className="h-5 w-5 text-gray-600" />
+          </button>
+          {openInTransitMenuId === item.id && (
+            <ActionMenu
+              menuOptions={menuOptions}
+              onClose={() => setOpenInTransitMenuId(null)}
+            />
+          )}
+        </div>
+      );
+    }
+    return renderInTransitCell(item, columnKey);
+  }, [openInTransitMenuId, handleInTransitAction]);
 
   // Show loading only on initial load
   const showLoading = isLoading && !data;
@@ -562,11 +613,11 @@ export default function ConsignmentsList() {
       )}
 
       <TableWrapper
-        key={showInTransit ? 'transit' : `consignments-${openStatusDropdownId || 'none'}`}
+        key={showInTransit ? `transit-${openInTransitMenuId || 'none'}` : `consignments-${openStatusDropdownId || 'none'}`}
         data={showInTransit ? filteredInTransitData : tableData}
         columns={showInTransit ? inTransitColumns : visibleColumns}
         title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
-        renderCell={showInTransit ? renderInTransitCell : renderCell}
+        renderCell={showInTransit ? renderInTransitCellWithActions : renderCell}
         onRowClick={showInTransit ? undefined : handleRowClick}
         itemsPerPage={showInTransit ? 10 : pageSize}
         showPagination={true}
@@ -591,6 +642,13 @@ export default function ConsignmentsList() {
         }
         filterComponent={
           <>
+          <CustomButton
+              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
+              icon={ArrowLeftCircle}
+              onClick={() => setShowInTransit(!showInTransit)}
+              variant={showInTransit ? 'secondary' : 'warning'}
+              size="md"
+            />
             {!showInTransit && (
               <FilterDropdown
                 statusOptions={statusOptions}
@@ -598,13 +656,7 @@ export default function ConsignmentsList() {
                 onFilterChange={handleFilterChange}
               />
             )}
-            <CustomButton
-              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
-              icon={ArrowLeftCircle}
-              onClick={() => setShowInTransit(!showInTransit)}
-              variant={showInTransit ? 'secondary' : 'warning'}
-              size="md"
-            />
+            
           </>
         }
         columnSelectorComponent={
@@ -635,6 +687,22 @@ export default function ConsignmentsList() {
         onPageSizeChange={showInTransit ? undefined : handlePageSizeChange}
       />
       
+      {/* Accept Return Modal */}
+      <FormModal
+        isOpen={isAcceptModalOpen}
+        onClose={() => {
+          setIsAcceptModalOpen(false);
+          setCurrentInTransitItem(null);
+        }}
+        actionType="Accept Return"
+        componentName={currentInTransitItem?.assetTag || ''}
+        fields={acceptReturnFields}
+        onSubmit={handleAcceptSubmit}
+        size="medium"
+        isSubmitting={isAcceptSubmitting}
+        helpText={`Asset: ${currentInTransitItem?.assetTag || ''} — ${currentInTransitItem?.model || ''}`}
+      />
+
       {/* Create Consignment Modal */}
       <FormModal
         isOpen={isCreateModalOpen}

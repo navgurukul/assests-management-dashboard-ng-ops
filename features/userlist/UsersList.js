@@ -19,15 +19,6 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/userTableConfig';
 
-// ─── Static filter options ────────────────────────────────────────────────────
-
-const roleOptions = [
-  { value: 'STUDENT', label: 'Student' },
-  { value: 'STAFF', label: 'Staff' },
-  { value: 'ADMIN', label: 'Admin' },
-  { value: 'MENTOR', label: 'Mentor' },
-];
-
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
 const formatRole = (role) => {
@@ -78,20 +69,13 @@ export default function UsersList() {
     params.append('page', currentPage);
     params.append('limit', pageSize);
     if (filters.role) params.append('role', filters.role);
-    if (filters.campus) params.append('campusId', filters.campus);
     return params.toString();
   };
 
-  // Fetch users from API
+  // Single API: fetch allocations with full user + asset details
   const { data, isLoading, isError, error } = useFetch({
-    url: `/users?${buildQueryString()}`,
-    queryKey: ['users', currentPage, pageSize, filters, debouncedSearch],
-  });
-
-  // Fetch campus options from API
-  const { data: campusData } = useFetch({
-    url: '/campuses',
-    queryKey: ['campuses'],
+    url: `/allocations/user-assets-details?${buildQueryString()}`,
+    queryKey: ['userAssetsDetails', currentPage, pageSize, filters, debouncedSearch],
   });
 
   // Pagination handlers
@@ -107,52 +91,46 @@ export default function UsersList() {
     setCurrentPage(1);
   };
 
-  // Dynamic campus options from API
-  const campusOptions = React.useMemo(() => {
-    if (!campusData?.data) return [];
-    return campusData.data.map((c) => ({ value: c.id, label: c.campusName }));
-  }, [campusData]);
-
-  const getFilterLabel = (filterKey, value) => {
-    if (filterKey === 'campus') return campusOptions.find((o) => o.value === value)?.label ?? value;
-    if (filterKey === 'role') return roleOptions.find((o) => o.value === value)?.label ?? value;
-    return value;
-  };
+  const getFilterLabel = (filterKey, value) => value;
 
   const getCategoryName = (filterKey) => {
-    const names = { campus: 'Campus', role: 'Role' };
+    const names = { role: 'Role' };
     return names[filterKey] || filterKey;
   };
 
-  // Transform API user data into table rows
+  // Transform allocation data into table rows
   const usersListData = React.useMemo(() => {
-    if (!data?.data) return [];
-    return data.data.map((user) => ({
-      id: user.id,
-      name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'N/A',
-      email: user.email || 'N/A',
-      role: formatRole(user.role),
-      campus: user.campusId || 'N/A',
-      isActive: user.isActive,
-      phone: user.phone || 'N/A',
-      department: user.department || 'N/A',
-      location: user.location || 'N/A',
-      createdAt: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
-      // Allocation fields — not in /users response
-      assetTag: 'N/A',
-      assetType: 'N/A',
-      assetBrand: 'N/A',
-      assetModel: 'N/A',
-      assetCondition: 'N/A',
-      assetCampus: 'N/A',
-      allocationDate: 'N/A',
-      allocationStatus: 'N/A',
-      allocationReason: 'N/A',
-      returnDate: 'N/A',
-      assetSerialNumber: 'N/A',
-      // Raw data reference
-      userData: user,
-    }));
+    const allocations = data?.data?.allocations;
+    if (!Array.isArray(allocations)) return [];
+    return allocations.map((alloc) => {
+      const user = alloc.user || {};
+      const asset = alloc.assets?.[0] || {};
+      return {
+        id: alloc.id,
+        name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'N/A',
+        email: user.email || 'N/A',
+        role: formatRole(user.role),
+        campus: user.campusId || 'N/A',
+        phone: user.phone || 'N/A',
+        department: user.department || 'N/A',
+        location: user.location || 'N/A',
+        // Asset fields
+        assetTag: asset.assetTag || 'N/A',
+        assetType: asset.specLabel || 'N/A',
+        assetBrand: asset.brand || 'N/A',
+        assetModel: asset.model || 'N/A',
+        assetCondition: asset.condition || 'N/A',
+        assetCampus: asset.campusId || 'N/A',
+        assetSerialNumber: asset.serialNumber || 'N/A',
+        // Allocation fields
+        allocationDate: alloc.createdAt ? new Date(alloc.createdAt).toLocaleDateString() : 'N/A',
+        allocationStatus: alloc.status || 'N/A',
+        allocationReason: alloc.allocationReason || 'N/A',
+        returnDate: alloc.expectedReturnDate ? new Date(alloc.expectedReturnDate).toLocaleDateString() : 'N/A',
+        // Raw data reference
+        userData: user,
+      };
+    });
   }, [data]);
 
   // Cell renderer
@@ -182,7 +160,7 @@ export default function UsersList() {
         );
 
       case 'assetTag':
-        return cellValue !== 'Not Assigned' ? (
+        return cellValue && cellValue !== 'N/A' ? (
           <span className="font-mono text-sm font-medium text-gray-800">{cellValue}</span>
         ) : (
           <span className="text-gray-400 text-xs italic">Not Assigned</span>
@@ -251,8 +229,6 @@ export default function UsersList() {
         filterComponent={
           <FilterDropdown
             onFilterChange={handleFilterChange}
-            campusOptions={campusOptions}
-            roleOptions={roleOptions}
             selectedFilters={filters}
           />
         }
@@ -278,7 +254,7 @@ export default function UsersList() {
         }
         // Server-side pagination
         serverPagination={true}
-        paginationData={data?.pagination}
+        paginationData={data?.data?.pagination}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />

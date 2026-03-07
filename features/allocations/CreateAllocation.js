@@ -25,24 +25,32 @@ export default function CreateAllocation() {
   const [modifiedInitialValues, setModifiedInitialValues] = useState(allocationInitialValues);
 
   useEffect(() => {
-    if (selectedTicket?.raisedByUser?.email) {
-      // Modify form fields to disable userEmail field
+    if (selectedTicket) {
+      // Modify form fields to disable userEmail and/or userAddress fields
       const updatedFields = allocationFormFields.map(field => {
-        if (field.name === 'userEmail') {
+        if (field.name === 'userEmail' && selectedTicket?.raisedByUser?.email) {
           return {
             ...field,
             disabled: true,
             helperText: 'Email pre-populated from ticket raiser',
           };
         }
+        if (field.name === 'userAddress') {
+          return {
+            ...field,
+            disabled: true,
+            helperText: 'Address pre-populated from ticket',
+          };
+        }
         return field;
       });
       setModifiedFormFields(updatedFields);
 
-      // Set initial value for userEmail
+      // Set initial values for userEmail and userAddress
       setModifiedInitialValues({
         ...allocationInitialValues,
-        userEmail: selectedTicket.raisedByUser.email,
+        ...(selectedTicket?.raisedByUser?.email && { userEmail: selectedTicket.raisedByUser.email }),
+        userAddress: selectedTicket?.address || '',
       });
     }
 
@@ -97,10 +105,6 @@ export default function CreateAllocation() {
         allocationData
       );
 
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      
       // Show success toast
       const successMessage = values.allocationType === 'CAMPUS' 
         ? `Campus allocation created successfully! ${values.campusAssets.length} asset(s) allocated.`
@@ -116,6 +120,7 @@ export default function CreateAllocation() {
       // Show error toast
       toast.error(error?.message || 'Failed to create allocation. Please try again.');
     } finally {
+      toast.dismiss(loadingToastId);
       setIsSubmitting(false);
     }
   };
