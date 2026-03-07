@@ -15,6 +15,11 @@ export default function AllocationConsignmentSelector({
   lockedAllocationId = '',
   lockedAllocationData = null,
 }) {
+  const getAssetIdentifier = (asset) => {
+    if (!asset) return '';
+    return String(asset.id || asset.assetId || asset.assetTag || '').trim();
+  };
+
   const normalizeAssets = (allocation) => {
     if (!allocation) return [];
 
@@ -108,6 +113,11 @@ export default function AllocationConsignmentSelector({
     queryKey: queryKey || ['allocations'],
   });
 
+  const { data: consignmentsData } = useFetch({
+    url: '/consignments?page=1&limit=1000',
+    queryKey: ['consignments', 'allocation-selector'],
+  });
+
   // Filter allocations by status
   const allAllocations = React.useMemo(() => {
     return Array.isArray(allocationsData?.data) ? allocationsData.data : [];
@@ -125,6 +135,71 @@ export default function AllocationConsignmentSelector({
     
     return sourceData;
   }, [allAllocations, filterStatus]);
+
+  const allConsignments = React.useMemo(() => {
+    return Array.isArray(consignmentsData?.data) ? consignmentsData.data : [];
+  }, [consignmentsData]);
+
+  const consignedAssetIdsByAllocation = React.useMemo(() => {
+    const allocationAssetMap = new Map();
+
+    const isExcludedStatus = (status) => {
+      const normalizedStatus = String(status || '').toUpperCase();
+      return ['CANCELLED', 'CANCELED', 'REJECTED'].includes(normalizedStatus);
+    };
+
+    allConsignments.forEach((consignment) => {
+      if (isExcludedStatus(consignment?.status)) return;
+
+      const allocationId = String(
+        consignment?.allocation?.id || consignment?.allocationId || ''
+      ).trim();
+
+      if (!allocationId) return;
+
+      const rawAssetIds = [
+        ...(Array.isArray(consignment?.assetIds) ? consignment.assetIds : []),
+        ...(Array.isArray(consignment?.assetsId) ? consignment.assetsId : []),
+        ...(Array.isArray(consignment?.assets)
+          ? consignment.assets
+              .map((asset) => getAssetIdentifier(asset))
+              .filter(Boolean)
+          : []),
+        getAssetIdentifier(consignment?.asset),
+        getAssetIdentifier({ id: consignment?.assetId }),
+      ]
+        .map((id) => String(id).trim())
+        .filter(Boolean);
+
+      if (rawAssetIds.length === 0) return;
+
+      const existingSet = allocationAssetMap.get(allocationId) || new Set();
+      rawAssetIds.forEach((assetId) => existingSet.add(assetId));
+      allocationAssetMap.set(allocationId, existingSet);
+    });
+
+    return allocationAssetMap;
+  }, [allConsignments]);
+
+  const availableAssets = React.useMemo(() => {
+    if (!allocationDetails?.assets || allocationDetails.assets.length === 0) return [];
+
+    const allocationId = String(
+      allocationDetails?.id || allocationDetails?.allocationId || selectedAllocation || ''
+    ).trim();
+
+    if (!allocationId) return allocationDetails.assets;
+
+    const consignedAssetIds = consignedAssetIdsByAllocation.get(allocationId);
+    if (!consignedAssetIds || consignedAssetIds.size === 0) {
+      return allocationDetails.assets;
+    }
+
+    return allocationDetails.assets.filter((asset) => {
+      const assetIdentifier = getAssetIdentifier(asset);
+      return assetIdentifier && !consignedAssetIds.has(assetIdentifier);
+    });
+  }, [allocationDetails, selectedAllocation, consignedAssetIdsByAllocation]);
 
   const getAllocationById = (id) => {
     if (!id) return null;
@@ -211,20 +286,53 @@ export default function AllocationConsignmentSelector({
   }, [value]);
 
   useEffect(() => {
+    if (!selectedAssets.length) return;
+
+    const availableAssetIds = new Set(
+      availableAssets.map((asset) => getAssetIdentifier(asset)).filter(Boolean)
+    );
+
+    const filteredSelectedAssets = selectedAssets.filter((asset) =>
+      availableAssetIds.has(getAssetIdentifier(asset))
+    );
+
+    if (filteredSelectedAssets.length !== selectedAssets.length) {
+      setSelectedAssets(filteredSelectedAssets);
+      onChange({
+        allocationId: selectedAllocation,
+        selectedAssets: filteredSelectedAssets,
+        allocationDetails,
+      });
+    }
+  }, [availableAssets, selectedAssets, selectedAllocation, allocationDetails, onChange]);
+
+  useEffect(() => {
     if (!lockAllocationSelection || !lockedAllocationId) return;
 
     const lockedId = String(lockedAllocationId);
     const fetchedAllocationById = getAllocationById(lockedId);
 
+    const hasCampusObject = (campus) => {
+      return !!campus && typeof campus === 'object' && (campus.campusName || campus.name);
+    };
+
+    const resolvedSourceCampus = hasCampusObject(lockedAllocationData?.sourceCampus)
+      ? lockedAllocationData.sourceCampus
+      : hasCampusObject(fetchedAllocationById?.sourceCampus)
+        ? fetchedAllocationById.sourceCampus
+        : lockedAllocationData?.sourceCampus || fetchedAllocationById?.sourceCampus;
+
+    const resolvedDestinationCampus = hasCampusObject(lockedAllocationData?.destinationCampus)
+      ? lockedAllocationData.destinationCampus
+      : hasCampusObject(fetchedAllocationById?.destinationCampus)
+        ? fetchedAllocationById.destinationCampus
+        : lockedAllocationData?.destinationCampus || fetchedAllocationById?.destinationCampus;
+
     const mergedLockedAllocation = {
       ...(fetchedAllocationById || {}),
       ...(lockedAllocationData || {}),
-      sourceCampus:
-        lockedAllocationData?.sourceCampus ||
-        fetchedAllocationById?.sourceCampus,
-      destinationCampus:
-        lockedAllocationData?.destinationCampus ||
-        fetchedAllocationById?.destinationCampus,
+      sourceCampus: resolvedSourceCampus,
+      destinationCampus: resolvedDestinationCampus,
       assets:
         (Array.isArray(lockedAllocationData?.assets) && lockedAllocationData.assets.length > 0
           ? lockedAllocationData.assets
@@ -360,7 +468,7 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* Assets Table */}
-      {allocationDetails && allocationDetails.assets && allocationDetails.assets.length > 0 && (
+      {allocationDetails && availableAssets.length > 0 && (
         <div className="border border-gray-300 rounded-lg overflow-hidden">
           <div className="bg-gray-100 px-4 py-3 border-b border-gray-300">
             <h4 className="text-sm font-semibold text-gray-900">
@@ -375,13 +483,13 @@ export default function AllocationConsignmentSelector({
                   <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedAssets.length === allocationDetails.assets.length}
+                      checked={availableAssets.length > 0 && selectedAssets.length === availableAssets.length}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedAssets([...allocationDetails.assets]);
+                          setSelectedAssets([...availableAssets]);
                           onChange({
                             allocationId: selectedAllocation,
-                            selectedAssets: [...allocationDetails.assets],
+                            selectedAssets: [...availableAssets],
                             allocationDetails,
                           });
                         } else {
@@ -409,7 +517,7 @@ export default function AllocationConsignmentSelector({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {allocationDetails.assets.map((asset) => {
+                {availableAssets.map((asset) => {
                   const assetId = asset.id || asset.assetId;
                   const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
                   
@@ -457,9 +565,9 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* No Assets Message */}
-      {allocationDetails && (!allocationDetails.assets || allocationDetails.assets.length === 0) && (
+      {allocationDetails && availableAssets.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          <p>No assets found in this allocation.</p>
+          <p>No eligible assets found in this allocation.</p>
         </div>
       )}
     </div>
