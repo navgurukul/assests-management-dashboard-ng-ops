@@ -12,6 +12,9 @@ export default function AllocationConsignmentSelector({
   queryKey,
   filterStatus = 'ALLOCATED',
   isDisabled = false,
+  lockAllocationSelection = false,
+  lockedAllocationId = '',
+  lockedAllocationData = null,
 }) {
   const [selectedAllocation, setSelectedAllocation] = useState(value.allocationId || '');
   const [selectedAssets, setSelectedAssets] = useState(value.selectedAssets || []);
@@ -36,6 +39,12 @@ export default function AllocationConsignmentSelector({
     
     return sourceData;
   }, [allocationsData, filterStatus]);
+
+  const getAllocationById = (id) => {
+    if (!id) return null;
+    const normalizedId = String(id);
+    return allocations.find((allocation) => String(allocation.id) === normalizedId) || null;
+  };
 
   // Handle allocation selection
   const handleAllocationChange = (e) => {
@@ -103,27 +112,62 @@ export default function AllocationConsignmentSelector({
     }
   }, [value]);
 
+  useEffect(() => {
+    if (!lockAllocationSelection || !lockedAllocationId) return;
+
+    const lockedId = String(lockedAllocationId);
+    const lockedAllocation = lockedAllocationData || getAllocationById(lockedId) || null;
+
+    if (selectedAllocation !== lockedId || !allocationDetails) {
+      setSelectedAllocation(lockedId);
+      setSelectedAssets([]);
+      setAllocationDetails(lockedAllocation);
+
+      onChange({
+        allocationId: lockedId,
+        selectedAssets: [],
+        allocationDetails: lockedAllocation,
+      });
+    }
+  }, [lockAllocationSelection, lockedAllocationId, lockedAllocationData, allocations]);
+
+  const isAllocationLocked = lockAllocationSelection && !!lockedAllocationId;
+
   return (
     <div className="space-y-4">
-      {/* Allocation ID Dropdown */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Allocation ID <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={selectedAllocation}
-          onChange={handleAllocationChange}
-          disabled={isDisabled}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">Select an allocation</option>
-          {allocations.map((allocation) => (
-            <option key={allocation.id} value={allocation.id}>
-              {allocation.allocationCode || `ALLOC-${allocation.id}`}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Allocation ID */}
+      {isAllocationLocked ? (
+        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+          <p className="text-xs text-gray-600 mb-1">Allocation ID</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-lg font-semibold text-gray-900 break-all">
+              {allocationDetails?.allocationCode || selectedAllocation}
+            </p>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              {allocationDetails?.status || 'ACTIVE'}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Allocation ID <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={selectedAllocation}
+            onChange={handleAllocationChange}
+            disabled={isDisabled}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select an allocation</option>
+            {allocations.map((allocation) => (
+              <option key={allocation.id} value={allocation.id}>
+                {allocation.allocationCode || `ALLOC-${allocation.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Allocation Details Section */}
       {allocationDetails && (

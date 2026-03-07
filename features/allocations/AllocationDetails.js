@@ -4,12 +4,18 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import CustomButton from '@/components/atoms/CustomButton';
+import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
+import post from '@/app/api/post/post';
+import { toast } from '@/app/utils/toast';
+import { createConsignmentFields } from '@/app/config/formConfigs/consignmentFormConfig';
 
 export default function AllocationDetails({ allocationId, onBack }) {
   const router = useRouter();
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   // Fetch allocation details from API
   const { data, isLoading, isError, error } = useFetch({
@@ -34,6 +40,75 @@ export default function AllocationDetails({ allocationId, onBack }) {
   }
 
   const allocationDetails = data.data;
+
+  const assetsFromAllocation = allocationDetails?.assets || [];
+  const singleAssetFallback = allocationDetails?.asset
+    ? [{
+        id: allocationDetails.asset.id || allocationDetails.assetId,
+        assetId: allocationDetails.asset.id || allocationDetails.assetId,
+        assetTag: allocationDetails.asset.assetTag,
+        assetType: allocationDetails.asset.assetType || allocationDetails.asset.type,
+        status: allocationDetails.asset.status,
+      }]
+    : [];
+
+  const normalizedAllocationDetails = {
+    ...allocationDetails,
+    assets: assetsFromAllocation.length > 0 ? assetsFromAllocation : singleAssetFallback,
+  };
+
+  const createFieldsForAllocation = createConsignmentFields.map((field) => {
+    if (field.type !== 'allocation-consignment-selector') {
+      return field;
+    }
+
+    return {
+      ...field,
+      lockAllocationSelection: true,
+      lockedAllocationId: String(allocationDetails.id || allocationId),
+      lockedAllocationData: normalizedAllocationDetails,
+    };
+  });
+
+  const handleCreateConsignment = async (formData) => {
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading('Creating consignment...');
+
+    try {
+      if (!formData.allocationId) {
+        throw new Error('Please select an allocation');
+      }
+
+      if (!formData.selectedAssets || formData.selectedAssets.length === 0) {
+        throw new Error('Please select at least one asset');
+      }
+
+      const payload = {
+        allocationId: formData.allocationId,
+        assetIds: formData.selectedAssets.map((asset) => asset.id || asset.assetId),
+        status: 'draft',
+        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.source,
+        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destination,
+      };
+
+      await post({
+        url: config.getApiUrl(config.endpoints.consignments.create),
+        method: 'POST',
+        data: payload,
+      });
+
+      toast.dismiss(loadingToastId);
+      toast.success('Consignment created successfully');
+      setIsCreateModalOpen(false);
+      router.push('/consignments');
+    } catch (error) {
+      console.error('Error creating consignment:', error);
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to create consignment');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Format status
   const isActive = !allocationDetails.endDate;
@@ -166,23 +241,36 @@ export default function AllocationDetails({ allocationId, onBack }) {
   ];
 
   return (
-    <DetailsPage
-      title={`ALLOCATION #${allocationDetails.id}`}
-      subtitle={`Status: ${displayStatus} | Assigned to: ${allocationDetails.user?.name || allocationDetails.userId || 'Unknown'}`}
-      subtitleColor={getStatusColor()}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      showTimeline={false}
-      onBack={onBack}
-      headerActions={
-        <CustomButton
-          text="Create Consignments"
-          variant="primary"
-          size="md"
-          onClick={() => router.push('/consignments')}
-        />
-      }
-    />
+    <>
+      <DetailsPage
+        title={`ALLOCATION #${allocationDetails.id}`}
+        subtitle={`Status: ${displayStatus} | Assigned to: ${allocationDetails.user?.name || allocationDetails.userId || 'Unknown'}`}
+        subtitleColor={getStatusColor()}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        showTimeline={false}
+        onBack={onBack}
+        headerActions={
+          <CustomButton
+            text="Create Consignments"
+            variant="primary"
+            size="md"
+            onClick={() => setIsCreateModalOpen(true)}
+          />
+        }
+      />
+
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        actionType="Create"
+        fields={createFieldsForAllocation}
+        onSubmit={handleCreateConsignment}
+        size="large"
+        isSubmitting={isSubmitting}
+        helpText="Select assets from this allocation to create a new consignment. The allocation is pre-selected and locked."
+      />
+    </>
   );
 }
 

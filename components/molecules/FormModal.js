@@ -314,6 +314,9 @@ export default function FormModal({
             apiUrl={field.apiUrl}
             queryKey={field.queryKey}
             filterStatus={field.filterStatus}
+            lockAllocationSelection={field.lockAllocationSelection}
+            lockedAllocationId={field.lockedAllocationId}
+            lockedAllocationData={field.lockedAllocationData}
             isDisabled={isSubmitting}
           />
         );
