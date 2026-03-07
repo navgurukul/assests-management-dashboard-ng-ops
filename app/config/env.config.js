@@ -23,6 +23,8 @@ const config = {
       update: (id) => `/assets/${id}`,
       delete: (id) => `/assets/${id}`,
       details: (id) => `/assets/${id}`,
+      repair: (id) => `/assets/${id}/repair`,
+      scrap: (id) => `/assets/${id}/scrap`,
     },
     
     // Consignments
