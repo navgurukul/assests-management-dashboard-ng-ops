@@ -15,9 +15,92 @@ export default function AllocationConsignmentSelector({
   lockedAllocationId = '',
   lockedAllocationData = null,
 }) {
+  const normalizeAssets = (allocation) => {
+    if (!allocation) return [];
+
+    const directAssets = Array.isArray(allocation.assets) ? allocation.assets : [];
+    if (directAssets.length > 0) {
+      return directAssets.map((asset) => ({
+        ...asset,
+        id: asset.id || asset.assetId,
+        assetId: asset.assetId || asset.id,
+      }));
+    }
+
+    if (allocation.asset) {
+      const asset = allocation.asset;
+      const normalizedId = asset.id || asset.assetId || allocation.assetId;
+      return [{
+        ...asset,
+        id: normalizedId,
+        assetId: normalizedId,
+        assetTag: asset.assetTag || normalizedId,
+        assetType: asset.assetType || asset.type || 'N/A',
+        status: asset.status || 'ACTIVE',
+      }];
+    }
+
+    const rawAssetIds = Array.isArray(allocation.assetIds)
+      ? allocation.assetIds
+      : Array.isArray(allocation.assetsId)
+        ? allocation.assetsId
+        : [];
+
+    return rawAssetIds.map((assetId) => ({
+      id: assetId,
+      assetId,
+      assetTag: assetId,
+      assetType: 'N/A',
+      status: 'ACTIVE',
+    }));
+  };
+
+  const normalizeAllocationData = (allocation) => {
+    if (!allocation) return null;
+
+    const sourceCampusName =
+      allocation.sourceCampus?.campusName ||
+      allocation.sourceCampus?.name ||
+      allocation.sourceCampusName ||
+      allocation.sourceCampusCode ||
+      allocation.sourceCampusId ||
+      allocation.source;
+
+    const destinationCampusName =
+      allocation.destinationCampus?.campusName ||
+      allocation.destinationCampus?.name ||
+      allocation.destinationCampusName ||
+      allocation.destinationCampusCode ||
+      allocation.destinationCampusId ||
+      allocation.destination;
+
+    return {
+      ...allocation,
+      assets: normalizeAssets(allocation),
+      sourceCampus: allocation.sourceCampus
+        ? {
+            ...allocation.sourceCampus,
+            name: sourceCampusName || allocation.sourceCampus?.name || 'N/A',
+          }
+        : sourceCampusName
+          ? { name: sourceCampusName, campusName: sourceCampusName }
+          : undefined,
+      destinationCampus: allocation.destinationCampus
+        ? {
+            ...allocation.destinationCampus,
+            name: destinationCampusName || allocation.destinationCampus?.name || 'N/A',
+          }
+        : destinationCampusName
+          ? { name: destinationCampusName, campusName: destinationCampusName }
+          : undefined,
+      source: sourceCampusName || allocation.source || 'N/A',
+      destination: destinationCampusName || allocation.destination || 'N/A',
+    };
+  };
+
   const [selectedAllocation, setSelectedAllocation] = useState(value.allocationId || '');
   const [selectedAssets, setSelectedAssets] = useState(value.selectedAssets || []);
-  const [allocationDetails, setAllocationDetails] = useState(value.allocationDetails || null);
+  const [allocationDetails, setAllocationDetails] = useState(normalizeAllocationData(value.allocationDetails) || null);
 
   // Fetch allocations data
   const { data: allocationsData } = useFetch({
@@ -26,8 +109,12 @@ export default function AllocationConsignmentSelector({
   });
 
   // Filter allocations by status
+  const allAllocations = React.useMemo(() => {
+    return Array.isArray(allocationsData?.data) ? allocationsData.data : [];
+  }, [allocationsData]);
+
   const allocations = React.useMemo(() => {
-    let sourceData = Array.isArray(allocationsData?.data) ? allocationsData.data : [];
+    let sourceData = [...allAllocations];
     
     // Filter by status if specified
     if (filterStatus) {
@@ -37,12 +124,12 @@ export default function AllocationConsignmentSelector({
     }
     
     return sourceData;
-  }, [allocationsData, filterStatus]);
+  }, [allAllocations, filterStatus]);
 
   const getAllocationById = (id) => {
     if (!id) return null;
     const normalizedId = String(id);
-    return allocations.find((allocation) => String(allocation.id) === normalizedId) || null;
+    return allAllocations.find((allocation) => String(allocation.id) === normalizedId) || null;
   };
 
   // Handle allocation selection
@@ -52,13 +139,14 @@ export default function AllocationConsignmentSelector({
     setSelectedAssets([]);
     
     if (allocationId) {
-      const allocation = allocations.find(a => a.id === parseInt(allocationId));
-      setAllocationDetails(allocation);
+      const allocation = allocations.find((a) => String(a.id) === String(allocationId));
+      const normalizedAllocation = normalizeAllocationData(allocation);
+      setAllocationDetails(normalizedAllocation);
       
       onChange({
         allocationId,
         selectedAssets: [],
-        allocationDetails: allocation,
+        allocationDetails: normalizedAllocation,
       });
     } else {
       setAllocationDetails(null);
@@ -104,10 +192,21 @@ export default function AllocationConsignmentSelector({
 
   // Update state when value prop changes from parent
   useEffect(() => {
-    if (value.allocationId !== selectedAllocation) {
-      setSelectedAllocation(value.allocationId || '');
-      setSelectedAssets(value.selectedAssets || []);
-      setAllocationDetails(value.allocationDetails || null);
+    const incomingAllocationId = value.allocationId || '';
+    const incomingSelectedAssets = value.selectedAssets || [];
+    const incomingAllocationDetails = normalizeAllocationData(value.allocationDetails) || null;
+
+    const selectedAssetsChanged = JSON.stringify(incomingSelectedAssets) !== JSON.stringify(selectedAssets);
+    const allocationDetailsChanged = JSON.stringify(incomingAllocationDetails) !== JSON.stringify(allocationDetails);
+
+    if (
+      incomingAllocationId !== selectedAllocation ||
+      selectedAssetsChanged ||
+      allocationDetailsChanged
+    ) {
+      setSelectedAllocation(incomingAllocationId);
+      setSelectedAssets(incomingSelectedAssets);
+      setAllocationDetails(incomingAllocationDetails);
     }
   }, [value]);
 
@@ -115,7 +214,35 @@ export default function AllocationConsignmentSelector({
     if (!lockAllocationSelection || !lockedAllocationId) return;
 
     const lockedId = String(lockedAllocationId);
-    const lockedAllocation = lockedAllocationData || getAllocationById(lockedId) || null;
+    const fetchedAllocationById = getAllocationById(lockedId);
+
+    const mergedLockedAllocation = {
+      ...(fetchedAllocationById || {}),
+      ...(lockedAllocationData || {}),
+      sourceCampus:
+        lockedAllocationData?.sourceCampus ||
+        fetchedAllocationById?.sourceCampus,
+      destinationCampus:
+        lockedAllocationData?.destinationCampus ||
+        fetchedAllocationById?.destinationCampus,
+      assets:
+        (Array.isArray(lockedAllocationData?.assets) && lockedAllocationData.assets.length > 0
+          ? lockedAllocationData.assets
+          : fetchedAllocationById?.assets) ||
+        [],
+      assetIds:
+        (Array.isArray(lockedAllocationData?.assetIds) && lockedAllocationData.assetIds.length > 0
+          ? lockedAllocationData.assetIds
+          : fetchedAllocationById?.assetIds) ||
+        [],
+      assetsId:
+        (Array.isArray(lockedAllocationData?.assetsId) && lockedAllocationData.assetsId.length > 0
+          ? lockedAllocationData.assetsId
+          : fetchedAllocationById?.assetsId) ||
+        [],
+    };
+
+    const lockedAllocation = normalizeAllocationData(mergedLockedAllocation);
 
     if (selectedAllocation !== lockedId || !allocationDetails) {
       setSelectedAllocation(lockedId);
@@ -186,6 +313,7 @@ export default function AllocationConsignmentSelector({
               <p className="text-xs text-gray-600 mb-1">Source</p>
               <p className="text-sm font-medium text-gray-900">
                 {allocationDetails.sourceCampus?.name || 
+                  allocationDetails.sourceCampus?.campusName ||
                  allocationDetails.source || 
                  'N/A'}
               </p>
@@ -194,6 +322,7 @@ export default function AllocationConsignmentSelector({
               <p className="text-xs text-gray-600 mb-1">Destination</p>
               <p className="text-sm font-medium text-gray-900">
                 {allocationDetails.destinationCampus?.name || 
+                  allocationDetails.destinationCampus?.campusName ||
                  allocationDetails.destination || 
                  'N/A'}
               </p>

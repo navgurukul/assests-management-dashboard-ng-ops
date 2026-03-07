@@ -87,8 +87,8 @@ export default function AllocationDetails({ allocationId, onBack }) {
         allocationId: formData.allocationId,
         assetIds: formData.selectedAssets.map((asset) => asset.id || asset.assetId),
         status: 'draft',
-        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.source,
-        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destination,
+        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.sourceCampus?.campusName || formData.allocationDetails?.source,
+        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destinationCampus?.campusName || formData.allocationDetails?.destination,
       };
 
       await post({
