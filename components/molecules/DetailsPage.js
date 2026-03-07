@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react'; 
+import React from 'react';
+import { ArrowLeft } from 'lucide-react';
+import CustomButton from '@/components/atoms/CustomButton';
 
 export default function DetailsPage({
   title,
@@ -150,6 +152,18 @@ export default function DetailsPage({
   return (
     <div className="h-full overflow-y-auto bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        {onBack && (
+          <div className="mb-4">
+            <CustomButton
+              text="Back"
+              icon={ArrowLeft}
+              onClick={onBack}
+              variant="secondary"
+              size="sm"
+            />
+          </div>
+        )}
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
           <div className="flex justify-between items-start">

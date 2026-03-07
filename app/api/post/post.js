@@ -1,4 +1,9 @@
-import { getAuthToken } from '@/app/utils/authUtils';
+import { getAuthToken, clearAuthData } from '@/app/utils/authUtils';
+
+const handleUnauthorized = () => {
+  clearAuthData();
+  window.dispatchEvent(new Event('auth:unauthorized'));
+};
 
 const post = async ({
   url,
@@ -38,6 +43,15 @@ const post = async ({
         code: response.status,
         message: "Server error. Please try again later.",
         requestId: response.headers.get("X-Request-Id")
+      };
+    }
+
+    // Handle 401 Unauthorized — token expired
+    if (response.status === 401) {
+      handleUnauthorized();
+      throw {
+        status: 401,
+        message: 'Session expired. Please login again.',
       };
     }
 

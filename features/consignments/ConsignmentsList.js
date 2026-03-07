@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Eye, ChevronDown, Package, Truck } from 'lucide-react';
+import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
+import ActionMenu from '@/components/molecules/ActionMenu';
+import { inTransitColumns, renderInTransitCell } from '@/features/consignments/InTransitReturns';
+import { inTransitReturnsDummyData } from '@/dummyJson/dummyJson';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
@@ -11,10 +14,10 @@ import SearchInput from '@/components/molecules/SearchInput';
 import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
+import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
-import { useQueryClient } from '@tanstack/react-query';
-import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
+import apiService from '@/app/utils/apiService';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   CONSIGNMENT_TABLE_ID,
@@ -22,11 +25,11 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/consignmentTableConfig';
 import { transformConsignmentForTable } from '@/app/utils/dataTransformers';
-import { consignmentsListData, allocationsListData } from '@/dummyJson/dummyJson';
 import {
   createConsignmentFields,
   readyToDispatchFields,
   courierProviders,
+  getAcceptReturnFields,
 } from '@/app/config/formConfigs/consignmentFormConfig';
 import { toast } from '@/app/utils/toast';
 
@@ -34,7 +37,6 @@ const actionOptions = ['View', 'Details', 'Update Status'];
 
 export default function ConsignmentsList() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,6 +65,18 @@ export default function ConsignmentsList() {
   const [currentConsignment, setCurrentConsignment] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // In-transit returns modal state
+  const [showInTransit, setShowInTransit] = useState(false);
+  const [inTransitSearch, setInTransitSearch] = useState('');
+  
+  // In-transit action menu state
+  const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
+
+  // Accept return modal state
+  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+  const [currentInTransitItem, setCurrentInTransitItem] = useState(null);
+  const [isAcceptSubmitting, setIsAcceptSubmitting] = useState(false);
+
   // Dynamic form fields state for create modal
   const [createFormFields, setCreateFormFields] = useState(createConsignmentFields);
   
@@ -118,17 +132,11 @@ export default function ConsignmentsList() {
   };
   
   // Fetch consignments data from API with pagination, filters, and search
-  const { data, isLoading, isError, error } = useFetch({
+  const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
   
-  // Fetch courier services from API
-  const { data: courierData } = useFetch({
-    url: '/courier-services',
-    queryKey: ['courier-services'],
-  });
-
   // Fetch campuses from API
   const { data: campusData } = useFetch({
     url: '/campuses',
@@ -160,15 +168,13 @@ export default function ConsignmentsList() {
     setCurrentPage(1);
   };
   
-  // Transform courier data from API to filter options
+  // Use static courier providers for filter options
   const courierOptions = React.useMemo(() => {
-    if (!courierData || !courierData.data) return [];
-    
-    return courierData.data.map((courier) => ({
+    return courierProviders.map((courier) => ({
       value: courier.id,
       label: courier.name,
     }));
-  }, [courierData]);
+  }, []);
 
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -240,59 +246,7 @@ export default function ConsignmentsList() {
   
   // Process API data to table format
   const tableData = React.useMemo(() => {
-    let sourceData = (data && data.data) ? data.data : consignmentsListData;
-    
-    // Apply client-side filtering for dummy data
-    if (!data || !data.data) {
-      sourceData = sourceData.filter((consignment) => {
-        // Filter by status
-        if (filters.status && consignment.status !== filters.status) {
-          return false;
-        }
-        
-        // Filter by courier service
-        if (filters.courier) {
-          const courierServiceId = consignment.courierService?.id || consignment.courierServiceId;
-          if (courierServiceId !== filters.courier && courierServiceId !== parseInt(filters.courier)) {
-            return false;
-          }
-        }
-        
-        // Filter by allocation
-        if (filters.allocation) {
-          const allocationId = consignment.allocation?.id || consignment.allocationId;
-          if (allocationId !== filters.allocation && allocationId !== parseInt(filters.allocation)) {
-            return false;
-          }
-        }
-        
-        // Filter by search
-        if (debouncedSearch) {
-          const searchLower = debouncedSearch.toLowerCase();
-          const searchableFields = [
-            consignment.consignmentCode,
-            consignment.code,
-            consignment.trackingId,
-            consignment.allocation?.allocationCode,
-            consignment.allocationCode,
-            consignment.source,
-            consignment.destination,
-            consignment.allocation?.sourceCampus?.name,
-            consignment.allocation?.destinationCampus?.name,
-          ].filter(Boolean);
-          
-          const matchesSearch = searchableFields.some(field => 
-            String(field).toLowerCase().includes(searchLower)
-          );
-          
-          if (!matchesSearch) {
-            return false;
-          }
-        }
-        
-        return true;
-      });
-    }
+    const sourceData = Array.isArray(data?.data) ? data.data : [];
     
     return sourceData.map((consignment) => {
       if (typeof transformConsignmentForTable === 'function') {
@@ -320,16 +274,29 @@ export default function ConsignmentsList() {
         allocationId: consignment.allocation?.id || consignment.allocationId || '',
       };
     });
-  }, [data, filters, debouncedSearch]);
+  }, [data]);
   
   // Get pagination metadata
   const totalItems = data?.pagination?.total || data?.total || tableData.length;
   const totalPages = data?.pagination?.totalPages || Math.ceil(totalItems / pageSize) || 1;
-  
+
+  // Filtered in-transit data (client-side search)
+  const filteredInTransitData = React.useMemo(() => {
+    if (!inTransitSearch.trim()) return inTransitReturnsDummyData;
+    const q = inTransitSearch.toLowerCase();
+    return inTransitReturnsDummyData.filter((row) =>
+      row.consignmentCode.toLowerCase().includes(q) ||
+      row.assetTag.toLowerCase().includes(q) ||
+      row.model.toLowerCase().includes(q) ||
+      row.userName.toLowerCase().includes(q) ||
+      row.trackingId.toLowerCase().includes(q)
+    );
+  }, [inTransitSearch]);
+
   // Handle row click - navigate to details page
   const handleRowClick = (item) => {
     if (typeof window !== 'undefined') {
-      const sourceData = (data && data.data) ? data.data : consignmentsListData;
+      const sourceData = Array.isArray(data?.data) ? data.data : [];
       const fullConsignment = sourceData.find(c => c.id === item.id);
       if (fullConsignment) {
         sessionStorage.setItem('currentConsignmentData', JSON.stringify(fullConsignment));
@@ -379,7 +346,6 @@ export default function ConsignmentsList() {
       toast.success('Consignment created successfully with status: Draft');
       
       setIsCreateModalOpen(false);
-      queryClient.invalidateQueries(['consignments']);
       
     } catch (error) {
       console.error('Error creating consignment:', error);
@@ -398,41 +364,7 @@ export default function ConsignmentsList() {
   
   // Handle dispatch form data change to auto-populate tracking link
   const handleDispatchFormDataChange = (formData, field) => {
-    let updatedFormData = { ...formData };
-    
-    // When courier service changes, auto-populate tracking link template
-    if (field.name === 'courierServiceId' && formData.courierServiceId) {
-      const selectedCourier = courierProviders.find(
-        courier => courier.id === formData.courierServiceId
-      );
-      
-      if (selectedCourier && selectedCourier.trackingUrlPattern) {
-        // Replace {trackingId} with actual tracking ID if available
-        let trackingLink = selectedCourier.trackingUrlPattern;
-        if (formData.trackingId) {
-          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
-        }
-        updatedFormData.trackingLink = trackingLink;
-      }
-    }
-    
-    // When tracking ID changes, update the link if courier is selected
-    if (field.name === 'trackingId' && formData.courierServiceId) {
-      const selectedCourier = courierProviders.find(
-        courier => courier.id === formData.courierServiceId
-      );
-      
-      if (selectedCourier && selectedCourier.trackingUrlPattern) {
-        // Replace {trackingId} with actual tracking ID
-        let trackingLink = selectedCourier.trackingUrlPattern;
-        if (formData.trackingId) {
-          trackingLink = trackingLink.replace('{trackingId}', formData.trackingId);
-        }
-        updatedFormData.trackingLink = trackingLink;
-      }
-    }
-    
-    return updatedFormData;
+    return formData;
   };
   
   const handleDispatchConsignment = async (formData) => {
@@ -440,23 +372,32 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Dispatching consignment...');
     
     try {
+      const selectedCourier = courierProviders.find(
+        (courier) => courier.id === formData.courierServiceId
+      );
+
       const payload = {
-        courierServiceId: formData.courierServiceId,
+        courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
         trackingId: formData.trackingId,
-        trackingLink: formData.trackingLink || null,
-        status: 'dispatched',
+        link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
       };
 
       
       // Make API call to update consignment status to dispatched
-      const response = await post(`/consignments/${currentConsignment.id}/dispatch`, payload);
+      await apiService.patch(
+        config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
+          `/consignments/${currentConsignment.id}/dispatch`,
+        payload
+      );
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
+
+      // Refresh list so updated status is reflected in the table immediately
+      await refetchConsignments();
       
       setIsDispatchModalOpen(false);
       setCurrentConsignment(null);
-      queryClient.invalidateQueries(['consignments']);
       
     } catch (error) {
       console.error('Error dispatching consignment:', error);
@@ -469,41 +410,6 @@ export default function ConsignmentsList() {
   
 
   
-  // Handle form data change in create modal to populate assets
-  const handleCreateFormDataChange = (formData, field) => {
-    if (field.name === 'allocationId' && formData.allocationId) {
-      const selectedAllocation = allocationsListData.find(
-        alloc => alloc.id === parseInt(formData.allocationId) || alloc.id === formData.allocationId
-      );
-      
-      if (selectedAllocation) {
-        const assets = selectedAllocation.assets || [];
-        const source = selectedAllocation.sourceCampus?.name || '';
-        const destination = selectedAllocation.destinationCampus?.name || '';
-        
-        const assetOptions = assets.map(asset => ({
-          value: asset.id,
-          label: asset.assetTag,
-        }));
-        
-        setCreateFormFields(prev =>
-          prev.map(f => {
-            if (f.name === 'assets') {
-              return { ...f, options: assetOptions };
-            }
-            if (f.name === 'source') {
-              return { ...f, defaultValue: source };
-            }
-            if (f.name === 'destination') {
-              return { ...f, defaultValue: destination };
-            }
-            return f;
-          })
-        );
-      }
-    }
-  };
-  
   const handleStatusChange = async (consignmentId, newStatus) => {
     try {
       setOpenStatusDropdownId(null);
@@ -512,8 +418,85 @@ export default function ConsignmentsList() {
     }
   };
 
+  // Accept return form fields (built dynamically so campusOptions are available)
+  const acceptReturnFields = React.useMemo(
+    () => getAcceptReturnFields(campusOptions),
+    [campusOptions]
+  );
+
+  // Handle accept return form submit
+  const handleAcceptSubmit = async (formData) => {
+    setIsAcceptSubmitting(true);
+    const loadingToastId = toast.loading('Processing acceptance...');
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.dismiss(loadingToastId);
+      toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
+      setIsAcceptModalOpen(false);
+      setCurrentInTransitItem(null);
+    } catch (error) {
+      toast.dismiss(loadingToastId);
+      toast.error(error?.message || 'Failed to accept return');
+    } finally {
+      setIsAcceptSubmitting(false);
+    }
+  };
+
+  // In-transit action handlers
+  const handleInTransitAction = React.useCallback((action, item) => {
+    setOpenInTransitMenuId(null);
+    if (action === 'Accepted') {
+      setCurrentInTransitItem(item);
+      setIsAcceptModalOpen(true);
+    } else {
+      toast.success(`Marked as ${action}: ${item.assetTag}`);
+    }
+  }, []);
+
+  // Render cell for in-transit table (with actions column)
+  const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
+    if (columnKey === 'actions') {
+      const menuOptions = [
+        {
+          label: 'Accepted',
+          icon: CheckCircle,
+          iconClassName: 'text-green-600',
+          onClick: () => handleInTransitAction('Accepted', item),
+        },
+        {
+          label: 'Rejected',
+          icon: XCircle,
+          iconClassName: 'text-red-500',
+          onClick: () => handleInTransitAction('Rejected', item),
+        },
+      ];
+
+      return (
+        <div className="relative flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenInTransitMenuId(openInTransitMenuId === item.id ? null : item.id);
+            }}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Actions menu"
+          >
+            <MoreVertical className="h-5 w-5 text-gray-600" />
+          </button>
+          {openInTransitMenuId === item.id && (
+            <ActionMenu
+              menuOptions={menuOptions}
+              onClose={() => setOpenInTransitMenuId(null)}
+            />
+          )}
+        </div>
+      );
+    }
+    return renderInTransitCell(item, columnKey);
+  }, [openInTransitMenuId, handleInTransitAction]);
+
   // Show loading only on initial load
-  const showLoading = isLoading && !consignmentsListData;
+  const showLoading = isLoading && !data;
 
   // Error state
   const showErrorBanner = isError && !data;
@@ -531,8 +514,8 @@ export default function ConsignmentsList() {
         );
         
       case 'assetCount':
-        const sourceData = (data && data.data) ? data.data : consignmentsListData;
-        const fullConsignment = sourceData.find(c => c.id === item.id);
+        const sourceData = Array.isArray(data?.data) ? data.data : [];
+        const fullConsignment = sourceData.find(c => c.id === item.id) || item.consignmentData;
         const assets = fullConsignment?.assets || [];
         
         return (
@@ -549,18 +532,9 @@ export default function ConsignmentsList() {
         );
         
       case 'status':
-        const normalizedStatus = cellValue?.toLowerCase().replace(/\s+/g, '_');
-        const statusColors = {
-          'draft': 'bg-gray-100 text-gray-800 border border-gray-300',
-          'dispatched': 'bg-amber-100 text-amber-800 border border-amber-300',
-          'delivered': 'bg-green-100 text-green-800 border border-green-300',
-        };
-        
         return (
           <div className="relative">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center ${statusColors[normalizedStatus] || 'bg-gray-100 text-gray-800 border border-gray-300'}`}>
-              {cellValue}
-            </span>
+            <StatusChip value={cellValue} />
           </div>
         );
         
@@ -621,7 +595,7 @@ export default function ConsignmentsList() {
 
   return (
     <div className="space-y-6">
-      {showErrorBanner && (
+      {showErrorBanner && !showInTransit && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -631,52 +605,74 @@ export default function ConsignmentsList() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>Using sample data:</strong> Unable to connect to server. Displaying sample consignments for demonstration.
+                <strong>Unable to load consignments:</strong> Please try again or check your network connection.
               </p>
             </div>
           </div>
         </div>
       )}
-      
+
       <TableWrapper
-        key={`table-${openStatusDropdownId || 'none'}`}
-        data={tableData}
-        columns={visibleColumns}
-        title="Consignments"
-        renderCell={renderCell}
-        onRowClick={handleRowClick}
-        itemsPerPage={pageSize}
+        key={showInTransit ? `transit-${openInTransitMenuId || 'none'}` : `consignments-${openStatusDropdownId || 'none'}`}
+        data={showInTransit ? filteredInTransitData : tableData}
+        columns={showInTransit ? inTransitColumns : visibleColumns}
+        title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
+        renderCell={showInTransit ? renderInTransitCellWithActions : renderCell}
+        onRowClick={showInTransit ? undefined : handleRowClick}
+        itemsPerPage={showInTransit ? 10 : pageSize}
         showPagination={true}
-        ariaLabel="Consignments table"
-        showCreateButton={true}
+        ariaLabel={showInTransit ? 'In-transit returns table' : 'Consignments table'}
+        showCreateButton={!showInTransit}
         onCreateClick={handleCreateClick}
-        isLoading={showLoading}
+        isLoading={showInTransit ? false : showLoading}
         searchComponent={
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            placeholder="Search consignments..."
-          />
+          showInTransit ? (
+            <SearchInput
+              value={inTransitSearch}
+              onChange={setInTransitSearch}
+              placeholder="Search by asset, user, tracking..."
+            />
+          ) : (
+            <SearchInput
+              value={searchInput}
+              onChange={setSearchInput}
+              placeholder="Search consignments..."
+            />
+          )
         }
         filterComponent={
-          <FilterDropdown
-            statusOptions={statusOptions}
-            selectedFilters={filters}
-            onFilterChange={handleFilterChange}
-          />
+          <>
+          <CustomButton
+              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
+              icon={ArrowLeftCircle}
+              onClick={() => setShowInTransit(!showInTransit)}
+              variant={showInTransit ? 'secondary' : 'warning'}
+              size="md"
+            />
+            {!showInTransit && (
+              <FilterDropdown
+                statusOptions={statusOptions}
+                selectedFilters={filters}
+                onFilterChange={handleFilterChange}
+              />
+            )}
+            
+          </>
         }
         columnSelectorComponent={
-          <ColumnSelector
-            allColumns={allColumns}
-            visibleColumnKeys={visibleColumnKeys}
-            alwaysVisibleColumns={alwaysVisibleColumns}
-            onToggleColumn={toggleColumn}
-            onShowAll={showAllColumns}
-            onReset={resetToDefault}
-          />
+          !showInTransit && (
+            <ColumnSelector
+              allColumns={allColumns}
+              visibleColumnKeys={visibleColumnKeys}
+              alwaysVisibleColumns={alwaysVisibleColumns}
+              onToggleColumn={toggleColumn}
+              onShowAll={showAllColumns}
+              onReset={resetToDefault}
+            />
+          )
         }
         activeFiltersComponent={
-          Object.keys(filters).length > 0 && (
+          !showInTransit && Object.keys(filters).length > 0 && (
             <ActiveFiltersChips
               filters={filters}
               getCategoryName={getCategoryName}
@@ -685,12 +681,28 @@ export default function ConsignmentsList() {
             />
           )
         }
-        serverPagination={true}
-        paginationData={data?.pagination}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+        serverPagination={!showInTransit}
+        paginationData={showInTransit ? null : data?.pagination}
+        onPageChange={showInTransit ? undefined : handlePageChange}
+        onPageSizeChange={showInTransit ? undefined : handlePageSizeChange}
       />
       
+      {/* Accept Return Modal */}
+      <FormModal
+        isOpen={isAcceptModalOpen}
+        onClose={() => {
+          setIsAcceptModalOpen(false);
+          setCurrentInTransitItem(null);
+        }}
+        actionType="Accept Return"
+        componentName={currentInTransitItem?.assetTag || ''}
+        fields={acceptReturnFields}
+        onSubmit={handleAcceptSubmit}
+        size="medium"
+        isSubmitting={isAcceptSubmitting}
+        helpText={`Asset: ${currentInTransitItem?.assetTag || ''} — ${currentInTransitItem?.model || ''}`}
+      />
+
       {/* Create Consignment Modal */}
       <FormModal
         isOpen={isCreateModalOpen}
@@ -700,7 +712,6 @@ export default function ConsignmentsList() {
         onSubmit={handleCreateConsignment}
         size="large"
         isSubmitting={isSubmitting}
-        onFormDataChange={handleCreateFormDataChange}
         helpText="Select an allocation and choose assets to create a new consignment"
       />
       
@@ -753,7 +764,6 @@ export default function ConsignmentsList() {
           )}
         </div>
       </Modal>
-      
     </div>
   );
 }

@@ -5,8 +5,8 @@ export const menuItems = [
   { name: 'Consignments', icon: 'Archive', path: '/consignments' },
   { name: 'Assets', icon: 'Package', path: '/assets' },
   { name: 'Components', icon: 'Component', path: '/components' },
-  { name: 'Reports', icon: 'FileText', path: '/reports' },
   { name: 'User List', icon: 'Users', path: '/userlist' },
+  { name: 'Reports', icon: 'FileText', path: '/reports' },
 ];
 
 export const userListData = [
@@ -1770,5 +1770,184 @@ export const ticketsSummaryCards = [
     iconColor: 'text-red-500',
     borderColor: 'border-red-200',
   },
+];
+
+export const inTransitReturnsDummyData = [
+  {
+    id: 1,
+    consignmentCode: 'CON-1021',
+    assetTag:        'NG-LP-00451',
+    model:           'Dell Latitude 5520',
+    userName:        'Arjun Mehta',
+    userEmail:       'arjun.mehta@ng.com',
+    trackingId:      'DTDC-8834712',
+    estimatedArrival:'02 Mar 2026',
+  },
+  {
+    id: 2,
+    consignmentCode: 'CON-1021',
+    assetTag:        'NG-LP-00512',
+    model:           'HP EliteBook 840 G8',
+    userName:        'Arjun Mehta',
+    userEmail:       'arjun.mehta@ng.com',
+    trackingId:      'DTDC-8834712',
+    estimatedArrival:'02 Mar 2026',
+  },
+  {
+    id: 3,
+    consignmentCode: 'CON-1027',
+    assetTag:        'NG-LP-00389',
+    model:           'Lenovo ThinkPad E15',
+    userName:        'Priya Sharma',
+    userEmail:       'priya.sharma@ng.com',
+    trackingId:      'BLUEDART-99112',
+    estimatedArrival:'04 Mar 2026',
+  },
+  {
+    id: 4,
+    consignmentCode: 'CON-1031',
+    assetTag:        'NG-LP-00601',
+    model:           'Apple MacBook Air M2',
+    userName:        'Rohan Verma',
+    userEmail:       'rohan.verma@ng.com',
+    trackingId:      'ECOM-47762301',
+    estimatedArrival:'05 Mar 2026',
+  },
+  {
+    id: 5,
+    consignmentCode: 'CON-1031',
+    assetTag:        'NG-LP-00744',
+    model:           'Apple MacBook Pro M3',
+    userName:        'Rohan Verma',
+    userEmail:       'rohan.verma@ng.com',
+    trackingId:      'ECOM-47762301',
+    estimatedArrival:'05 Mar 2026',
+  },
+];
+
+// Campus Incharge
+export const campusInchargeFormFields = [
+  {
+    name: 'campus',
+    label: 'Campus',
+    type: 'text',
+    placeholder: 'e.g. PUNE',
+    required: true,
+  },
+  // IT Coordinator
+  {
+    name: 'itCoordinatorName',
+    label: 'IT Coordinator Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+  },
+  {
+    name: 'itCoordinatorEmail',
+    label: 'IT Coordinator Email',
+    type: 'email',
+    placeholder: 'email@example.com',
+    required: true,
+  },
+  {
+    name: 'itCoordinatorPhone',
+    label: 'IT Coordinator Phone',
+    type: 'text',
+    placeholder: '+91 XXXXX XXXXX',
+    required: true,
+  },
+  // Operation
+  {
+    name: 'operationName',
+    label: 'Operation Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+  },
+  {
+    name: 'operationEmail',
+    label: 'Operation Email',
+    type: 'email',
+    placeholder: 'email@example.com',
+    required: true,
+  },
+  {
+    name: 'operationPhone',
+    label: 'Operation Phone',
+    type: 'text',
+    placeholder: '+91 XXXXX XXXXX',
+    required: true,
+  },
+  // IT Lead
+  {
+    name: 'itLeadName',
+    label: 'IT Lead Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+  },
+  {
+    name: 'itLeadEmail',
+    label: 'IT Lead Email',
+    type: 'email',
+    placeholder: 'email@example.com',
+    required: true,
+  },
+  {
+    name: 'itLeadPhone',
+    label: 'IT Lead Phone',
+    type: 'text',
+    placeholder: '+91 XXXXX XXXXX',
+    required: true,
+  },
+];
+
+export const campusInchargeData = [
+  {
+    id: 1,
+    campus: 'PUNE',
+    itCoordinator: {
+      name: 'Rajesh Sharma',
+      email: 'rajesh.sharma@navgurukul.org',
+      phone: '+91 98765 43210',
+    },
+    operation: {
+      name: 'Priya Deshmukh',
+      email: 'priya.d@navgurukul.org',
+      phone: '+91 98765 43211',
+    },
+    itLead: {
+      name: 'Amit Patil',
+      email: 'amit.patil@navgurukul.org',
+      phone: '+91 98765 43212',
+    },
+  },
+  {
+    id: 2,
+    campus: 'DELHI',
+    itCoordinator: {
+      name: 'Vikram Singh',
+      email: 'vikram.singh@navgurukul.org',
+      phone: '+91 98765 43213',
+    },
+    operation: {
+      name: 'Anjali Kumar',
+      email: 'anjali.k@navgurukul.org',
+      phone: '+91 98765 43214',
+    },
+    itLead: {
+      name: 'Rahul Verma',
+      email: 'rahul.verma@navgurukul.org',
+      phone: '+91 98765 43215',
+    },
+  },
+];
+
+export const campusInchargeColumns = [
+  { key: 'campus', label: 'CAMPUS', align: 'start' },
+  { key: 'itCoordinator', label: 'IT COORDINATOR', align: 'start' },
+  { key: 'operation', label: 'OPERATION', align: 'start' },
+  { key: 'itLead', label: 'IT LEAD', align: 'start' },
+  { key: 'actions', label: 'ACTION', align: 'center' },
 ];
 

@@ -1,48 +1,39 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
+import StatusChip from '@/components/atoms/StatusChip';
+import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
+import StateHandler from '@/components/atoms/StateHandler';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
+import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   USER_TABLE_ID,
   userTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/userTableConfig';
-import { userListData } from '@/dummyJson/dummyJson';
 
-// ─── Static filter options ────────────────────────────────────────────────────
+// ─── Helper ───────────────────────────────────────────────────────────────────
 
-const campusOptions = [
-  { value: 'Bangalore', label: 'Bangalore' },
-  { value: 'Pune', label: 'Pune' },
-  { value: 'Dharamshala', label: 'Dharamshala' },
-  { value: 'Sarjapur', label: 'Sarjapur' },
-];
-
-const roleOptions = [
-  { value: 'Student', label: 'Student' },
-  { value: 'Staff', label: 'Staff' },
-  { value: 'Admin', label: 'Admin' },
-  { value: 'Mentor', label: 'Mentor' },
-];
-
-const allocationStatusOptions = [
-  { value: 'Active', label: 'Active' },
-  { value: 'Returned', label: 'Returned' },
-  { value: 'No Allocation', label: 'No Allocation' },
-];
+const formatRole = (role) => {
+  if (!role) return 'N/A';
+  return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+};
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function UsersList() {
+  const router = useRouter();
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
 
   // Filters
   const [filters, setFilters] = useState({});
@@ -62,53 +53,30 @@ export default function UsersList() {
     alwaysVisibleColumns,
   } = useTableColumns(USER_TABLE_ID, userTableColumns, defaultVisibleColumns);
 
-  // Debounce search (400 ms)
+  // Debounce search (800 ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
       setCurrentPage(1);
-    }, 400);
+    }, 800);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Client-side filter + search on dummy data
-  const filteredData = useMemo(() => {
-    let result = [...userListData];
-
-    if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
-      result = result.filter(
-        (u) =>
-          u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q) ||
-          u.assetTag.toLowerCase().includes(q) ||
-          u.campus.toLowerCase().includes(q)
-      );
-    }
-
-    if (filters.campus) result = result.filter((u) => u.campus === filters.campus);
-    if (filters.role) result = result.filter((u) => u.role === filters.role);
-    if (filters.allocationStatus) result = result.filter((u) => u.allocationStatus === filters.allocationStatus);
-
-    return result;
-  }, [debouncedSearch, filters]);
-
-  // Pagination helpers
-  const totalPages = Math.ceil(filteredData.length / pageSize);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, currentPage, pageSize]);
-
-  const paginationData = {
-    page: currentPage,
-    limit: pageSize,
-    totalCount: filteredData.length,
-    totalPages,
-    hasNextPage: currentPage < totalPages,
-    hasPreviousPage: currentPage > 1,
+  // Build query string
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    if (filters.role) params.append('role', filters.role);
+    return params.toString();
   };
+
+  // Single API: fetch allocations with full user + asset details
+  const { data, isLoading, isError, error } = useFetch({
+    url: `/allocations/user-assets-details?${buildQueryString()}`,
+    queryKey: ['userAssetsDetails', currentPage, pageSize, filters, debouncedSearch],
+  });
 
   // Pagination handlers
   const handlePageChange = (page) => setCurrentPage(page);
@@ -123,17 +91,47 @@ export default function UsersList() {
     setCurrentPage(1);
   };
 
-  const getFilterLabel = (filterKey, value) => {
-    if (filterKey === 'campus') return campusOptions.find((o) => o.value === value)?.label ?? value;
-    if (filterKey === 'role') return roleOptions.find((o) => o.value === value)?.label ?? value;
-    if (filterKey === 'allocationStatus') return allocationStatusOptions.find((o) => o.value === value)?.label ?? value;
-    return value;
-  };
+  const getFilterLabel = (filterKey, value) => value;
 
   const getCategoryName = (filterKey) => {
-    const names = { campus: 'Campus', role: 'Role', allocationStatus: 'Allocation Status' };
+    const names = { role: 'Role' };
     return names[filterKey] || filterKey;
   };
+
+  // Transform allocation data into table rows
+  const usersListData = React.useMemo(() => {
+    const allocations = data?.data?.allocations;
+    if (!Array.isArray(allocations)) return [];
+    return allocations.map((alloc) => {
+      const user = alloc.user || {};
+      const asset = alloc.assets?.[0] || {};
+      return {
+        id: alloc.id,
+        name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'N/A',
+        email: user.email || 'N/A',
+        role: formatRole(user.role),
+        campus: user.campusId || 'N/A',
+        phone: user.phone || 'N/A',
+        department: user.department || 'N/A',
+        location: user.location || 'N/A',
+        // Asset fields
+        assetTag: asset.assetTag || 'N/A',
+        assetType: asset.specLabel || 'N/A',
+        assetBrand: asset.brand || 'N/A',
+        assetModel: asset.model || 'N/A',
+        assetCondition: asset.condition || 'N/A',
+        assetCampus: asset.campusId || 'N/A',
+        assetSerialNumber: asset.serialNumber || 'N/A',
+        // Allocation fields
+        allocationDate: alloc.createdAt ? new Date(alloc.createdAt).toLocaleDateString() : 'N/A',
+        allocationStatus: alloc.status || 'N/A',
+        allocationReason: alloc.allocationReason || 'N/A',
+        returnDate: alloc.expectedReturnDate ? new Date(alloc.expectedReturnDate).toLocaleDateString() : 'N/A',
+        // Raw data reference
+        userData: user,
+      };
+    });
+  }, [data]);
 
   // Cell renderer
   const renderCell = (item, columnKey) => {
@@ -148,40 +146,21 @@ export default function UsersList() {
 
       case 'role':
         return (
-          <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
-            {cellValue}
-          </span>
+          <StatusChip value={cellValue} colorFn={() => 'bg-purple-100 text-purple-800'} />
         );
 
       case 'allocationStatus':
-        const statusColors = {
-          Active: 'bg-green-100 text-green-800',
-          Returned: 'bg-gray-100 text-gray-700',
-          'No Allocation': 'bg-yellow-100 text-yellow-800',
-        };
-        return (
-          <span className={`px-3 py-1 rounded text-xs font-medium ${statusColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} />;
 
       case 'assetCondition':
-        const conditionColors = {
-          Working: 'bg-green-100 text-green-800',
-          New: 'bg-blue-100 text-blue-800',
-          Damaged: 'bg-orange-100 text-orange-800',
-          Faulty: 'bg-red-100 text-red-800',
-        };
         return cellValue !== 'N/A' ? (
-          <span className={`px-3 py-1 rounded text-xs font-medium ${conditionColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
+          <StatusChip value={cellValue} colorFn={getConditionChipColor} />
         ) : (
           <span className="text-gray-400 text-xs">N/A</span>
         );
 
       case 'assetTag':
-        return cellValue !== 'Not Assigned' ? (
+        return cellValue && cellValue !== 'N/A' ? (
           <span className="font-mono text-sm font-medium text-gray-800">{cellValue}</span>
         ) : (
           <span className="text-gray-400 text-xs italic">Not Assigned</span>
@@ -207,31 +186,49 @@ export default function UsersList() {
     }
   };
 
+  // Handle loading and error states
+  if (isLoading || isError) {
+    return (
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading users..."
+        errorMessage="Error loading users"
+      />
+    );
+  }
+
+  const handleRowClick = (user) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('currentUserData', JSON.stringify(user.userData));
+    }
+    router.push('/userlist/details');
+  };
+
   return (
     <div className="space-y-6">
       <TableWrapper
-        data={paginatedData}
+        data={usersListData}
         columns={visibleColumns}
         title="User List"
         renderCell={renderCell}
         itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="User list table"
+        onRowClick={handleRowClick}
         // Search
         searchComponent={
           <SearchInput
             value={searchInput}
             onChange={setSearchInput}
-            placeholder="Search by name, email, asset tag..."
+            placeholder="Search by name, email..."
           />
         }
         // Filters
         filterComponent={
           <FilterDropdown
             onFilterChange={handleFilterChange}
-            campusOptions={campusOptions}
-            statusOptions={allocationStatusOptions}
-            roleOptions={roleOptions}
             selectedFilters={filters}
           />
         }
@@ -255,9 +252,9 @@ export default function UsersList() {
             getFilterLabel={getFilterLabel}
           />
         }
-        // Pagination (client-side data, server-pagination UI)
+        // Server-side pagination
         serverPagination={true}
-        paginationData={paginationData}
+        paginationData={data?.data?.pagination}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />

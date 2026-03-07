@@ -9,7 +9,7 @@ export const allocationFormFields = [
     type: 'radio',
     required: true,
     options: [
-      { value: 'REMOTE', label: 'Remote (Student, Employee, etc.)' },
+      { value: 'REMOTE', label: 'Individual (Student,Remote Employee, etc.)' },
       { value: 'CAMPUS', label: 'Campus (Bulk Allocation)' },
     ],
   },
@@ -25,6 +25,25 @@ export const allocationFormFields = [
     valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
+    onFieldChange: 'clearAssetSelections',
+  },
+  {
+    name: 'assetTypeId',
+    label: 'Asset Type',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select asset type',
+    apiUrl: baseUrl + '/asset-types',
+    queryKey: ['asset-types-remote'],
+    labelKey: 'name',
+    valueKey: 'id',
+    filterCategory: 'DEVICE',
+    required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+    dependsOn: {
+      field: 'campusId',
+      paramKey: 'campusId',
+    },
+    onFieldChange: 'clearAssetId',
   },
   {
     name: 'assetId',
@@ -32,15 +51,17 @@ export const allocationFormFields = [
     type: 'api-autocomplete',
     placeholder: 'Search and select asset',
     apiUrl: baseUrl + '/assets',
-    queryKey: ['assets'],
     labelKey: 'assetTag',
     valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
     dependsOn: {
-      field: 'campusId',
-      paramKey: 'campusId',
+      field: 'assetTypeId',
+      paramKey: 'type',
     },
+    buildAdditionalParams: (formData) => ({
+      campusId: formData?.campusId || undefined,
+    }),
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
   },
   {
@@ -160,6 +181,12 @@ export const allocationValidationSchema = Yup.object().shape({
       then: (schema) => schema.required('Asset is required'),
       otherwise: (schema) => schema.nullable(),
     }),
+  assetTypeId: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.required('Asset type is required'),
+      otherwise: (schema) => schema.nullable(),
+    }),
   userEmail: Yup.string()
     .nullable()
     .email('Invalid email format'),
@@ -222,6 +249,7 @@ export const allocationInitialValues = {
   allocationType: 'REMOTE',
   // Remote fields
   campusId: '',
+  assetTypeId: '',
   assetId: '',
   userEmail: '',
   phoneNumber: '',

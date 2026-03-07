@@ -23,6 +23,8 @@ const config = {
       update: (id) => `/assets/${id}`,
       delete: (id) => `/assets/${id}`,
       details: (id) => `/assets/${id}`,
+      repair: (id) => `/assets/${id}/repair`,
+      scrap: (id) => `/assets/${id}/scrap`,
     },
     
     // Consignments
@@ -33,6 +35,7 @@ const config = {
       delete: (id) => `/consignments/${id}`,
       details: (id) => `/consignments/${id}`,
       updateStatus: (id) => `/consignments/${id}/status`,
+      dispatch: (id) => `/consignments/${id}/dispatch`,
     },
     
     // Documents
@@ -77,6 +80,21 @@ const config = {
     // User
     user: {
       me: '/user/me',
+    },
+
+    // Campus Incharge
+    campusIncharge: {
+      list: '/campus-incharge',
+      create: '/campus-incharge',
+      update: (id) => `/campus-incharge/${id}`,
+      delete: (id) => `/campus-incharge/${id}`,
+    },
+
+    // Users
+    users: {
+      list: '/users',
+      details: (id) => `/users/${id}`,
+      changeRole: (id) => `/users/${id}/role`,
     },
   },
   

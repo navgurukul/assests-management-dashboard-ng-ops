@@ -218,12 +218,12 @@ export const transformAllocationForTable = (allocation) => {
   }
   
   // Format campus display — prefer nested object name, fallback to ID
-  const sourceCampus = getNestedValue(allocation, 'sourceCampus.name') ||
-                       getNestedValue(allocation, 'sourceCampus.campusName') ||
+  const sourceCampus = getNestedValue(allocation, 'sourceCampus.campusName', null) ||
+                       getNestedValue(allocation, 'sourceCampus.name', null) ||
                        allocation.sourceCampusId || 'N/A';
 
-  const destinationCampus = getNestedValue(allocation, 'destinationCampus.name') ||
-                             getNestedValue(allocation, 'destinationCampus.campusName') ||
+  const destinationCampus = getNestedValue(allocation, 'destinationCampus.campusName', null) ||
+                             getNestedValue(allocation, 'destinationCampus.name', null) ||
                              allocation.destinationCampusId || 'N/A';
 
   return {

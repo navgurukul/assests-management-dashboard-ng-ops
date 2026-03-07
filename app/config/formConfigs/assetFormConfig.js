@@ -16,8 +16,24 @@ export const assetFormFields = [
   {
     name: 'brand',
     label: 'Brand',
-    type: 'text',
-    placeholder: 'Enter brand name (e.g., Dell, HP, Lenovo)',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select brand',
+    apiUrl: '',// No API URL since we are using static items for brands
+    queryKey: [],
+    labelKey: 'label',
+    valueKey: 'value',
+    staticItems: [
+      { label: 'Dell', value: 'Dell' },
+      { label: 'HP', value: 'HP' },
+      { label: 'Lenovo', value: 'Lenovo' },
+      { label: 'Acer', value: 'Acer' },
+      { label: 'ASUS', value: 'ASUS' },
+      { label: 'Apple', value: 'Apple' },
+      { label: 'MSI', value: 'MSI' },
+      { label: 'Samsung', value: 'Samsung' },
+      { label: 'Microsoft', value: 'Microsoft' },
+      { label: 'Toshiba', value: 'Toshiba' },
+    ],
     required: true,
   },
   {
@@ -44,10 +60,22 @@ export const assetFormFields = [
   {
     name: 'ramSizeGB',
     label: 'RAM Size (GB)',
-    type: 'number',
-    placeholder: 'Enter RAM size in GB (e.g., 8, 16, 32)',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select RAM size (GB)',
+    apiUrl: '', // No API URL since we are using static items for RAM sizes 
+    queryKey: [],
+    labelKey: 'label',
+    valueKey: 'value',
+    staticItems: [
+      { label: '4 GB', value: '4' },
+      { label: '8 GB', value: '8' },
+      { label: '12 GB', value: '12' },
+      { label: '16 GB', value: '16' },
+      { label: '24 GB', value: '24' },
+      { label: '32 GB', value: '32' },
+      { label: '64 GB', value: '64' },
+    ],
     required: false,
-    min: 0,
   },
   {
     name: 'storageSizeGB',
@@ -163,12 +191,6 @@ export const assetFormFields = [
     type: 'checkbox',
     required: false,
   },
-  {
-    name: 'bag',
-    label: 'Bag',
-    type: 'checkbox',
-    required: false,
-  },
 ];
 
 export const assetValidationSchema = Yup.object().shape({
@@ -184,9 +206,13 @@ export const assetValidationSchema = Yup.object().shape({
     .min(2, 'Specification must be at least 2 characters'),
   processor: Yup.string()
     .min(2, 'Processor must be at least 2 characters'),
-  ramSizeGB: Yup.number()
+  ramSizeGB: Yup.string()
     .nullable()
-    .min(1, 'RAM size must be at least 1 GB'),
+    .test('valid-ram', 'RAM size must be at least 1 GB', function(value) {
+      if (!value) return true; // Allow null/empty
+      const num = parseInt(value, 10);
+      return num >= 1;
+    }),
   storageSizeGB: Yup.number()
     .nullable()
     .min(1, 'Storage size must be at least 1 GB'),
@@ -214,7 +240,6 @@ export const assetValidationSchema = Yup.object().shape({
     .max(9999999, 'Cost cannot exceed 99,99,999'),
   notes: Yup.string(),
   charger: Yup.boolean(),
-  bag: Yup.boolean(),
 });
 
 export const assetInitialValues = {
@@ -236,5 +261,4 @@ export const assetInitialValues = {
   cost: '',
   notes: '',
   charger: false,
-  bag: false,
 };

@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText, X, Check } from 'lucide-react';
+import StatusChip from '@/components/atoms/StatusChip';
+import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
 import StateHandler from '@/components/atoms/StateHandler';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -191,30 +193,10 @@ export default function AssetsList() {
         return <span className="font-medium text-gray-800">{cellValue}</span>;
       
       case "status":
-        const statusColors = {
-          'Under Repair': 'bg-red-100 text-red-800',
-          'Allocated': 'bg-green-100 text-green-800',
-          'In Stock': 'bg-blue-100 text-blue-800',
-          'Scrap': 'bg-gray-100 text-gray-800',
-          'Parted Out': 'bg-orange-100 text-orange-800',
-        };
-        return (
-          <span className={`px-3 py-1 rounded text-xs font-medium ${statusColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} />;
       
       case "condition":
-        const conditionColors = {
-          'Working': 'bg-green-100 text-green-800',
-          'Damaged': 'bg-orange-100 text-orange-800',
-          'Faulty': 'bg-red-100 text-red-800',
-        };
-        return (
-          <span className={`px-3 py-1 rounded text-xs font-medium ${conditionColors[cellValue] || 'bg-gray-100 text-gray-800'}`}>
-            {cellValue}
-          </span>
-        );
+        return <StatusChip value={cellValue} colorFn={getConditionChipColor} />;
       
       case "charger":
       case "bag":

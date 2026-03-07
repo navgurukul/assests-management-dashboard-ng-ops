@@ -2,43 +2,14 @@
 
 import { Ticket } from 'lucide-react';
 import StateHandler from '@/components/atoms/StateHandler';
-
-const getStatusColor = (status) => {
-  switch (status?.toUpperCase()) {
-    case 'OPEN':
-      return 'bg-orange-100 text-orange-800';
-    case 'IN_PROGRESS':
-    case 'IN PROGRESS':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'RESOLVED':
-      return 'bg-blue-100 text-blue-800';
-    case 'CLOSED':
-      return 'bg-green-100 text-green-800';
-    case 'ACTIVE':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getPriorityColor = (priority) => {
-  switch (priority?.toUpperCase()) {
-    case 'HIGH':
-      return 'bg-red-100 text-red-800';
-    case 'MEDIUM':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'LOW':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
+import StatusChip from '@/components/atoms/StatusChip';
+import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 
 export default function TicketStatusTab({ userTickets, isLoadingTickets, ticketsError }) {
   if (isLoadingTickets || ticketsError) {
     return (
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Status</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">My Ticket Status</h2>
         <StateHandler
           isLoading={isLoadingTickets}
           isError={!!ticketsError}
@@ -54,7 +25,7 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Status</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">My Ticket Status</h2>
       
       {userTickets && userTickets.length > 0 ? (
         <div className="overflow-x-auto -mx-6">
@@ -101,14 +72,12 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
                       {ticket.ticketType?.replace('_', ' ')}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityColor(ticket.priority)}`}>
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getPriorityChipColor(ticket.priority)}`}>
                         {ticket.priority}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getStatusColor(ticket.status)}`}>
-                        {ticket.status}
-                      </span>
+                      <StatusChip value={ticket.status} />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                       {ticket.campus?.name || '-'}
