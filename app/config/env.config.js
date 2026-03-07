@@ -23,6 +23,8 @@ const config = {
       update: (id) => `/assets/${id}`,
       delete: (id) => `/assets/${id}`,
       details: (id) => `/assets/${id}`,
+      repair: (id) => `/assets/${id}/repair`,
+      scrap: (id) => `/assets/${id}/scrap`,
     },
     
     // Consignments
@@ -78,6 +80,14 @@ const config = {
     // User
     user: {
       me: '/user/me',
+    },
+
+    // Campus Incharge
+    campusIncharge: {
+      list: '/campus-incharge',
+      create: '/campus-incharge',
+      update: (id) => `/campus-incharge/${id}`,
+      delete: (id) => `/campus-incharge/${id}`,
     },
 
     // Users

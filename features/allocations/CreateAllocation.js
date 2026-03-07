@@ -25,24 +25,32 @@ export default function CreateAllocation() {
   const [modifiedInitialValues, setModifiedInitialValues] = useState(allocationInitialValues);
 
   useEffect(() => {
-    if (selectedTicket?.raisedByUser?.email) {
-      // Modify form fields to disable userEmail field
+    if (selectedTicket) {
+      // Modify form fields to disable userEmail and/or userAddress fields
       const updatedFields = allocationFormFields.map(field => {
-        if (field.name === 'userEmail') {
+        if (field.name === 'userEmail' && selectedTicket?.raisedByUser?.email) {
           return {
             ...field,
             disabled: true,
             helperText: 'Email pre-populated from ticket raiser',
           };
         }
+        if (field.name === 'userAddress') {
+          return {
+            ...field,
+            disabled: true,
+            helperText: 'Address pre-populated from ticket',
+          };
+        }
         return field;
       });
       setModifiedFormFields(updatedFields);
 
-      // Set initial value for userEmail
+      // Set initial values for userEmail and userAddress
       setModifiedInitialValues({
         ...allocationInitialValues,
-        userEmail: selectedTicket.raisedByUser.email,
+        ...(selectedTicket?.raisedByUser?.email && { userEmail: selectedTicket.raisedByUser.email }),
+        userAddress: selectedTicket?.address || '',
       });
     }
 
@@ -123,6 +131,10 @@ export default function CreateAllocation() {
 
   // Field callbacks for form field changes
   const fieldCallbacks = {
+    clearAssetSelections: (value, formik) => {
+      formik.setFieldValue('assetTypeId', '');
+      formik.setFieldValue('assetId', '');
+    },
     clearAssetId: (value, formik) => {
       // Clear assetId when assetType changes
       formik.setFieldValue('assetId', '');

@@ -4,13 +4,35 @@ import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
+import apiService from '@/app/utils/apiService';
+import { toast } from '@/app/utils/toast';
+import config from '@/app/config/env.config';
 
 export default function AssetDetails({ assetId, assetData, onBack }) {
   const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleStatusUpdate = (formData) => {
-    console.log('Status update submitted:', { action: modalAction, description: formData.description });
-    setModalAction(null);
+  const handleStatusUpdate = async (formData) => {
+    const id = assetId || assetData?.id;
+    setIsSubmitting(true);
+    try {
+      if (modalAction === 'REPAIR') {
+        await apiService.post(config.endpoints.assets.repair(id), {
+          reasonForRepair: formData.description,
+        });
+        toast.success('Asset moved to repair successfully.');
+      } else if (modalAction === 'SCRAP') {
+        await apiService.post(config.endpoints.assets.scrap(id), {
+          reasonForScrapping: formData.description,
+        });
+        toast.success('Asset marked as scrap successfully.');
+      }
+      setModalAction(null);
+    } catch (error) {
+      toast.error(error?.message || 'Failed to update asset status. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const repairFields = [
@@ -187,6 +209,7 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
         actionType={modalAction === 'REPAIR' ? 'Put in Repair' : 'Scrap this Device'}
         fields={modalAction === 'REPAIR' ? repairFields : scrapFields}
         onSubmit={handleStatusUpdate}
+        isSubmitting={isSubmitting}
         helpText={
           modalAction === 'REPAIR'
             ? 'Provide details about the issue. The asset status will be updated to Under Repair.'
