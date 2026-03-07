@@ -80,6 +80,14 @@ const config = {
       me: '/user/me',
     },
 
+    // Campus Incharge
+    campusIncharge: {
+      list: '/campus-incharge',
+      create: '/campus-incharge',
+      update: (id) => `/campus-incharge/${id}`,
+      delete: (id) => `/campus-incharge/${id}`,
+    },
+
     // Users
     users: {
       list: '/users',
