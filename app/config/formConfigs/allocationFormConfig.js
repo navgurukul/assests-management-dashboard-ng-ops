@@ -9,7 +9,7 @@ export const allocationFormFields = [
     type: 'radio',
     required: true,
     options: [
-      { value: 'REMOTE', label: 'Remote (Student, Employee, etc.)' },
+      { value: 'REMOTE', label: 'Individual (Student,Remote Employee, etc.)' },
       { value: 'CAMPUS', label: 'Campus (Bulk Allocation)' },
     ],
   },
