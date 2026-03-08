@@ -186,6 +186,21 @@ export default function ConsignmentsList() {
     }));
   }, [campusData]);
 
+  const campusNameById = React.useMemo(() => {
+    const map = new Map();
+    const campuses = Array.isArray(campusData?.data) ? campusData.data : [];
+
+    campuses.forEach((campus) => {
+      const campusId = String(campus?.id || '').trim();
+      const campusName = campus?.campusName || campus?.name || '';
+      if (campusId && campusName) {
+        map.set(campusId, campusName);
+      }
+    });
+
+    return map;
+  }, [campusData]);
+
   // Update createFormFields when campus options are available
   useEffect(() => {
     if (campusOptions.length > 0) {
@@ -322,6 +337,78 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Creating consignment...');
     
     try {
+      const isPlaceholderValue = (value) => {
+        if (value === null || value === undefined) return true;
+        const normalized = String(value).trim().toUpperCase();
+        return normalized === '' || normalized === 'N/A' || normalized === 'NA' || normalized === '-';
+      };
+
+      const isLikelyCampusId = (value) => {
+        if (typeof value !== 'string') return false;
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return false;
+        return /^[a-f0-9-]{16,}$/i.test(trimmedValue) && !/\s/.test(trimmedValue);
+      };
+
+      const resolveCampusName = (...candidates) => {
+        for (const candidate of candidates) {
+          if (!candidate) continue;
+
+          if (typeof candidate === 'object') {
+            const objectName = candidate.campusName || candidate.name;
+            if (!isPlaceholderValue(objectName) && !isLikelyCampusId(String(objectName))) {
+              return objectName;
+            }
+
+            const objectId = String(candidate.id || candidate.campusId || '').trim();
+            if (objectId && campusNameById.has(objectId)) {
+              return campusNameById.get(objectId);
+            }
+
+            continue;
+          }
+
+          const value = String(candidate).trim();
+          if (isPlaceholderValue(value)) continue;
+
+          if (campusNameById.has(value)) {
+            return campusNameById.get(value);
+          }
+
+          if (!isLikelyCampusId(value)) {
+            return value;
+          }
+        }
+
+        return '';
+      };
+
+      const selectedAllocationRecord = allAllocations.find(
+        (allocation) => String(allocation?.id) === String(formData.allocationId)
+      );
+
+      const sourceCampusName = resolveCampusName(
+        selectedAllocationRecord?.sourceCampus,
+        selectedAllocationRecord?.sourceCampusId,
+        selectedAllocationRecord?.sourceCampusName,
+        selectedAllocationRecord?.source,
+        formData.allocationDetails?.sourceCampus,
+        formData.allocationDetails?.sourceCampusId,
+        formData.allocationDetails?.sourceCampusName,
+        formData.allocationDetails?.source
+      );
+
+      const destinationCampusName = resolveCampusName(
+        selectedAllocationRecord?.destinationCampus,
+        selectedAllocationRecord?.destinationCampusId,
+        selectedAllocationRecord?.destinationCampusName,
+        selectedAllocationRecord?.destination,
+        formData.allocationDetails?.destinationCampus,
+        formData.allocationDetails?.destinationCampusId,
+        formData.allocationDetails?.destinationCampusName,
+        formData.allocationDetails?.destination
+      );
+
       // Validate that we have allocation and assets
       if (!formData.allocationId) {
         throw new Error('Please select an allocation');
@@ -335,8 +422,8 @@ export default function ConsignmentsList() {
         allocationId: formData.allocationId,
         assetIds: formData.selectedAssets.map(asset => asset.id || asset.assetId),
         status: 'draft',
-        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.source,
-        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destination,
+        source: sourceCampusName,
+        destination: destinationCampusName,
       };
 
       
