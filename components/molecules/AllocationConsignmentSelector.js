@@ -49,7 +49,7 @@ export default function AllocationConsignmentSelector({
     return rawAssetIds.map((assetId) => ({
       id: assetId,
       assetId,
-      assetTag: assetId,
+      assetTag: '',
       assetType: 'N/A',
       status: 'ACTIVE',
     }));
@@ -58,16 +58,21 @@ export default function AllocationConsignmentSelector({
   const normalizeAllocationData = (allocation) => {
     if (!allocation) return null;
 
+    const hasSourceCampusObject = !!allocation.sourceCampus && typeof allocation.sourceCampus === 'object';
+    const hasDestinationCampusObject = !!allocation.destinationCampus && typeof allocation.destinationCampus === 'object';
+
     const sourceCampusName =
-      allocation.sourceCampus?.campusName ||
-      allocation.sourceCampus?.name ||
+      (hasSourceCampusObject ? allocation.sourceCampus?.campusName : '') ||
+      (hasSourceCampusObject ? allocation.sourceCampus?.name : '') ||
+      (typeof allocation.sourceCampus === 'string' ? allocation.sourceCampus : '') ||
       allocation.sourceCampusName ||
       allocation.sourceCampusCode ||
       allocation.source;
 
     const destinationCampusName =
-      allocation.destinationCampus?.campusName ||
-      allocation.destinationCampus?.name ||
+      (hasDestinationCampusObject ? allocation.destinationCampus?.campusName : '') ||
+      (hasDestinationCampusObject ? allocation.destinationCampus?.name : '') ||
+      (typeof allocation.destinationCampus === 'string' ? allocation.destinationCampus : '') ||
       allocation.destinationCampusName ||
       allocation.destinationCampusCode ||
       allocation.destination;
@@ -75,7 +80,7 @@ export default function AllocationConsignmentSelector({
     return {
       ...allocation,
       assets: normalizeAssets(allocation),
-      sourceCampus: allocation.sourceCampus
+      sourceCampus: hasSourceCampusObject
         ? {
             ...allocation.sourceCampus,
             name: sourceCampusName || allocation.sourceCampus?.name || 'N/A',
@@ -83,7 +88,7 @@ export default function AllocationConsignmentSelector({
         : sourceCampusName
           ? { name: sourceCampusName, campusName: sourceCampusName }
           : undefined,
-      destinationCampus: allocation.destinationCampus
+      destinationCampus: hasDestinationCampusObject
         ? {
             ...allocation.destinationCampus,
             name: destinationCampusName || allocation.destinationCampus?.name || 'N/A',
@@ -91,14 +96,33 @@ export default function AllocationConsignmentSelector({
         : destinationCampusName
           ? { name: destinationCampusName, campusName: destinationCampusName }
           : undefined,
-      source: sourceCampusName || allocation.source || 'N/A',
-      destination: destinationCampusName || allocation.destination || 'N/A',
+      source: sourceCampusName || allocation.source || (typeof allocation.sourceCampus === 'string' ? allocation.sourceCampus : '') || 'N/A',
+      destination: destinationCampusName || allocation.destination || (typeof allocation.destinationCampus === 'string' ? allocation.destinationCampus : '') || 'N/A',
     };
   };
 
   const [selectedAllocation, setSelectedAllocation] = useState(value.allocationId || '');
   const [selectedAssets, setSelectedAssets] = useState(value.selectedAssets || []);
   const [allocationDetails, setAllocationDetails] = useState(normalizeAllocationData(value.allocationDetails) || null);
+  const [assetTagsByFetchedId, setAssetTagsByFetchedId] = useState({});
+  const [assetTypesByFetchedId, setAssetTypesByFetchedId] = useState({});
+  const [attemptedAssetTagLookupById, setAttemptedAssetTagLookupById] = useState({});
+  const [currentAssetLookupId, setCurrentAssetLookupId] = useState('');
+
+  const getAssetTypeLabel = (value) => {
+    if (!value) return '';
+    if (typeof value === 'string') {
+      const normalized = value.trim();
+      return normalized && normalized !== 'N/A' ? normalized : '';
+    }
+    if (typeof value === 'object') {
+      const candidate = value.name || value.assetTypeName || value.type || value.label || value.value || '';
+      const normalized = String(candidate || '').trim();
+      return normalized && normalized !== 'N/A' ? normalized : '';
+    }
+    const normalized = String(value).trim();
+    return normalized && normalized !== 'N/A' ? normalized : '';
+  };
 
   // Fetch allocations data
   const { data: allocationsData } = useFetch({
@@ -189,7 +213,110 @@ export default function AllocationConsignmentSelector({
     return map;
   }, [allAllocations, assetsData]);
 
+  const assetTypeById = React.useMemo(() => {
+    const map = new Map();
+
+    const setType = (idCandidate, typeCandidate) => {
+      const id = String(idCandidate || '').trim();
+      const type = getAssetTypeLabel(typeCandidate);
+      if (!id || !type || map.has(id)) return;
+      map.set(id, type);
+    };
+
+    const addFromAssets = (assets) => {
+      if (!Array.isArray(assets)) return;
+      assets.forEach((asset) => {
+        if (!asset) return;
+        setType(asset.id || asset.assetId, asset.assetType || asset.type || asset.assetTypeName);
+      });
+    };
+
+    allAllocations.forEach((allocation) => {
+      addFromAssets(allocation?.assets);
+      if (allocation?.asset) {
+        setType(
+          allocation.asset.id || allocation.asset.assetId || allocation.assetId,
+          allocation.asset.assetType || allocation.asset.type || allocation.asset.assetTypeName
+        );
+      }
+    });
+
+    const apiAssets =
+      (Array.isArray(assetsData?.data?.assets) && assetsData.data.assets) ||
+      (Array.isArray(assetsData?.data) && assetsData.data) ||
+      (Array.isArray(assetsData?.assets) && assetsData.assets) ||
+      (Array.isArray(assetsData) && assetsData) ||
+      [];
+
+    addFromAssets(apiAssets);
+
+    return map;
+  }, [allAllocations, assetsData]);
+
   const getAssetId = (asset) => String(asset?.id || asset?.assetId || '').trim();
+
+  const unresolvedAssetIds = React.useMemo(() => {
+    const assets = Array.isArray(allocationDetails?.assets) ? allocationDetails.assets : [];
+
+    return assets
+      .map((asset) => ({
+        id: getAssetId(asset),
+        directTag: String(asset?.assetTag || '').trim(),
+        directType: getAssetTypeLabel(asset?.assetType || asset?.type),
+      }))
+      .filter(({ id, directTag, directType }) => {
+        if (!id) return false;
+        const tagResolved = (directTag && directTag !== id) || assetTagById.has(id) || !!assetTagsByFetchedId[id];
+        const typeResolved = !!directType || assetTypeById.has(id) || !!assetTypesByFetchedId[id];
+        if (tagResolved && typeResolved) return false;
+        if (attemptedAssetTagLookupById[id]) return false;
+        return true;
+      })
+      .map(({ id }) => id);
+  }, [allocationDetails, assetTagById, assetTagsByFetchedId, assetTypeById, assetTypesByFetchedId, attemptedAssetTagLookupById]);
+
+  const { data: unresolvedAssetByIdData, isError: isUnresolvedAssetByIdError } = useFetch({
+    url: currentAssetLookupId ? `/assets/${currentAssetLookupId}` : '/assets',
+    queryKey: ['assets', 'allocation-consignment-selector', 'detail-by-id', currentAssetLookupId],
+    enabled: !!currentAssetLookupId,
+  });
+
+  useEffect(() => {
+    if (currentAssetLookupId) return;
+    if (!unresolvedAssetIds.length) return;
+    setCurrentAssetLookupId(unresolvedAssetIds[0]);
+  }, [unresolvedAssetIds, currentAssetLookupId]);
+
+  useEffect(() => {
+    if (!currentAssetLookupId) return;
+    if (typeof unresolvedAssetByIdData === 'undefined' && !isUnresolvedAssetByIdError) return;
+
+    const payload = unresolvedAssetByIdData?.data || unresolvedAssetByIdData;
+    const assetData = payload?.asset || payload;
+    const resolvedTag = String(assetData?.assetTag || assetData?.tag || '').trim();
+    const resolvedType = getAssetTypeLabel(assetData?.assetType || assetData?.type || assetData?.assetTypeName);
+
+    setAttemptedAssetTagLookupById((prev) => ({
+      ...prev,
+      [currentAssetLookupId]: true,
+    }));
+
+    if (resolvedTag && resolvedTag !== currentAssetLookupId) {
+      setAssetTagsByFetchedId((prev) => ({
+        ...prev,
+        [currentAssetLookupId]: resolvedTag,
+      }));
+    }
+
+    if (resolvedType) {
+      setAssetTypesByFetchedId((prev) => ({
+        ...prev,
+        [currentAssetLookupId]: resolvedType,
+      }));
+    }
+
+    setCurrentAssetLookupId('');
+  }, [currentAssetLookupId, unresolvedAssetByIdData, isUnresolvedAssetByIdError]);
 
   const getAssetTag = (asset) => {
     const assetId = getAssetId(asset);
@@ -199,11 +326,34 @@ export default function AllocationConsignmentSelector({
       return directTag;
     }
 
+    if (assetId && assetTagsByFetchedId[assetId]) {
+      return assetTagsByFetchedId[assetId];
+    }
+
     if (assetId && assetTagById.has(assetId)) {
       return assetTagById.get(assetId);
     }
 
-    return directTag || 'N/A';
+    return 'N/A';
+  };
+
+  const getAssetType = (asset) => {
+    const assetId = getAssetId(asset);
+    const directType = getAssetTypeLabel(asset?.assetType || asset?.type);
+
+    if (directType) {
+      return directType;
+    }
+
+    if (assetId && assetTypesByFetchedId[assetId]) {
+      return assetTypesByFetchedId[assetId];
+    }
+
+    if (assetId && assetTypeById.has(assetId)) {
+      return assetTypeById.get(assetId);
+    }
+
+    return 'N/A';
   };
 
   const isLikelyCampusId = (value) => {
@@ -434,7 +584,7 @@ export default function AllocationConsignmentSelector({
           <h4 className="text-sm font-semibold text-blue-900 mb-3">Allocation Details</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <p className="text-xs text-gray-600 mb-1">Assigned To</p>
+              <p className="text-xs text-gray-600 mb-1">Allocated To</p>
               <p className="text-sm font-medium text-gray-900">
                 {allocationDetails.user?.email || 
                  allocationDetails.userEmail || 
@@ -591,7 +741,7 @@ export default function AllocationConsignmentSelector({
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-700">
-                          {asset.assetType || asset.type || 'Laptop'}
+                          {getAssetType(asset)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
