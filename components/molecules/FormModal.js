@@ -33,6 +33,20 @@ export default function FormModal({
     if (isOpen) {
       const initialData = {};
       fields.forEach((field) => {
+        if (field.type === 'allocation-consignment-selector' && field.lockAllocationSelection && field.lockedAllocationId) {
+          const lockedAllocationValue = {
+            allocationId: String(field.lockedAllocationId),
+            selectedAssets: [],
+            allocationDetails: field.lockedAllocationData || null,
+          };
+
+          initialData[field.name] = lockedAllocationValue;
+          initialData.allocationId = lockedAllocationValue.allocationId;
+          initialData.selectedAssets = lockedAllocationValue.selectedAssets;
+          initialData.allocationDetails = lockedAllocationValue.allocationDetails;
+          return;
+        }
+
         initialData[field.name] = field.defaultValue || '';
       });
       setFormData(initialData);
@@ -314,6 +328,9 @@ export default function FormModal({
             apiUrl={field.apiUrl}
             queryKey={field.queryKey}
             filterStatus={field.filterStatus}
+            lockAllocationSelection={field.lockAllocationSelection}
+            lockedAllocationId={field.lockedAllocationId}
+            lockedAllocationData={field.lockedAllocationData}
             isDisabled={isSubmitting}
           />
         );

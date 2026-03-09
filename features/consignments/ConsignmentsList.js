@@ -186,6 +186,21 @@ export default function ConsignmentsList() {
     }));
   }, [campusData]);
 
+  const campusNameById = React.useMemo(() => {
+    const map = new Map();
+    const campuses = Array.isArray(campusData?.data) ? campusData.data : [];
+
+    campuses.forEach((campus) => {
+      const campusId = String(campus?.id || '').trim();
+      const campusName = campus?.campusName || campus?.name || '';
+      if (campusId && campusName) {
+        map.set(campusId, campusName);
+      }
+    });
+
+    return map;
+  }, [campusData]);
+
   // Update createFormFields when campus options are available
   useEffect(() => {
     if (campusOptions.length > 0) {
@@ -243,6 +258,54 @@ export default function ConsignmentsList() {
       options: courierOptions,
     },
   ];
+
+  const isLikelyId = (value) => {
+    if (typeof value !== 'string') return false;
+    const trimmed = value.trim();
+    if (!trimmed) return false;
+    return /^[a-f0-9-]{16,}$/i.test(trimmed) && !/\s/.test(trimmed);
+  };
+
+  const isPlaceholder = (value) => {
+    if (value === null || value === undefined) return true;
+    const normalized = String(value).trim().toUpperCase();
+    return normalized === '' || normalized === 'N/A' || normalized === 'NA' || normalized === '-';
+  };
+
+  const resolveConsignmentLocationLabel = (baseValue, objectCandidate, idCandidate) => {
+    const candidates = [baseValue, objectCandidate, idCandidate];
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+
+      if (typeof candidate === 'object') {
+        const objectName = candidate.campusName || candidate.name;
+        if (!isPlaceholder(objectName)) {
+          return objectName;
+        }
+
+        const objectId = String(candidate.id || candidate.campusId || '').trim();
+        if (objectId && campusNameById.has(objectId)) {
+          return campusNameById.get(objectId);
+        }
+
+        continue;
+      }
+
+      const value = String(candidate).trim();
+      if (isPlaceholder(value)) continue;
+
+      if (campusNameById.has(value)) {
+        return campusNameById.get(value);
+      }
+
+      if (!isLikelyId(value)) {
+        return value;
+      }
+    }
+
+    return 'N/A';
+  };
   
   // Process API data to table format
   const tableData = React.useMemo(() => {
@@ -250,7 +313,25 @@ export default function ConsignmentsList() {
     
     return sourceData.map((consignment) => {
       if (typeof transformConsignmentForTable === 'function') {
-        return transformConsignmentForTable(consignment);
+        const transformed = transformConsignmentForTable(consignment);
+
+        const resolvedSource = resolveConsignmentLocationLabel(
+          transformed?.source,
+          consignment?.sourceCampus || consignment?.sourceLocation || consignment?.allocation?.sourceCampus,
+          consignment?.sourceCampusId || consignment?.sourceLocationId || consignment?.allocation?.sourceCampusId
+        );
+
+        const resolvedDestination = resolveConsignmentLocationLabel(
+          transformed?.destination,
+          consignment?.destinationCampus || consignment?.destinationLocation || consignment?.allocation?.destinationCampus,
+          consignment?.destinationCampusId || consignment?.destinationLocationId || consignment?.allocation?.destinationCampusId
+        );
+
+        return {
+          ...transformed,
+          source: resolvedSource,
+          destination: resolvedDestination,
+        };
       }
       
       // Default formatting
@@ -274,7 +355,7 @@ export default function ConsignmentsList() {
         allocationId: consignment.allocation?.id || consignment.allocationId || '',
       };
     });
-  }, [data]);
+  }, [data, campusNameById]);
   
   // Get pagination metadata
   const totalItems = data?.pagination?.total || data?.total || tableData.length;
@@ -322,6 +403,78 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Creating consignment...');
     
     try {
+      const isPlaceholderValue = (value) => {
+        if (value === null || value === undefined) return true;
+        const normalized = String(value).trim().toUpperCase();
+        return normalized === '' || normalized === 'N/A' || normalized === 'NA' || normalized === '-';
+      };
+
+      const isLikelyCampusId = (value) => {
+        if (typeof value !== 'string') return false;
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return false;
+        return /^[a-f0-9-]{16,}$/i.test(trimmedValue) && !/\s/.test(trimmedValue);
+      };
+
+      const resolveCampusName = (...candidates) => {
+        for (const candidate of candidates) {
+          if (!candidate) continue;
+
+          if (typeof candidate === 'object') {
+            const objectName = candidate.campusName || candidate.name;
+            if (!isPlaceholderValue(objectName) && !isLikelyCampusId(String(objectName))) {
+              return objectName;
+            }
+
+            const objectId = String(candidate.id || candidate.campusId || '').trim();
+            if (objectId && campusNameById.has(objectId)) {
+              return campusNameById.get(objectId);
+            }
+
+            continue;
+          }
+
+          const value = String(candidate).trim();
+          if (isPlaceholderValue(value)) continue;
+
+          if (campusNameById.has(value)) {
+            return campusNameById.get(value);
+          }
+
+          if (!isLikelyCampusId(value)) {
+            return value;
+          }
+        }
+
+        return '';
+      };
+
+      const selectedAllocationRecord = allAllocations.find(
+        (allocation) => String(allocation?.id) === String(formData.allocationId)
+      );
+
+      const sourceCampusName = resolveCampusName(
+        selectedAllocationRecord?.sourceCampus,
+        selectedAllocationRecord?.sourceCampusId,
+        selectedAllocationRecord?.sourceCampusName,
+        selectedAllocationRecord?.source,
+        formData.allocationDetails?.sourceCampus,
+        formData.allocationDetails?.sourceCampusId,
+        formData.allocationDetails?.sourceCampusName,
+        formData.allocationDetails?.source
+      );
+
+      const destinationCampusName = resolveCampusName(
+        selectedAllocationRecord?.destinationCampus,
+        selectedAllocationRecord?.destinationCampusId,
+        selectedAllocationRecord?.destinationCampusName,
+        selectedAllocationRecord?.destination,
+        formData.allocationDetails?.destinationCampus,
+        formData.allocationDetails?.destinationCampusId,
+        formData.allocationDetails?.destinationCampusName,
+        formData.allocationDetails?.destination
+      );
+
       // Validate that we have allocation and assets
       if (!formData.allocationId) {
         throw new Error('Please select an allocation');
@@ -335,8 +488,8 @@ export default function ConsignmentsList() {
         allocationId: formData.allocationId,
         assetIds: formData.selectedAssets.map(asset => asset.id || asset.assetId),
         status: 'draft',
-        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.source,
-        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destination,
+        source: sourceCampusName,
+        destination: destinationCampusName,
       };
 
       
@@ -548,6 +701,10 @@ export default function ConsignmentsList() {
         
       case 'actions':
         const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
+        const canTrack =
+          normalizedItemStatus === 'dispatched' &&
+          item.trackingId &&
+          item.trackingId !== '-';
         
         return (
           <div className="flex items-center justify-start gap-2 flex-wrap">
@@ -566,8 +723,8 @@ export default function ConsignmentsList() {
               />
             )}
             
-            {/* Track button if tracking ID exists */}
-            {item.trackingId && item.trackingId !== '-' && (
+            {/* Track button only for dispatched status */}
+            {canTrack && (
               <CustomButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -582,7 +739,7 @@ export default function ConsignmentsList() {
             )}
             
             {/* Show message if no actions available */}
-            {normalizedItemStatus !== 'draft' && (!item.trackingId || item.trackingId === '-') && (
+            {normalizedItemStatus !== 'draft' && !canTrack && (
               <span className="text-xs text-gray-400">-</span>
             )}
           </div>

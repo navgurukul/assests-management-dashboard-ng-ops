@@ -60,6 +60,7 @@ export default function ApiAutocomplete({
   selectedItem = null,
   excludeValue = null,
   onItemSelect = null,
+  staticItems = null,
 }) {
   // Use custom hook to handle data fetching and processing
   const { items, isLoading } = useApiAutocomplete({
@@ -74,6 +75,7 @@ export default function ApiAutocomplete({
     selectedItem,
     value,
     valueKey,
+    staticItems,
   });
 
   // Ensure items is always an array to prevent iteration errors
