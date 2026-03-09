@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';import { useDispatch } from 'react-redux';
-import { setSelectedTicket } from '@/app/store/slices/ticketSlice';import DetailsPage from '@/components/molecules/DetailsPage';
+import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
+import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
-import useFetch from '@/app/hooks/query/useFetch';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import {
@@ -22,28 +23,19 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data, isLoading, isError, error, refetch } = useFetch({
-    url: config.getApiUrl(config.endpoints.tickets.details(ticketId)),
-    queryKey: ['ticket', ticketId],
-  });
-
-  // Handle loading, error, and not found states
-  if (isLoading || isError || !data?.data) {
+  // Use table row data directly — no API call needed
+  if (!ticketData) {
     return (
       <StateHandler
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-        isEmpty={!data?.data}
-        loadingMessage="Loading ticket..."
-        errorMessage="Error loading ticket"
+        isLoading={false}
+        isError={false}
+        isEmpty={true}
         emptyMessage="Ticket not found"
       />
     );
   }
 
-  // Merge API data with table row data (ticketData) to fill in fields like address, managerEmail
-  const ticket = { ...ticketData, ...data.data };
+  const ticket = ticketData;
   const historyEntries = (ticket.historyLogs || []).map((log) => ({
     time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
     text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
@@ -79,7 +71,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
       alert('Ticket updated successfully!');
       
       setIsUpdateModalOpen(false);
-      refetch(); // Refresh ticket data
       
     } catch (error) {
       console.error('Error updating ticket:', error);
