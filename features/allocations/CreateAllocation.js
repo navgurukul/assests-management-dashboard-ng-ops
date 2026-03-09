@@ -75,6 +75,8 @@ export default function CreateAllocation() {
         allocationData = {
           allocationType: 'Remote',
           assetIds: [values.assetId],
+          sourceCampusName: values.sourceCampusName,
+          destinationCampusName: 'Remote',
           allocationReason: values.allocationReason,
           notes: values.notes || null,
         };

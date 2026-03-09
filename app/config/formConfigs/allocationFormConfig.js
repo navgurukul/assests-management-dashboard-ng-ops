@@ -26,6 +26,8 @@ export const allocationFormFields = [
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
     onFieldChange: 'clearAssetSelections',
+    companionField: 'sourceCampusName',
+    companionKey: 'campusName',
   },
   {
     name: 'assetTypeId',
