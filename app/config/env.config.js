@@ -25,6 +25,7 @@ const config = {
       details: (id) => `/assets/${id}`,
       repair: (id) => `/assets/${id}/repair`,
       scrap: (id) => `/assets/${id}/scrap`,
+      consolidatedByCampus: '/assets/consolidated-data/by-campus',
     },
     
     // Consignments
