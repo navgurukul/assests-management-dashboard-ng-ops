@@ -228,6 +228,15 @@ export default function TicketsList() {
     return categoryNames[filterKey] || filterKey;
   };
 
+  // Map from ticket id → original API ticket object for details page
+  const rawTicketsMap = React.useMemo(() => {
+    if (!data?.data?.tickets) return {};
+    return data.data.tickets.reduce((acc, t) => {
+      acc[t.id] = t;
+      return acc;
+    }, {});
+  }, [data]);
+
   const ticketsData = React.useMemo(() => {
     if (!data?.data?.tickets) return [];
 
@@ -388,6 +397,10 @@ export default function TicketsList() {
   };
 
   const handleRowClick = (ticket) => {
+    if (typeof window !== 'undefined') {
+      const rawTicket = rawTicketsMap[ticket.id] || ticket;
+      sessionStorage.setItem('currentTicketData', JSON.stringify(rawTicket));
+    }
     router.push(`/tickets/${ticket.id}?id=${ticket.id}`);
   };
 
