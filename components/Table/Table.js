@@ -1,14 +1,8 @@
 "use client";
-import { Chip } from "@nextui-org/react";
 import TableWrapper from "./TableWrapper";
-import { assetsPageData } from '@/dummyJson/dummyJson';
-
-const statusColorMap = {
-  Active: "success",
-  "In Storage": "primary",
-  "Needs Repair": "warning",
-  "In Repair": "danger",
-};
+import StateHandler from "@/components/atoms/StateHandler";
+import useFetch from "@/app/hooks/query/useFetch";
+import config from "@/app/config/env.config";
 
 const columns = [
   { key: "campus", label: "Campus" },
@@ -23,17 +17,29 @@ const columns = [
   { key: "grandTotal", label: "Grand Total" },
 ];
 
-export default function AssetsTable() {
-  const tableData = assetsPageData.map((item) => {
-    const subTotal = (item.lws || 0) + (item.lis || 0) + (item.lct || 0) + (item.lr || 0);
-    const grandTotal = subTotal + (item.lnw || 0) + (item.lwfhe || 0) + (item.lsdb || 0);
+function transformRow(item) {
+  return {
+    id: item.campus,
+    campus: item.campus,
+    lws: item.LWS ?? 0,
+    lis: item.LIS ?? 0,
+    lct: item.LCT ?? 0,
+    lr: item.LR ?? 0,
+    subTotal: item.sub_total ?? 0,
+    lnw: item.LNW ?? 0,
+    lwfhe: item.LWFHE ?? 0,
+    lsdb: item.LSD_B ?? 0,
+    grandTotal: item.grand_total ?? 0,
+  };
+}
 
-    return {
-      ...item,
-      subTotal,
-      grandTotal,
-    };
+export default function AssetsTable() {
+  const { data: response, isLoading, isError, error } = useFetch({
+    url: config.endpoints.assets.consolidatedByCampus,
+    queryKey: ["assets", "consolidated-by-campus"],
   });
+
+  const tableData = (response?.data ?? []).map(transformRow);
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -44,24 +50,28 @@ export default function AssetsTable() {
       case "subTotal":
       case "grandTotal":
         return <span className="font-bold text-blue-600">{cellValue}</span>;
-      case "lws":
-      case "lis":
-      case "lct":
-      case "lr":
-      case "lnw":
-      case "lwfhe":
-      case "lsdb":
-        return <span className="text-gray-700 text-center">{cellValue}</span>;
       default:
-        return cellValue;
+        return <span className="text-gray-700 text-center">{cellValue}</span>;
     }
   };
+
+  if (isLoading || isError) {
+    return (
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading consolidated data..."
+        errorMessage="Failed to load consolidated campus data"
+      />
+    );
+  }
 
   return (
     <TableWrapper
       data={tableData}
       columns={columns}
-      title="Consolidated laptop Data - Navgurukul"
+      title="Consolidated Laptop Data - Navgurukul"
       renderCell={renderCell}
       itemsPerPage={10}
       showPagination={true}
