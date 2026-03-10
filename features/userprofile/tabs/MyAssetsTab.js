@@ -7,6 +7,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import usePost from '@/app/hooks/query/usePost';
+import useFileUpload from '@/app/hooks/useFileUpload';
 import { toast } from '@/app/utils/toast';
 
 const returnAssetFields = [
@@ -105,8 +106,11 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
 
-  // React Query mutation — isPending replaces manual isSubmitting state
-  const { mutateAsync: extendLease, isPending: isExtending } = usePost();
+  // Single React Query mutation — reused for all POST calls in this tab
+  const { mutateAsync, isPending } = usePost();
+
+  // File upload hook for vendor receipt
+  const { uploadFiles, isUploading } = useFileUpload();
 
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -151,14 +155,35 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   };
 
   const handleReturnSubmit = async (formData) => {
-    setIsSubmitting(true);
     try {
-      // TODO: wire up to API
-      console.log('Return asset payload:', { assetId: selectedAsset?.id, ...formData });
-    } finally {
-      setIsSubmitting(false);
+      // Upload vendor receipt files if provided
+      let vendorReceiptUrl = undefined;
+      if (formData.vendorReceipt && formData.vendorReceipt.length > 0) {
+        const files = Array.from(formData.vendorReceipt);
+        const uploaded = await uploadFiles(files);
+        if (uploaded && uploaded.length > 0) {
+          vendorReceiptUrl = uploaded[0].url;
+        }
+      }
+
+      await mutateAsync({
+        endpoint: '/consignments/in-transit-returns',
+        body: {
+          assetId: selectedAsset?.id,
+          campusItCoordinatorEmail: formData.campusItCoordinator,
+          exactAddress: formData.exactAddress,
+          vendorName: formData.vendorName,
+          ...(vendorReceiptUrl && { vendorReceiptUrl }),
+          managerEmail: formData.managerEmail,
+          expectedDeliveryDate: formData.expectedDeliveryDate,
+        },
+      });
+
+      toast.success('Return asset request created successfully.');
       setReturnModalOpen(false);
       setSelectedAsset(null);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to submit return asset request.');
     }
   };
 
@@ -169,7 +194,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
     }
 
     try {
-      await extendLease({
+      await mutateAsync({
         endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
         body: {
           leaseType: formData.leaseType,
@@ -339,7 +364,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Extend Lease"
         fields={extendLeaseFields}
         onSubmit={handleExtendSubmit}
-        isSubmitting={isExtending}
+        isSubmitting={isPending}
         size="small"
       />
 
@@ -350,7 +375,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Return Asset"
         fields={computedReturnFields}
         onSubmit={handleReturnSubmit}
-        isSubmitting={false}
+        isSubmitting={isPending || isUploading}
         size="medium"
       />
     </div>
