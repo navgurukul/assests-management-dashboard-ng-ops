@@ -58,7 +58,7 @@ const returnAssetFields = [
   },
   {
     name: 'managerEmail',
-    label: 'Manager Email (Loop In)',
+    label: 'Manager Email',
     type: 'email',
     required: true,
     placeholder: 'Manager email to loop in',
