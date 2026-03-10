@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
 import ActionMenu from '@/components/molecules/ActionMenu';
 import { inTransitColumns, renderInTransitCell } from '@/features/consignments/InTransitReturns';
-import { inTransitReturnsDummyData } from '@/dummyJson/dummyJson';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
@@ -68,6 +67,9 @@ export default function ConsignmentsList() {
   // In-transit returns modal state
   const [showInTransit, setShowInTransit] = useState(false);
   const [inTransitSearch, setInTransitSearch] = useState('');
+  const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState('');
+  const [inTransitPage, setInTransitPage] = useState(1);
+  const [inTransitPageSize, setInTransitPageSize] = useState(10);
   
   // In-transit action menu state
   const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
@@ -91,7 +93,7 @@ export default function ConsignmentsList() {
     alwaysVisibleColumns,
   } = useTableColumns(CONSIGNMENT_TABLE_ID, consignmentTableColumns, defaultVisibleColumns);
   
-  // Debounce search input (800ms delay)
+  // Debounce main search input (800ms delay)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
@@ -100,6 +102,16 @@ export default function ConsignmentsList() {
     
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  // Debounce in-transit search input (800ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedInTransitSearch(inTransitSearch);
+      setInTransitPage(1);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [inTransitSearch]);
   
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -131,6 +143,27 @@ export default function ConsignmentsList() {
     return params.toString();
   };
   
+  // Build in-transit query string
+  const buildInTransitQueryString = () => {
+    const params = new URLSearchParams();
+    params.append('page', inTransitPage);
+    params.append('limit', inTransitPageSize);
+    if (debouncedInTransitSearch) params.append('search', debouncedInTransitSearch);
+    return params.toString();
+  };
+
+  // Fetch in-transit returns from API
+  const {
+    data: inTransitData,
+    isLoading: isInTransitLoading,
+    isError: isInTransitError,
+    refetch: refetchInTransit,
+  } = useFetch({
+    url: `${config.endpoints.consignments?.inTransitReturns || '/consignments/in-transit-returns'}?${buildInTransitQueryString()}`,
+    queryKey: ['inTransitReturns', inTransitPage, inTransitPageSize, debouncedInTransitSearch],
+    enabled: showInTransit,
+  });
+
   // Fetch consignments data from API with pagination, filters, and search
   const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
@@ -361,18 +394,22 @@ export default function ConsignmentsList() {
   const totalItems = data?.pagination?.total || data?.total || tableData.length;
   const totalPages = data?.pagination?.totalPages || Math.ceil(totalItems / pageSize) || 1;
 
-  // Filtered in-transit data (client-side search)
-  const filteredInTransitData = React.useMemo(() => {
-    if (!inTransitSearch.trim()) return inTransitReturnsDummyData;
-    const q = inTransitSearch.toLowerCase();
-    return inTransitReturnsDummyData.filter((row) =>
-      row.consignmentCode.toLowerCase().includes(q) ||
-      row.assetTag.toLowerCase().includes(q) ||
-      row.model.toLowerCase().includes(q) ||
-      row.userName.toLowerCase().includes(q) ||
-      row.trackingId.toLowerCase().includes(q)
-    );
-  }, [inTransitSearch]);
+  // Map API in-transit data to table row shape
+  const inTransitTableData = React.useMemo(() => {
+    const source = Array.isArray(inTransitData?.data) ? inTransitData.data : [];
+    return source.map((row) => ({
+      id: row.action?.consignmentAssetId || row.assetTag,
+      consignmentCode: row.consignment || '-',
+      assetTag: row.assetTag || '-',
+      model: row.laptopModel || '-',
+      userName: row.returnedBy || '-',
+      trackingId: row.trackingId || '-',
+      estimatedArrival: row.estArrivalDate
+        ? new Date(row.estArrivalDate).toLocaleDateString()
+        : '-',
+      action: row.action || {},
+    }));
+  }, [inTransitData]);
 
   // Handle row click - navigate to details page
   const handleRowClick = (item) => {
@@ -771,17 +808,17 @@ export default function ConsignmentsList() {
 
       <TableWrapper
         key={showInTransit ? `transit-${openInTransitMenuId || 'none'}` : `consignments-${openStatusDropdownId || 'none'}`}
-        data={showInTransit ? filteredInTransitData : tableData}
+        data={showInTransit ? inTransitTableData : tableData}
         columns={showInTransit ? inTransitColumns : visibleColumns}
         title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
         renderCell={showInTransit ? renderInTransitCellWithActions : renderCell}
         onRowClick={showInTransit ? undefined : handleRowClick}
-        itemsPerPage={showInTransit ? 10 : pageSize}
+        itemsPerPage={showInTransit ? inTransitPageSize : pageSize}
         showPagination={true}
         ariaLabel={showInTransit ? 'In-transit returns table' : 'Consignments table'}
         showCreateButton={!showInTransit}
         onCreateClick={handleCreateClick}
-        isLoading={showInTransit ? false : showLoading}
+        isLoading={showInTransit ? isInTransitLoading : showLoading}
         searchComponent={
           showInTransit ? (
             <SearchInput
@@ -838,10 +875,10 @@ export default function ConsignmentsList() {
             />
           )
         }
-        serverPagination={!showInTransit}
-        paginationData={showInTransit ? null : data?.pagination}
-        onPageChange={showInTransit ? undefined : handlePageChange}
-        onPageSizeChange={showInTransit ? undefined : handlePageSizeChange}
+        serverPagination={true}
+        paginationData={showInTransit ? inTransitData?.pagination : data?.pagination}
+        onPageChange={showInTransit ? setInTransitPage : handlePageChange}
+        onPageSizeChange={showInTransit ? (size) => { setInTransitPageSize(size); setInTransitPage(1); } : handlePageSizeChange}
       />
       
       {/* Accept Return Modal */}
