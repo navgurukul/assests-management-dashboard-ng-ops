@@ -168,6 +168,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
       title: 'DETAILS',
       itemsGrid: true,
       items: [
+        { label: 'Ticket ID', value: ticket.id || '—' },
         { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
         { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
         { label: 'Address', value: ticket.address || '—' },
@@ -196,8 +197,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
   ];
 
   const handleCreateAllocation = () => {
-    dispatch(setSelectedTicket(ticket));
-    router.push('/allocations/create');
+    dispatch(setSelectedTicket({ ...ticket, id: ticket?.id || ticketId }));
+    router.push(`/allocations/create?ticketId=${ticket?.id || ticketId}`);
   }
 
   return (
