@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTicket, clearSelectedTicket } from '@/app/store/slices/ticketSlice';
 import { ArrowLeft } from 'lucide-react';
@@ -18,6 +18,8 @@ import apiService from '@/app/utils/apiService';
 
 export default function CreateAllocation() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const ticketIdFromQuery = searchParams.get('ticketId');
   const dispatch = useDispatch();
   const selectedTicket = useSelector(selectTicket);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +87,8 @@ export default function CreateAllocation() {
         if (values.userEmail) allocationData.userEmail = values.userEmail;
         if (values.phoneNumber) allocationData.phoneNumber = values.phoneNumber;
         if (values.userAddress) allocationData.userAddress = values.userAddress;
+        const resolvedTicketId = selectedTicket?.id || ticketIdFromQuery;
+        if (resolvedTicketId) allocationData.ticketId = resolvedTicketId;
         
       } else if (values.allocationType === 'CAMPUS') {
         // Campus allocation - bulk assets transfer
