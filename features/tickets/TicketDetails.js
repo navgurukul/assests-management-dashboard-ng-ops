@@ -168,6 +168,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
       title: 'DETAILS',
       itemsGrid: true,
       items: [
+        { label: 'Ticket ID', value: ticket.id || '—' },
         { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
         { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
         { label: 'Address', value: ticket.address || '—' },
