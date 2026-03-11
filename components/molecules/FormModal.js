@@ -141,8 +141,14 @@ export default function FormModal({
       }
     } else {
       // Required validation for other field types
-      if (field.required && (!value || value.toString().trim() === '')) {
-        error = `${field.label} is required`;
+      if (field.required) {
+        const isEmpty =
+          field.type === 'file'
+            ? !value || (value instanceof FileList ? value.length === 0 : !value)
+            : !value || value.toString().trim() === '';
+        if (isEmpty) {
+          error = `${field.label} is required`;
+        }
       }
     }
 
@@ -186,9 +192,15 @@ export default function FormModal({
         }
       } else {
         // Required validation for other field types
-        if (field.required && (!value || value.toString().trim() === '')) {
-          newErrors[field.name] = `${field.label} is required`;
-          isValid = false;
+        if (field.required) {
+          const isEmpty =
+            field.type === 'file'
+              ? !value || (value instanceof FileList ? value.length === 0 : !value)
+              : !value || value.toString().trim() === '';
+          if (isEmpty) {
+            newErrors[field.name] = `${field.label} is required`;
+            isValid = false;
+          }
         }
       }
 
