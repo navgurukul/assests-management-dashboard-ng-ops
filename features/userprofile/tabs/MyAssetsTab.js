@@ -7,98 +7,8 @@ import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import usePost from '@/app/hooks/query/usePost';
-import useFileUpload from '@/app/hooks/useFileUpload';
 import { toast } from '@/app/utils/toast';
-
-const returnAssetFields = [
-  {
-    name: 'assetId',
-    label: 'Asset ID',
-    type: 'text',
-    required: false,
-    disabled: true,
-    placeholder: '',
-  },
-  {
-    name: 'assetSource',
-    label: 'Asset Source (Campus)',
-    type: 'text',
-    required: false,
-    disabled: true,
-    placeholder: '',
-  },
-  {
-    name: 'campusItCoordinator',
-    label: 'Campus IT Co-ordinator Email',
-    type: 'email',
-    required: true,
-    placeholder: 'IT coordinator email',
-  },
-  {
-    name: 'exactAddress',
-    label: 'Exact Address',
-    type: 'textarea',
-    required: true,
-    placeholder: 'Enter exact pickup / drop address...',
-  },
-  {
-    name: 'vendorName',
-    label: 'Vendor Name',
-    type: 'text',
-    required: true,
-    placeholder: 'e.g. Bluedart',
-  },
-  {
-    name: 'vendorReceipt',
-    label: 'Vendor Receipt (Photo / PDF)',
-    type: 'file',
-    required: false,
-    accept: 'image/*,application/pdf',
-    multiple: true,
-    hint: 'Accepted formats: JPG, PNG, PDF',
-  },
-  {
-    name: 'managerEmail',
-    label: 'Manager Email',
-    type: 'email',
-    required: true,
-    placeholder: 'Manager email to loop in',
-  },
-  {
-    name: 'expectedDeliveryDate',
-    label: 'Expected Delivery Date',
-    type: 'date',
-    required: true,
-    placeholder: 'Select date',
-  },
-];
-
-const extendLeaseFields = [
-  {
-    name: 'leaseType',
-    label: 'Lease Type',
-    type: 'radio',
-    required: true,
-    options: [
-      { label: 'Bond', value: 'BOND' },
-      { label: 'Deposit', value: 'DEPOSIT' },
-    ],
-  },
-  {
-    name: 'extendUntil',
-    label: 'Extend Until',
-    type: 'date',
-    required: true,
-    placeholder: 'Select date',
-  },
-  {
-    name: 'description',
-    label: 'Description',
-    type: 'textarea',
-    required: false,
-    placeholder: 'Reason for extending lease...',
-  },
-];
+import { returnAssetFields, extendLeaseFields } from '@/dummyJson/dummyJson';
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
@@ -108,9 +18,6 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   // Single React Query mutation — reused for all POST calls in this tab
   const { mutateAsync, isPending } = usePost();
-
-  // File upload hook for vendor receipt
-  const { uploadFiles, isUploading } = useFileUpload();
 
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -156,27 +63,23 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   const handleReturnSubmit = async (formData) => {
     try {
-      // Upload vendor receipt files if provided
-      let vendorReceiptUrl = undefined;
-      if (formData.vendorReceipt && formData.vendorReceipt.length > 0) {
-        const files = Array.from(formData.vendorReceipt);
-        const uploaded = await uploadFiles(files);
-        if (uploaded && uploaded.length > 0) {
-          vendorReceiptUrl = uploaded[0].url;
-        }
-      }
+      const fields = {
+        assetId: selectedAsset?.id,
+        assetSourceCampus: formData.assetSource,
+        campusITCoordinatorEmail: formData.campusItCoordinator,
+        exactAddress: formData.exactAddress,
+        vendorName: formData.vendorName,
+        managerEmail: formData.managerEmail,
+        expectedDeliveryDate: formData.expectedDeliveryDate,
+      };
+
+      const payload = new FormData();
+      Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
+      Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
 
       await mutateAsync({
-        endpoint: '/consignments/in-transit-returns',
-        body: {
-          assetId: selectedAsset?.id,
-          campusItCoordinatorEmail: formData.campusItCoordinator,
-          exactAddress: formData.exactAddress,
-          vendorName: formData.vendorName,
-          ...(vendorReceiptUrl && { vendorReceiptUrl }),
-          managerEmail: formData.managerEmail,
-          expectedDeliveryDate: formData.expectedDeliveryDate,
-        },
+        endpoint: '/allocations/my-assets/return',
+        body: payload,
       });
 
       toast.success('Return asset request created successfully.');
@@ -375,7 +278,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Return Asset"
         fields={computedReturnFields}
         onSubmit={handleReturnSubmit}
-        isSubmitting={isPending || isUploading}
+        isSubmitting={isPending}
         size="medium"
       />
     </div>

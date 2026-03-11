@@ -1951,3 +1951,97 @@ export const campusInchargeColumns = [
   { key: 'actions', label: 'ACTION', align: 'center' },
 ];
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
+
+export const returnAssetFields = [
+  {
+    name: 'assetId',
+    label: 'Asset ID',
+    type: 'text',
+    required: false,
+    disabled: true,
+    placeholder: '',
+  },
+  {
+    name: 'assetSource',
+    label: 'Asset Source (Campus)',
+    type: 'api-autocomplete',
+    required: true,
+    placeholder: 'Search and select campus',
+    apiUrl: `${baseUrl}/campuses`,
+    queryKey: ['campuses'],
+    labelKey: 'campusName',
+    valueKey: 'campusName',
+  },
+  {
+    name: 'campusItCoordinator',
+    label: 'Campus IT Co-ordinator Email',
+    type: 'email',
+    required: true,
+    placeholder: 'IT coordinator email',
+  },
+  {
+    name: 'exactAddress',
+    label: 'Exact Address',
+    type: 'textarea',
+    required: true,
+    placeholder: 'Enter exact pickup / drop address...',
+  },
+  {
+    name: 'vendorName',
+    label: 'Vendor Name',
+    type: 'text',
+    required: true,
+    placeholder: 'e.g. Bluedart',
+  },
+  {
+    name: 'vendorReceipt',
+    label: 'Vendor Receipt (Photo / PDF)',
+    type: 'file',
+    required: true,
+    accept: 'image/*,application/pdf',
+    multiple: true,
+    hint: 'Accepted formats: JPG, PNG, PDF',
+  },
+  {
+    name: 'managerEmail',
+    label: 'Manager Email',
+    type: 'email',
+    required: true,
+    placeholder: 'Manager email to loop in',
+  },
+  {
+    name: 'expectedDeliveryDate',
+    label: 'Expected Delivery Date',
+    type: 'date',
+    required: true,
+    placeholder: 'Select date',
+  },
+];
+
+export const extendLeaseFields = [
+  {
+    name: 'leaseType',
+    label: 'Lease Type',
+    type: 'radio',
+    required: true,
+    options: [
+      { label: 'Bond', value: 'BOND' },
+      { label: 'Deposit', value: 'DEPOSIT' },
+    ],
+  },
+  {
+    name: 'extendUntil',
+    label: 'Extend Until',
+    type: 'date',
+    required: true,
+    placeholder: 'Select date',
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    required: false,
+    placeholder: 'Reason for extending lease...',
+  },
+];
