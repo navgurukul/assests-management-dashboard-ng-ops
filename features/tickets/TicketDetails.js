@@ -197,8 +197,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
   ];
 
   const handleCreateAllocation = () => {
-    dispatch(setSelectedTicket(ticket));
-    router.push('/allocations/create');
+    dispatch(setSelectedTicket({ ...ticket, id: ticket?.id || ticketId }));
+    router.push(`/allocations/create?ticketId=${ticket?.id || ticketId}`);
   }
 
   return (
