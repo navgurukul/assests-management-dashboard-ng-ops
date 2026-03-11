@@ -63,7 +63,7 @@ export const allocationFormFields = [
     },
     buildAdditionalParams: (formData) => ({
       campusId: formData?.campusId || undefined,
-      status: 'ALLOCATED',
+      status: 'IN_STOCK',
     }),
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
   },
