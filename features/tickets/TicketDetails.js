@@ -101,15 +101,35 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
     timelineDate: ticket.timelineDate || '',
   };
 
-  // Prevent status change if already allocated/assigned
-  const isAllocated = !!ticket.assigneeUserId;
-
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
-    if (field.name === 'status' && isAllocated) {
+    // Status — always read-only, pre-populated with current value
+    if (field.name === 'status') {
       return {
         ...field,
         disabled: true,
-        helperText: 'Status cannot be changed after allocation.',
+        helperText: 'Current ticket status (read-only).',
+      };
+    }
+    // Assign To — always read-only, pre-populated with current assignee
+    if (field.name === 'assigneeUserId') {
+      return {
+        ...field,
+        disabled: true,
+        selectedItem: ticket.assigneeUser
+          ? {
+              ...ticket.assigneeUser,
+              id: ticket.assigneeUser?.id || ticket.assigneeUserId,
+            }
+          : null,
+        helperText: 'Current assignee (read-only).',
+      };
+    }
+    // Description — always read-only, pre-populated with current description
+    if (field.name === 'description') {
+      return {
+        ...field,
+        disabled: true,
+        helperText: 'Current description (read-only).',
       };
     }
     if (field.name === 'timelineDate' && ticket.timelineDate) {
@@ -117,17 +137,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
         ...field,
         disabled: true,
         helperText: 'SLA timeline is already set and cannot be changed.',
-      };
-    }
-    if (field.name === 'assigneeUserId' && ticket.assigneeUser) {
-      // Pre-load the selected coordinator to display immediately
-      // Ensure the selectedItem has an 'id' field so React Aria can key it correctly
-      return {
-        ...field,
-        selectedItem: {
-          ...ticket.assigneeUser,
-          id: ticket.assigneeUser?.id || ticket.assigneeUserId,
-        },
       };
     }
     return field;
