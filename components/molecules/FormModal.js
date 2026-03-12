@@ -22,6 +22,7 @@ export default function FormModal({
   componentData = null, // Component data from table row (includes campus.id)
   onFormDataChange = null, // Optional callback when form data changes
   helpText = '', // Optional help text to display instead of component name
+  validationSchema = null, // Optional Yup schema for validation
 }) {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -124,39 +125,48 @@ export default function FormModal({
   };
 
   // Validate a single field
-  const validateField = (fieldName, value) => {
+  const validateField = async (fieldName, value) => {
     const field = fields.find((f) => f.name === fieldName);
     if (!field) return true;
 
     let error = '';
 
-    // Special handling for allocation-consignment-selector
-    if (field.type === 'allocation-consignment-selector') {
-      if (field.required) {
-        if (!formData.allocationId) {
-          error = 'Please select an allocation';
-        } else if (!formData.selectedAssets || formData.selectedAssets.length === 0) {
-          error = 'Please select at least one asset';
-        }
+    // Yup field-level validation (takes priority when schema provided)
+    if (validationSchema) {
+      try {
+        await validationSchema.validateAt(fieldName, { ...formData, [fieldName]: value });
+      } catch (yupError) {
+        error = yupError.message;
       }
     } else {
-      // Required validation for other field types
-      if (field.required) {
-        const isEmpty =
-          field.type === 'file'
-            ? !value || (value instanceof FileList ? value.length === 0 : !value)
-            : !value || value.toString().trim() === '';
-        if (isEmpty) {
-          error = `${field.label} is required`;
+      // Special handling for allocation-consignment-selector
+      if (field.type === 'allocation-consignment-selector') {
+        if (field.required) {
+          if (!formData.allocationId) {
+            error = 'Please select an allocation';
+          } else if (!formData.selectedAssets || formData.selectedAssets.length === 0) {
+            error = 'Please select at least one asset';
+          }
+        }
+      } else {
+        // Required validation for other field types
+        if (field.required) {
+          const isEmpty =
+            field.type === 'file'
+              ? !value || (value instanceof FileList ? value.length === 0 : !value)
+              : !value || value.toString().trim() === '';
+          if (isEmpty) {
+            error = `${field.label} is required`;
+          }
         }
       }
-    }
 
-    // Custom validation
-    if (!error && field.validation && typeof field.validation === 'function') {
-      const customError = field.validation(value, formData);
-      if (customError) {
-        error = customError;
+      // Custom validation
+      if (!error && field.validation && typeof field.validation === 'function') {
+        const customError = field.validation(value, formData);
+        if (customError) {
+          error = customError;
+        }
       }
     }
 
@@ -168,14 +178,42 @@ export default function FormModal({
       return false;
     }
 
+    // Clear error for this field if validation passed
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[fieldName];
+      return next;
+    });
     return true;
   };
 
   // Validate all fields
-  const validateForm = () => {
+  const validateForm = async () => {
     const newErrors = {};
     let isValid = true;
 
+    // Yup schema-level validation
+    if (validationSchema) {
+      try {
+        await validationSchema.validate(formData, { abortEarly: false });
+      } catch (yupError) {
+        if (yupError.inner && yupError.inner.length > 0) {
+          yupError.inner.forEach((err) => {
+            if (!newErrors[err.path]) {
+              newErrors[err.path] = err.message;
+            }
+          });
+        } else {
+          // Single error (abortEarly: true fallback)
+          newErrors[yupError.path] = yupError.message;
+        }
+        isValid = false;
+      }
+      setErrors(newErrors);
+      return isValid;
+    }
+
+    // Built-in field-level validation (no Yup schema)
     fields.forEach((field) => {
       const value = formData[field.name];
 
@@ -295,7 +333,7 @@ export default function FormModal({
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Mark all fields as touched
@@ -305,8 +343,9 @@ export default function FormModal({
     });
     setTouched(allTouched);
 
-    // Validate form
-    if (validateForm()) {
+    // Validate form (async to support Yup)
+    const isValid = await validateForm();
+    if (isValid) {
       onSubmit(formData);
     }
   };
