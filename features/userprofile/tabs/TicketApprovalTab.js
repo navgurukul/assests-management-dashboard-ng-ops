@@ -49,13 +49,12 @@ export default function TicketApprovalTab() {
     return params.toString();
   };
   
-  // Fetch pending approval tickets from API
-  // TODO: Replace hardcoded email with user?.email when ready
-  const managerEmail = 'sarah.johnson@company.com';
+  // Fetch pending approval tickets using the authenticated user's email
+  const managerEmail = user?.email;
   const { data, isLoading, isError, error, refetch } = useFetch({
-    url: `${config.endpoints.tickets.pendingApproval}/${encodeURIComponent(managerEmail)}?${buildQueryString()}`,
+    url: `${config.endpoints.tickets.pendingApproval}/${encodeURIComponent(managerEmail ?? '')}?${buildQueryString()}`,
     queryKey: ['pending-approval-tickets', managerEmail, currentPage, pageSize],
-    enabled: true,
+    enabled: !!managerEmail,
   });
   
   // Extract tickets from API response
