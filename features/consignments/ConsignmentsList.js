@@ -398,8 +398,18 @@ export default function ConsignmentsList() {
   const inTransitTableData = React.useMemo(() => {
     const source = Array.isArray(inTransitData?.data) ? inTransitData.data : [];
     return source.map((row) => ({
+      ...row,
       id: row.action?.consignmentAssetId || row.assetTag,
+      consignmentId: row.action?.consignmentId || row.consignmentId || row.consignment?.id || '',
       consignmentCode: row.consignment || '-',
+      assetId:
+        row.action?.assetId ||
+        row.action?.consignmentAssetId ||
+        row.action?.id ||
+        row.assetId ||
+        row.asset?.id ||
+        row.id ||
+        '',
       assetTag: row.assetTag || '-',
       model: row.laptopModel || '-',
       userName: row.returnedBy || '-',
@@ -619,12 +629,48 @@ export default function ConsignmentsList() {
     setIsAcceptSubmitting(true);
     const loadingToastId = toast.loading('Processing acceptance...');
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const consignmentId = currentInTransitItem?.consignmentId;
+      const assetId =
+        currentInTransitItem?.assetId ||
+        currentInTransitItem?.action?.assetId ||
+        currentInTransitItem?.action?.consignmentAssetId ||
+        currentInTransitItem?.action?.id ||
+        currentInTransitItem?.id;
+
+      if (!consignmentId) {
+        throw new Error('Consignment ID is missing for this return item');
+      }
+
+      if (!assetId) {
+        throw new Error('Asset ID is missing for this return item');
+      }
+
+      if (!formData?.storedIn) {
+        throw new Error('Please select a storage location');
+      }
+
+      const payload = {
+        assetId,
+        quantity: 1,
+        storedCampusId: formData.storedIn,
+        returnAcceptNotes: formData.comment || '',
+      };
+
+      await apiService.post(
+        config.endpoints.consignments?.assets?.(consignmentId) ||
+          `/consignments/${consignmentId}/assets`,
+        payload
+      );
+
       toast.dismiss(loadingToastId);
       toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
+
+      await refetchInTransit();
+
       setIsAcceptModalOpen(false);
       setCurrentInTransitItem(null);
     } catch (error) {
+      console.error('Error accepting return:', error);
       toast.dismiss(loadingToastId);
       toast.error(error?.message || 'Failed to accept return');
     } finally {
