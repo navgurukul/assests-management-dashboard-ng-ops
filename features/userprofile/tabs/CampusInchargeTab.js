@@ -10,7 +10,11 @@ import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
-import { campusInchargeFormFields, campusInchargeColumns } from '@/dummyJson/dummyJson';
+import { campusInchargeColumns } from '@/dummyJson/dummyJson';
+import {
+  campusInchargeModalFields,
+  campusInchargeValidationSchema,
+} from '@/app/config/formConfigs/campusInchargeModalConfig';
 
 
 export default function CampusInchargeTab() {
@@ -148,10 +152,11 @@ export default function CampusInchargeTab() {
         onClose={() => setIsCreateModalOpen(false)}
         componentName="Campus Incharge"
         actionType="Create"
-        fields={campusInchargeFormFields}
+        fields={campusInchargeModalFields}
         onSubmit={handleCreateSubmit}
         isSubmitting={isSubmitting}
         size="large"
+        validationSchema={campusInchargeValidationSchema}
       />
     </div>
   );

@@ -7,13 +7,10 @@ import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
-
-const ROLE_OPTIONS = [
-  { value: 'ADMIN', label: 'Admin' },
-  { value: 'EMPLOYEE', label: 'Employee' },
-  { value: 'RESIDENTIAL_TEAM', label: 'Residential Team' },
-  { value: 'STUDENT', label: 'Student' },
-];
+import {
+  changeRoleFields,
+  changeRoleValidationSchema,
+} from '@/app/config/formConfigs/changeRoleModalConfig';
 
 export default function UserDetails({ userId, userData, onBack }) {
   const [roleModalOpen, setRoleModalOpen] = useState(false);
@@ -189,19 +186,11 @@ export default function UserDetails({ userId, userData, onBack }) {
         onClose={() => setRoleModalOpen(false)}
         actionType="Change Role"
         helpText={`Current role: ${formatRole(userData.role)}`}
-        fields={[
-          {
-            name: 'role',
-            label: 'New Role',
-            type: 'select',
-            required: true,
-            placeholder: 'Select a role',
-            options: ROLE_OPTIONS,
-          },
-        ]}
+        fields={changeRoleFields}
         onSubmit={handleChangeRole}
         isSubmitting={roleChanging}
         size="small"
+        validationSchema={changeRoleValidationSchema}
       />
     </>
   );
