@@ -117,6 +117,12 @@ const prepareItems = (filteredItems, selectedItem, value, valueKey) => {
   if (!selectedItem || !value) {
     return filteredItems;
   }
+
+  // Guard: don't add selectedItem if it lacks a valid key — would cause
+  // React Aria's CollectionBuilder to throw "No key found for item"
+  if (selectedItem[valueKey] == null) {
+    return filteredItems;
+  }
   
   const isItemInList = filteredItems.some(
     (item) => item[valueKey] === value

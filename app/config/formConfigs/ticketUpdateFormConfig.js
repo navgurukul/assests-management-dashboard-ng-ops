@@ -12,20 +12,9 @@ export const ticketUpdateFormFields = [
   {
     name: 'status',
     label: 'Status',
-    type: 'select',
-    placeholder: 'Select ticket status',
+    type: 'text',
+    placeholder: 'Status',
     required: false,
-    options: [
-      { value: 'OPEN', label: 'Open' },
-      { value: 'ALLOCATED', label: 'Allocated' },
-      { value: 'IN_PROGRESS', label: 'In Progress' },
-      { value: 'PENDING_APPROVAL', label: 'Pending Approval' },
-      { value: 'OVERDUE', label: 'Overdue' },
-      { value: 'RESOLVED', label: 'Resolved' },
-      { value: 'CLOSED', label: 'Closed' },
-      { value: 'ESCALATED', label: 'Escalated' },
-    ],
-    helperText: 'Status value must match backend allowed values. If ALLOCATED fails, ask backend team for correct value.',
   },
   {
     name: 'assigneeUserId',

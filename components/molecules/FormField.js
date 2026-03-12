@@ -68,10 +68,11 @@ export default function FormField({ field, formik, onFieldChange }) {
           <Field
             as="select"
             name={name}
+            disabled={disabled}
             onChange={handleFieldChange}
             className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               hasError ? 'border-red-500' : 'border-gray-300'
-            }`}
+            } ${disabled ? 'bg-gray-100 cursor-not-allowed opacity-70' : ''}`}
           >
             <option value="">{placeholder || 'Select an option'}</option>
             {options?.map((option) => (
