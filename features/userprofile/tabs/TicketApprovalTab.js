@@ -13,6 +13,10 @@ import config from '@/app/config/env.config';
 import StateHandler from '@/components/atoms/StateHandler';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
+import {
+  getTicketActionFields,
+  ticketApprovalValidationSchema,
+} from '@/app/config/formConfigs/ticketApprovalModalConfig';
 
 // Define columns configuration
 const columns = [
@@ -214,17 +218,7 @@ export default function TicketApprovalTab() {
   // Define form fields based on action
   const getFormFields = () => {
     if (!currentAction) return [];
-    
-    return [
-      {
-        name: 'remarks',
-        label: 'Remarks',
-        type: 'textarea',
-        placeholder: `Enter remarks for ${currentAction.toLowerCase()}ing this ticket...`,
-        required: false,
-        rows: 4
-      }
-    ];
+    return getTicketActionFields(currentAction);
   };
   
   // Handle page change
@@ -262,6 +256,7 @@ export default function TicketApprovalTab() {
         isSubmitting={isSubmitting}
         componentData={currentTicket}
         helpText={currentTicket?.description || ''}
+        validationSchema={ticketApprovalValidationSchema}
       />
 
       {/* Table */}

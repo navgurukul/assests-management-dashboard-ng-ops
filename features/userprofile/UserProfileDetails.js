@@ -9,6 +9,10 @@ import useFetch from '@/app/hooks/query/useFetch';
 import FormModal from '@/components/molecules/FormModal';
 import post from '@/app/api/post/post';
 import { toast } from '@/app/utils/toast';
+import {
+  getEditProfileFields,
+  editProfileValidationSchema,
+} from '@/app/config/formConfigs/editProfileModalConfig';
 
 const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
@@ -157,24 +161,10 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     }
   };
 
-  const editProfileFields = [
-    {
-      name: 'phone',
-      label: 'Phone',
-      type: 'text',
-      placeholder: 'Enter phone number',
-      required: false,
-      defaultValue: userData.phone || '',
-    },
-    {
-      name: 'location',
-      label: 'Location',
-      type: 'text',
-      placeholder: 'Enter location',
-      required: false,
-      defaultValue: userData.location || '',
-    },
-  ];
+  const editProfileFields = getEditProfileFields({
+    phone: userData.phone,
+    location: userData.location,
+  });
 
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
 
@@ -189,6 +179,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
         onSubmit={handleEditSubmit}
         size="small"
         isSubmitting={isSubmitting}
+        validationSchema={editProfileValidationSchema}
       />
       <div className="h-full overflow-y-auto bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
