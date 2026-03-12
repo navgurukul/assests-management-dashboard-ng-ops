@@ -121,9 +121,13 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
     }
     if (field.name === 'assigneeUserId' && ticket.assigneeUser) {
       // Pre-load the selected coordinator to display immediately
+      // Ensure the selectedItem has an 'id' field so React Aria can key it correctly
       return {
         ...field,
-        selectedItem: ticket.assigneeUser,
+        selectedItem: {
+          ...ticket.assigneeUser,
+          id: ticket.assigneeUser?.id || ticket.assigneeUserId,
+        },
       };
     }
     return field;
