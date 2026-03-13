@@ -18,11 +18,30 @@ import {
   ticketUpdateValidationSchema,
 } from '@/app/config/formConfigs/ticketUpdateFormConfig';
 
-export default function TicketDetails({ ticketId, ticketData, onBack }) {
+export default function TicketDetails({ ticketId, ticketData, onBack, isLoading, isError, error }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (isLoading) {
+    return (
+      <StateHandler
+        isLoading={true}
+        loadingMessage="Loading ticket details..."
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <StateHandler
+        isError={true}
+        error={error}
+        errorMessage="Error loading ticket details"
+      />
+    );
+  }
 
   if (!ticketData) {
     return (
@@ -169,25 +188,42 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
       items: [
         { label: 'Ticket ID', value: ticket.id || '—' },
         { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Address', value: ticket.address || '—' },
-        { label: 'Manager Email', value: ticket.managerEmail || '—' },
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Assignee ID', value: ticket.assigneeUserId || '—' },
-        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
+        { label: 'Is Escalated', value: ticket.isEscalated ? 'Yes' : 'No' },
+        { label: 'Address', value: ticket.address || '—' },
+        { label: 'Manager Email', value: ticket.managerEmail || '—' },
+        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
+        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
+        { label: 'Campus Code', value: ticket.campus?.code || '—' },
+        { label: 'Campus Name', value: ticket.campus?.name || '—' },
+        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
+        { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
+        { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
+        { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
+        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleString() : '—' },
+        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
+
+        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
+        { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
+        { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
+        { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
+        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
+
+        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
+        { label: 'Assignee ID', value: ticket.assigneeUserId || '—' },
+        { label: 'Assignee User ID', value: ticket.assigneeUser?.id || '—' },
+        { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
+        { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
+        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
+        { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
       ],
     },
     {
       title: 'DEVICE SUMMARY',
       items: [
+        { label: 'Asset ID', value: ticket.assetId || '—' },
         { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
         { label: 'Brand', value: ticket.asset?.brand || '—' },
         { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
