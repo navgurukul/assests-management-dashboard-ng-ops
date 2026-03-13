@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import CustomButton from '@/components/atoms/CustomButton';
 import FormModal from '@/components/molecules/FormModal';
@@ -14,6 +15,7 @@ import { createConsignmentFields } from '@/app/config/formConfigs/consignmentFor
 
 export default function AllocationDetails({ allocationId, onBack }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
@@ -40,6 +42,17 @@ export default function AllocationDetails({ allocationId, onBack }) {
   }
 
   const allocationDetails = data.data;
+  const cachedAllocationFromList = React.useMemo(() => {
+    const allocationQueries = queryClient.getQueriesData({ queryKey: ['allocations'] });
+
+    for (const [, queryData] of allocationQueries) {
+      const allocations = Array.isArray(queryData?.data) ? queryData.data : [];
+      const match = allocations.find((item) => String(item?.id) === String(allocationId));
+      if (match) return match;
+    }
+
+    return null;
+  }, [queryClient, allocationId]);
 
   const assetsFromAllocation = allocationDetails?.assets || [];
   const singleAssetFallback = allocationDetails?.asset
@@ -87,8 +100,16 @@ export default function AllocationDetails({ allocationId, onBack }) {
         allocationId: formData.allocationId,
         assetIds: formData.selectedAssets.map((asset) => asset.id || asset.assetId),
         status: 'draft',
-        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.sourceCampus?.campusName || formData.allocationDetails?.source,
-        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destinationCampus?.campusName || formData.allocationDetails?.destination,
+        source:
+          formData.allocationDetails?.sourceCampusName ||
+          formData.allocationDetails?.sourceCampus?.name ||
+          formData.allocationDetails?.sourceCampus?.campusName ||
+          formData.allocationDetails?.source,
+        destination:
+          formData.allocationDetails?.destinationCampusName ||
+          formData.allocationDetails?.destinationCampus?.name ||
+          formData.allocationDetails?.destinationCampus?.campusName ||
+          formData.allocationDetails?.destination,
       };
 
       await post({
@@ -129,6 +150,28 @@ export default function AllocationDetails({ allocationId, onBack }) {
     return isActive ? 'text-green-600' : 'text-gray-600';
   };
 
+  const sourceCampusDisplay =
+    allocationDetails.sourceCampusName ||
+    allocationDetails.sourceCampus?.campusName ||
+    allocationDetails.sourceCampus?.name ||
+    cachedAllocationFromList?.sourceCampusName ||
+    cachedAllocationFromList?.sourceCampus?.campusName ||
+    cachedAllocationFromList?.sourceCampus?.name ||
+    cachedAllocationFromList?.sourceCampus ||
+    allocationDetails.source ||
+    'N/A';
+
+  const destinationCampusDisplay =
+    allocationDetails.destinationCampusName ||
+    allocationDetails.destinationCampus?.campusName ||
+    allocationDetails.destinationCampus?.name ||
+    cachedAllocationFromList?.destinationCampusName ||
+    cachedAllocationFromList?.destinationCampus?.campusName ||
+    cachedAllocationFromList?.destinationCampus?.name ||
+    cachedAllocationFromList?.destinationCampus ||
+    allocationDetails.destination ||
+    'N/A';
+
   // Calculate duration
   const calculateDuration = () => {
     const start = new Date(allocationDetails.startDate);
@@ -146,6 +189,8 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Allocation ID', value: `#${allocationDetails.id || 'N/A'}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
+        { label: 'Source Campus', value: sourceCampusDisplay },
+        { label: 'Destination Campus', value: destinationCampusDisplay },
         { label: 'Temporary', value: allocationDetails.isTemporary ? 'Yes' : 'No' },
         { label: 'Duration', value: calculateDuration() },
       ],
