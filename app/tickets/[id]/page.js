@@ -1,36 +1,30 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import TicketDetails from '@/features/tickets/TicketDetails';
+import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 
 export default function TicketDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const ticketId = params.id;
-  const [ticketData, setTicketData] = useState(null);
+  const ticketId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-  useEffect(() => {
-    // Get ticket data from sessionStorage
-    if (typeof window !== 'undefined') {
-      const storedData = sessionStorage.getItem('currentTicketData');
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          setTicketData(parsedData);
-          // Clean up sessionStorage after retrieving data
-          sessionStorage.removeItem('currentTicketData');
-        } catch (error) {
-          console.error('Error parsing ticket data:', error);
-        }
-      }
-    }
-  }, []);
+  const { data, isLoading, isError, error } = useFetch({
+    url: config.endpoints.tickets.details(ticketId),
+    queryKey: ['ticket-details', ticketId],
+    enabled: Boolean(ticketId),
+  });
+
+  const normalizedTicketData = data?.data?.ticket || data?.data || data?.ticket || data || null;
 
   return (
     <TicketDetails 
       ticketId={ticketId}
-      ticketData={ticketData}
+      ticketData={normalizedTicketData}
+      isLoading={isLoading}
+      isError={isError}
+      error={error}
       onBack={() => router.back()} 
     />
   );
