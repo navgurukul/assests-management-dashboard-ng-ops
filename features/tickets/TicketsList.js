@@ -61,6 +61,11 @@ export default function TicketsList() {
   // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
+
+    const statusApiMap = {
+      RAISED: 'CLOSED',
+      ESCALATED: 'REJECTED',
+    };
     
     // Add search parameter first
     if (debouncedSearch) params.append('search', debouncedSearch);
@@ -70,7 +75,7 @@ export default function TicketsList() {
 
     // Add filters
     if (filters.campus) params.append('campusId', filters.campus);
-    if (filters.status) params.append('status', filters.status);
+    if (filters.status) params.append('status', statusApiMap[filters.status] || filters.status);
     if (filters.assignee) params.append('assigneeId', filters.assignee);
     
     return params.toString();
@@ -80,37 +85,6 @@ export default function TicketsList() {
   const { data, isLoading, isError, error } = useFetch({
     url: `/tickets?${buildQueryString()}`,
     queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
-  });
-
-  // Fetch counts for each status
-  const { data: totalCountData } = useFetch({
-    url: '/tickets?page=1&limit=1',
-    queryKey: ['tickets-count-total'],
-  });
-
-  const { data: openCountData } = useFetch({
-    url: '/tickets?status=OPEN&page=1&limit=1',
-    queryKey: ['tickets-count-open'],
-  });
-
-  const { data: inProgressCountData } = useFetch({
-    url: '/tickets?status=IN_PROGRESS&page=1&limit=1',
-    queryKey: ['tickets-count-in-progress'],
-  });
-
-  const { data: resolvedCountData } = useFetch({
-    url: '/tickets?status=RESOLVED&page=1&limit=1',
-    queryKey: ['tickets-count-resolved'],
-  });
-
-  const { data: closedCountData } = useFetch({
-    url: '/tickets?status=CLOSED&page=1&limit=1',
-    queryKey: ['tickets-count-closed'],
-  });
-
-  const { data: rejectedCountData } = useFetch({
-    url: '/tickets?status=REJECTED&page=1&limit=1',
-    queryKey: ['tickets-count-rejected'],
   });
 
   // Fetch campus options from API
@@ -197,8 +171,8 @@ export default function TicketsList() {
     { value: 'OPEN', label: 'Open' },
     { value: 'IN_PROGRESS', label: 'In Progress' },
     { value: 'RESOLVED', label: 'Resolved' },
-    { value: 'CLOSED', label: 'Closed' },
-    { value: 'REJECTED', label: 'Rejected' },
+    { value: 'RAISED', label: 'Raised' },
+    { value: 'ESCALATED', label: 'Escaleted' },
   ];
 
   // Get label for a filter value
@@ -329,6 +303,19 @@ export default function TicketsList() {
     });
   }, [data]);
 
+  const statusCounts = React.useMemo(() => {
+    const counts = {};
+    const tickets = data?.data?.tickets || [];
+
+    tickets.forEach((ticket) => {
+      const normalizedStatus = ticket?.status?.toString().toUpperCase().replace(/\s+/g, '_');
+      if (!normalizedStatus) return;
+      counts[normalizedStatus] = (counts[normalizedStatus] || 0) + 1;
+    });
+
+    return counts;
+  }, [data]);
+
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
 
@@ -410,23 +397,20 @@ export default function TicketsList() {
 
   // Get count for a specific status
   const getStatusCount = (status) => {
+    const statusAliases = {
+      OPEN: ['OPEN'],
+      IN_PROGRESS: ['IN_PROGRESS'],
+      RESOLVED: ['RESOLVED'],
+      RAISED: ['RAISED', 'CLOSED'],
+      ESCALATED: ['ESCALATED', 'REJECTED'],
+    };
+
     if (status === null) {
-      return totalCountData?.data?.pagination?.totalCount || 0;
+      return data?.data?.pagination?.totalCount || ticketsData.length;
     }
-    switch (status) {
-      case 'OPEN':
-        return openCountData?.data?.pagination?.totalCount || 0;
-      case 'IN_PROGRESS':
-        return inProgressCountData?.data?.pagination?.totalCount || 0;
-      case 'RESOLVED':
-        return resolvedCountData?.data?.pagination?.totalCount || 0;
-      case 'CLOSED':
-        return closedCountData?.data?.pagination?.totalCount || 0;
-      case 'REJECTED':
-        return rejectedCountData?.data?.pagination?.totalCount || 0;
-      default:
-        return 0;
-    }
+
+    const mappedStatuses = statusAliases[status] || [status];
+    return mappedStatuses.reduce((total, key) => total + (statusCounts[key] || 0), 0);
   };
 
   return (
