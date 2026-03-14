@@ -52,7 +52,7 @@ export const ticketFormFields = [
     required: true,
     options: [
       { value: 'prabhat@navgurukul.org', label: 'Prabhat - prabhat@navgurukul.org' },
-      { value: 'mubin@nav', label: 'Mubin - mubin@navgurukul.org' },
+      { value: 'mubin@navgurukul.org', label: 'Mubin - mubin@navgurukul.org' },
       { value: 'alimausmani@navgurukul.org', label: 'Ali Mausmani - alimausmani@navgurukul.org' },
       { value: 'geetashriyadav@navgurukul.org', label: 'Geetha Shri Yadav - geetashriyadav@navgurukul.org' },
       { value: 'anjani.k@navgurukul.org', label: 'Anjani K - anjani.k@navgurukul.org' },
