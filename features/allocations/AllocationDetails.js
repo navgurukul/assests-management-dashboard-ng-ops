@@ -18,6 +18,17 @@ export default function AllocationDetails({ allocationId, onBack }) {
   const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const cachedAllocationFromList = React.useMemo(() => {
+    const allocationQueries = queryClient.getQueriesData({ queryKey: ['allocations'] });
+
+    for (const [, queryData] of allocationQueries) {
+      const allocations = Array.isArray(queryData?.data) ? queryData.data : [];
+      const match = allocations.find((item) => String(item?.id) === String(allocationId));
+      if (match) return match;
+    }
+
+    return null;
+  }, [queryClient, allocationId]);
   
   // Fetch allocation details from API
   const { data, isLoading, isError, error } = useFetch({
@@ -42,17 +53,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
   }
 
   const allocationDetails = data.data;
-  const cachedAllocationFromList = React.useMemo(() => {
-    const allocationQueries = queryClient.getQueriesData({ queryKey: ['allocations'] });
-
-    for (const [, queryData] of allocationQueries) {
-      const allocations = Array.isArray(queryData?.data) ? queryData.data : [];
-      const match = allocations.find((item) => String(item?.id) === String(allocationId));
-      if (match) return match;
-    }
-
-    return null;
-  }, [queryClient, allocationId]);
 
   const assetsFromAllocation = allocationDetails?.assets || [];
   const singleAssetFallback = allocationDetails?.asset
