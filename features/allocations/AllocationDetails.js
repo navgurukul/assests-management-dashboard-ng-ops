@@ -66,6 +66,26 @@ export default function AllocationDetails({ allocationId, onBack }) {
     assets: normalizedAssets,
   };
 
+  const getCampusLabel = (details, campusType) => {
+    if (!details) return 'N/A';
+
+    const prefix = campusType === 'source' ? 'source' : 'destination';
+    const campus = details?.[`${prefix}Campus`];
+
+    const value =
+      (typeof campus === 'object' ? (campus?.campusName || campus?.name) : '') ||
+      (typeof campus === 'string' ? campus : '') ||
+      details?.[`${prefix}CampusName`] ||
+      details?.[`${prefix}Name`] ||
+      details?.[prefix];
+
+    const cleanedValue = String(value || '').trim();
+    return cleanedValue || 'N/A';
+  };
+
+  const sourceCampusDisplay = getCampusLabel(allocationDetails, 'source');
+  const destinationCampusDisplay = getCampusLabel(allocationDetails, 'destination');
+
   const createFieldsForAllocation = createConsignmentFields.map((field) => {
     if (field.type !== 'allocation-consignment-selector') {
       return field;
@@ -92,20 +112,19 @@ export default function AllocationDetails({ allocationId, onBack }) {
         throw new Error('Please select at least one asset');
       }
 
+      const selectedAllocationDetails = formData.allocationDetails || normalizedAllocationDetails;
+      const sourceFromModal = getCampusLabel(selectedAllocationDetails, 'source');
+      const destinationFromModal = getCampusLabel(selectedAllocationDetails, 'destination');
+
+      const sourceFromDetails = sourceFromModal !== 'N/A' ? sourceFromModal : sourceCampusDisplay;
+      const destinationFromDetails = destinationFromModal !== 'N/A' ? destinationFromModal : destinationCampusDisplay;
+
       const payload = {
         allocationId: formData.allocationId,
         assetIds: formData.selectedAssets.map((asset) => asset.id || asset.assetId),
         status: 'draft',
-        source:
-          formData.allocationDetails?.sourceCampusName ||
-          formData.allocationDetails?.sourceCampus?.name ||
-          formData.allocationDetails?.sourceCampus?.campusName ||
-          formData.allocationDetails?.source,
-        destination:
-          formData.allocationDetails?.destinationCampusName ||
-          formData.allocationDetails?.destinationCampus?.name ||
-          formData.allocationDetails?.destinationCampus?.campusName ||
-          formData.allocationDetails?.destination,
+        source: sourceFromDetails,
+        destination: destinationFromDetails,
       };
 
       await post({
@@ -157,22 +176,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
     allocationDetails.user?.username ||
     allocationDetails.userId ||
     'Unknown';
-
-  const sourceCampusDisplay =
-    allocationDetails.sourceName ||
-    allocationDetails.sourceCampusName ||
-    allocationDetails.sourceCampus?.campusName ||
-    allocationDetails.sourceCampus?.name ||
-    allocationDetails.source ||
-    'N/A';
-
-  const destinationCampusDisplay =
-    allocationDetails.destinationName ||
-    allocationDetails.destinationCampusName ||
-    allocationDetails.destinationCampus?.campusName ||
-    allocationDetails.destinationCampus?.name ||
-    allocationDetails.destination ||
-    'N/A';
 
   // Calculate duration
   const calculateDuration = () => {
