@@ -74,7 +74,7 @@ export const ticketFormFields = [
     name: 'description',
     label: 'Description',
     type: 'textarea',
-    placeholder: 'Describe the issue or request in detail...',
+    placeholder: 'Describe the issue or request in detail (at least 5 words)...',
     required: true,
     rows: 4,
   },
