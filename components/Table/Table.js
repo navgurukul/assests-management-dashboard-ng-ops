@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
@@ -34,12 +35,25 @@ function transformRow(item) {
 }
 
 export default function AssetsTable() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
   const { data: response, isLoading, isError, error } = useFetch({
     url: config.endpoints.assets.consolidatedByCampus,
     queryKey: ["assets", "consolidated-by-campus"],
   });
 
   const tableData = (response?.data ?? []).map(transformRow);
+  const totalCount = tableData.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = tableData.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (page) => setCurrentPage(page);
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -69,12 +83,23 @@ export default function AssetsTable() {
 
   return (
     <TableWrapper
-      data={tableData}
+      data={paginatedData}
       columns={columns}
       title="Consolidated Laptop Data - Navgurukul"
       renderCell={renderCell}
-      itemsPerPage={10}
+      itemsPerPage={pageSize}
       showPagination={true}
+      serverPagination={true}
+      paginationData={{
+        page: currentPage,
+        limit: pageSize,
+        totalCount,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPreviousPage: currentPage > 1,
+      }}
+      onPageChange={handlePageChange}
+      onPageSizeChange={handlePageSizeChange}
       ariaLabel="Consolidated laptop table"
     />
   );
