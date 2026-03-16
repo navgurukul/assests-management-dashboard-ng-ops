@@ -52,7 +52,7 @@ export const ticketFormFields = [
     required: true,
     options: [
       { value: 'prabhat@navgurukul.org', label: 'Prabhat - prabhat@navgurukul.org' },
-      { value: 'mubin@nav', label: 'Mubin - mubin@navgurukul.org' },
+      { value: 'mubin@navgurukul.org', label: 'Mubin - mubin@navgurukul.org' },
       { value: 'alimausmani@navgurukul.org', label: 'Ali Mausmani - alimausmani@navgurukul.org' },
       { value: 'geetashriyadav@navgurukul.org', label: 'Geetha Shri Yadav - geetashriyadav@navgurukul.org' },
       { value: 'anjani.k@navgurukul.org', label: 'Anjani K - anjani.k@navgurukul.org' },
@@ -74,7 +74,7 @@ export const ticketFormFields = [
     name: 'description',
     label: 'Description',
     type: 'textarea',
-    placeholder: 'Describe the issue or request in detail...',
+    placeholder: 'Describe the issue or request in detail (at least 5 words)...',
     required: true,
     rows: 4,
   },
@@ -90,7 +90,7 @@ export const ticketValidationSchema = Yup.object().shape({
   priority: Yup.string().required('Priority is required'),
   description: Yup.string()
     .required('Description is required')
-    .min(10, 'Description must be at least 10 characters')
+    .min(25, 'Description must be at least 25 characters')
     .max(500, 'Description must not exceed 500 characters'),
   address: Yup.string().max(200, 'Address must not exceed 200 characters'),
   managerEmail: Yup.string()

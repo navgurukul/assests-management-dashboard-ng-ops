@@ -1,22 +1,40 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Building2, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePost from '@/app/hooks/query/usePost';
 import config from '@/app/config/env.config';
-import { campusInchargeFormFields, campusInchargeColumns } from '@/dummyJson/dummyJson';
+import { toast } from '@/app/utils/toast';
+import { campusInchargeColumns } from '@/dummyJson/dummyJson';
+import {
+  campusInchargeModalFields,
+  campusInchargeValidationSchema,
+} from '@/app/config/formConfigs/campusInchargeModalConfig';
 
 
 export default function CampusInchargeTab() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: apiResponse, isLoading, isError, error } = useFetch({
     url: config.endpoints.campusIncharge.list,
     queryKey: ['campus-incharge'],
+  });
+
+  const { mutateAsync: createCampusIncharge, isPending: isSubmitting } = usePost({
+    onSuccess: () => {
+      toast.success('Campus Incharge created successfully');
+      queryClient.invalidateQueries({ queryKey: ['campus-incharge'] });
+      setIsCreateModalOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err?.message || 'Failed to create Campus Incharge');
+    },
   });
 
   const campusInchargeData = useMemo(() => {
@@ -28,14 +46,28 @@ export default function CampusInchargeTab() {
   }, [apiResponse]);
 
   const handleCreateSubmit = async (formData) => {
-    setIsSubmitting(true);
-    try {
-      // TODO: replace with actual API call
-      console.log('Create Campus Incharge:', formData);
-      setIsCreateModalOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
+    const payload = {
+      campusName: formData.campus,
+      itCoordinator: {
+        name: formData.itCoordinatorName,
+        email: formData.itCoordinatorEmail,
+        phone: formData.itCoordinatorPhone,
+      },
+      operation: {
+        name: formData.operationName,
+        email: formData.operationEmail,
+        phone: formData.operationPhone,
+      },
+      itLead: {
+        name: formData.itLeadName,
+        email: formData.itLeadEmail,
+        phone: formData.itLeadPhone,
+      },
+    };
+    await createCampusIncharge({
+      endpoint: config.endpoints.campusIncharge.create,
+      body: payload,
+    });
   };
 
   // Render person details (Name, Email, Phone)
@@ -120,10 +152,11 @@ export default function CampusInchargeTab() {
         onClose={() => setIsCreateModalOpen(false)}
         componentName="Campus Incharge"
         actionType="Create"
-        fields={campusInchargeFormFields}
+        fields={campusInchargeModalFields}
         onSubmit={handleCreateSubmit}
         isSubmitting={isSubmitting}
         size="large"
+        validationSchema={campusInchargeValidationSchema}
       />
     </div>
   );

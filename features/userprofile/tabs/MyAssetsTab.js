@@ -8,7 +8,14 @@ import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import usePost from '@/app/hooks/query/usePost';
 import { toast } from '@/app/utils/toast';
-import { returnAssetFields, extendLeaseFields } from '@/dummyJson/dummyJson';
+import {
+  getReturnAssetFields,
+  returnAssetValidationSchema,
+} from '@/app/config/formConfigs/returnAssetModalConfig';
+import {
+  extendLeaseFields,
+  extendLeaseValidationSchema,
+} from '@/app/config/formConfigs/extendLeaseModalConfig';
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
@@ -39,14 +46,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   }, [allocations]);
 
   const computedReturnFields = useMemo(
-    () =>
-      returnAssetFields.map((f) => {
-        if (f.name === 'assetId')
-          return { ...f, defaultValue: selectedAsset?.assetTag || selectedAsset?.id || '' };
-        if (f.name === 'assetSource')
-          return { ...f, defaultValue: selectedAsset?.campus?.name || selectedAsset?.campusName || '' };
-        return f;
-      }),
+    () => getReturnAssetFields(selectedAsset),
     [selectedAsset]
   );
 
@@ -269,6 +269,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         onSubmit={handleExtendSubmit}
         isSubmitting={isPending}
         size="small"
+        validationSchema={extendLeaseValidationSchema}
       />
 
       <FormModal
@@ -280,6 +281,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         onSubmit={handleReturnSubmit}
         isSubmitting={isPending}
         size="medium"
+        validationSchema={returnAssetValidationSchema}
       />
     </div>
   );

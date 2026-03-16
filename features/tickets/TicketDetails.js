@@ -12,18 +12,37 @@ import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
+import { toast } from '@/app/utils/toast';
 import {
   ticketUpdateFormFields,
   ticketUpdateValidationSchema,
 } from '@/app/config/formConfigs/ticketUpdateFormConfig';
 
-export default function TicketDetails({ ticketId, ticketData, onBack }) {
+export default function TicketDetails({ ticketId, ticketData, onBack, isLoading, isError, error }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Use table row data directly — no API call needed
+  if (isLoading) {
+    return (
+      <StateHandler
+        isLoading={true}
+        loadingMessage="Loading ticket details..."
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <StateHandler
+        isError={true}
+        error={error}
+        errorMessage="Error loading ticket details"
+      />
+    );
+  }
+
   if (!ticketData) {
     return (
       <StateHandler
@@ -36,6 +55,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
   }
 
   const ticket = ticketData;
+
   const historyEntries = (ticket.historyLogs || []).map((log) => ({
     time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
     text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
@@ -45,37 +65,36 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
     setIsUpdateModalOpen(true);
   };
 
-  const handleUpdateSubmit = async (values) => {
+  const handleUpdateSubmit = async (values, overrideStatus = null) => {
     setIsSubmitting(true);
     try {
-      // Filter out empty values
-      const payload = Object.keys(values).reduce((acc, key) => {
-        if (values[key] !== '' && values[key] !== null && values[key] !== undefined) {
-          acc[key] = values[key];
+      const payload = {};
+      const apiFields = ['status', 'assigneeUserId', 'timelineDate', 'resolutionNotes', 'description'];
+      apiFields.forEach((key) => {
+        const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
+        if (val !== '' && val !== null && val !== undefined) {
+          payload[key] = val;
         }
-        return acc;
-      }, {});
+      });
 
       if (Object.keys(payload).length === 0) {
-        alert('Please update at least one field');
+        toast.warning('Please update at least one field.');
         setIsSubmitting(false);
         return;
       }
 
-      const result = await post({
+      await post({
         url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
         method: 'PUT',
         data: payload,
       });
 
-      alert('Ticket updated successfully!');
-      
+      toast.success('Ticket updated successfully!');
       setIsUpdateModalOpen(false);
-      
+
     } catch (error) {
       console.error('Error updating ticket:', error);
-      const errorMessage = error?.message || 'Failed to update ticket';
-      alert(`${errorMessage}\n\nPlease try again.`);
+      toast.error(error?.message || 'Failed to update ticket. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -86,11 +105,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
   };
 
   const handleResolvedClick = (values) => {
-    // No action needed
+    handleUpdateSubmit(values, 'RESOLVED');
   };
 
   const handleEscalationClick = (values) => {
-    // No action needed
+    handleUpdateSubmit(values, 'ESCALATED');
   };
 
   const updateInitialValues = {
@@ -101,15 +120,21 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
     timelineDate: ticket.timelineDate || '',
   };
 
-  // Prevent status change if already allocated/assigned
-  const isAllocated = !!ticket.assigneeUserId;
-
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
-    if (field.name === 'status' && isAllocated) {
+    if (field.name === 'assigneeUserId') {
+      if (ticket.assigneeUser) {
+        return {
+          ...field,
+          selectedItem: {
+            ...ticket.assigneeUser,
+            id: ticket.assigneeUser?.id || ticket.assigneeUserId,
+          },
+        };
+      }
       return {
         ...field,
-        disabled: true,
-        helperText: 'Status cannot be changed after allocation.',
+        type: 'text',
+        placeholder: ticket.assigneeUserId || 'Not assigned',
       };
     }
     if (field.name === 'timelineDate' && ticket.timelineDate) {
@@ -117,13 +142,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
         ...field,
         disabled: true,
         helperText: 'SLA timeline is already set and cannot be changed.',
-      };
-    }
-    if (field.name === 'assigneeUserId' && ticket.assigneeUser) {
-      // Pre-load the selected coordinator to display immediately
-      return {
-        ...field,
-        selectedItem: ticket.assigneeUser,
       };
     }
     return field;
@@ -170,24 +188,42 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
       items: [
         { label: 'Ticket ID', value: ticket.id || '—' },
         { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Address', value: ticket.address || '—' },
-        { label: 'Manager Email', value: ticket.managerEmail || '—' },
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || ticket.assigneeUserId || '—') },
-        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleDateString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleDateString() + (ticket.timelineDate ? ' 🔒' : '') : '—' },
+        { label: 'Is Escalated', value: ticket.isEscalated ? 'Yes' : 'No' },
+        { label: 'Address', value: ticket.address || '—' },
+        { label: 'Manager Email', value: ticket.managerEmail || '—' },
+        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
+        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
+        { label: 'Campus Code', value: ticket.campus?.code || '—' },
+        { label: 'Campus Name', value: ticket.campus?.name || '—' },
+        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
+        { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
+        { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
+        { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
+        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleString() : '—' },
+        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
+
+        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
+        { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
+        { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
+        { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
+        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
+
+        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
+        { label: 'Assignee ID', value: ticket.assigneeUserId || '—' },
+        { label: 'Assignee User ID', value: ticket.assigneeUser?.id || '—' },
+        { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
+        { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
+        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
+        { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
       ],
     },
     {
       title: 'DEVICE SUMMARY',
       items: [
+        { label: 'Asset ID', value: ticket.assetId || '—' },
         { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
         { label: 'Brand', value: ticket.asset?.brand || '—' },
         { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
@@ -239,10 +275,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack }) {
           onSubmit={handleUpdateSubmit}
           onCancel={handleCloseModal}
           isSubmitting={isSubmitting}
+          submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
           customActions={[
-            { label: 'Resolved', variant: 'success', onClick: handleResolvedClick },
-            { label: 'Escalation', variant: 'warning', onClick: handleEscalationClick },
+            { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
+            { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
           ]}
         />
       </Modal>

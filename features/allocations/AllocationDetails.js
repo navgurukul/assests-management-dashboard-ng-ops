@@ -41,7 +41,11 @@ export default function AllocationDetails({ allocationId, onBack }) {
 
   const allocationDetails = data.data;
 
-  const assetsFromAllocation = allocationDetails?.assets || [];
+  const assetsFromAllocation = Array.isArray(allocationDetails?.assets)
+    ? allocationDetails.assets
+    : Array.isArray(allocationDetails?.assets?.items)
+      ? allocationDetails.assets.items
+      : [];
   const singleAssetFallback = allocationDetails?.asset
     ? [{
         id: allocationDetails.asset.id || allocationDetails.assetId,
@@ -49,13 +53,38 @@ export default function AllocationDetails({ allocationId, onBack }) {
         assetTag: allocationDetails.asset.assetTag,
         assetType: allocationDetails.asset.assetType || allocationDetails.asset.type,
         status: allocationDetails.asset.status,
+        brand: allocationDetails.asset.brand,
+        model: allocationDetails.asset.model,
       }]
     : [];
 
+  const normalizedAssets = assetsFromAllocation.length > 0 ? assetsFromAllocation : singleAssetFallback;
+  const primaryAsset = normalizedAssets[0] || null;
+
   const normalizedAllocationDetails = {
     ...allocationDetails,
-    assets: assetsFromAllocation.length > 0 ? assetsFromAllocation : singleAssetFallback,
+    assets: normalizedAssets,
   };
+
+  const getCampusLabel = (details, campusType) => {
+    if (!details) return 'N/A';
+
+    const prefix = campusType === 'source' ? 'source' : 'destination';
+    const campus = details?.[`${prefix}Campus`];
+
+    const value =
+      (typeof campus === 'object' ? (campus?.campusName || campus?.name) : '') ||
+      (typeof campus === 'string' ? campus : '') ||
+      details?.[`${prefix}CampusName`] ||
+      details?.[`${prefix}Name`] ||
+      details?.[prefix];
+
+    const cleanedValue = String(value || '').trim();
+    return cleanedValue || 'N/A';
+  };
+
+  const sourceCampusDisplay = getCampusLabel(allocationDetails, 'source');
+  const destinationCampusDisplay = getCampusLabel(allocationDetails, 'destination');
 
   const createFieldsForAllocation = createConsignmentFields.map((field) => {
     if (field.type !== 'allocation-consignment-selector') {
@@ -83,12 +112,19 @@ export default function AllocationDetails({ allocationId, onBack }) {
         throw new Error('Please select at least one asset');
       }
 
+      const selectedAllocationDetails = formData.allocationDetails || normalizedAllocationDetails;
+      const sourceFromModal = getCampusLabel(selectedAllocationDetails, 'source');
+      const destinationFromModal = getCampusLabel(selectedAllocationDetails, 'destination');
+
+      const sourceFromDetails = sourceFromModal !== 'N/A' ? sourceFromModal : sourceCampusDisplay;
+      const destinationFromDetails = destinationFromModal !== 'N/A' ? destinationFromModal : destinationCampusDisplay;
+
       const payload = {
         allocationId: formData.allocationId,
         assetIds: formData.selectedAssets.map((asset) => asset.id || asset.assetId),
         status: 'draft',
-        source: formData.allocationDetails?.sourceCampus?.name || formData.allocationDetails?.sourceCampus?.campusName || formData.allocationDetails?.source,
-        destination: formData.allocationDetails?.destinationCampus?.name || formData.allocationDetails?.destinationCampus?.campusName || formData.allocationDetails?.destination,
+        source: sourceFromDetails,
+        destination: destinationFromDetails,
       };
 
       await post({
@@ -111,8 +147,13 @@ export default function AllocationDetails({ allocationId, onBack }) {
   };
 
   // Format status
-  const isActive = !allocationDetails.endDate;
-  const displayStatus = isActive ? 'Active' : 'Returned';
+  const statusFromApi = String(allocationDetails.status || '').toUpperCase();
+  const isActive = statusFromApi
+    ? statusFromApi === 'ACTIVE'
+    : !allocationDetails.endDate;
+  const displayStatus = statusFromApi
+    ? (allocationDetails.status.charAt(0).toUpperCase() + allocationDetails.status.slice(1).toLowerCase())
+    : (isActive ? 'Active' : 'Returned');
 
   // Format reason
   const formatReason = (reason) => {
@@ -129,13 +170,46 @@ export default function AllocationDetails({ allocationId, onBack }) {
     return isActive ? 'text-green-600' : 'text-gray-600';
   };
 
+  const userDisplayName =
+    allocationDetails.user?.name ||
+    [allocationDetails.user?.firstName, allocationDetails.user?.lastName].filter(Boolean).join(' ') ||
+    allocationDetails.user?.username ||
+    allocationDetails.userId ||
+    'Unknown';
+
   // Calculate duration
   const calculateDuration = () => {
-    const start = new Date(allocationDetails.startDate);
+    const startDate = allocationDetails.startDate || allocationDetails.createdAt;
+    if (!startDate) return 'N/A';
+
+    const start = new Date(startDate);
+    if (Number.isNaN(start.getTime())) return 'N/A';
+
     const end = allocationDetails.endDate ? new Date(allocationDetails.endDate) : new Date();
+    if (Number.isNaN(end.getTime())) return 'N/A';
+
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return `${diffDays} days`;
+  };
+
+  const formatDate = (value, fallback = 'N/A') => {
+    if (!value) return fallback;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return fallback;
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatDateTime = (value, fallback = 'N/A') => {
+    if (!value) return fallback;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return fallback;
+    return date.toLocaleString();
   };
 
   // Left column sections (30%)
@@ -146,6 +220,8 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Allocation ID', value: `#${allocationDetails.id || 'N/A'}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
+        { label: 'Source Campus', value: sourceCampusDisplay },
+        { label: 'Destination Campus', value: destinationCampusDisplay },
         { label: 'Temporary', value: allocationDetails.isTemporary ? 'Yes' : 'No' },
         { label: 'Duration', value: calculateDuration() },
       ],
@@ -153,17 +229,17 @@ export default function AllocationDetails({ allocationId, onBack }) {
     {
       title: 'Asset Information',
       items: [
-        { label: 'Asset ID', value: allocationDetails.assetId || 'N/A' },
-        { label: 'Asset Tag', value: allocationDetails.asset?.assetTag || 'N/A' },
-        { label: 'Brand', value: allocationDetails.asset?.brand || 'N/A' },
-        { label: 'Model', value: allocationDetails.asset?.model || 'N/A' },
+        { label: 'Asset ID', value: primaryAsset?.id || allocationDetails.assetId || 'N/A' },
+        { label: 'Asset Tag', value: primaryAsset?.assetTag || allocationDetails.asset?.assetTag || 'N/A' },
+        { label: 'Brand', value: primaryAsset?.brand || allocationDetails.asset?.brand || 'N/A' },
+        { label: 'Model', value: primaryAsset?.model || allocationDetails.asset?.model || 'N/A' },
       ],
     },
     {
       title: 'User Information',
       items: [
         { label: 'User ID', value: allocationDetails.userId || 'N/A' },
-        { label: 'User Name', value: allocationDetails.user?.name || 'N/A' },
+        { label: 'User Name', value: userDisplayName },
         { label: 'User Email', value: allocationDetails.user?.email || 'N/A' },
         { label: 'User Role', value: allocationDetails.user?.role || 'N/A' },
       ],
@@ -175,57 +251,44 @@ export default function AllocationDetails({ allocationId, onBack }) {
     {
       title: 'Timeline',
       items: [
-        { 
-          label: 'Start Date', 
-          value: allocationDetails.startDate 
-            ? new Date(allocationDetails.startDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })
-            : 'N/A' 
+        {
+          label: 'Start Date',
+          value: formatDate(allocationDetails.startDate || allocationDetails.createdAt),
         },
-        { 
-          label: 'End Date', 
-          value: allocationDetails.endDate 
-            ? new Date(allocationDetails.endDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })
-            : 'Still Active' 
+        {
+          label: 'End Date',
+          value: formatDate(allocationDetails.endDate, 'Still Active'),
         },
-        { 
-          label: 'Expected Return Date', 
-          value: allocationDetails.expectedReturnDate 
-            ? new Date(allocationDetails.expectedReturnDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })
-            : 'Not Applicable' 
+        {
+          label: 'Expected Return Date',
+          value: formatDate(allocationDetails.expectedReturnDate, 'Not Applicable'),
         },
       ],
     },
     {
       title: 'Administrative Information',
       items: [
-        { label: 'Created By', value: allocationDetails.createdByUserId || 'N/A' },
-        { label: 'Verified By', value: allocationDetails.verifiedByUserId || 'Not Yet Verified' },
-        { 
-          label: 'Created At', 
-          value: allocationDetails.createdAt 
-            ? new Date(allocationDetails.createdAt).toLocaleString()
-            : 'N/A' 
+        {
+          label: 'Created By',
+          value:
+            allocationDetails.administrationInformation?.createdBy?.email ||
+            allocationDetails.createdByUserId ||
+            'N/A',
         },
-        { 
-          label: 'Updated At', 
-          value: allocationDetails.updatedAt 
-            ? new Date(allocationDetails.updatedAt).toLocaleString()
-            : 'N/A' 
+        {
+          label: 'Verified By',
+          value:
+            allocationDetails.administrationInformation?.verifiedBy?.email ||
+            allocationDetails.verifiedByUserId ||
+            'Not Yet Verified',
+        },
+        {
+          label: 'Created At',
+          value: formatDateTime(allocationDetails.createdAt),
+        },
+        {
+          label: 'Updated At',
+          value: formatDateTime(allocationDetails.updatedAt),
         },
       ],
     },
@@ -244,7 +307,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     <>
       <DetailsPage
         title={`ALLOCATION #${allocationDetails.id}`}
-        subtitle={`Status: ${displayStatus} | Assigned to: ${allocationDetails.user?.name || allocationDetails.userId || 'Unknown'}`}
+        subtitle={`Status: ${displayStatus} | Assigned to: ${userDisplayName}`}
         subtitleColor={getStatusColor()}
         leftSections={leftSections}
         rightSections={rightSections}
