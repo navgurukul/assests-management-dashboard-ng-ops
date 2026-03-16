@@ -306,18 +306,18 @@ export default function ConsignmentsList() {
   };
 
   const resolveConsignmentLocationLabel = (baseValue, objectCandidate, idCandidate) => {
-    const candidates = [baseValue, objectCandidate, idCandidate];
+    const candidates = [objectCandidate, baseValue, idCandidate];
 
     for (const candidate of candidates) {
       if (!candidate) continue;
 
       if (typeof candidate === 'object') {
-        const objectName = candidate.campusName || candidate.name;
+        const objectName = candidate.campus?.name || candidate.campusName || candidate.name;
         if (!isPlaceholder(objectName)) {
           return objectName;
         }
 
-        const objectId = String(candidate.id || candidate.campusId || '').trim();
+        const objectId = String(candidate.campus?.id || candidate.id || candidate.campusId || '').trim();
         if (objectId && campusNameById.has(objectId)) {
           return campusNameById.get(objectId);
         }
@@ -373,14 +373,26 @@ export default function ConsignmentsList() {
         consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
         status: consignment.status,
         allocationCode: consignment.allocation?.allocationCode || consignment.allocationCode || '-',
-        courierService: consignment.courierService?.name || consignment.courierServiceName || '-',
+        courierService:
+          consignment.courierName ||
+          consignment.courierService?.name ||
+          consignment.courierServiceName ||
+          '-',
         courierServiceId: consignment.courierService?.id || consignment.courierServiceId || '',
-        source: consignment.source || consignment.allocation?.sourceCampus?.name || '-',
-        destination: consignment.destination || consignment.allocation?.destinationCampus?.name || '-',
+        source: resolveConsignmentLocationLabel(
+          consignment.source,
+          consignment.sourceCampus || consignment.sourceLocation || consignment.allocation?.sourceCampus,
+          consignment.sourceCampusId || consignment.sourceLocationId || consignment.allocation?.sourceCampusId
+        ),
+        destination: resolveConsignmentLocationLabel(
+          consignment.destination,
+          consignment.destinationCampus || consignment.destinationLocation || consignment.allocation?.destinationCampus,
+          consignment.destinationCampusId || consignment.destinationLocationId || consignment.allocation?.destinationCampusId
+        ),
         shippedAt: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : '-',
         estimatedDeliveryDate: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : '-',
-        trackingId: consignment.trackingId || '-',
-        trackingLink: consignment.trackingLink || '',
+        trackingId: consignment.trackingNumber || consignment.trackingId || '-',
+        trackingLink: consignment.link || consignment.trackingLink || '',
         assetCount: consignment.assets?.length || consignment.assetCount || 0,
         deliveredAt: consignment.deliveredAt ? new Date(consignment.deliveredAt).toLocaleDateString() : '-',
         createdBy: consignment.createdBy?.name || '-',

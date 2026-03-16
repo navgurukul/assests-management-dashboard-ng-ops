@@ -281,13 +281,17 @@ export const transformConsignmentForTable = (consignment) => {
     consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
     status: formatConsignmentStatus(consignment.status),
     allocationCode: getNestedValue(consignment, 'allocation.allocationCode') || consignment.allocationCode || 'N/A',
-    courierService: getNestedValue(consignment, 'courierService.name') || consignment.courierServiceName || 'N/A',
+    courierService:
+      consignment.courierName ||
+      getNestedValue(consignment, 'courierService.name') ||
+      consignment.courierServiceName ||
+      'N/A',
     source: consignment.source || getNestedValue(consignment, 'allocation.sourceCampus.name') || 'N/A',
     destination: consignment.destination || getNestedValue(consignment, 'allocation.destinationCampus.name') || 'N/A',
     shippedAt: formatDate(consignment.shippedAt),
     estimatedDeliveryDate: formatDate(consignment.estimatedDeliveryDate),
     deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
-    trackingId: consignment.trackingId || 'N/A',
+    trackingId: consignment.trackingNumber || consignment.trackingId || 'N/A',
     assetCount: consignment.assets?.length || consignment.assetCount || 0,
     assignedTo: consignment.assignedTo || null,
     createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
