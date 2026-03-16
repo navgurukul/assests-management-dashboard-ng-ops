@@ -16,12 +16,29 @@ export default function TicketDetailsPage() {
     enabled: Boolean(ticketId),
   });
 
+  const {
+    data: historyResponse,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError,
+    error: historyError,
+  } = useFetch({
+    url: config.endpoints.tickets.history(ticketId),
+    queryKey: ['ticket-history', ticketId],
+    enabled: Boolean(ticketId),
+  });
+
   const normalizedTicketData = data?.data?.ticket || data?.data || data?.ticket || data || null;
+  const normalizedTicketHistory = Array.isArray(historyResponse?.data)
+    ? historyResponse.data
+    : [];
 
   return (
     <TicketDetails 
       ticketId={ticketId}
       ticketData={normalizedTicketData}
+      historyData={normalizedTicketHistory}
+      historyLoading={isHistoryLoading}
+      historyError={isHistoryError ? historyError : null}
       isLoading={isLoading}
       isError={isError}
       error={error}

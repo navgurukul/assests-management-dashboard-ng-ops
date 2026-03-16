@@ -18,7 +18,17 @@ import {
   ticketUpdateValidationSchema,
 } from '@/app/config/formConfigs/ticketUpdateFormConfig';
 
-export default function TicketDetails({ ticketId, ticketData, onBack, isLoading, isError, error }) {
+export default function TicketDetails({
+  ticketId,
+  ticketData,
+  historyData = [],
+  historyLoading = false,
+  historyError = null,
+  onBack,
+  isLoading,
+  isError,
+  error,
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -56,9 +66,15 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const ticket = ticketData;
 
-  const historyEntries = (ticket.historyLogs || []).map((log) => ({
-    time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
-    text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
+  const historySource = Array.isArray(historyData)
+    ? historyData
+    : Array.isArray(ticket.historyLogs)
+      ? ticket.historyLogs
+      : [];
+
+  const historyEntries = historySource.map((log) => ({
+    time: log.createdAt || log.updatedAt ? new Date(log.createdAt || log.updatedAt).toLocaleString() : '—',
+    text: `${log.action || log.actionType || log.status || 'Update'}${log.notes || log.message ? `: ${log.notes || log.message}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
   }));
 
   const handleUpdateClick = () => {
@@ -169,9 +185,13 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     },
     {
       title: 'HISTORY LOG',
-      ...(historyEntries.length
-        ? { logEntries: historyEntries }
-        : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
+      ...(historyLoading
+        ? { content: <div className="text-sm text-gray-600">Loading history...</div> }
+        : historyError
+          ? { content: <div className="text-sm text-red-600">Failed to load history log.</div> }
+          : historyEntries.length
+            ? { logEntries: historyEntries }
+            : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
     },
     {
       title: 'ACTIONS',

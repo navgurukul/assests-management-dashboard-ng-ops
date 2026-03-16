@@ -59,6 +59,7 @@ const config = {
       update: (id) => `/tickets/${id}`,
       delete: (id) => `/tickets/${id}`,
       details: (id) => `/tickets/${id}`,
+      history: (id) => `/tickets/${id}/history`,
       myTickets: '/tickets/my-tickets',
       pendingApproval: '/tickets/pending-approval',
     },
