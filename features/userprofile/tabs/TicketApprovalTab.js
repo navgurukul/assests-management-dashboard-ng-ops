@@ -1,14 +1,15 @@
 'use client';
 
-import { Ticket, Check, X, MoreVertical } from 'lucide-react';
+import { Check, X, MoreVertical } from 'lucide-react';
 import { useState, useCallback } from 'react';
-import CustomButton from '@/components/atoms/CustomButton';
+import { useMutation } from '@tanstack/react-query';
 import TableWrapper from '@/components/Table/TableWrapper';
 import ActionMenu from '@/components/molecules/ActionMenu';
 import FormModal from '@/components/molecules/FormModal';
 import { toast } from '@/app/utils/toast';
 import { useAuth } from '@/app/context/AuthContext';
 import useFetch from '@/app/hooks/query/useFetch';
+import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import StateHandler from '@/components/atoms/StateHandler';
 import StatusChip from '@/components/atoms/StatusChip';
@@ -43,7 +44,12 @@ export default function TicketApprovalTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState(null);
   const [currentTicket, setCurrentTicket] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutateAsync: updateTicket, isPending: isSubmitting } = useMutation({
+    mutationFn: ({ endpoint, body }) => apiService.put(endpoint, body),
+  });
+
+  const getTicketIdentifier = useCallback((ticket) => ticket?.id || ticket?.ticketId, []);
   
   // Build query string with pagination
   const buildQueryString = () => {
@@ -78,28 +84,36 @@ export default function TicketApprovalTab() {
     setIsModalOpen(false);
     setCurrentAction(null);
     setCurrentTicket(null);
-    setIsSubmitting(false);
   }, []);
 
   // Handle form submission
   const handleFormSubmit = useCallback(async (formData) => {
-    setIsSubmitting(true);
+    const ticketIdentifier = getTicketIdentifier(currentTicket);
+
+    if (!ticketIdentifier || !currentAction) {
+      toast.error('Unable to process ticket. Missing ticket details.');
+      return;
+    }
+
+    setProcessingTicket(ticketIdentifier);
     let loadingToastId = null;
 
     try {
       const action = currentAction?.toLowerCase();
       loadingToastId = toast.loading(`${currentAction} in progress...`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Here you would make the actual API call
-      // const payload = {
-      //   ticketId: currentTicket.id,
-      //   action: action,
-      //   remarks: formData.remarks || ''
-      // };
-      // await post({ url: apiUrl, method: 'POST', data: payload });
+
+      const payload = {
+        status: currentAction === 'Approve' ? 'APPROVED' : 'REJECTED',
+        assigneeUserId: currentTicket?.assigneeUserId || '',
+        timelineDate: currentTicket?.timelineDate || new Date().toISOString(),
+        resolutionNotes: formData?.remarks || '',
+        description: currentTicket?.description || '',
+      };
+
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketIdentifier),
+        body: payload,
+      });
       
       toast.dismiss(loadingToastId);
       loadingToastId = null;
@@ -118,9 +132,9 @@ export default function TicketApprovalTab() {
       const errorMessage = error?.message || 'An error occurred. Please try again.';
       toast.error(errorMessage);
     } finally {
-      setIsSubmitting(false);
+      setProcessingTicket(null);
     }
-  }, [currentAction, currentTicket, handleCloseModal, refetch]);
+  }, [currentAction, currentTicket, getTicketIdentifier, handleCloseModal, refetch, updateTicket]);
 
   // Handle cell rendering
   const renderCell = useCallback((ticket, columnKey) => {
@@ -173,6 +187,7 @@ export default function TicketApprovalTab() {
         );
       
       case 'actions':
+        const ticketIdentifier = getTicketIdentifier(ticket);
         const menuOptions = [
           {
             label: 'Approve',
@@ -193,15 +208,15 @@ export default function TicketApprovalTab() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setOpenMenuId(openMenuId === ticket.id ? null : ticket.id);
+                setOpenMenuId(openMenuId === ticketIdentifier ? null : ticketIdentifier);
               }}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               aria-label="Actions menu"
-              disabled={processingTicket === ticket.id}
+              disabled={processingTicket === ticketIdentifier}
             >
               <MoreVertical className="h-5 w-5 text-gray-600" />
             </button>
-            {openMenuId === ticket.id && (
+            {openMenuId === ticketIdentifier && (
               <ActionMenu
                 menuOptions={menuOptions}
                 onClose={() => setOpenMenuId(null)}
@@ -213,7 +228,7 @@ export default function TicketApprovalTab() {
       default:
         return ticket[columnKey];
     }
-  }, [openMenuId, processingTicket, handleOpenActionModal]);
+  }, [getTicketIdentifier, openMenuId, processingTicket, handleOpenActionModal]);
 
   // Define form fields based on action
   const getFormFields = () => {
