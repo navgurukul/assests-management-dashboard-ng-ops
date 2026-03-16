@@ -404,11 +404,8 @@ export default function ConsignmentsList() {
       consignmentCode: row.consignment || '-',
       assetId:
         row.action?.assetId ||
-        row.action?.consignmentAssetId ||
-        row.action?.id ||
         row.assetId ||
         row.asset?.id ||
-        row.id ||
         '',
       assetTag: row.assetTag || '-',
       model: row.laptopModel || '-',
@@ -631,11 +628,9 @@ export default function ConsignmentsList() {
     try {
       const consignmentId = currentInTransitItem?.consignmentId;
       const assetId =
-        currentInTransitItem?.assetId ||
         currentInTransitItem?.action?.assetId ||
-        currentInTransitItem?.action?.consignmentAssetId ||
-        currentInTransitItem?.action?.id ||
-        currentInTransitItem?.id;
+        currentInTransitItem?.assetId ||
+        currentInTransitItem?.asset?.id;
 
       if (!consignmentId) {
         throw new Error('Consignment ID is missing for this return item');
