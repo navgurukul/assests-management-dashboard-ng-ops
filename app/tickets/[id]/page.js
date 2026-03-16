@@ -28,9 +28,13 @@ export default function TicketDetailsPage() {
   });
 
   const normalizedTicketData = data?.data?.ticket || data?.data || data?.ticket || data || null;
-  const normalizedTicketHistory = Array.isArray(historyResponse?.data)
-    ? historyResponse.data
-    : [];
+  const normalizedTicketHistory = Array.isArray(historyResponse?.data?.historyLogs)
+    ? historyResponse.data.historyLogs
+    : Array.isArray(historyResponse?.data)
+      ? historyResponse.data
+      : Array.isArray(historyResponse?.historyLogs)
+        ? historyResponse.historyLogs
+        : [];
 
   return (
     <TicketDetails 
