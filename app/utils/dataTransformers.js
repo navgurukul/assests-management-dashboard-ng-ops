@@ -276,6 +276,39 @@ export const formatConsignmentStatus = (status) => {
  * @returns {object} Transformed consignment data
  */
 export const transformConsignmentForTable = (consignment) => {
+  const requestRaisedBy = getNestedValue(consignment, 'allocation.requestRaisedBy', null);
+  const normalizedAssignedTo = (() => {
+    if (requestRaisedBy) {
+      if (typeof requestRaisedBy === 'string') {
+        return { name: requestRaisedBy, email: '' };
+      }
+
+      if (typeof requestRaisedBy === 'object') {
+        const fullName = `${requestRaisedBy.firstName || ''} ${requestRaisedBy.lastName || ''}`.trim();
+        return {
+          name:
+            requestRaisedBy.name ||
+            fullName ||
+            requestRaisedBy.username ||
+            requestRaisedBy.email ||
+            requestRaisedBy.id ||
+            '-',
+          email: requestRaisedBy.email || '',
+        };
+      }
+    }
+
+    if (consignment.assignedTo && typeof consignment.assignedTo === 'object') {
+      return consignment.assignedTo;
+    }
+
+    if (typeof consignment.assignedTo === 'string' && consignment.assignedTo.trim()) {
+      return { name: consignment.assignedTo.trim(), email: '' };
+    }
+
+    return null;
+  })();
+
   return {
     id: consignment.id,
     consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
@@ -293,7 +326,7 @@ export const transformConsignmentForTable = (consignment) => {
     deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
     trackingId: consignment.trackingNumber || consignment.trackingId || 'N/A',
     assetCount: consignment.assets?.length || consignment.assetCount || 0,
-    assignedTo: consignment.assignedTo || null,
+    assignedTo: normalizedAssignedTo,
     createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
     createdAt: formatDate(consignment.createdAt),
     updatedAt: formatDate(consignment.updatedAt),
