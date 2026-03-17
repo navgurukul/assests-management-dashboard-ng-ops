@@ -99,17 +99,28 @@ export const readyToDispatchFields = [
     })),
     required: false,
   },
+  {
+    name: 'estimatedDeliveryDate',
+    label: 'Estimated Delivery Date',
+    type: 'date',
+    placeholder: 'Select estimated delivery date',
+    required: true,
+  },
 ];
 
 export const readyToDispatchValidation = Yup.object().shape({
   courierServiceId: Yup.string().required('Courier partner is required'),
   trackingId: Yup.string().required('Tracking ID is required'),
+  estimatedDeliveryDate: Yup.date()
+    .required('Estimated delivery date is required')
+    .nullable(),
 });
 
 export const readyToDispatchInitialValues = {
   courierServiceId: '',
   trackingId: '',
   trackingLink: 'https://www.shiprocket.in/shipment-tracking/',
+  estimatedDeliveryDate: '',
 };
 
 // ============================================

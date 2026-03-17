@@ -84,6 +84,58 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   const courierServiceName = consignment.courierName || consignment.courierService?.name || consignment.courierServiceName;
   const totalAssets = consignment.assetCount ?? consignment.assets?.length ?? 0;
 
+  const resolveUserDisplay = (userValue) => {
+    if (!userValue) return 'N/A';
+    if (typeof userValue === 'string') return userValue;
+
+    const fullName = `${userValue.firstName || ''} ${userValue.lastName || ''}`.trim();
+    return (
+      userValue.name ||
+      fullName ||
+      userValue.email ||
+      userValue.username ||
+      userValue.id ||
+      'N/A'
+    );
+  };
+
+  const resolveUserEmail = (userValue) => {
+    if (!userValue) return 'N/A';
+    if (typeof userValue === 'string') return userValue;
+    return userValue.email || resolveUserDisplay(userValue);
+  };
+
+  const resolveAddressDisplay = (addressValue) => {
+    if (!addressValue) return '';
+    if (typeof addressValue === 'string') {
+      const trimmed = addressValue.trim();
+      return trimmed;
+    }
+
+    if (typeof addressValue === 'object') {
+      const line1 = addressValue.line1 || addressValue.addressLine1 || '';
+      const line2 = addressValue.line2 || addressValue.addressLine2 || '';
+      const city = addressValue.city || '';
+      const state = addressValue.state || '';
+      const postalCode = addressValue.postalCode || addressValue.pincode || '';
+
+      const combined = [line1, line2, city, state, postalCode]
+        .map((part) => String(part || '').trim())
+        .filter(Boolean)
+        .join(', ');
+
+      if (combined) return combined;
+    }
+
+    return '';
+  };
+
+  const shippingDestinationDisplay =
+    resolveAddressDisplay(consignment.allocation?.userAddress) ||
+    consignment.destinationLocation?.campus?.name ||
+    destinationName ||
+    'N/A';
+
   const getStatusColor = () => {
     switch ((consignment.status || '').toUpperCase()) {
       case 'DRAFT':
@@ -104,7 +156,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
-        { label: 'Allocation', value: consignment.allocation?.allocationCode || consignment.allocationCode || 'N/A' },
+        { label: 'Allocation', value: consignment.allocation?.id || consignment.allocationId || 'N/A' },
         { label: 'Total Assets', value: String(totalAssets) },
       ],
     },
@@ -117,7 +169,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
             ? new Date(consignment.receivedAt || consignment.deliveredAt).toLocaleDateString()
-            : 'Not delivered yet',
+            : shippingDestinationDisplay,
           className: (consignment.receivedAt || consignment.deliveredAt) ? 'text-green-600 font-semibold' : 'text-gray-500'
         },
       ],
@@ -177,10 +229,17 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       title: 'Allocation Information',
       itemsGrid: true,
       items: [
-        { label: 'Allocation Code', value: consignment.allocation?.allocationCode || 'N/A' },
+        { label: 'Allocation Code', value: consignment.allocation?.id || 'N/A' },
         { label: 'Allocation Type', value: consignment.allocation?.allocationType || 'N/A' },
         { label: 'Allocation Status', value: consignment.allocation?.status || 'N/A' },
-        { label: 'User Email', value: consignment.allocation?.userEmail || 'N/A' },
+        {
+          label: 'User Email',
+          value: resolveUserEmail(
+            consignment.allocation?.requestRaisedBy ||
+            consignment.allocation?.userEmail ||
+            consignment.allocation?.user
+          ),
+        },
       ],
     },
     {
@@ -188,7 +247,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       itemsGrid: true,
       items: [
         { label: 'Consignment ID', value: consignment.id || 'N/A' },
-        { label: 'Created By', value: consignment.createdBy?.name || consignment.createdBy || 'N/A' },
+        { label: 'Created By', value: resolveUserDisplay(consignment.createdBy) },
         { label: 'Created At', value: consignment.createdAt ? new Date(consignment.createdAt).toLocaleString() : 'N/A' },
         { label: 'Updated At', value: consignment.updatedAt ? new Date(consignment.updatedAt).toLocaleString() : 'N/A' },
       ],
