@@ -39,6 +39,8 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
           createdAt: allocation.createdAt,
           allocationType: allocation.allocationType,
           allocationReason: allocation.allocationReason,
+          sourceName: allocation.sourceName,
+          destinationName: allocation.destinationName,
         };
       });
     });
@@ -220,10 +222,22 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                     <span className="text-gray-500">Allocated Date:</span>
                     <span className="font-medium text-gray-900">{allocatedDate}</span>
                   </div>
-                  {allocation?.allocationType && (
+                  {/* {allocation?.allocationType && (
                     <div className="flex justify-between text-xs">
                       <span className="text-gray-500">Allocation Type:</span>
                       <span className="font-medium text-gray-900">{allocation.allocationType}</span>
+                    </div>
+                  )} */}
+                  {allocation?.sourceName && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500">Source:</span>
+                      <span className="font-medium text-gray-900">{allocation.sourceName}</span>
+                    </div>
+                  )}
+                  {allocation?.destinationName && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500">Destination:</span>
+                      <span className="font-medium text-gray-900">{allocation.destinationName}</span>
                     </div>
                   )}
                   
