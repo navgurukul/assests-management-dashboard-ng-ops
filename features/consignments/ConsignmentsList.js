@@ -621,24 +621,30 @@ export default function ConsignmentsList() {
     [campusOptions]
   );
 
+  const getReturnActionIdentifiers = React.useCallback((item) => {
+    const consignmentId = item?.consignmentId;
+    const assetId =
+      item?.action?.assetId ||
+      item?.assetId ||
+      item?.asset?.id;
+
+    if (!consignmentId) {
+      throw new Error('Consignment ID is missing for this return item');
+    }
+
+    if (!assetId) {
+      throw new Error('Asset ID is missing for this return item');
+    }
+
+    return { consignmentId, assetId };
+  }, []);
+
   // Handle accept return form submit
   const handleAcceptSubmit = async (formData) => {
     setIsAcceptSubmitting(true);
     const loadingToastId = toast.loading('Processing acceptance...');
     try {
-      const consignmentId = currentInTransitItem?.consignmentId;
-      const assetId =
-        currentInTransitItem?.action?.assetId ||
-        currentInTransitItem?.assetId ||
-        currentInTransitItem?.asset?.id;
-
-      if (!consignmentId) {
-        throw new Error('Consignment ID is missing for this return item');
-      }
-
-      if (!assetId) {
-        throw new Error('Asset ID is missing for this return item');
-      }
+      const { consignmentId, assetId } = getReturnActionIdentifiers(currentInTransitItem);
 
       if (!formData?.storedIn) {
         throw new Error('Please select a storage location');
@@ -674,15 +680,46 @@ export default function ConsignmentsList() {
   };
 
   // In-transit action handlers
-  const handleInTransitAction = React.useCallback((action, item) => {
+  const handleInTransitAction = React.useCallback(async (action, item) => {
     setOpenInTransitMenuId(null);
+
     if (action === 'Accepted') {
       setCurrentInTransitItem(item);
       setIsAcceptModalOpen(true);
-    } else {
-      toast.success(`Marked as ${action}: ${item.assetTag}`);
+      return;
     }
-  }, []);
+
+    if (action === 'Rejected') {
+      const loadingToastId = toast.loading('Processing rejection...');
+      try {
+        const { consignmentId, assetId } = getReturnActionIdentifiers(item);
+
+        const payload = {
+          assetId,
+          quantity: 1,
+          storedCampusId: null,
+          returnAcceptNotes: 'REJECTED',
+        };
+
+        await apiService.post(
+          config.endpoints.consignments?.assets?.(consignmentId) ||
+            `/consignments/${consignmentId}/assets`,
+          payload
+        );
+
+        toast.dismiss(loadingToastId);
+        toast.success(`Return rejected for ${item.assetTag}`);
+        await refetchInTransit();
+      } catch (error) {
+        console.error('Error rejecting return:', error);
+        toast.dismiss(loadingToastId);
+        toast.error(error?.message || 'Failed to reject return');
+      }
+      return;
+    }
+
+    toast.success(`Marked as ${action}: ${item.assetTag}`);
+  }, [getReturnActionIdentifiers, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
