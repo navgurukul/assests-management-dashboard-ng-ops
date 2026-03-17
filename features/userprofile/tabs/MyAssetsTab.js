@@ -48,8 +48,8 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   }, [allocations]);
 
   const computedReturnFields = useMemo(
-    () => getReturnAssetFields(selectedAsset),
-    [selectedAsset]
+    () => getReturnAssetFields(selectedAsset, allocationMap[selectedAsset?.id]?.sourceName),
+    [selectedAsset, allocationMap]
   );
 
   const handleExtendLease = (asset) => {

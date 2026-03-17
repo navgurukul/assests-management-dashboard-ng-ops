@@ -20,13 +20,10 @@ export const returnAssetFields = [
   {
     name: 'assetSource',
     label: 'Asset Source (Campus)',
-    type: 'api-autocomplete',
-    required: true,
-    placeholder: 'Search and select campus',
-    apiUrl: `${baseUrl}/campuses`,
-    queryKey: ['campuses'],
-    labelKey: 'campusName',
-    valueKey: 'campusName',
+    type: 'text',
+    required: false,
+    disabled: true,
+    placeholder: '',
   },
   {
     name: 'campusItCoordinator',
@@ -79,7 +76,7 @@ export const returnAssetFields = [
  *
  * @param {{ assetTag?: string; id?: string; campus?: { name?: string }; campusName?: string } | null} selectedAsset
  */
-export const getReturnAssetFields = (selectedAsset = null) =>
+export const getReturnAssetFields = (selectedAsset = null, sourceName = '') =>
   returnAssetFields.map((f) => {
     if (f.name === 'assetId')
       return {
@@ -89,8 +86,7 @@ export const getReturnAssetFields = (selectedAsset = null) =>
     if (f.name === 'assetSource')
       return {
         ...f,
-        defaultValue:
-          selectedAsset?.campus?.name || selectedAsset?.campusName || '',
+        defaultValue: sourceName || selectedAsset?.campus?.name || selectedAsset?.campusName || '',
       };
     return f;
   });
@@ -98,7 +94,7 @@ export const getReturnAssetFields = (selectedAsset = null) =>
 // ─── Yup Validation Schema ─────────────────────────────────────────────────
 
 export const returnAssetValidationSchema = Yup.object().shape({
-  assetSource: Yup.string().required('Campus is required'),
+  assetSource: Yup.string(),
   campusItCoordinator: Yup.string()
     .required('IT Coordinator email is required')
     .email('Enter a valid email address'),
