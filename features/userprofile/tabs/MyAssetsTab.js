@@ -16,10 +16,15 @@ import {
   extendLeaseFields,
   extendLeaseValidationSchema,
 } from '@/app/config/formConfigs/extendLeaseModalConfig';
+import {
+  assetReceivedFields,
+  assetReceivedValidationSchema,
+} from '@/app/config/formConfigs/assetReceivedModalConfig';
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
+  const [receivedModalOpen, setReceivedModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
 
@@ -61,6 +66,31 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   const handleReturnAsset = (asset) => {
     setSelectedAsset(asset);
     setReturnModalOpen(true);
+  };
+
+  const handleAssetReceived = (asset) => {
+    setSelectedAsset(asset);
+    setReceivedModalOpen(true);
+  };
+
+  const handleAssetReceivedSubmit = async (formData) => {
+    try {
+      await mutateAsync({
+        endpoint: `/allocations/my-assets/${selectedAsset?.id}/received`,
+        body: {
+          assetId: selectedAsset?.id,
+          workingFine: formData.workingFine || false,
+          havingIssue: formData.havingIssue || false,
+          issueType: formData.havingIssue ? formData.issueType : undefined,
+          description: formData.havingIssue ? formData.description : undefined,
+        },
+      });
+      toast.success('Asset received confirmation submitted successfully.');
+      setReceivedModalOpen(false);
+      setSelectedAsset(null);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to confirm asset received.');
+    }
   };
 
   const handleReturnSubmit = async (formData) => {
@@ -169,8 +199,13 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                       <p className="text-xs text-gray-500">{asset.assetTag}</p>
                     </div>
                   </div>
-                  <StatusChip value={asset.status} />
                   <div className="flex items-center gap-2">
+                    <CustomButton
+                      text="Asset Received"
+                      onClick={() => handleAssetReceived(asset)}
+                      variant="success"
+                      size="sm"
+                    />
                     <CustomButton
                       text="Return Asset"
                       onClick={() => handleReturnAsset(asset)}
@@ -207,42 +242,46 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                 </div>
 
                 {/* Additional Info */}
-                <div className="border-t border-gray-100 pt-3 space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Serial Number:</span>
-                    <span className="font-medium text-gray-900">{asset.serialNumber}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Condition:</span>
-                    <span className={`px-2 py-0.5 font-semibold rounded ${getConditionChipColor(asset.condition)}`}>
-                      {asset.condition}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Allocated Date:</span>
-                    <span className="font-medium text-gray-900">{allocatedDate}</span>
-                  </div>
-                  {/* {allocation?.allocationType && (
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Allocation Type:</span>
-                      <span className="font-medium text-gray-900">{allocation.allocationType}</span>
+                <div className="border-t border-gray-100 pt-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    {/* Col 1 */}
+                    <div className="flex flex-col gap-y-2">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Status</span>
+                        <span className="text-xs font-medium text-gray-900">{asset.status}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Condition</span>
+                        <span className="text-xs font-medium text-gray-900">{asset.condition}</span>
+                      </div>
+                      {allocation?.sourceName && (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs text-gray-500">Source</span>
+                          <span className="text-xs font-medium text-gray-900">{allocation.sourceName}</span>
+                        </div>
+                      )}
                     </div>
-                  )} */}
-                  {allocation?.sourceName && (
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Source:</span>
-                      <span className="font-medium text-gray-900">{allocation.sourceName}</span>
+                    {/* Col 2 */}
+                    <div className="flex flex-col gap-y-2">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Serial Number</span>
+                        <span className="text-xs font-medium text-gray-900">{asset.serialNumber}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Allocated Date</span>
+                        <span className="text-xs font-medium text-gray-900">{allocatedDate}</span>
+                      </div>
+                      {allocation?.destinationName && (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs text-gray-500">Destination</span>
+                          <span className="text-xs font-medium text-gray-900">{allocation.destinationName}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {allocation?.destinationName && (
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Destination:</span>
-                      <span className="font-medium text-gray-900">{allocation.destinationName}</span>
-                    </div>
-                  )}
-                  
+                  </div>
+
                   {/* Accessories */}
-                  <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-3 pt-2 mt-2 border-t border-gray-100">
                     <span className="text-xs text-gray-500">Accessories:</span>
                     <div className="flex items-center gap-2">
                       {asset.charger && (
@@ -273,6 +312,18 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
           <p className="mt-2 text-sm text-gray-500">No assets assigned</p>
         </div>
       )}
+
+      <FormModal
+        isOpen={receivedModalOpen}
+        onClose={() => { setReceivedModalOpen(false); setSelectedAsset(null); }}
+        componentName=""
+        actionType="Asset Received"
+        fields={assetReceivedFields}
+        onSubmit={handleAssetReceivedSubmit}
+        isSubmitting={isPending}
+        size="medium"
+        validationSchema={assetReceivedValidationSchema}
+      />
 
       <FormModal
         isOpen={extendModalOpen}
