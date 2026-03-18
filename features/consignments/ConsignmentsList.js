@@ -292,49 +292,15 @@ export default function ConsignmentsList() {
     },
   ];
 
-  const isLikelyId = (value) => {
-    if (typeof value !== 'string') return false;
-    const trimmed = value.trim();
-    if (!trimmed) return false;
-    return /^[a-f0-9-]{16,}$/i.test(trimmed) && !/\s/.test(trimmed);
-  };
+  const resolveConsignmentLocationLabel = (location) => {
+    const campusName = location?.campus?.name;
+    if (campusName) {
+      return campusName;
+    }
 
-  const isPlaceholder = (value) => {
-    if (value === null || value === undefined) return true;
-    const normalized = String(value).trim().toUpperCase();
-    return normalized === '' || normalized === 'N/A' || normalized === 'NA' || normalized === '-';
-  };
-
-  const resolveConsignmentLocationLabel = (baseValue, objectCandidate, idCandidate) => {
-    const candidates = [objectCandidate, baseValue, idCandidate];
-
-    for (const candidate of candidates) {
-      if (!candidate) continue;
-
-      if (typeof candidate === 'object') {
-        const objectName = candidate.campus?.name || candidate.campusName || candidate.name;
-        if (!isPlaceholder(objectName)) {
-          return objectName;
-        }
-
-        const objectId = String(candidate.campus?.id || candidate.id || candidate.campusId || '').trim();
-        if (objectId && campusNameById.has(objectId)) {
-          return campusNameById.get(objectId);
-        }
-
-        continue;
-      }
-
-      const value = String(candidate).trim();
-      if (isPlaceholder(value)) continue;
-
-      if (campusNameById.has(value)) {
-        return campusNameById.get(value);
-      }
-
-      if (!isLikelyId(value)) {
-        return value;
-      }
+    const campusId = location?.campus?.id;
+    if (campusId && campusNameById.has(campusId)) {
+      return campusNameById.get(campusId);
     }
 
     return 'N/A';
@@ -348,17 +314,9 @@ export default function ConsignmentsList() {
       if (typeof transformConsignmentForTable === 'function') {
         const transformed = transformConsignmentForTable(consignment);
 
-        const resolvedSource = resolveConsignmentLocationLabel(
-          transformed?.source,
-          consignment?.sourceCampus || consignment?.sourceLocation || consignment?.allocation?.sourceCampus,
-          consignment?.sourceCampusId || consignment?.sourceLocationId || consignment?.allocation?.sourceCampusId
-        );
+        const resolvedSource = resolveConsignmentLocationLabel(consignment?.sourceLocation);
 
-        const resolvedDestination = resolveConsignmentLocationLabel(
-          transformed?.destination,
-          consignment?.destinationCampus || consignment?.destinationLocation || consignment?.allocation?.destinationCampus,
-          consignment?.destinationCampusId || consignment?.destinationLocationId || consignment?.allocation?.destinationCampusId
-        );
+        const resolvedDestination = resolveConsignmentLocationLabel(consignment?.destinationLocation);
 
         return {
           ...transformed,
@@ -370,34 +328,25 @@ export default function ConsignmentsList() {
       // Default formatting
       return {
         id: consignment.id,
-        consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
+        consignmentCode: consignment.consignmentCode || `CON-${consignment.id}`,
         status: consignment.status,
-        allocationCode: consignment.allocation?.allocationCode || consignment.allocationCode || '-',
-        courierService:
-          consignment.courierName ||
-          consignment.courierService?.name ||
-          consignment.courierServiceName ||
-          '-',
-        courierServiceId: consignment.courierService?.id || consignment.courierServiceId || '',
-        source: resolveConsignmentLocationLabel(
-          consignment.source,
-          consignment.sourceCampus || consignment.sourceLocation || consignment.allocation?.sourceCampus,
-          consignment.sourceCampusId || consignment.sourceLocationId || consignment.allocation?.sourceCampusId
-        ),
-        destination: resolveConsignmentLocationLabel(
-          consignment.destination,
-          consignment.destinationCampus || consignment.destinationLocation || consignment.allocation?.destinationCampus,
-          consignment.destinationCampusId || consignment.destinationLocationId || consignment.allocation?.destinationCampusId
-        ),
+        allocationCode: consignment.allocation?.allocationCode || '-',
+        courierService: consignment.courierName || '-',
+        courierServiceId: consignment.courierService?.id || '',
+        source: resolveConsignmentLocationLabel(consignment.sourceLocation),
+        destination: resolveConsignmentLocationLabel(consignment.destinationLocation),
         shippedAt: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : '-',
         estimatedDeliveryDate: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : '-',
-        trackingId: consignment.trackingNumber || consignment.trackingId || '-',
-        trackingLink: consignment.link || consignment.trackingLink || '',
-        assetCount: consignment.assets?.length || consignment.assetCount || 0,
-        deliveredAt: consignment.deliveredAt ? new Date(consignment.deliveredAt).toLocaleDateString() : '-',
-        createdBy: consignment.createdBy?.name || '-',
+        trackingId: consignment.trackingNumber || '-',
+        trackingLink: consignment.link || '',
+        assetCount: consignment.assetCount ?? 0,
+        deliveredAt: consignment.receivedAt ? new Date(consignment.receivedAt).toLocaleDateString() : '-',
+        createdBy:
+          `${consignment.createdBy?.firstName || ''} ${consignment.createdBy?.lastName || ''}`.trim() ||
+          consignment.createdBy?.email ||
+          '-',
         createdAt: consignment.createdAt ? new Date(consignment.createdAt).toLocaleDateString() : '-',
-        allocationId: consignment.allocation?.id || consignment.allocationId || '',
+        allocationId: consignment.allocation?.id || '',
       };
     });
   }, [data, campusNameById]);
