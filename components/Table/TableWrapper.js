@@ -70,7 +70,7 @@ export default function TableWrapper({
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+          <h2 className="text-xl font-bold text-gray-800 ml-4">{title}</h2>
         </div>
       )}
       

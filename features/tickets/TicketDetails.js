@@ -173,12 +173,12 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         ? { logEntries: historyEntries }
         : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
     },
-    {
+    ...(ticket.status === 'APPROVED' ? [{
       title: 'ACTIONS',
       actions: [
         { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
       ],
-    },
+    }] : []),
   ];
 
   const rightSections = [
@@ -206,7 +206,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
 
         { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
+        // { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
         { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
         { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
         { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
@@ -217,7 +217,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
         { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
         { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
-        { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
+        // { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
       ],
     },
     {
@@ -246,13 +246,23 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         rightSections={rightSections}
         onBack={onBack}
         headerActions={
-          <CustomButton
-            text="Create Allocation"
-            variant="primary"
-            size="md"
-            onClick={handleCreateAllocation}
-          />
-        }
+          ticket.status === 'APPROVED' ? (
+            <CustomButton
+              text="Create Allocation"
+              variant="primary"
+              size="md"
+              onClick={handleCreateAllocation}
+            />
+          ) : ticket.status === 'RAISED' ? (
+            <CustomButton
+              text="Ticket is not approved"
+              variant="warning"
+              size="md"
+              className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
+              onClick={() => {}}
+              title="Please contact your manager"
+            />
+          ) : null}
       />
 
       <Modal
