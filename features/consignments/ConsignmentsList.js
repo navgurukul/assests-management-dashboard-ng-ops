@@ -690,20 +690,20 @@ export default function ConsignmentsList() {
           </div>
         );
         
-      case 'assignedTo':
-        const assignedToName =
-          typeof item.assignedTo === 'object'
-            ? item.assignedTo?.name || '-'
-            : (item.assignedTo || '-');
-        const assignedToEmail =
-          typeof item.assignedTo === 'object'
-            ? (item.assignedTo?.email || '')
+      case 'allocatedTo':
+        const allocatedToName =
+          typeof item.allocatedTo === 'object'
+            ? item.allocatedTo?.name || '-'
+            : (item.allocatedTo || '-');
+        const allocatedToEmail =
+          typeof item.allocatedTo === 'object'
+            ? (item.allocatedTo?.email || '')
             : '';
 
         return (
           <div className="flex flex-col">
-            <span className="text-sm text-gray-900">{assignedToName}</span>
-            <span className="text-xs text-gray-500">{assignedToEmail}</span>
+            <span className="text-sm text-gray-900">{allocatedToName}</span>
+            <span className="text-xs text-gray-500">{allocatedToEmail}</span>
           </div>
         );
         
