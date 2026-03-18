@@ -54,7 +54,7 @@ export const consignmentTableColumns = [
   
   // 7. Allocated To
   { 
-    key: 'assignedTo', 
+    key: 'allocatedTo', 
     label: 'ALLOCATED TO',
     description: 'User allocated to this consignment'
   },
@@ -115,7 +115,7 @@ export const defaultVisibleColumns = [
   'destination',        // 4. Destination
   'courierService',     // 5. Courier Partner
   'trackingId',         // 6. Tracking ID
-  'assignedTo',         // 7. Assigned To
+  'allocatedTo',        // 7. Allocated To
   'status',             // 8. Status
   'actions',            // 9. Actions
 ];

@@ -276,30 +276,32 @@ export const formatConsignmentStatus = (status) => {
  * @returns {object} Transformed consignment data
  */
 export const transformConsignmentForTable = (consignment) => {
-  const requestRaisedBy = getNestedValue(consignment, 'allocation.requestRaisedBy', null);
-  const normalizedAssignedTo = (() => {
-    if (requestRaisedBy) {
-      if (typeof requestRaisedBy === 'string') {
-        return { name: requestRaisedBy, email: '' };
-      }
+  const allocationUser = getNestedValue(consignment, 'allocation.user', null);
+  const normalizedAllocatedTo = (() => {
+    if (allocationUser && typeof allocationUser === 'object') {
+      const fullName = `${allocationUser.firstName || ''} ${allocationUser.lastName || ''}`.trim();
+      return {
+        name:
+          allocationUser.name ||
+          fullName ||
+          allocationUser.username ||
+          allocationUser.email ||
+          allocationUser.id ||
+          '-',
+        email: allocationUser.email || '',
+      };
+    }
 
-      if (typeof requestRaisedBy === 'object') {
-        const fullName = `${requestRaisedBy.firstName || ''} ${requestRaisedBy.lastName || ''}`.trim();
-        return {
-          name:
-            requestRaisedBy.name ||
-            fullName ||
-            requestRaisedBy.username ||
-            requestRaisedBy.email ||
-            requestRaisedBy.id ||
-            '-',
-          email: requestRaisedBy.email || '',
-        };
-      }
+    if (consignment.allocatedTo && typeof consignment.allocatedTo === 'object') {
+      return consignment.allocatedTo;
     }
 
     if (consignment.assignedTo && typeof consignment.assignedTo === 'object') {
       return consignment.assignedTo;
+    }
+
+    if (typeof consignment.allocatedTo === 'string' && consignment.allocatedTo.trim()) {
+      return { name: consignment.allocatedTo.trim(), email: '' };
     }
 
     if (typeof consignment.assignedTo === 'string' && consignment.assignedTo.trim()) {
@@ -315,6 +317,7 @@ export const transformConsignmentForTable = (consignment) => {
     status: formatConsignmentStatus(consignment.status),
     allocationCode: getNestedValue(consignment, 'allocation.allocationCode') || consignment.allocationCode || 'N/A',
     courierService:
+      consignment.courierPartnerName ||
       consignment.courierName ||
       getNestedValue(consignment, 'courierService.name') ||
       consignment.courierServiceName ||
@@ -326,7 +329,7 @@ export const transformConsignmentForTable = (consignment) => {
     deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
     trackingId: consignment.trackingNumber || consignment.trackingId || 'N/A',
     assetCount: consignment.assets?.length || consignment.assetCount || 0,
-    assignedTo: normalizedAssignedTo,
+    allocatedTo: normalizedAllocatedTo,
     createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
     createdAt: formatDate(consignment.createdAt),
     updatedAt: formatDate(consignment.updatedAt),
