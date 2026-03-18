@@ -16,6 +16,10 @@ import {
   extendLeaseFields,
   extendLeaseValidationSchema,
 } from '@/app/config/formConfigs/extendLeaseModalConfig';
+import {
+  assetReceivedFields,
+  assetReceivedValidationSchema,
+} from '@/app/config/formConfigs/assetReceivedModalConfig';
 
 export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
@@ -64,13 +68,26 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
     setReturnModalOpen(true);
   };
 
-  const handleAssetReceived = async (asset) => {
+  const handleAssetReceived = (asset) => {
+    setSelectedAsset(asset);
+    setReceivedModalOpen(true);
+  };
+
+  const handleAssetReceivedSubmit = async (formData) => {
     try {
       await mutateAsync({
-        endpoint: `/allocations/my-assets/${asset.id}/received`,
-        body: { assetId: asset.id },
+        endpoint: `/allocations/my-assets/${selectedAsset?.id}/received`,
+        body: {
+          assetId: selectedAsset?.id,
+          workingFine: formData.workingFine || false,
+          havingIssue: formData.havingIssue || false,
+          issueType: formData.havingIssue ? formData.issueType : undefined,
+          description: formData.havingIssue ? formData.description : undefined,
+        },
       });
       toast.success('Asset received confirmation submitted successfully.');
+      setReceivedModalOpen(false);
+      setSelectedAsset(null);
     } catch (err) {
       toast.error(err?.message || 'Failed to confirm asset received.');
     }
@@ -295,6 +312,18 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
           <p className="mt-2 text-sm text-gray-500">No assets assigned</p>
         </div>
       )}
+
+      <FormModal
+        isOpen={receivedModalOpen}
+        onClose={() => { setReceivedModalOpen(false); setSelectedAsset(null); }}
+        componentName=""
+        actionType="Asset Received"
+        fields={assetReceivedFields}
+        onSubmit={handleAssetReceivedSubmit}
+        isSubmitting={isPending}
+        size="medium"
+        validationSchema={assetReceivedValidationSchema}
+      />
 
       <FormModal
         isOpen={extendModalOpen}
