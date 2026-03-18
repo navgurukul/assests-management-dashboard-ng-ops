@@ -108,6 +108,16 @@ export default function AllocationsList() {
       case "allocationId":
         return <span className="font-medium text-blue-600">#{cellValue}</span>;
       case "assetTag":
+        if (item.assetCount === 1) {
+          return (
+            <span
+              className="font-medium text-gray-800"
+              title={item.assetTag}
+            >
+              1 Asset
+            </span>
+          );
+        }
         return <span className="font-medium text-gray-800">{cellValue}</span>;
       case "allocationType":
         return <StatusChip value={cellValue} colorFn={getAllocationTypeChipColor} />;
@@ -239,10 +249,10 @@ export default function AllocationsList() {
   };
 
   // Handle loading and error states
-  if (isLoading || isError) {
+  if (isError) {
     return (
       <StateHandler
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         loadingMessage="Loading allocations..."
@@ -302,6 +312,8 @@ export default function AllocationsList() {
             onResetToDefault={resetToDefault}
           />
         }
+        // Loading state
+        isLoading={isLoading}
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}
