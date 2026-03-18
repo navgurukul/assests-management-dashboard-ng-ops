@@ -56,7 +56,7 @@ export const ticketFormFields = [
       { value: 'alimausmani@navgurukul.org', label: 'Ali Mausmani - alimausmani@navgurukul.org' },
       { value: 'geetashriyadav@navgurukul.org', label: 'Geetha Shri Yadav - geetashriyadav@navgurukul.org' },
       { value: 'anjani.k@navgurukul.org', label: 'Anjani K - anjani.k@navgurukul.org' },
-      { value: 'sanjana@navgurukul.org', label: 'Sanjana - sanjana@navgurukul.org' },
+      { value: 'sanjna@navgurukul.org', label: 'Sanjana - sanjna@navgurukul.org' },
     ],
   },
   {
