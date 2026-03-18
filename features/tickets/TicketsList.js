@@ -383,10 +383,10 @@ export default function TicketsList() {
   };
 
   // Handle loading and error states
-  if (isLoading || isError) {
+  if (isError) {
     return (
       <StateHandler
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         loadingMessage="Loading tickets..."
@@ -489,6 +489,8 @@ export default function TicketsList() {
             getFilterLabel={getFilterLabel}
           />
         }
+        // Loading state
+        isLoading={isLoading}
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.data?.pagination}
