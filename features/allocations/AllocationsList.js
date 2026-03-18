@@ -8,6 +8,7 @@ import {
   getAllocationTypeChipColor,
   getAllocationReasonChipColor,
   getDeviceModeChipColor,
+  getStatusChipColor,
   CHIP_CLASSES,
 } from '@/app/utils/statusHelpers';
 import * as LucideIcons from 'lucide-react';
@@ -125,10 +126,7 @@ export default function AllocationsList() {
           </div>
         );
       case "status":
-        const StatusIcon = item.isActive ? CheckCircle : XCircle;
-        return (
-          <StatusChip value={cellValue} icon={<StatusIcon className="w-3 h-3" />} />
-        );
+        return <StatusChip value={cellValue} colorFn={getStatusChipColor} />;
       case "reason":
         return <StatusChip value={cellValue} colorFn={getAllocationReasonChipColor} />;
       case "endDate":
@@ -256,7 +254,7 @@ export default function AllocationsList() {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
         {allocationsSummaryCards.map((card) => {
           const IconComponent = LucideIcons[card.icon];
           return (

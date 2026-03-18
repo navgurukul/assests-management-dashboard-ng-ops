@@ -169,12 +169,6 @@ export default function ConsignmentsList() {
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
-  
-  // Fetch campuses from API
-  const { data: campusData } = useFetch({
-    url: '/campuses',
-    queryKey: ['campuses'],
-  });
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -209,30 +203,34 @@ export default function ConsignmentsList() {
     }));
   }, []);
 
-  // Transform campus data from API to filter options
-  const campusOptions = React.useMemo(() => {
-    if (!campusData || !campusData.data) return [];
-    
-    return campusData.data.map((campus) => ({
-      value: campus.id,
-      label: campus.campusName || campus.name,
-    }));
-  }, [campusData]);
-
   const campusNameById = React.useMemo(() => {
     const map = new Map();
-    const campuses = Array.isArray(campusData?.data) ? campusData.data : [];
+    const consignments = Array.isArray(data?.data) ? data.data : [];
 
-    campuses.forEach((campus) => {
-      const campusId = String(campus?.id || '').trim();
-      const campusName = campus?.campusName || campus?.name || '';
-      if (campusId && campusName) {
-        map.set(campusId, campusName);
-      }
+    consignments.forEach((consignment) => {
+      const campuses = [
+        consignment?.sourceLocation?.campus,
+        consignment?.destinationLocation?.campus,
+      ];
+
+      campuses.forEach((campus) => {
+        const campusId = String(campus?.id || '').trim();
+        const campusName = campus?.campusName || campus?.name || '';
+        if (campusId && campusName) {
+          map.set(campusId, campusName);
+        }
+      });
     });
 
     return map;
-  }, [campusData]);
+  }, [data]);
+
+  const campusOptions = React.useMemo(() => {
+    return Array.from(campusNameById.entries()).map(([value, label]) => ({
+      value,
+      label,
+    }));
+  }, [campusNameById]);
 
   // Update createFormFields when campus options are available
   useEffect(() => {
@@ -292,52 +290,29 @@ export default function ConsignmentsList() {
     },
   ];
 
-  const isLikelyId = (value) => {
-    if (typeof value !== 'string') return false;
-    const trimmed = value.trim();
-    if (!trimmed) return false;
-    return /^[a-f0-9-]{16,}$/i.test(trimmed) && !/\s/.test(trimmed);
-  };
+  const resolveConsignmentLocationLabel = (location) => {
+    const campusName = location?.campus?.name;
+    if (campusName) {
+      return campusName;
+    }
 
-  const isPlaceholder = (value) => {
-    if (value === null || value === undefined) return true;
-    const normalized = String(value).trim().toUpperCase();
-    return normalized === '' || normalized === 'N/A' || normalized === 'NA' || normalized === '-';
-  };
-
-  const resolveConsignmentLocationLabel = (baseValue, objectCandidate, idCandidate) => {
-    const candidates = [baseValue, objectCandidate, idCandidate];
-
-    for (const candidate of candidates) {
-      if (!candidate) continue;
-
-      if (typeof candidate === 'object') {
-        const objectName = candidate.campusName || candidate.name;
-        if (!isPlaceholder(objectName)) {
-          return objectName;
-        }
-
-        const objectId = String(candidate.id || candidate.campusId || '').trim();
-        if (objectId && campusNameById.has(objectId)) {
-          return campusNameById.get(objectId);
-        }
-
-        continue;
-      }
-
-      const value = String(candidate).trim();
-      if (isPlaceholder(value)) continue;
-
-      if (campusNameById.has(value)) {
-        return campusNameById.get(value);
-      }
-
-      if (!isLikelyId(value)) {
-        return value;
-      }
+    const campusId = location?.campus?.id;
+    if (campusId && campusNameById.has(campusId)) {
+      return campusNameById.get(campusId);
     }
 
     return 'N/A';
+  };
+
+  const extractTrackingUrl = (consignment) => {
+    const directUrl = String(consignment?.trackingLink || consignment?.link || '').trim();
+    if (directUrl) {
+      return directUrl;
+    }
+
+    const notes = String(consignment?.notes || '').trim();
+    const urlMatch = notes.match(/https?:\/\/[^\s]+/i);
+    return urlMatch ? urlMatch[0] : '';
   };
   
   // Process API data to table format
@@ -348,44 +323,40 @@ export default function ConsignmentsList() {
       if (typeof transformConsignmentForTable === 'function') {
         const transformed = transformConsignmentForTable(consignment);
 
-        const resolvedSource = resolveConsignmentLocationLabel(
-          transformed?.source,
-          consignment?.sourceCampus || consignment?.sourceLocation || consignment?.allocation?.sourceCampus,
-          consignment?.sourceCampusId || consignment?.sourceLocationId || consignment?.allocation?.sourceCampusId
-        );
+        const resolvedSource = resolveConsignmentLocationLabel(consignment?.sourceLocation);
 
-        const resolvedDestination = resolveConsignmentLocationLabel(
-          transformed?.destination,
-          consignment?.destinationCampus || consignment?.destinationLocation || consignment?.allocation?.destinationCampus,
-          consignment?.destinationCampusId || consignment?.destinationLocationId || consignment?.allocation?.destinationCampusId
-        );
+        const resolvedDestination = resolveConsignmentLocationLabel(consignment?.destinationLocation);
 
         return {
           ...transformed,
           source: resolvedSource,
           destination: resolvedDestination,
+          trackingLink: extractTrackingUrl(consignment) || transformed?.trackingLink || '',
         };
       }
       
       // Default formatting
       return {
         id: consignment.id,
-        consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
+        consignmentCode: consignment.consignmentCode || `CON-${consignment.id}`,
         status: consignment.status,
-        allocationCode: consignment.allocation?.allocationCode || consignment.allocationCode || '-',
-        courierService: consignment.courierService?.name || consignment.courierServiceName || '-',
-        courierServiceId: consignment.courierService?.id || consignment.courierServiceId || '',
-        source: consignment.source || consignment.allocation?.sourceCampus?.name || '-',
-        destination: consignment.destination || consignment.allocation?.destinationCampus?.name || '-',
+        allocationCode: consignment.allocation?.allocationCode || '-',
+        courierService: consignment.courierPartnerName || consignment.courierName || '-',
+        courierServiceId: consignment.courierService?.id || '',
+        source: resolveConsignmentLocationLabel(consignment.sourceLocation),
+        destination: resolveConsignmentLocationLabel(consignment.destinationLocation),
         shippedAt: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : '-',
         estimatedDeliveryDate: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : '-',
-        trackingId: consignment.trackingId || '-',
-        trackingLink: consignment.trackingLink || '',
-        assetCount: consignment.assets?.length || consignment.assetCount || 0,
-        deliveredAt: consignment.deliveredAt ? new Date(consignment.deliveredAt).toLocaleDateString() : '-',
-        createdBy: consignment.createdBy?.name || '-',
+        trackingId: consignment.trackingNumber || '-',
+        trackingLink: extractTrackingUrl(consignment),
+        assetCount: consignment.assetCount ?? 0,
+        deliveredAt: consignment.receivedAt ? new Date(consignment.receivedAt).toLocaleDateString() : '-',
+        createdBy:
+          `${consignment.createdBy?.firstName || ''} ${consignment.createdBy?.lastName || ''}`.trim() ||
+          consignment.createdBy?.email ||
+          '-',
         createdAt: consignment.createdAt ? new Date(consignment.createdAt).toLocaleDateString() : '-',
-        allocationId: consignment.allocation?.id || consignment.allocationId || '',
+        allocationId: consignment.allocation?.id || '',
       };
     });
   }, [data, campusNameById]);
@@ -577,6 +548,7 @@ export default function ConsignmentsList() {
         courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
         trackingId: formData.trackingId,
         link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
+        estimatedDeliveryDate: formData.estimatedDeliveryDate,
       };
 
       
@@ -806,20 +778,32 @@ export default function ConsignmentsList() {
           </div>
         );
         
-      case 'assignedTo':
+      case 'allocatedTo':
+        const assignee = item.allocatedTo;
+        const allocatedToName =
+          typeof assignee === 'object'
+            ? assignee?.name || '-'
+            : (assignee || '-');
+        const allocatedToEmail =
+          typeof assignee === 'object'
+            ? (assignee?.email || '')
+            : '';
+
         return (
           <div className="flex flex-col">
-            <span className="text-sm text-gray-900">{item.assignedTo?.name || '-'}</span>
-            <span className="text-xs text-gray-500">{item.assignedTo?.email || ''}</span>
+            <span className="text-sm text-gray-900">{allocatedToName}</span>
+            <span className="text-xs text-gray-500">{allocatedToEmail}</span>
           </div>
         );
         
       case 'actions':
         const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
+        const trackingUrl = String(item.trackingLink || '').trim();
         const canTrack =
           normalizedItemStatus === 'dispatched' &&
           item.trackingId &&
-          item.trackingId !== '-';
+          item.trackingId !== '-' &&
+          trackingUrl;
         
         return (
           <div className="flex items-center justify-start gap-2 flex-wrap">
@@ -843,7 +827,7 @@ export default function ConsignmentsList() {
               <CustomButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.open(`https://www.google.com/search?q=${encodeURIComponent(item.trackingId + ' tracking')}`, '_blank');
+                  window.open(trackingUrl, '_blank', 'noopener,noreferrer');
                 }}
                 variant="secondary"
                 size="sm"
@@ -861,6 +845,9 @@ export default function ConsignmentsList() {
         );
         
       default:
+        if (typeof cellValue === 'object' && cellValue !== null) {
+          return '-';
+        }
         return cellValue;
     }
   };

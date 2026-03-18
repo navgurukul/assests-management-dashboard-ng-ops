@@ -7,27 +7,27 @@ export const courierProviders = [
   {
     id: 'dtdc',
     name: 'DTDC',
-    trackingUrlPattern: 'https://www.dtdc.in/tracking/mobile/search.asp?invoiceno={trackingId}',
+    trackingUrlPattern: 'https://www.dtdc.com/track-your-shipment/',
   },
   {
     id: 'indianpost',
     name: 'India Post',
-    trackingUrlPattern: 'https://tracking.indiapost.gov.in/status/trackingid?mailid={trackingId}',
+    trackingUrlPattern: 'https://www.indiapost.gov.in/',
   },
   {
     id: 'bluedart',
     name: 'Blue Dart',
-    trackingUrlPattern: 'https://www.bluedart.com/onlinetracking.asp?ShipmentNumber={trackingId}',
+    trackingUrlPattern: 'https://bluedart.com/tracking',
   },
   {
     id: 'delhivery',
     name: 'Delhivery',
-    trackingUrlPattern: 'https://track.delhivery.com/track/package/{trackingId}',
+    trackingUrlPattern: 'https://www.delhivery.com/tracking',
   },
   {
     id: 'flipkart',
     name: 'Flipkart Logistics',
-    trackingUrlPattern: 'https://www.flipkart.com/tracking/order/{trackingId}',
+    trackingUrlPattern: 'https://www.ekartlogistics.in/track-order',
   },
   {
     id: 'shiprocket',
@@ -99,17 +99,28 @@ export const readyToDispatchFields = [
     })),
     required: false,
   },
+  {
+    name: 'estimatedDeliveryDate',
+    label: 'Estimated Delivery Date',
+    type: 'date',
+    placeholder: 'Select estimated delivery date',
+    required: true,
+  },
 ];
 
 export const readyToDispatchValidation = Yup.object().shape({
   courierServiceId: Yup.string().required('Courier partner is required'),
   trackingId: Yup.string().required('Tracking ID is required'),
+  estimatedDeliveryDate: Yup.date()
+    .required('Estimated delivery date is required')
+    .nullable(),
 });
 
 export const readyToDispatchInitialValues = {
   courierServiceId: '',
   trackingId: '',
   trackingLink: 'https://www.shiprocket.in/shipment-tracking/',
+  estimatedDeliveryDate: '',
 };
 
 // ============================================
