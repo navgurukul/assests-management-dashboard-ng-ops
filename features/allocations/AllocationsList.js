@@ -249,10 +249,10 @@ export default function AllocationsList() {
   };
 
   // Handle loading and error states
-  if (isLoading || isError) {
+  if (isError) {
     return (
       <StateHandler
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         loadingMessage="Loading allocations..."
@@ -312,6 +312,8 @@ export default function AllocationsList() {
             onResetToDefault={resetToDefault}
           />
         }
+        // Loading state
+        isLoading={isLoading}
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}
