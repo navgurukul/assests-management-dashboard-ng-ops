@@ -253,17 +253,16 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               size="md"
               onClick={handleCreateAllocation}
             />
-          ) : (
+          ) : ticket.status === 'RAISED' ? (
             <CustomButton
               text="Ticket is not approved"
               variant="warning"
               size="md"
               className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
-            
+              onClick={() => {}}
               title="Please contact your manager"
             />
-          )
-        }
+          ) : null}
       />
 
       <Modal
