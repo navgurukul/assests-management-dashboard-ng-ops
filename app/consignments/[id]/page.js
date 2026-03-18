@@ -1,36 +1,30 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import ConsignmentDetails from '@/features/consignments/ConsignmentDetails';
+import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 
 export default function ConsignmentDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const consignmentId = params.id;
-  const [consignmentData, setConsignmentData] = useState(null);
+  const consignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-  useEffect(() => {
-    // Get consignment data from sessionStorage
-    if (typeof window !== 'undefined') {
-      const storedData = sessionStorage.getItem('currentConsignmentData');
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          setConsignmentData(parsedData);
-          // Clean up sessionStorage after retrieving data
-          sessionStorage.removeItem('currentConsignmentData');
-        } catch (error) {
-          console.error('Error parsing consignment data:', error);
-        }
-      }
-    }
-  }, []);
+  const { data, isLoading, isError, error } = useFetch({
+    url: config.endpoints.consignments.details(consignmentId),
+    queryKey: ['consignment-details', consignmentId],
+    enabled: Boolean(consignmentId),
+  });
+
+  const normalizedConsignmentData = data?.data || data?.consignment || data || null;
 
   return (
     <ConsignmentDetails 
       consignmentId={consignmentId}
-      consignmentData={consignmentData}
+      consignmentData={normalizedConsignmentData}
+      isLoading={isLoading}
+      isError={isError}
+      error={error}
       onBack={() => router.back()} 
     />
   );
