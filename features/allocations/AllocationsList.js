@@ -108,6 +108,16 @@ export default function AllocationsList() {
       case "allocationId":
         return <span className="font-medium text-blue-600">#{cellValue}</span>;
       case "assetTag":
+        if (item.assetCount === 1) {
+          return (
+            <span
+              className="font-medium text-gray-800"
+              title={item.assetTag}
+            >
+              1 Asset
+            </span>
+          );
+        }
         return <span className="font-medium text-gray-800">{cellValue}</span>;
       case "allocationType":
         return <StatusChip value={cellValue} colorFn={getAllocationTypeChipColor} />;
