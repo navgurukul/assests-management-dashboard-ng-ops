@@ -48,12 +48,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     enabled: true
   });
 
-  // Console log the user data response
-  useEffect(() => {
-    if (userDataResponse) {
-      console.log('User data response:', userDataResponse);
-    }
-  }, [userDataResponse]);
+   
 
   // Extract user data from response or use fallback
   const rawUserData = userDataResponse?.data || userDataResponse || null;
@@ -181,8 +176,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
         isSubmitting={isSubmitting}
         validationSchema={editProfileValidationSchema}
       />
-      <div className="h-full overflow-y-auto bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="h-full overflow-y-auto bg-gray-50 p-4"> 
         {/* Breadcrumb */}
         <div className="mb-3 text-xs text-gray-600">
           <span className="hover:text-blue-600 cursor-pointer">Dashboard</span>
@@ -258,7 +252,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
             )}
           </div>
         </div>
-      </div>
+       
     </div>
     </>
   );
