@@ -187,7 +187,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       itemsGrid: true,
       items: [
         // { label: 'Ticket ID', value: ticket.id || '—' },
-        { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
+        { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
