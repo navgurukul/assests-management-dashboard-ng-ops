@@ -13,8 +13,13 @@ export const allocationTableColumns = [
   // Default visible columns
   { 
     key: 'assetTag', 
-    label: 'ASSET WRAPPED',
-    description: 'Asset wrapped'
+    label: 'ASSET TAG',
+    description: 'Asset tag'
+  },
+  { 
+    key: 'brandModel', 
+    label: 'BRAND / MODEL',
+    description: 'Asset brand and model'
   },
   { 
     key: 'allocationType', 
@@ -96,6 +101,7 @@ export const allocationTableColumns = [
 // Default visible columns (shown when user first visits or resets)
 export const defaultVisibleColumns = [
   'assetTag',
+  'brandModel',
   'allocationType',
   'startDate',
   'reason',

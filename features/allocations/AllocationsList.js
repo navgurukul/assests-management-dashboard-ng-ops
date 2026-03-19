@@ -108,17 +108,15 @@ export default function AllocationsList() {
       case "allocationId":
         return <span className="font-medium text-blue-600">#{cellValue}</span>;
       case "assetTag":
-        if (item.assetCount === 1) {
-          return (
-            <span
-              className="font-medium text-gray-800"
-              title={item.assetTag}
-            >
-              1 Asset
-            </span>
-          );
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
         }
         return <span className="font-medium text-gray-800">{cellValue}</span>;
+      case "brandModel":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
+        return <span className="text-gray-700 text-sm">{cellValue}</span>;
       case "allocationType":
         return <StatusChip value={cellValue} colorFn={getAllocationTypeChipColor} />;
       case "userName":
