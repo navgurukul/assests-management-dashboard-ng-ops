@@ -13,6 +13,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
+import useFetch from '@/app/hooks/query/useFetch';
 import {
   ticketUpdateFormFields,
   ticketUpdateValidationSchema,
@@ -23,6 +24,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: campusInchargeData } = useFetch({
+    url: config.getApiUrl(config.endpoints.campusIncharge.list),
+    queryKey: ['campus-incharge'],
+  });
 
   if (isLoading) {
     return (
@@ -55,6 +61,27 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }
 
   const ticket = ticketData;
+
+  const isNewTicketType = ticket.ticketType === 'NEW';
+  const assigneeItems = (() => {
+    const list = campusInchargeData?.data;
+    if (!Array.isArray(list)) return [];
+    const items = [];
+    list.forEach((campus) => {
+      if (campus.itLead?.email) {
+        items.push({ id: campus.itLead.email, name: campus.itLead.name, email: campus.itLead.email });
+      }
+      if (!isNewTicketType) {
+        if (campus.itCoordinator?.email) {
+          items.push({ id: campus.itCoordinator.email, name: campus.itCoordinator.name, email: campus.itCoordinator.email });
+        }
+        if (campus.operation?.email) {
+          items.push({ id: campus.operation.email, name: campus.operation.name, email: campus.operation.email });
+        }
+      }
+    });
+    return items;
+  })();
 
   const historyEntries = (ticket.historyLogs || []).map((log) => ({
     time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
@@ -122,19 +149,16 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
     if (field.name === 'assigneeUserId') {
-      if (ticket.assigneeUser) {
-        return {
-          ...field,
-          selectedItem: {
-            ...ticket.assigneeUser,
-            id: ticket.assigneeUser?.id || ticket.assigneeUserId,
-          },
-        };
-      }
       return {
         ...field,
-        type: 'text',
-        placeholder: ticket.assigneeUserId || 'Not assigned',
+        type: 'api-autocomplete',
+        disabled: false,
+        placeholder: 'Search by name or email',
+        staticItems: assigneeItems,
+        labelKey: 'name',
+        valueKey: 'id',
+        formatLabel: (item) => `${item.name} (${item.email})`,
+        selectedItem: null,
       };
     }
     if (field.name === 'timelineDate' && ticket.timelineDate) {
@@ -269,7 +293,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         isOpen={isUpdateModalOpen}
         onClose={handleCloseModal}
         title="Update Ticket"
-        size="medium"
+        size="large"
       >
         {ticket.assigneeUser && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
