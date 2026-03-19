@@ -153,7 +153,7 @@ export default function CreateAllocation() {
     <div className="h-full overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-4">
+        <div className="mb-1">
           <CustomButton
             text="Back to Allocations"
             icon={ArrowLeft}
@@ -163,8 +163,13 @@ export default function CreateAllocation() {
             className="mb-6"
           />
           
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
+          
+        </div>
+
+        {/* Form Container */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 px-8 py-4">
+        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"> */}
+            <div className="flex items-center justify-between py-4">
               <h1 className="text-xl font-bold text-gray-900">Create New Allocation</h1>
               <button
                 type="button"
@@ -173,13 +178,8 @@ export default function CreateAllocation() {
                 title="Allocation type info"
               >
                 <Info size={20} />
-              </button>
-            </div>
+              </button> 
           </div>
-        </div>
-
-        {/* Form Container */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
           <GenericForm
             fields={modifiedFormFields}
             initialValues={modifiedInitialValues}
