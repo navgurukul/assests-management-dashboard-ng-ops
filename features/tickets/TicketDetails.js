@@ -173,7 +173,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         ? { logEntries: historyEntries }
         : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
     },
-    ...(ticket.status === 'APPROVED' ? [{
+    ...(ticket.status === 'APPROVED' && ticket.ticketType !== 'NEW' ? [{
       title: 'ACTIONS',
       actions: [
         { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
