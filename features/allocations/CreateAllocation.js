@@ -169,6 +169,7 @@ export default function CreateAllocation() {
               <ul className="text-sm text-blue-700 space-y-1 ml-4">
                 <li>• <strong>Remote:</strong> Allocate assets to individual users (students, employees) with user details</li>
                 <li>• <strong>Campus:</strong> Bulk transfer of assets between campus locations with working conditions</li>
+                <li>• <strong>NOTE:</strong>An individual User can only two laptops at a time.*</li>
               </ul>
             </div>
           </div>
