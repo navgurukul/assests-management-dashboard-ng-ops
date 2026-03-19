@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTicket, clearSelectedTicket } from '@/app/store/slices/ticketSlice';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
+import Modal from '@/components/molecules/Modal';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
 import config from '@/app/config/env.config';
@@ -23,6 +24,7 @@ export default function CreateAllocation() {
   const dispatch = useDispatch();
   const selectedTicket = useSelector(selectTicket);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [modifiedFormFields, setModifiedFormFields] = useState(allocationFormFields);
   const [modifiedInitialValues, setModifiedInitialValues] = useState(allocationInitialValues);
 
@@ -162,15 +164,16 @@ export default function CreateAllocation() {
           />
           
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Create New Allocation</h1>
-            {/* Info Box */}
-            <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-              <p className="text-sm text-blue-800 font-medium mb-2">Choose Allocation Type:</p>
-              <ul className="text-sm text-blue-700 space-y-1 ml-4">
-                <li>• <strong>Remote:</strong> Allocate assets to individual users (students, employees) with user details</li>
-                <li>• <strong>Campus:</strong> Bulk transfer of assets between campus locations with working conditions</li>
-                <li>• <strong>NOTE:</strong>An individual User can only two laptops at a time.*</li>
-              </ul>
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold text-gray-900">Create New Allocation</h1>
+              <button
+                type="button"
+                onClick={() => setIsInfoModalOpen(true)}
+                className="p-1.5 rounded-full text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                title="Allocation type info"
+              >
+                <Info size={20} />
+              </button>
             </div>
           </div>
         </div>
@@ -189,6 +192,23 @@ export default function CreateAllocation() {
           />
         </div>
       </div>
+
+      {/* Info Modal */}
+      <Modal
+        isOpen={isInfoModalOpen}
+        onClose={() => setIsInfoModalOpen(false)}
+        title="Allocation Type Information"
+        size="medium"
+      >
+        <div className="p-4">
+          <p className="text-sm text-blue-800 font-medium mb-3">Choose Allocation Type:</p>
+          <ul className="text-sm text-blue-700 space-y-2 ml-4">
+            <li>• <strong>Remote:</strong> Allocate assets to individual users (students, employees) with user details</li>
+            <li>• <strong>Campus:</strong> Bulk transfer of assets between campus locations with working conditions</li>
+            <li>• <strong>NOTE:</strong> An individual User can only have two laptops at a time.*</li>
+          </ul>
+        </div>
+      </Modal>
     </div>
   );
 }
