@@ -145,7 +145,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     assigneeUserId: ticket.assigneeUserId || '',
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
-    timelineDate: ticket.timelineDate || '',
+    timelineDate: ticket.timelineDate ? new Date(ticket.timelineDate).toISOString().split('T')[0] : '',
   };
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
