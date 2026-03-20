@@ -13,6 +13,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
+import useFetch from '@/app/hooks/query/useFetch';
 import {
   ticketUpdateFormFields,
   ticketUpdateValidationSchema,
@@ -23,6 +24,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: campusInchargeData } = useFetch({
+    url: config.getApiUrl(config.endpoints.campusIncharge.list),
+    queryKey: ['campus-incharge'],
+  });
 
   if (isLoading) {
     return (
@@ -55,6 +61,28 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }
 
   const ticket = ticketData;
+
+  const isNewTicketType = ticket.ticketType === 'NEW';
+  const assigneeItems = (() => {
+    const list = campusInchargeData?.data;
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    const items = [];
+    const addItem = (person) => {
+      if (person?.email && !seen.has(person.email)) {
+        seen.add(person.email);
+        items.push({ id: person.email, name: person.name, email: person.email });
+      }
+    };
+    list.forEach((campus) => {
+      addItem(campus.itLead);
+      if (!isNewTicketType) {
+        addItem(campus.itCoordinator);
+        addItem(campus.operation);
+      }
+    });
+    return items;
+  })();
 
   const historyEntries = (ticket.historyLogs || []).map((log) => ({
     time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
@@ -117,24 +145,21 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     assigneeUserId: ticket.assigneeUserId || '',
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
-    timelineDate: ticket.timelineDate || '',
+    timelineDate: ticket.timelineDate ? new Date(ticket.timelineDate).toISOString().split('T')[0] : '',
   };
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
     if (field.name === 'assigneeUserId') {
-      if (ticket.assigneeUser) {
-        return {
-          ...field,
-          selectedItem: {
-            ...ticket.assigneeUser,
-            id: ticket.assigneeUser?.id || ticket.assigneeUserId,
-          },
-        };
-      }
       return {
         ...field,
-        type: 'text',
-        placeholder: ticket.assigneeUserId || 'Not assigned',
+        type: 'api-autocomplete',
+        disabled: false,
+        placeholder: 'Search by name or email',
+        staticItems: assigneeItems,
+        labelKey: 'name',
+        valueKey: 'id',
+        formatLabel: (item) => `${item.name} (${item.email})`,
+        selectedItem: null,
       };
     }
     if (field.name === 'timelineDate' && ticket.timelineDate) {
@@ -173,7 +198,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         ? { logEntries: historyEntries }
         : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
     },
-    ...(ticket.status === 'APPROVED' && ticket.ticketType !== 'NEW' ? [{
+    ...(ticket.status === 'APPROVED' ? [{
       title: 'ACTIONS',
       actions: [
         { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
@@ -269,7 +294,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         isOpen={isUpdateModalOpen}
         onClose={handleCloseModal}
         title="Update Ticket"
-        size="medium"
+        size="large"
       >
         {ticket.assigneeUser && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
