@@ -66,18 +66,19 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const assigneeItems = (() => {
     const list = campusInchargeData?.data;
     if (!Array.isArray(list)) return [];
+    const seen = new Set();
     const items = [];
-    list.forEach((campus) => {
-      if (campus.itLead?.email) {
-        items.push({ id: campus.itLead.email, name: campus.itLead.name, email: campus.itLead.email });
+    const addItem = (person) => {
+      if (person?.email && !seen.has(person.email)) {
+        seen.add(person.email);
+        items.push({ id: person.email, name: person.name, email: person.email });
       }
+    };
+    list.forEach((campus) => {
+      addItem(campus.itLead);
       if (!isNewTicketType) {
-        if (campus.itCoordinator?.email) {
-          items.push({ id: campus.itCoordinator.email, name: campus.itCoordinator.name, email: campus.itCoordinator.email });
-        }
-        if (campus.operation?.email) {
-          items.push({ id: campus.operation.email, name: campus.operation.name, email: campus.operation.email });
-        }
+        addItem(campus.itCoordinator);
+        addItem(campus.operation);
       }
     });
     return items;
