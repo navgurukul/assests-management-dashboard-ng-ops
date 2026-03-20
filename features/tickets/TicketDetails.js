@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
+import { Laptop, Monitor, Tablet, Smartphone, Package } from 'lucide-react';
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
@@ -29,6 +30,32 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     url: config.getApiUrl(config.endpoints.campusIncharge.list),
     queryKey: ['campus-incharge'],
   });
+
+  const { data: myAssetsData } = useFetch({
+    url: config.endpoints.allocations.myAssets,
+    queryKey: ['myAssets'],
+  });
+
+  const { data: assetTypesData } = useFetch({
+    url: '/asset-types',
+    queryKey: ['asset-types'],
+  });
+
+  const assetTypeMap = React.useMemo(() => {
+    const map = {};
+    (assetTypesData?.data || []).forEach((t) => { map[t.id] = t.name; });
+    return map;
+  }, [assetTypesData]);
+
+  const assetGroupCounts = React.useMemo(() => {
+    const assets = myAssetsData?.data?.assets ?? myAssetsData?.assets ?? [];
+    const counts = {};
+    assets.forEach((asset) => {
+      const typeName = assetTypeMap[asset.assetTypeId] || asset.brand || 'Other';
+      counts[typeName] = (counts[typeName] || 0) + 1;
+    });
+    return Object.entries(counts);
+  }, [myAssetsData, assetTypeMap]);
 
   if (isLoading) {
     return (
@@ -271,23 +298,41 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         rightSections={rightSections}
         onBack={onBack}
         headerActions={
-          ticket.status === 'APPROVED' ? (
-            <CustomButton
-              text="Create Allocation"
-              variant="primary"
-              size="md"
-              onClick={handleCreateAllocation}
-            />
-          ) : ticket.status === 'RAISED' ? (
-            <CustomButton
-              text="Ticket is not approved"
-              variant="warning"
-              size="md"
-              className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
-              onClick={() => {}}
-              title="Please contact your manager"
-            />
-          ) : null}
+          <div className="flex items-center gap-3">
+            {assetGroupCounts.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {assetGroupCounts.map(([typeName, count]) => (
+                  <div
+                    key={typeName}
+                    className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5"
+                  >
+                    <Package className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-700">
+                      {typeName}: {count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {ticket.status === 'APPROVED' ? (
+              <CustomButton
+                text="Create Allocation"
+                variant="primary"
+                size="md"
+                onClick={handleCreateAllocation}
+              />
+            ) : ticket.status === 'RAISED' ? (
+              <CustomButton
+                text="Ticket is not approved"
+                variant="warning"
+                size="md"
+                className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
+                onClick={() => {}}
+                title="Please contact your manager"
+              />
+            ) : null}
+          </div>
+        }
       />
 
       <Modal
