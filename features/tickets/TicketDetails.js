@@ -26,11 +26,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: campusInchargeData } = useFetch({
-    url: config.getApiUrl(config.endpoints.campusIncharge.list),
-    queryKey: ['campus-incharge'],
-  });
-
   const { data: myAssetsData } = useFetch({
     url: config.endpoints.allocations.myAssets,
     queryKey: ['myAssets'],
@@ -88,28 +83,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }
 
   const ticket = ticketData;
-
-  const isNewTicketType = ticket.ticketType === 'NEW';
-  const assigneeItems = (() => {
-    const list = campusInchargeData?.data;
-    if (!Array.isArray(list)) return [];
-    const seen = new Set();
-    const items = [];
-    const addItem = (person) => {
-      if (person?.email && !seen.has(person.email)) {
-        seen.add(person.email);
-        items.push({ id: person.email, name: person.name, email: person.email });
-      }
-    };
-    list.forEach((campus) => {
-      addItem(campus.itLead);
-      if (!isNewTicketType) {
-        addItem(campus.itCoordinator);
-        addItem(campus.operation);
-      }
-    });
-    return items;
-  })();
 
   const historyEntries = (ticket.historyLogs || []).map((log) => ({
     time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
@@ -169,26 +142,12 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const updateInitialValues = {
     status: ticket.status || '',
-    assigneeUserId: ticket.assigneeUserId || '',
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
     timelineDate: ticket.timelineDate ? new Date(ticket.timelineDate).toISOString().split('T')[0] : '',
   };
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
-    if (field.name === 'assigneeUserId') {
-      return {
-        ...field,
-        type: 'api-autocomplete',
-        disabled: false,
-        placeholder: 'Search by name or email',
-        staticItems: assigneeItems,
-        labelKey: 'name',
-        valueKey: 'id',
-        formatLabel: (item) => `${item.name} (${item.email})`,
-        selectedItem: null,
-      };
-    }
     if (field.name === 'timelineDate' && ticket.timelineDate) {
       return {
         ...field,
