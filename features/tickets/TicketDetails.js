@@ -26,6 +26,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAssigneeEmail, setSelectedAssigneeEmail] = useState(null);
+  const [showAssignTable, setShowAssignTable] = useState(false);
 
   const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
     url: config.getApiUrl(config.endpoints.campusIncharge.list),
@@ -125,6 +126,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const handleUpdateClick = () => {
     setSelectedAssigneeEmail(null);
+    setShowAssignTable(false);
     setIsUpdateModalOpen(true);
   };
 
@@ -170,6 +172,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const handleCloseModal = () => {
     setIsUpdateModalOpen(false);
     setSelectedAssigneeEmail(null);
+    setShowAssignTable(false);
   };
 
   const handleResolvedClick = (values) => {
@@ -350,50 +353,65 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
         {/* Assign To — selection table */}
         <div className="mb-5">
-          <p className="text-sm font-medium text-gray-700 mb-2">Assign To</p>
-          {campusInchargeLoading ? (
-            <div className="text-sm text-gray-500 py-2">Loading...</div>
-          ) : assigneeRows.length === 0 ? (
-            <div className="text-sm text-gray-500 py-2">No coordinators available.</div>
-          ) : (
-            <div className="overflow-auto max-h-52 border border-gray-200 rounded-lg">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr>
-                    <th className="px-3 py-2 w-10"></th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-600">Name</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-600">Email</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-600">Position</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-600">Campus</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assigneeRows.map((row) => (
-                    <tr
-                      key={row.email}
-                      onClick={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
-                      className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
-                        selectedAssigneeEmail === row.email ? 'bg-blue-50' : ''
-                      }`}
-                    >
-                      <td className="px-3 py-2 text-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedAssigneeEmail === row.email}
-                          onChange={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-4 h-4 accent-blue-600"
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-gray-800">{row.name}</td>
-                      <td className="px-3 py-2 text-gray-600">{row.email}</td>
-                      <td className="px-3 py-2 text-gray-600">{row.position}</td>
-                      <td className="px-3 py-2 text-gray-600">{row.campus}</td>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium text-gray-700">Assign To</p>
+            <CustomButton
+              text={showAssignTable ? 'Hide' : 'Select Assignee'}
+              variant={showAssignTable ? 'secondary' : 'primary'}
+              size="sm"
+              onClick={() => setShowAssignTable((prev) => !prev)}
+            />
+          </div>
+          {selectedAssigneeEmail && (
+            <p className="text-xs text-blue-700 mb-2">
+              Selected: <span className="font-medium">{selectedAssigneeEmail}</span>
+            </p>
+          )}
+          {showAssignTable && (
+            campusInchargeLoading ? (
+              <div className="text-sm text-gray-500 py-2">Loading...</div>
+            ) : assigneeRows.length === 0 ? (
+              <div className="text-sm text-gray-500 py-2">No coordinators available.</div>
+            ) : (
+              <div className="overflow-auto max-h-52 border border-gray-200 rounded-lg">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 w-10"></th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Name</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Email</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Position</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Campus</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {assigneeRows.map((row) => (
+                      <tr
+                        key={row.email}
+                        onClick={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                        className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
+                          selectedAssigneeEmail === row.email ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <td className="px-3 py-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedAssigneeEmail === row.email}
+                            onChange={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-4 h-4 accent-blue-600"
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-gray-800">{row.name}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.email}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.position}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.campus}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
           )}
         </div>
 
