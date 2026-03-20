@@ -25,6 +25,12 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedAssigneeEmail, setSelectedAssigneeEmail] = useState(null);
+
+  const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
+    url: config.getApiUrl(config.endpoints.campusIncharge.list),
+    queryKey: ['campus-incharge'],
+  });
 
   const { data: myAssetsData } = useFetch({
     url: config.endpoints.allocations.myAssets,
@@ -51,6 +57,34 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     });
     return Object.entries(counts);
   }, [myAssetsData, assetTypeMap]);
+
+  // Flatten campus-incharge data into individual people rows, deduplicated by email
+  const assigneeRows = React.useMemo(() => {
+    const list = campusInchargeData?.data;
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    const rows = [];
+    list.forEach((campus) => {
+      const roleEntries = [
+        { person: campus.itCoordinator, position: 'IT Coordinator' },
+        { person: campus.operation,      position: 'Operation'       },
+        { person: campus.itLead,         position: 'IT Lead'         },
+      ];
+      roleEntries.forEach(({ person, position }) => {
+        if (person?.email && !seen.has(person.email)) {
+          seen.add(person.email);
+          rows.push({
+            email:    person.email,
+            name:     person.name  || '—',
+            phone:    person.phone || '—',
+            position,
+            campus:   campus.campusName || '—',
+          });
+        }
+      });
+    });
+    return rows;
+  }, [campusInchargeData]);
 
   if (isLoading) {
     return (
@@ -90,6 +124,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }));
 
   const handleUpdateClick = () => {
+    setSelectedAssigneeEmail(null);
     setIsUpdateModalOpen(true);
   };
 
@@ -97,13 +132,17 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     setIsSubmitting(true);
     try {
       const payload = {};
-      const apiFields = ['status', 'assigneeUserId', 'timelineDate', 'resolutionNotes', 'description'];
+      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
       apiFields.forEach((key) => {
         const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
         if (val !== '' && val !== null && val !== undefined) {
           payload[key] = val;
         }
       });
+
+      if (selectedAssigneeEmail) {
+        payload.assigneeUserId = selectedAssigneeEmail;
+      }
 
       if (Object.keys(payload).length === 0) {
         toast.warning('Please update at least one field.');
@@ -130,6 +169,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const handleCloseModal = () => {
     setIsUpdateModalOpen(false);
+    setSelectedAssigneeEmail(null);
   };
 
   const handleResolvedClick = (values) => {
@@ -307,6 +347,56 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
             </p>
           </div>
         )}
+
+        {/* Assign To — selection table */}
+        <div className="mb-5">
+          <p className="text-sm font-medium text-gray-700 mb-2">Assign To</p>
+          {campusInchargeLoading ? (
+            <div className="text-sm text-gray-500 py-2">Loading...</div>
+          ) : assigneeRows.length === 0 ? (
+            <div className="text-sm text-gray-500 py-2">No coordinators available.</div>
+          ) : (
+            <div className="overflow-auto max-h-52 border border-gray-200 rounded-lg">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 w-10"></th>
+                    <th className="px-3 py-2 text-left font-medium text-gray-600">Name</th>
+                    <th className="px-3 py-2 text-left font-medium text-gray-600">Email</th>
+                    <th className="px-3 py-2 text-left font-medium text-gray-600">Position</th>
+                    <th className="px-3 py-2 text-left font-medium text-gray-600">Campus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assigneeRows.map((row) => (
+                    <tr
+                      key={row.email}
+                      onClick={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                      className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
+                        selectedAssigneeEmail === row.email ? 'bg-blue-50' : ''
+                      }`}
+                    >
+                      <td className="px-3 py-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedAssigneeEmail === row.email}
+                          onChange={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-gray-800">{row.name}</td>
+                      <td className="px-3 py-2 text-gray-600">{row.email}</td>
+                      <td className="px-3 py-2 text-gray-600">{row.position}</td>
+                      <td className="px-3 py-2 text-gray-600">{row.campus}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
         <GenericForm
           fields={updateFormFieldsModified}
           initialValues={updateInitialValues}
