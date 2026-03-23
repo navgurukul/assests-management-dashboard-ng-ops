@@ -25,7 +25,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedAssigneeEmail, setSelectedAssigneeEmail] = useState(null);
+  const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [showAssignTable, setShowAssignTable] = useState(false);
 
   const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
@@ -75,6 +75,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         if (person?.email && !seen.has(person.email)) {
           seen.add(person.email);
           rows.push({
+            id:       person.id || null,
             email:    person.email,
             name:     person.name  || '—',
             phone:    person.phone || '—',
@@ -125,7 +126,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }));
 
   const handleUpdateClick = () => {
-    setSelectedAssigneeEmail(null);
+    setSelectedAssignee(null);
     setShowAssignTable(false);
     setIsUpdateModalOpen(true);
   };
@@ -142,8 +143,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         }
       });
 
-      if (selectedAssigneeEmail) {
-        payload.assigneeUserId = selectedAssigneeEmail;
+      if (selectedAssignee) {
+        payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
       }
 
       if (Object.keys(payload).length === 0) {
@@ -171,7 +172,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const handleCloseModal = () => {
     setIsUpdateModalOpen(false);
-    setSelectedAssigneeEmail(null);
+    setSelectedAssignee(null);
     setShowAssignTable(false);
   };
 
@@ -362,9 +363,9 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               onClick={() => setShowAssignTable((prev) => !prev)}
             />
           </div>
-          {selectedAssigneeEmail && (
+          {selectedAssignee && (
             <p className="text-xs text-blue-700 mb-2">
-              Selected: <span className="font-medium">{selectedAssigneeEmail}</span>
+              Selected: <span className="font-medium">{selectedAssignee.name} ({selectedAssignee.email})</span>
             </p>
           )}
           {showAssignTable && (
@@ -388,16 +389,16 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                     {assigneeRows.map((row) => (
                       <tr
                         key={row.email}
-                        onClick={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                        onClick={() => setSelectedAssignee(selectedAssignee?.email === row.email ? null : row)}
                         className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
-                          selectedAssigneeEmail === row.email ? 'bg-blue-50' : ''
+                          selectedAssignee?.email === row.email ? 'bg-blue-50' : ''
                         }`}
                       >
                         <td className="px-3 py-2 text-center">
                           <input
                             type="checkbox"
-                            checked={selectedAssigneeEmail === row.email}
-                            onChange={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                            checked={selectedAssignee?.email === row.email}
+                            onChange={() => setSelectedAssignee(selectedAssignee?.email === row.email ? null : row)}
                             onClick={(e) => e.stopPropagation()}
                             className="w-4 h-4 accent-blue-600"
                           />
@@ -425,8 +426,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
           customActions={[
-            { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
-            { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
+            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting },
+            ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
+              { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
+              { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
+            ] : []),
           ]}
         />
       </Modal>
