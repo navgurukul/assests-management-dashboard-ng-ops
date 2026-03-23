@@ -17,7 +17,6 @@ import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import config from '@/app/config/env.config';
-import apiService from '@/app/utils/apiService';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   CONSIGNMENT_TABLE_ID,
@@ -169,6 +168,28 @@ export default function ConsignmentsList() {
   const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
+  });
+
+  const acceptReturnCampusId = React.useMemo(() => {
+    if (!isAcceptModalOpen || !currentInTransitItem) return null;
+
+    return (
+      currentInTransitItem?.campusId ||
+      currentInTransitItem?.campus?.id ||
+      currentInTransitItem?.allocation?.campus?.id ||
+      null
+    );
+  }, [isAcceptModalOpen, currentInTransitItem]);
+
+  const {
+    data: campusLocationsData,
+    isError: isCampusLocationsError,
+  } = useFetch({
+    url: acceptReturnCampusId
+      ? config.endpoints.locations?.byCampus?.(acceptReturnCampusId)
+      : '/locations/campus/invalid',
+    queryKey: ['campusLocations', acceptReturnCampusId],
+    enabled: Boolean(acceptReturnCampusId),
   });
 
   const { mutateAsync: postMutation } = usePost();
@@ -556,11 +577,13 @@ export default function ConsignmentsList() {
 
       
       // Make API call to update consignment status to dispatched
-      await apiService.patch(
-        config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
+      await postMutation({
+        endpoint:
+          config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
           `/consignments/${currentConsignment.id}/dispatch`,
-        payload
-      );
+        body: payload,
+        method: 'PATCH',
+      });
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
@@ -590,10 +613,37 @@ export default function ConsignmentsList() {
     }
   };
 
-  // Accept return form fields (built dynamically so campusOptions are available)
+  const storedLocationOptions = React.useMemo(() => {
+    const source = Array.isArray(campusLocationsData)
+      ? campusLocationsData
+      : Array.isArray(campusLocationsData?.data)
+      ? campusLocationsData.data
+      : [];
+
+    return source
+      .map((location) => ({
+        value: location?.id,
+        label: location?.name || location?.locationName || '',
+      }))
+      .filter((option) => option.value && option.label);
+  }, [campusLocationsData]);
+
+  useEffect(() => {
+    if (isAcceptModalOpen && !acceptReturnCampusId) {
+      toast.error('Campus ID not found for this return item');
+    }
+  }, [isAcceptModalOpen, acceptReturnCampusId]);
+
+  useEffect(() => {
+    if (isAcceptModalOpen && isCampusLocationsError) {
+      toast.error('Failed to fetch storage locations');
+    }
+  }, [isAcceptModalOpen, isCampusLocationsError]);
+
+  // Accept return form fields (built dynamically with locations fetched via useFetch)
   const acceptReturnFields = React.useMemo(
-    () => getAcceptReturnFields(campusOptions),
-    [campusOptions]
+    () => getAcceptReturnFields(storedLocationOptions),
+    [storedLocationOptions]
   );
 
   const getReturnActionIdentifiers = React.useCallback((item) => {
@@ -626,17 +676,17 @@ export default function ConsignmentsList() {
       }
 
       const payload = {
-        assetId,
-        quantity: 1,
-        storedCampusId: formData.storedIn,
-        returnAcceptNotes: formData.comment || '',
+        status: 'PENDING',
+        storedLocationId: formData.storedIn,
+        notes: formData.comment || '',
       };
 
       await postMutation({
         endpoint:
-          config.endpoints.consignments?.assets?.(consignmentId) ||
-          `/consignments/${consignmentId}/assets`,
+          config.endpoints.consignments?.assetById?.(consignmentId, assetId) ||
+          `/consignments/${consignmentId}/assets/${assetId}`,
         body: payload,
+        method: 'PATCH',
       });
 
       toast.dismiss(loadingToastId);
