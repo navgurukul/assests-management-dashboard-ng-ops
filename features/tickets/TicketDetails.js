@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
+import { Laptop, Monitor, Tablet, Smartphone, Package } from 'lucide-react';
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
@@ -13,6 +14,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
+import useFetch from '@/app/hooks/query/useFetch';
 import {
   ticketUpdateFormFields,
   ticketUpdateValidationSchema,
@@ -33,6 +35,67 @@ export default function TicketDetails({
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedAssigneeEmail, setSelectedAssigneeEmail] = useState(null);
+  const [showAssignTable, setShowAssignTable] = useState(false);
+
+  const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
+    url: config.getApiUrl(config.endpoints.campusIncharge.list),
+    queryKey: ['campus-incharge'],
+  });
+
+  const { data: myAssetsData } = useFetch({
+    url: config.endpoints.allocations.myAssets,
+    queryKey: ['myAssets'],
+  });
+
+  const { data: assetTypesData } = useFetch({
+    url: '/asset-types',
+    queryKey: ['asset-types'],
+  });
+
+  const assetTypeMap = React.useMemo(() => {
+    const map = {};
+    (assetTypesData?.data || []).forEach((t) => { map[t.id] = t.name; });
+    return map;
+  }, [assetTypesData]);
+
+  const assetGroupCounts = React.useMemo(() => {
+    const assets = myAssetsData?.data?.assets ?? myAssetsData?.assets ?? [];
+    const counts = {};
+    assets.forEach((asset) => {
+      const typeName = assetTypeMap[asset.assetTypeId] || asset.brand || 'Other';
+      counts[typeName] = (counts[typeName] || 0) + 1;
+    });
+    return Object.entries(counts);
+  }, [myAssetsData, assetTypeMap]);
+
+  // Flatten campus-incharge data into individual people rows, deduplicated by email
+  const assigneeRows = React.useMemo(() => {
+    const list = campusInchargeData?.data;
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    const rows = [];
+    list.forEach((campus) => {
+      const roleEntries = [
+        { person: campus.itCoordinator, position: 'IT Coordinator' },
+        { person: campus.operation,      position: 'Operation'       },
+        { person: campus.itLead,         position: 'IT Lead'         },
+      ];
+      roleEntries.forEach(({ person, position }) => {
+        if (person?.email && !seen.has(person.email)) {
+          seen.add(person.email);
+          rows.push({
+            email:    person.email,
+            name:     person.name  || '—',
+            phone:    person.phone || '—',
+            position,
+            campus:   campus.campusName || '—',
+          });
+        }
+      });
+    });
+    return rows;
+  }, [campusInchargeData]);
 
   if (isLoading) {
     return (
@@ -78,6 +141,8 @@ export default function TicketDetails({
   }));
 
   const handleUpdateClick = () => {
+    setSelectedAssigneeEmail(null);
+    setShowAssignTable(false);
     setIsUpdateModalOpen(true);
   };
 
@@ -85,13 +150,17 @@ export default function TicketDetails({
     setIsSubmitting(true);
     try {
       const payload = {};
-      const apiFields = ['status', 'assigneeUserId', 'timelineDate', 'resolutionNotes', 'description'];
+      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
       apiFields.forEach((key) => {
         const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
         if (val !== '' && val !== null && val !== undefined) {
           payload[key] = val;
         }
       });
+
+      if (selectedAssigneeEmail) {
+        payload.assigneeUserId = selectedAssigneeEmail;
+      }
 
       if (Object.keys(payload).length === 0) {
         toast.warning('Please update at least one field.');
@@ -118,6 +187,8 @@ export default function TicketDetails({
 
   const handleCloseModal = () => {
     setIsUpdateModalOpen(false);
+    setSelectedAssigneeEmail(null);
+    setShowAssignTable(false);
   };
 
   const handleResolvedClick = (values) => {
@@ -130,29 +201,12 @@ export default function TicketDetails({
 
   const updateInitialValues = {
     status: ticket.status || '',
-    assigneeUserId: ticket.assigneeUserId || '',
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
-    timelineDate: ticket.timelineDate || '',
+    timelineDate: ticket.timelineDate ? new Date(ticket.timelineDate).toISOString().split('T')[0] : '',
   };
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
-    if (field.name === 'assigneeUserId') {
-      if (ticket.assigneeUser) {
-        return {
-          ...field,
-          selectedItem: {
-            ...ticket.assigneeUser,
-            id: ticket.assigneeUser?.id || ticket.assigneeUserId,
-          },
-        };
-      }
-      return {
-        ...field,
-        type: 'text',
-        placeholder: ticket.assigneeUserId || 'Not assigned',
-      };
-    }
     if (field.name === 'timelineDate' && ticket.timelineDate) {
       return {
         ...field,
@@ -193,12 +247,12 @@ export default function TicketDetails({
             ? { logEntries: historyEntries }
             : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
     },
-    {
+    ...(ticket.status === 'APPROVED' ? [{
       title: 'ACTIONS',
       actions: [
         { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
       ],
-    },
+    }] : []),
   ];
 
   const rightSections = [
@@ -206,8 +260,8 @@ export default function TicketDetails({
       title: 'DETAILS',
       itemsGrid: true,
       items: [
-        { label: 'Ticket ID', value: ticket.id || '—' },
-        { label: 'Ticket Number', value: ticket.ticketNumber || '—' },
+        // { label: 'Ticket ID', value: ticket.id || '—' },
+        { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
@@ -226,7 +280,7 @@ export default function TicketDetails({
         { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
 
         { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
+        // { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
         { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
         { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
         { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
@@ -237,7 +291,7 @@ export default function TicketDetails({
         { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
         { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
         { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
-        { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
+        // { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
       ],
     },
     {
@@ -266,12 +320,40 @@ export default function TicketDetails({
         rightSections={rightSections}
         onBack={onBack}
         headerActions={
-          <CustomButton
-            text="Create Allocation"
-            variant="primary"
-            size="md"
-            onClick={handleCreateAllocation}
-          />
+          <div className="flex items-center gap-3">
+            {assetGroupCounts.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {assetGroupCounts.map(([typeName, count]) => (
+                  <div
+                    key={typeName}
+                    className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5"
+                  >
+                    <Package className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-700">
+                      {typeName}: {count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {ticket.status === 'APPROVED' ? (
+              <CustomButton
+                text="Create Allocation"
+                variant="primary"
+                size="md"
+                onClick={handleCreateAllocation}
+              />
+            ) : ticket.status === 'RAISED' ? (
+              <CustomButton
+                text="Ticket is not approved"
+                variant="warning"
+                size="md"
+                className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
+                onClick={() => {}}
+                title="Please contact your manager"
+              />
+            ) : null}
+          </div>
         }
       />
 
@@ -279,7 +361,7 @@ export default function TicketDetails({
         isOpen={isUpdateModalOpen}
         onClose={handleCloseModal}
         title="Update Ticket"
-        size="medium"
+        size="large"
       >
         {ticket.assigneeUser && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -288,6 +370,71 @@ export default function TicketDetails({
             </p>
           </div>
         )}
+
+        {/* Assign To — selection table */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium text-gray-700">Assign To</p>
+            <CustomButton
+              text={showAssignTable ? 'Hide' : 'Select Assignee'}
+              variant={showAssignTable ? 'secondary' : 'primary'}
+              size="sm"
+              onClick={() => setShowAssignTable((prev) => !prev)}
+            />
+          </div>
+          {selectedAssigneeEmail && (
+            <p className="text-xs text-blue-700 mb-2">
+              Selected: <span className="font-medium">{selectedAssigneeEmail}</span>
+            </p>
+          )}
+          {showAssignTable && (
+            campusInchargeLoading ? (
+              <div className="text-sm text-gray-500 py-2">Loading...</div>
+            ) : assigneeRows.length === 0 ? (
+              <div className="text-sm text-gray-500 py-2">No coordinators available.</div>
+            ) : (
+              <div className="overflow-auto max-h-52 border border-gray-200 rounded-lg">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 w-10"></th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Name</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Email</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Position</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Campus</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assigneeRows.map((row) => (
+                      <tr
+                        key={row.email}
+                        onClick={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                        className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
+                          selectedAssigneeEmail === row.email ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <td className="px-3 py-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedAssigneeEmail === row.email}
+                            onChange={() => setSelectedAssigneeEmail(selectedAssigneeEmail === row.email ? null : row.email)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-4 h-4 accent-blue-600"
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-gray-800">{row.name}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.email}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.position}</td>
+                        <td className="px-3 py-2 text-gray-600">{row.campus}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          )}
+        </div>
+
         <GenericForm
           fields={updateFormFieldsModified}
           initialValues={updateInitialValues}

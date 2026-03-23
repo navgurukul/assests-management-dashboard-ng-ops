@@ -65,7 +65,7 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600">
                       {ticket.ticketNumber}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
+                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate" title={ticket.description || '-'}>
                       {ticket.description || '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">

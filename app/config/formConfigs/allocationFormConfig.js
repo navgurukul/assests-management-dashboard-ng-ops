@@ -75,14 +75,14 @@ export const allocationFormFields = [
     required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
-  {
-    name: 'phoneNumber',
-    label: 'Phone Number',
-    type: 'text',
-    placeholder: 'Enter phone number',
-    required: false,
-    showIf: { field: 'allocationType', value: 'REMOTE' },
-  },
+  // {
+  //   name: 'phoneNumber',
+  //   label: 'Phone Number',
+  //   type: 'text',
+  //   placeholder: 'Enter phone number',
+  //   required: false,
+  //   showIf: { field: 'allocationType', value: 'REMOTE' },
+  // },
   {
     name: 'userAddress',
     label: 'User Address',

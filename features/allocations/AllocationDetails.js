@@ -238,7 +238,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     {
       title: 'User Information',
       items: [
-        { label: 'User ID', value: allocationDetails.userId || 'N/A' },
+        // { label: 'User ID', value: allocationDetails.userId || 'N/A' },
         { label: 'User Name', value: userDisplayName },
         { label: 'User Email', value: allocationDetails.user?.email || 'N/A' },
         { label: 'User Role', value: allocationDetails.user?.role || 'N/A' },
@@ -292,6 +292,20 @@ export default function AllocationDetails({ allocationId, onBack }) {
         },
       ],
     },
+    ...(allocationDetails.ticket
+      ? [
+          {
+            title: 'Ticket Information',
+            items: [
+              { label: 'Ticket Number', value: allocationDetails.ticket.ticketNumber || 'N/A' },
+              { label: 'Ticket Type', value: allocationDetails.ticket.ticketType || 'N/A' },
+              { label: 'Priority', value: allocationDetails.ticket.priority || 'N/A' },
+              { label: 'Ticket Status', value: allocationDetails.ticket.status || 'N/A' },
+              { label: 'Description', value: allocationDetails.ticket.description || 'N/A' },
+            ],
+          },
+        ]
+      : []),
     {
       title: 'Notes',
       items: [

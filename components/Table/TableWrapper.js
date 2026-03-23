@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import { Plus } from "lucide-react";
+import "@/components/atoms/Loader.css";
 import TableFooter from "./TableFooter";
 import Pagination from "@/components/atoms/Pagination";
 import CustomButton from "@/components/atoms/CustomButton";
@@ -70,7 +71,7 @@ export default function TableWrapper({
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+          <h2 className="text-xl font-bold text-gray-800 ml-4">{title}</h2>
         </div>
       )}
       
@@ -135,8 +136,8 @@ export default function TableWrapper({
             emptyContent={
               isLoading ? (
                 <div className="flex items-center justify-center py-20">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="loader"></div>
                     <p className="text-gray-600">Loading...</p>
                   </div>
                 </div>

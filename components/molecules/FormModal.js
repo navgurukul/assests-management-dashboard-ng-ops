@@ -48,7 +48,9 @@ export default function FormModal({
           return;
         }
 
-        initialData[field.name] = field.defaultValue || '';
+        initialData[field.name] = field.type === 'checkbox'
+          ? (field.defaultValue ?? false)
+          : (field.defaultValue || '');
       });
       setFormData(initialData);
       setErrors({});
@@ -471,9 +473,26 @@ export default function FormModal({
           </div>
         );
       
+      case 'checkbox':
+        return (
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              id={field.name}
+              name={field.name}
+              checked={!!formData[field.name]}
+              onChange={(e) => handleChange(field.name, e.target.checked)}
+              onBlur={() => handleBlur(field.name)}
+              className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 shrink-0"
+              disabled={field.disabled || isSubmitting}
+            />
+            <span className="text-sm text-gray-700 leading-relaxed">{field.label}</span>
+          </label>
+        );
+
       case 'radio':
         return (
-          <div className="flex items-center gap-6">
+          <div className={field.layout === 'vertical' ? 'flex flex-col gap-3' : 'flex items-center gap-6'}>
             {field.options?.map((option) => (
               <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -761,10 +780,15 @@ export default function FormModal({
               return null;
             }
             
+            // showWhen conditional — hide field if condition not met
+            if (field.showWhen && !field.showWhen(formData)) {
+              return null;
+            }
+
             // Regular field rendering
             return (
               <div key={field.name}>
-                {field.type !== 'api-autocomplete' && field.type !== 'filter-toggle' && field.type !== 'filter-group' && field.type !== 'allocation-consignment-selector' && (
+                {field.type !== 'api-autocomplete' && field.type !== 'filter-toggle' && field.type !== 'filter-group' && field.type !== 'allocation-consignment-selector' && field.type !== 'checkbox' && (
                   <label
                     htmlFor={field.name}
                     className="block text-sm font-medium text-gray-700 mb-1"

@@ -206,16 +206,25 @@ export const transformAllocationForTable = (allocation) => {
   
   // Handle asset display - supports both single asset and multiple assets
   let assetDisplay = 'N/A';
-  if (allocation.assetIds && Array.isArray(allocation.assetIds) && allocation.assetIds.length > 0) {
-    // Multiple assets or bulk allocation
-    assetDisplay = allocation.assetIds.length === 1 
-      ? allocation.assetIds[0] 
+  const firstAsset = Array.isArray(allocation.assets) && allocation.assets.length > 0 ? allocation.assets[0] : null;
+  if (firstAsset) {
+    assetDisplay = allocation.assets.length === 1
+      ? (firstAsset.assetTag || firstAsset.id || 'N/A')
+      : `${allocation.assets.length} Assets`;
+  } else if (allocation.assetIds && Array.isArray(allocation.assetIds) && allocation.assetIds.length > 0) {
+    assetDisplay = allocation.assetIds.length === 1
+      ? allocation.assetIds[0]
       : `${allocation.assetIds.length} Assets`;
   } else if (getNestedValue(allocation, 'asset.assetTag')) {
     assetDisplay = allocation.asset.assetTag;
   } else if (allocation.assetId) {
     assetDisplay = allocation.assetId;
   }
+
+  // Brand + Model from first asset
+  const brandModel = firstAsset
+    ? [firstAsset.brand, firstAsset.model].filter(Boolean).join(' ')
+    : 'N/A';
   
   // Format campus display — prefer nested object name, fallback to ID
   const sourceCampus = getNestedValue(allocation, 'sourceCampus.campusName', null) ||
@@ -230,13 +239,14 @@ export const transformAllocationForTable = (allocation) => {
     id: allocation.id,
     allocationId: allocation.id || 'N/A',
     assetTag: assetDisplay,
+    brandModel: brandModel || 'N/A',
     allocationType: allocation.allocationType || 'N/A',
     userName: userName,
     startDate: formatDate(allocation.createdAt || allocation.startDate),
     endDate: allocation.status === 'ACTIVE' ? 'Active' : formatDate(allocation.updatedAt || allocation.endDate),
     reason: formatAllocationReason(allocation.allocationReason),
-    status: allocation.status === 'ACTIVE' ? 'Active' : 'Returned',
-    isActive: allocation.status === 'ACTIVE',
+    status: allocation.status || 'N/A',
+    isActive: allocation.status === 'ACTIVE' || allocation.status === 'ALLOCATED',
     assetCount: allocation.assetIds?.length || 1,
     assetIds: allocation.assetIds || [],
     deviceSelectionMode: allocation.deviceSelectionMode || 'N/A',
@@ -276,20 +286,60 @@ export const formatConsignmentStatus = (status) => {
  * @returns {object} Transformed consignment data
  */
 export const transformConsignmentForTable = (consignment) => {
+  const allocationUser = getNestedValue(consignment, 'allocation.user', null);
+  const normalizedAllocatedTo = (() => {
+    if (allocationUser && typeof allocationUser === 'object') {
+      const fullName = `${allocationUser.firstName || ''} ${allocationUser.lastName || ''}`.trim();
+      return {
+        name:
+          allocationUser.name ||
+          fullName ||
+          allocationUser.username ||
+          allocationUser.email ||
+          allocationUser.id ||
+          '-',
+        email: allocationUser.email || '',
+      };
+    }
+
+    if (consignment.allocatedTo && typeof consignment.allocatedTo === 'object') {
+      return consignment.allocatedTo;
+    }
+
+    if (consignment.assignedTo && typeof consignment.assignedTo === 'object') {
+      return consignment.assignedTo;
+    }
+
+    if (typeof consignment.allocatedTo === 'string' && consignment.allocatedTo.trim()) {
+      return { name: consignment.allocatedTo.trim(), email: '' };
+    }
+
+    if (typeof consignment.assignedTo === 'string' && consignment.assignedTo.trim()) {
+      return { name: consignment.assignedTo.trim(), email: '' };
+    }
+
+    return null;
+  })();
+
   return {
     id: consignment.id,
     consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
     status: formatConsignmentStatus(consignment.status),
     allocationCode: getNestedValue(consignment, 'allocation.allocationCode') || consignment.allocationCode || 'N/A',
-    courierService: getNestedValue(consignment, 'courierService.name') || consignment.courierServiceName || 'N/A',
+    courierService:
+      consignment.courierPartnerName ||
+      consignment.courierName ||
+      getNestedValue(consignment, 'courierService.name') ||
+      consignment.courierServiceName ||
+      'N/A',
     source: consignment.source || getNestedValue(consignment, 'allocation.sourceCampus.name') || 'N/A',
     destination: consignment.destination || getNestedValue(consignment, 'allocation.destinationCampus.name') || 'N/A',
     shippedAt: formatDate(consignment.shippedAt),
     estimatedDeliveryDate: formatDate(consignment.estimatedDeliveryDate),
     deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
-    trackingId: consignment.trackingId || 'N/A',
+    trackingId: consignment.trackingNumber || consignment.trackingId || 'N/A',
     assetCount: consignment.assets?.length || consignment.assetCount || 0,
-    assignedTo: consignment.assignedTo || null,
+    allocatedTo: normalizedAllocatedTo,
     createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
     createdAt: formatDate(consignment.createdAt),
     updatedAt: formatDate(consignment.updatedAt),
