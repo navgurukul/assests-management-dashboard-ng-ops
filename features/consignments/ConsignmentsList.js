@@ -676,7 +676,7 @@ export default function ConsignmentsList() {
       }
 
       const payload = {
-        status: 'PENDING',
+        status: 'ACCEPTED',
         storedLocationId: formData.storedIn,
         notes: formData.comment || '',
       };
