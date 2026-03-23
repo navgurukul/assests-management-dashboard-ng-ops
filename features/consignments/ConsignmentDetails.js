@@ -130,9 +130,8 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     return '';
   };
 
-  const shippingDestinationDisplay =
-    resolveAddressDisplay(consignment.allocation?.userAddress) ||
-    consignment.destinationLocation?.campus?.name ||
+  const destinationLocationDisplay =
+    resolveLocationName(consignment.destinationLocation) ||
     destinationName ||
     'N/A';
 
@@ -149,6 +148,13 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     }
   };
 
+  // Truncate text with ellipsis if exceeds maxLength
+  const truncateWithEllipsis = (text, maxLength = 25) => {
+    if (!text) return text;
+    const str = String(text);
+    return str.length > maxLength ? str.substring(0, maxLength) + '...' : str;
+  };
+
   // Left column sections (30%) - Multiple smaller information cards
   const leftSections = [
     {
@@ -156,7 +162,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
-        { label: 'Allocation', value: consignment.allocation?.id || consignment.allocationId || 'N/A' },
         { label: 'Total Assets', value: String(totalAssets) },
       ],
     },
@@ -169,7 +174,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
             ? new Date(consignment.receivedAt || consignment.deliveredAt).toLocaleDateString()
-            : shippingDestinationDisplay,
+            : truncateWithEllipsis(destinationLocationDisplay, 2),
           className: (consignment.receivedAt || consignment.deliveredAt) ? 'text-green-600 font-semibold' : 'text-gray-500'
         },
       ],
@@ -229,7 +234,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       title: 'Allocation Information',
       itemsGrid: true,
       items: [
-        { label: 'Allocation Code', value: consignment.allocation?.id || 'N/A' },
         { label: 'Allocation Type', value: consignment.allocation?.allocationType || 'N/A' },
         { label: 'Allocation Status', value: consignment.allocation?.status || 'N/A' },
         {
