@@ -427,8 +427,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           cancelButtonText="Cancel"
           customActions={[
             { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting },
-            { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
-            { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
+            ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
+              { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
+              { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
+            ] : []),
           ]}
         />
       </Modal>
