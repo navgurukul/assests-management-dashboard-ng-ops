@@ -15,6 +15,7 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePost from '@/app/hooks/query/usePost';
 import config from '@/app/config/env.config';
 import apiService from '@/app/utils/apiService';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -169,6 +170,8 @@ export default function ConsignmentsList() {
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
+
+  const { mutateAsync: postMutation } = usePost();
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -629,11 +632,12 @@ export default function ConsignmentsList() {
         returnAcceptNotes: formData.comment || '',
       };
 
-      await apiService.post(
-        config.endpoints.consignments?.assets?.(consignmentId) ||
+      await postMutation({
+        endpoint:
+          config.endpoints.consignments?.assets?.(consignmentId) ||
           `/consignments/${consignmentId}/assets`,
-        payload
-      );
+        body: payload,
+      });
 
       toast.dismiss(loadingToastId);
       toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
@@ -673,11 +677,12 @@ export default function ConsignmentsList() {
           returnAcceptNotes: 'REJECTED',
         };
 
-        await apiService.post(
-          config.endpoints.consignments?.assets?.(consignmentId) ||
+        await postMutation({
+          endpoint:
+            config.endpoints.consignments?.assets?.(consignmentId) ||
             `/consignments/${consignmentId}/assets`,
-          payload
-        );
+          body: payload,
+        });
 
         toast.dismiss(loadingToastId);
         toast.success(`Return rejected for ${item.assetTag}`);
@@ -691,7 +696,7 @@ export default function ConsignmentsList() {
     }
 
     toast.success(`Marked as ${action}: ${item.assetTag}`);
-  }, [getReturnActionIdentifiers, refetchInTransit]);
+  }, [getReturnActionIdentifiers, postMutation, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
