@@ -15,8 +15,9 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePost from '@/app/hooks/query/usePost';
+import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
-import apiService from '@/app/utils/apiService';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   CONSIGNMENT_TABLE_ID,
@@ -169,6 +170,31 @@ export default function ConsignmentsList() {
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
+
+  const acceptReturnCampusId = React.useMemo(() => {
+    if (!isAcceptModalOpen || !currentInTransitItem) return null;
+
+    return (
+      currentInTransitItem?.campusId ||
+      currentInTransitItem?.campus?.id ||
+      currentInTransitItem?.allocation?.campus?.id ||
+      null
+    );
+  }, [isAcceptModalOpen, currentInTransitItem]);
+
+  const {
+    data: campusLocationsData,
+    isError: isCampusLocationsError,
+  } = useFetch({
+    url: acceptReturnCampusId
+      ? config.endpoints.locations?.byCampus?.(acceptReturnCampusId)
+      : '/locations/campus/invalid',
+    queryKey: ['campusLocations', acceptReturnCampusId],
+    enabled: Boolean(acceptReturnCampusId),
+  });
+
+  const { mutateAsync: postMutation } = usePost();
+  const { mutateAsync: patchMutation } = usePatch();
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -369,8 +395,15 @@ export default function ConsignmentsList() {
   const inTransitTableData = React.useMemo(() => {
     const source = Array.isArray(inTransitData?.data) ? inTransitData.data : [];
     return source.map((row) => ({
+      ...row,
       id: row.action?.consignmentAssetId || row.assetTag,
+      consignmentId: row.action?.consignmentId || row.consignmentId || row.consignment?.id || '',
       consignmentCode: row.consignment || '-',
+      assetId:
+        row.action?.assetId ||
+        row.assetId ||
+        row.asset?.id ||
+        '',
       assetTag: row.assetTag || '-',
       model: row.laptopModel || '-',
       userName: row.returnedBy || '-',
@@ -546,11 +579,13 @@ export default function ConsignmentsList() {
 
       
       // Make API call to update consignment status to dispatched
-      await apiService.patch(
-        config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
+      await postMutation({
+        endpoint:
+          config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
           `/consignments/${currentConsignment.id}/dispatch`,
-        payload
-      );
+        body: payload,
+        method: 'PATCH',
+      });
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
@@ -580,23 +615,90 @@ export default function ConsignmentsList() {
     }
   };
 
-  // Accept return form fields (built dynamically so campusOptions are available)
+  const storedLocationOptions = React.useMemo(() => {
+    const source = Array.isArray(campusLocationsData)
+      ? campusLocationsData
+      : Array.isArray(campusLocationsData?.data)
+      ? campusLocationsData.data
+      : [];
+
+    return source
+      .map((location) => ({
+        value: location?.id,
+        label: location?.name || location?.locationName || '',
+      }))
+      .filter((option) => option.value && option.label);
+  }, [campusLocationsData]);
+
+  useEffect(() => {
+    if (isAcceptModalOpen && !acceptReturnCampusId) {
+      toast.error('Campus ID not found for this return item');
+    }
+  }, [isAcceptModalOpen, acceptReturnCampusId]);
+
+  useEffect(() => {
+    if (isAcceptModalOpen && isCampusLocationsError) {
+      toast.error('Failed to fetch storage locations');
+    }
+  }, [isAcceptModalOpen, isCampusLocationsError]);
+
+  // Accept return form fields (built dynamically with locations fetched via useFetch)
   const acceptReturnFields = React.useMemo(
-    () => getAcceptReturnFields(campusOptions),
-    [campusOptions]
+    () => getAcceptReturnFields(storedLocationOptions),
+    [storedLocationOptions]
   );
+
+  const getReturnActionIdentifiers = React.useCallback((item) => {
+    const consignmentId = item?.consignmentId;
+    const assetId =
+      item?.action?.assetId ||
+      item?.assetId ||
+      item?.asset?.id;
+
+    if (!consignmentId) {
+      throw new Error('Consignment ID is missing for this return item');
+    }
+
+    if (!assetId) {
+      throw new Error('Asset ID is missing for this return item');
+    }
+
+    return { consignmentId, assetId };
+  }, []);
 
   // Handle accept return form submit
   const handleAcceptSubmit = async (formData) => {
     setIsAcceptSubmitting(true);
     const loadingToastId = toast.loading('Processing acceptance...');
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { consignmentId, assetId } = getReturnActionIdentifiers(currentInTransitItem);
+
+      if (!formData?.storedIn) {
+        throw new Error('Please select a storage location');
+      }
+
+      const payload = {
+        status: 'ACCEPTED',
+        storedLocationId: formData.storedIn,
+        notes: formData.comment || '',
+      };
+
+      await patchMutation({
+        endpoint:
+          config.endpoints.consignments?.assetById?.(consignmentId, assetId) ||
+          `/consignments/${consignmentId}/assets/${assetId}`,
+        body: payload,
+      });
+
       toast.dismiss(loadingToastId);
       toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
+
+      await refetchInTransit();
+
       setIsAcceptModalOpen(false);
       setCurrentInTransitItem(null);
     } catch (error) {
+      console.error('Error accepting return:', error);
       toast.dismiss(loadingToastId);
       toast.error(error?.message || 'Failed to accept return');
     } finally {
@@ -605,15 +707,47 @@ export default function ConsignmentsList() {
   };
 
   // In-transit action handlers
-  const handleInTransitAction = React.useCallback((action, item) => {
+  const handleInTransitAction = React.useCallback(async (action, item) => {
     setOpenInTransitMenuId(null);
+
     if (action === 'Accepted') {
       setCurrentInTransitItem(item);
       setIsAcceptModalOpen(true);
-    } else {
-      toast.success(`Marked as ${action}: ${item.assetTag}`);
+      return;
     }
-  }, []);
+
+    if (action === 'Rejected') {
+      const loadingToastId = toast.loading('Processing rejection...');
+      try {
+        const { consignmentId, assetId } = getReturnActionIdentifiers(item);
+
+        const payload = {
+          assetId,
+          quantity: 1,
+          storedCampusId: null,
+          returnAcceptNotes: 'REJECTED',
+        };
+
+        await postMutation({
+          endpoint:
+            config.endpoints.consignments?.assets?.(consignmentId) ||
+            `/consignments/${consignmentId}/assets`,
+          body: payload,
+        });
+
+        toast.dismiss(loadingToastId);
+        toast.success(`Return rejected for ${item.assetTag}`);
+        await refetchInTransit();
+      } catch (error) {
+        console.error('Error rejecting return:', error);
+        toast.dismiss(loadingToastId);
+        toast.error(error?.message || 'Failed to reject return');
+      }
+      return;
+    }
+
+    toast.success(`Marked as ${action}: ${item.assetTag}`);
+  }, [getReturnActionIdentifiers, postMutation, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
