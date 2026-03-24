@@ -28,6 +28,7 @@ export const ticketUpdateEditableFields = [
     placeholder: 'Add resolution notes...',
     required: false,
     rows: 4,
+    disabled: true,
   },
   {
     name: 'timelineDate',
