@@ -7,7 +7,7 @@ import TableWrapper from '@/components/Table/TableWrapper';
 import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
-import a from '@/app/hooks/query/usePost';
+import usePost from '@/app/hooks/query/usePost';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import { campusInchargeColumns } from '@/dummyJson/dummyJson';
