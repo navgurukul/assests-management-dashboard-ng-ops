@@ -416,7 +416,7 @@ export default function TicketsList() {
   return (
     <div className="space-y-6">
       {/* Status Cards */}
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {ticketsSummaryCards.map((card) => {
           const isActive = card.status === null 
             ? !filters.status 
