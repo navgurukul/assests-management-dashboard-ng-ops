@@ -16,6 +16,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
+import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -193,6 +194,7 @@ export default function ConsignmentsList() {
   });
 
   const { mutateAsync: postMutation } = usePost();
+  const { mutateAsync: patchMutation } = usePatch();
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -681,12 +683,11 @@ export default function ConsignmentsList() {
         notes: formData.comment || '',
       };
 
-      await postMutation({
+      await patchMutation({
         endpoint:
           config.endpoints.consignments?.assetById?.(consignmentId, assetId) ||
           `/consignments/${consignmentId}/assets/${assetId}`,
         body: payload,
-        method: 'PATCH',
       });
 
       toast.dismiss(loadingToastId);
