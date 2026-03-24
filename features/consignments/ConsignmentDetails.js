@@ -2,10 +2,14 @@
 
 import React from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
+import Modal from '@/components/molecules/Modal';
 import StateHandler from '@/components/atoms/StateHandler';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
+  const [isTextModalOpen, setIsTextModalOpen] = React.useState(false);
+  const [modalText, setModalText] = React.useState('');
+
   if (isLoading) {
     return (
       <StateHandler
@@ -148,11 +152,30 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     }
   };
 
-  // Truncate text with ellipsis if exceeds maxLength
-  const truncateWithEllipsis = (text, maxLength = 25) => {
+  const renderExpandableText = (text, maxLength = 25) => {
     if (!text) return text;
     const str = String(text);
-    return str.length > maxLength ? str.substring(0, maxLength) + '...' : str;
+
+    if (str.length <= maxLength) {
+      return str;
+    }
+
+    return (
+      <>
+        {str.substring(0, maxLength)}
+        <button
+          type="button"
+          className="text-blue-600 hover:text-blue-800 ml-1"
+          onClick={() => {
+            setModalText(str);
+            setIsTextModalOpen(true);
+          }}
+          aria-label="Show full text"
+        >
+          ...
+        </button>
+      </>
+    );
   };
 
   // Left column sections (30%) - Multiple smaller information cards
@@ -174,7 +197,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
             ? new Date(consignment.receivedAt || consignment.deliveredAt).toLocaleDateString()
-            : truncateWithEllipsis(destinationLocationDisplay, 2),
+            : renderExpandableText(destinationLocationDisplay, 2),
           className: (consignment.receivedAt || consignment.deliveredAt) ? 'text-green-600 font-semibold' : 'text-gray-500'
         },
       ],
@@ -259,12 +282,23 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   ];
 
   return (
-    <DetailsPage
-      title="Consignment Details"
-      subtitle={`Consignment: ${consignment.consignmentCode || consignment.code || consignment.id}`}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      onBack={onBack}
-    />
+    <>
+      <DetailsPage
+        title="Consignment Details"
+        subtitle={`Consignment: ${consignment.consignmentCode || consignment.code || consignment.id}`}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        onBack={onBack}
+      />
+
+      <Modal
+        isOpen={isTextModalOpen}
+        onClose={() => setIsTextModalOpen(false)}
+        title="Delivered At"
+        size="small"
+      >
+        <p className="text-sm text-gray-800 break-words">{modalText}</p>
+      </Modal>
+    </>
   );
 }
