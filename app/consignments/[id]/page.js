@@ -16,12 +16,33 @@ export default function ConsignmentDetailsPage() {
     enabled: Boolean(consignmentId),
   });
 
+  const {
+    data: historyResponse,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError,
+    error: historyError,
+  } = useFetch({
+    url: config.endpoints.consignments.history(consignmentId),
+    queryKey: ['consignment-history', consignmentId],
+    enabled: Boolean(consignmentId),
+  });
+
   const normalizedConsignmentData = data?.data || data?.consignment || data || null;
+  const normalizedConsignmentHistory = Array.isArray(historyResponse?.data?.historyLogs)
+    ? historyResponse.data.historyLogs
+    : Array.isArray(historyResponse?.data)
+      ? historyResponse.data
+      : Array.isArray(historyResponse?.historyLogs)
+        ? historyResponse.historyLogs
+        : [];
 
   return (
     <ConsignmentDetails 
       consignmentId={consignmentId}
       consignmentData={normalizedConsignmentData}
+      historyData={normalizedConsignmentHistory}
+      historyLoading={isHistoryLoading}
+      historyError={isHistoryError ? historyError : null}
       isLoading={isLoading}
       isError={isError}
       error={error}

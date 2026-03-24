@@ -5,7 +5,17 @@ import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 
-export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
+export default function ConsignmentDetails({
+  consignmentId,
+  consignmentData,
+  historyData = [],
+  historyLoading = false,
+  historyError = null,
+  onBack,
+  isLoading,
+  isError,
+  error,
+}) {
   if (isLoading) {
     return (
       <StateHandler
@@ -36,6 +46,16 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   }
 
   const consignment = consignmentData;
+  const historySource = Array.isArray(historyData)
+    ? historyData
+    : Array.isArray(consignment.historyLogs)
+      ? consignment.historyLogs
+      : [];
+
+  const historyEntries = historySource.map((log) => ({
+    time: log.createdAt || log.updatedAt ? new Date(log.createdAt || log.updatedAt).toLocaleString() : '—',
+    text: `${log.action || log.actionType || log.status || 'Update'}${log.notes || log.message ? `: ${log.notes || log.message}` : ''}${log.newValue ? ` -> ${log.newValue}` : ''}`,
+  }));
 
   const displayStatus = formatConsignmentStatus(consignment.status);
 
@@ -179,6 +199,16 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: [
         { label: 'Notes', value: consignment.notes || 'No notes available' },
       ],
+    },
+    {
+      title: 'HISTORY LOG',
+      ...(historyLoading
+        ? { content: <div className="text-sm text-gray-600">Loading history...</div> }
+        : historyError
+          ? { content: <div className="text-sm text-red-600">Failed to load history log.</div> }
+          : historyEntries.length
+            ? { logEntries: historyEntries }
+            : { content: <div className="text-sm text-gray-600">No history for this consignment.</div> }),
     },
   ];
 
