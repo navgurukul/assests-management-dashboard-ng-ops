@@ -29,8 +29,8 @@ export default function SummaryCard({
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-600">{label}</p>
-          <p className={`text-2xl font-bold ${valueColor}`}>{value}</p>
+          <p className="text-xs text-gray-600">{label}</p>
+          <p className={`text-xl font-bold ${valueColor}`}>{value}</p>
         </div>
         {Icon && <Icon className={`w-8 h-8 ${iconColor}`} />}
       </div>
