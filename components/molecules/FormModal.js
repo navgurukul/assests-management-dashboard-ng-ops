@@ -348,7 +348,11 @@ export default function FormModal({
     // Validate form (async to support Yup)
     const isValid = await validateForm();
     if (isValid) {
-      onSubmit(formData);
+      try {
+        await onSubmit(formData);
+      } catch {
+        // errors are handled by the caller's onError callback
+      }
     }
   };
 
