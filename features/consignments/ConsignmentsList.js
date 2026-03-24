@@ -15,8 +15,9 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePost from '@/app/hooks/query/usePost';
+import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
-import apiService from '@/app/utils/apiService';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   CONSIGNMENT_TABLE_ID,
@@ -169,12 +170,31 @@ export default function ConsignmentsList() {
     url: `/consignments?${buildQueryString()}`,
     queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
   });
-  
-  // Fetch campuses from API
-  const { data: campusData } = useFetch({
-    url: '/campuses',
-    queryKey: ['campuses'],
+
+  const acceptReturnCampusId = React.useMemo(() => {
+    if (!isAcceptModalOpen || !currentInTransitItem) return null;
+
+    return (
+      currentInTransitItem?.campusId ||
+      currentInTransitItem?.campus?.id ||
+      currentInTransitItem?.allocation?.campus?.id ||
+      null
+    );
+  }, [isAcceptModalOpen, currentInTransitItem]);
+
+  const {
+    data: campusLocationsData,
+    isError: isCampusLocationsError,
+  } = useFetch({
+    url: acceptReturnCampusId
+      ? config.endpoints.locations?.byCampus?.(acceptReturnCampusId)
+      : '/locations/campus/invalid',
+    queryKey: ['campusLocations', acceptReturnCampusId],
+    enabled: Boolean(acceptReturnCampusId),
   });
+
+  const { mutateAsync: postMutation } = usePost();
+  const { mutateAsync: patchMutation } = usePatch();
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -209,30 +229,34 @@ export default function ConsignmentsList() {
     }));
   }, []);
 
-  // Transform campus data from API to filter options
-  const campusOptions = React.useMemo(() => {
-    if (!campusData || !campusData.data) return [];
-    
-    return campusData.data.map((campus) => ({
-      value: campus.id,
-      label: campus.campusName || campus.name,
-    }));
-  }, [campusData]);
-
   const campusNameById = React.useMemo(() => {
     const map = new Map();
-    const campuses = Array.isArray(campusData?.data) ? campusData.data : [];
+    const consignments = Array.isArray(data?.data) ? data.data : [];
 
-    campuses.forEach((campus) => {
-      const campusId = String(campus?.id || '').trim();
-      const campusName = campus?.campusName || campus?.name || '';
-      if (campusId && campusName) {
-        map.set(campusId, campusName);
-      }
+    consignments.forEach((consignment) => {
+      const campuses = [
+        consignment?.sourceLocation?.campus,
+        consignment?.destinationLocation?.campus,
+      ];
+
+      campuses.forEach((campus) => {
+        const campusId = String(campus?.id || '').trim();
+        const campusName = campus?.campusName || campus?.name || '';
+        if (campusId && campusName) {
+          map.set(campusId, campusName);
+        }
+      });
     });
 
     return map;
-  }, [campusData]);
+  }, [data]);
+
+  const campusOptions = React.useMemo(() => {
+    return Array.from(campusNameById.entries()).map(([value, label]) => ({
+      value,
+      label,
+    }));
+  }, [campusNameById]);
 
   // Update createFormFields when campus options are available
   useEffect(() => {
@@ -292,52 +316,29 @@ export default function ConsignmentsList() {
     },
   ];
 
-  const isLikelyId = (value) => {
-    if (typeof value !== 'string') return false;
-    const trimmed = value.trim();
-    if (!trimmed) return false;
-    return /^[a-f0-9-]{16,}$/i.test(trimmed) && !/\s/.test(trimmed);
-  };
+  const resolveConsignmentLocationLabel = (location) => {
+    const campusName = location?.campus?.name;
+    if (campusName) {
+      return campusName;
+    }
 
-  const isPlaceholder = (value) => {
-    if (value === null || value === undefined) return true;
-    const normalized = String(value).trim().toUpperCase();
-    return normalized === '' || normalized === 'N/A' || normalized === 'NA' || normalized === '-';
-  };
-
-  const resolveConsignmentLocationLabel = (baseValue, objectCandidate, idCandidate) => {
-    const candidates = [baseValue, objectCandidate, idCandidate];
-
-    for (const candidate of candidates) {
-      if (!candidate) continue;
-
-      if (typeof candidate === 'object') {
-        const objectName = candidate.campusName || candidate.name;
-        if (!isPlaceholder(objectName)) {
-          return objectName;
-        }
-
-        const objectId = String(candidate.id || candidate.campusId || '').trim();
-        if (objectId && campusNameById.has(objectId)) {
-          return campusNameById.get(objectId);
-        }
-
-        continue;
-      }
-
-      const value = String(candidate).trim();
-      if (isPlaceholder(value)) continue;
-
-      if (campusNameById.has(value)) {
-        return campusNameById.get(value);
-      }
-
-      if (!isLikelyId(value)) {
-        return value;
-      }
+    const campusId = location?.campus?.id;
+    if (campusId && campusNameById.has(campusId)) {
+      return campusNameById.get(campusId);
     }
 
     return 'N/A';
+  };
+
+  const extractTrackingUrl = (consignment) => {
+    const directUrl = String(consignment?.trackingLink || consignment?.link || '').trim();
+    if (directUrl) {
+      return directUrl;
+    }
+
+    const notes = String(consignment?.notes || '').trim();
+    const urlMatch = notes.match(/https?:\/\/[^\s]+/i);
+    return urlMatch ? urlMatch[0] : '';
   };
   
   // Process API data to table format
@@ -348,44 +349,40 @@ export default function ConsignmentsList() {
       if (typeof transformConsignmentForTable === 'function') {
         const transformed = transformConsignmentForTable(consignment);
 
-        const resolvedSource = resolveConsignmentLocationLabel(
-          transformed?.source,
-          consignment?.sourceCampus || consignment?.sourceLocation || consignment?.allocation?.sourceCampus,
-          consignment?.sourceCampusId || consignment?.sourceLocationId || consignment?.allocation?.sourceCampusId
-        );
+        const resolvedSource = resolveConsignmentLocationLabel(consignment?.sourceLocation);
 
-        const resolvedDestination = resolveConsignmentLocationLabel(
-          transformed?.destination,
-          consignment?.destinationCampus || consignment?.destinationLocation || consignment?.allocation?.destinationCampus,
-          consignment?.destinationCampusId || consignment?.destinationLocationId || consignment?.allocation?.destinationCampusId
-        );
+        const resolvedDestination = resolveConsignmentLocationLabel(consignment?.destinationLocation);
 
         return {
           ...transformed,
           source: resolvedSource,
           destination: resolvedDestination,
+          trackingLink: extractTrackingUrl(consignment) || transformed?.trackingLink || '',
         };
       }
       
       // Default formatting
       return {
         id: consignment.id,
-        consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
+        consignmentCode: consignment.consignmentCode || `CON-${consignment.id}`,
         status: consignment.status,
-        allocationCode: consignment.allocation?.allocationCode || consignment.allocationCode || '-',
-        courierService: consignment.courierService?.name || consignment.courierServiceName || '-',
-        courierServiceId: consignment.courierService?.id || consignment.courierServiceId || '',
-        source: consignment.source || consignment.allocation?.sourceCampus?.name || '-',
-        destination: consignment.destination || consignment.allocation?.destinationCampus?.name || '-',
+        allocationCode: consignment.allocation?.allocationCode || '-',
+        courierService: consignment.courierPartnerName || consignment.courierName || '-',
+        courierServiceId: consignment.courierService?.id || '',
+        source: resolveConsignmentLocationLabel(consignment.sourceLocation),
+        destination: resolveConsignmentLocationLabel(consignment.destinationLocation),
         shippedAt: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : '-',
         estimatedDeliveryDate: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : '-',
-        trackingId: consignment.trackingId || '-',
-        trackingLink: consignment.trackingLink || '',
-        assetCount: consignment.assets?.length || consignment.assetCount || 0,
-        deliveredAt: consignment.deliveredAt ? new Date(consignment.deliveredAt).toLocaleDateString() : '-',
-        createdBy: consignment.createdBy?.name || '-',
+        trackingId: consignment.trackingNumber || '-',
+        trackingLink: extractTrackingUrl(consignment),
+        assetCount: consignment.assetCount ?? 0,
+        deliveredAt: consignment.receivedAt ? new Date(consignment.receivedAt).toLocaleDateString() : '-',
+        createdBy:
+          `${consignment.createdBy?.firstName || ''} ${consignment.createdBy?.lastName || ''}`.trim() ||
+          consignment.createdBy?.email ||
+          '-',
         createdAt: consignment.createdAt ? new Date(consignment.createdAt).toLocaleDateString() : '-',
-        allocationId: consignment.allocation?.id || consignment.allocationId || '',
+        allocationId: consignment.allocation?.id || '',
       };
     });
   }, [data, campusNameById]);
@@ -398,8 +395,15 @@ export default function ConsignmentsList() {
   const inTransitTableData = React.useMemo(() => {
     const source = Array.isArray(inTransitData?.data) ? inTransitData.data : [];
     return source.map((row) => ({
+      ...row,
       id: row.action?.consignmentAssetId || row.assetTag,
+      consignmentId: row.action?.consignmentId || row.consignmentId || row.consignment?.id || '',
       consignmentCode: row.consignment || '-',
+      assetId:
+        row.action?.assetId ||
+        row.assetId ||
+        row.asset?.id ||
+        '',
       assetTag: row.assetTag || '-',
       model: row.laptopModel || '-',
       userName: row.returnedBy || '-',
@@ -570,15 +574,18 @@ export default function ConsignmentsList() {
         courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
         trackingId: formData.trackingId,
         link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
+        estimatedDeliveryDate: formData.estimatedDeliveryDate,
       };
 
       
       // Make API call to update consignment status to dispatched
-      await apiService.patch(
-        config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
+      await postMutation({
+        endpoint:
+          config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
           `/consignments/${currentConsignment.id}/dispatch`,
-        payload
-      );
+        body: payload,
+        method: 'PATCH',
+      });
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');
@@ -608,23 +615,90 @@ export default function ConsignmentsList() {
     }
   };
 
-  // Accept return form fields (built dynamically so campusOptions are available)
+  const storedLocationOptions = React.useMemo(() => {
+    const source = Array.isArray(campusLocationsData)
+      ? campusLocationsData
+      : Array.isArray(campusLocationsData?.data)
+      ? campusLocationsData.data
+      : [];
+
+    return source
+      .map((location) => ({
+        value: location?.id,
+        label: location?.name || location?.locationName || '',
+      }))
+      .filter((option) => option.value && option.label);
+  }, [campusLocationsData]);
+
+  useEffect(() => {
+    if (isAcceptModalOpen && !acceptReturnCampusId) {
+      toast.error('Campus ID not found for this return item');
+    }
+  }, [isAcceptModalOpen, acceptReturnCampusId]);
+
+  useEffect(() => {
+    if (isAcceptModalOpen && isCampusLocationsError) {
+      toast.error('Failed to fetch storage locations');
+    }
+  }, [isAcceptModalOpen, isCampusLocationsError]);
+
+  // Accept return form fields (built dynamically with locations fetched via useFetch)
   const acceptReturnFields = React.useMemo(
-    () => getAcceptReturnFields(campusOptions),
-    [campusOptions]
+    () => getAcceptReturnFields(storedLocationOptions),
+    [storedLocationOptions]
   );
+
+  const getReturnActionIdentifiers = React.useCallback((item) => {
+    const consignmentId = item?.consignmentId;
+    const assetId =
+      item?.action?.assetId ||
+      item?.assetId ||
+      item?.asset?.id;
+
+    if (!consignmentId) {
+      throw new Error('Consignment ID is missing for this return item');
+    }
+
+    if (!assetId) {
+      throw new Error('Asset ID is missing for this return item');
+    }
+
+    return { consignmentId, assetId };
+  }, []);
 
   // Handle accept return form submit
   const handleAcceptSubmit = async (formData) => {
     setIsAcceptSubmitting(true);
     const loadingToastId = toast.loading('Processing acceptance...');
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { consignmentId, assetId } = getReturnActionIdentifiers(currentInTransitItem);
+
+      if (!formData?.storedIn) {
+        throw new Error('Please select a storage location');
+      }
+
+      const payload = {
+        status: 'ACCEPTED',
+        storedLocationId: formData.storedIn,
+        notes: formData.comment || '',
+      };
+
+      await patchMutation({
+        endpoint:
+          config.endpoints.consignments?.assetById?.(consignmentId, assetId) ||
+          `/consignments/${consignmentId}/assets/${assetId}`,
+        body: payload,
+      });
+
       toast.dismiss(loadingToastId);
       toast.success(`Return accepted for ${currentInTransitItem?.assetTag}`);
+
+      await refetchInTransit();
+
       setIsAcceptModalOpen(false);
       setCurrentInTransitItem(null);
     } catch (error) {
+      console.error('Error accepting return:', error);
       toast.dismiss(loadingToastId);
       toast.error(error?.message || 'Failed to accept return');
     } finally {
@@ -633,15 +707,47 @@ export default function ConsignmentsList() {
   };
 
   // In-transit action handlers
-  const handleInTransitAction = React.useCallback((action, item) => {
+  const handleInTransitAction = React.useCallback(async (action, item) => {
     setOpenInTransitMenuId(null);
+
     if (action === 'Accepted') {
       setCurrentInTransitItem(item);
       setIsAcceptModalOpen(true);
-    } else {
-      toast.success(`Marked as ${action}: ${item.assetTag}`);
+      return;
     }
-  }, []);
+
+    if (action === 'Rejected') {
+      const loadingToastId = toast.loading('Processing rejection...');
+      try {
+        const { consignmentId, assetId } = getReturnActionIdentifiers(item);
+
+        const payload = {
+          assetId,
+          quantity: 1,
+          storedCampusId: null,
+          returnAcceptNotes: 'REJECTED',
+        };
+
+        await postMutation({
+          endpoint:
+            config.endpoints.consignments?.assets?.(consignmentId) ||
+            `/consignments/${consignmentId}/assets`,
+          body: payload,
+        });
+
+        toast.dismiss(loadingToastId);
+        toast.success(`Return rejected for ${item.assetTag}`);
+        await refetchInTransit();
+      } catch (error) {
+        console.error('Error rejecting return:', error);
+        toast.dismiss(loadingToastId);
+        toast.error(error?.message || 'Failed to reject return');
+      }
+      return;
+    }
+
+    toast.success(`Marked as ${action}: ${item.assetTag}`);
+  }, [getReturnActionIdentifiers, postMutation, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
@@ -728,20 +834,32 @@ export default function ConsignmentsList() {
           </div>
         );
         
-      case 'assignedTo':
+      case 'allocatedTo':
+        const assignee = item.allocatedTo;
+        const allocatedToName =
+          typeof assignee === 'object'
+            ? assignee?.name || '-'
+            : (assignee || '-');
+        const allocatedToEmail =
+          typeof assignee === 'object'
+            ? (assignee?.email || '')
+            : '';
+
         return (
           <div className="flex flex-col">
-            <span className="text-sm text-gray-900">{item.assignedTo?.name || '-'}</span>
-            <span className="text-xs text-gray-500">{item.assignedTo?.email || ''}</span>
+            <span className="text-sm text-gray-900">{allocatedToName}</span>
+            <span className="text-xs text-gray-500">{allocatedToEmail}</span>
           </div>
         );
         
       case 'actions':
         const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
+        const trackingUrl = String(item.trackingLink || '').trim();
         const canTrack =
           normalizedItemStatus === 'dispatched' &&
           item.trackingId &&
-          item.trackingId !== '-';
+          item.trackingId !== '-' &&
+          trackingUrl;
         
         return (
           <div className="flex items-center justify-start gap-2 flex-wrap">
@@ -765,7 +883,7 @@ export default function ConsignmentsList() {
               <CustomButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.open(`https://www.google.com/search?q=${encodeURIComponent(item.trackingId + ' tracking')}`, '_blank');
+                  window.open(trackingUrl, '_blank', 'noopener,noreferrer');
                 }}
                 variant="secondary"
                 size="sm"
@@ -783,6 +901,9 @@ export default function ConsignmentsList() {
         );
         
       default:
+        if (typeof cellValue === 'object' && cellValue !== null) {
+          return '-';
+        }
         return cellValue;
     }
   };

@@ -286,20 +286,60 @@ export const formatConsignmentStatus = (status) => {
  * @returns {object} Transformed consignment data
  */
 export const transformConsignmentForTable = (consignment) => {
+  const allocationUser = getNestedValue(consignment, 'allocation.user', null);
+  const normalizedAllocatedTo = (() => {
+    if (allocationUser && typeof allocationUser === 'object') {
+      const fullName = `${allocationUser.firstName || ''} ${allocationUser.lastName || ''}`.trim();
+      return {
+        name:
+          allocationUser.name ||
+          fullName ||
+          allocationUser.username ||
+          allocationUser.email ||
+          allocationUser.id ||
+          '-',
+        email: allocationUser.email || '',
+      };
+    }
+
+    if (consignment.allocatedTo && typeof consignment.allocatedTo === 'object') {
+      return consignment.allocatedTo;
+    }
+
+    if (consignment.assignedTo && typeof consignment.assignedTo === 'object') {
+      return consignment.assignedTo;
+    }
+
+    if (typeof consignment.allocatedTo === 'string' && consignment.allocatedTo.trim()) {
+      return { name: consignment.allocatedTo.trim(), email: '' };
+    }
+
+    if (typeof consignment.assignedTo === 'string' && consignment.assignedTo.trim()) {
+      return { name: consignment.assignedTo.trim(), email: '' };
+    }
+
+    return null;
+  })();
+
   return {
     id: consignment.id,
     consignmentCode: consignment.consignmentCode || consignment.code || `CON-${consignment.id}`,
     status: formatConsignmentStatus(consignment.status),
     allocationCode: getNestedValue(consignment, 'allocation.allocationCode') || consignment.allocationCode || 'N/A',
-    courierService: getNestedValue(consignment, 'courierService.name') || consignment.courierServiceName || 'N/A',
+    courierService:
+      consignment.courierPartnerName ||
+      consignment.courierName ||
+      getNestedValue(consignment, 'courierService.name') ||
+      consignment.courierServiceName ||
+      'N/A',
     source: consignment.source || getNestedValue(consignment, 'allocation.sourceCampus.name') || 'N/A',
     destination: consignment.destination || getNestedValue(consignment, 'allocation.destinationCampus.name') || 'N/A',
     shippedAt: formatDate(consignment.shippedAt),
     estimatedDeliveryDate: formatDate(consignment.estimatedDeliveryDate),
     deliveredAt: consignment.deliveredAt ? formatDate(consignment.deliveredAt) : 'Not delivered',
-    trackingId: consignment.trackingId || 'N/A',
+    trackingId: consignment.trackingNumber || consignment.trackingId || 'N/A',
     assetCount: consignment.assets?.length || consignment.assetCount || 0,
-    assignedTo: consignment.assignedTo || null,
+    allocatedTo: normalizedAllocatedTo,
     createdBy: getNestedValue(consignment, 'createdBy.name') || 'N/A',
     createdAt: formatDate(consignment.createdAt),
     updatedAt: formatDate(consignment.updatedAt),
