@@ -249,10 +249,10 @@ export default function AssetsList() {
   };
 
   // Handle loading and error states
-  if (isLoading || isError) {
+  if (isError) {
     return (
       <StateHandler
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         loadingMessage="Loading assets..."
@@ -313,6 +313,8 @@ export default function AssetsList() {
             getFilterLabel={getFilterLabel}
           />
         }
+        // Loading state
+        isLoading={isLoading}
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}

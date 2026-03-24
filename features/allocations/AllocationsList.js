@@ -108,7 +108,15 @@ export default function AllocationsList() {
       case "allocationId":
         return <span className="font-medium text-blue-600">#{cellValue}</span>;
       case "assetTag":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
         return <span className="font-medium text-gray-800">{cellValue}</span>;
+      case "brandModel":
+        if (!cellValue || cellValue === 'N/A') {
+          return <span className="text-gray-400">—</span>;
+        }
+        return <span className="text-gray-700 text-sm">{cellValue}</span>;
       case "allocationType":
         return <StatusChip value={cellValue} colorFn={getAllocationTypeChipColor} />;
       case "userName":
@@ -239,10 +247,10 @@ export default function AllocationsList() {
   };
 
   // Handle loading and error states
-  if (isLoading || isError) {
+  if (isError) {
     return (
       <StateHandler
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         loadingMessage="Loading allocations..."
@@ -302,6 +310,8 @@ export default function AllocationsList() {
             onResetToDefault={resetToDefault}
           />
         }
+        // Loading state
+        isLoading={isLoading}
         // Server-side pagination props
         serverPagination={true}
         paginationData={data?.pagination}
