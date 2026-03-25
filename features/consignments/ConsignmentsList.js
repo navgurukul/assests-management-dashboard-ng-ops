@@ -579,12 +579,11 @@ export default function ConsignmentsList() {
 
       
       // Make API call to update consignment status to dispatched
-      await postMutation({
+      await patchMutation({
         endpoint:
           config.endpoints.consignments?.dispatch?.(currentConsignment.id) ||
           `/consignments/${currentConsignment.id}/dispatch`,
         body: payload,
-        method: 'PATCH',
       });
       
       toast.dismiss(loadingToastId);
