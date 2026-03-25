@@ -75,7 +75,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         if (person?.email && !seen.has(person.email)) {
           seen.add(person.email);
           rows.push({
-            id:       campus.id,
+            id:       person?.user?.id,
             email:    person.email,
             name:     person.name  || '—',
             phone:    person.phone || '—',
