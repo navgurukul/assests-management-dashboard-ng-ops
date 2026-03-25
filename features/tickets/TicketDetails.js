@@ -279,7 +279,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         // { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
       ],
     },
-    {
+    ...(ticket.assetId || ticket.asset ? [{
       title: 'DEVICE SUMMARY',
       items: [
         { label: 'Asset ID', value: ticket.assetId || '—' },
@@ -288,7 +288,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
         { label: 'Condition', value: ticket.asset?.condition || '—' },
       ],
-    },
+    }] : []),
   ];
 
   const handleCreateAllocation = () => {
