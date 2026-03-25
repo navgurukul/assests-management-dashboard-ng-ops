@@ -15,6 +15,7 @@ import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import useFetch from '@/app/hooks/query/useFetch';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ticketUpdateFormFields,
   ticketUpdateValidationSchema,
@@ -23,6 +24,7 @@ import {
 export default function TicketDetails({ ticketId, ticketData, onBack, isLoading, isError, error }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState(null);
@@ -161,6 +163,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
       toast.success('Ticket updated successfully!');
       setIsUpdateModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
 
     } catch (error) {
       console.error('Error updating ticket:', error);
