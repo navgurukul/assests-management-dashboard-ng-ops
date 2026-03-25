@@ -12,6 +12,7 @@ export default function ClientLayout({ children }) {
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
   const [isReady, setIsReady] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Define public routes (no authentication required)
   const publicPaths = ['/login'];
@@ -72,12 +73,23 @@ export default function ClientLayout({ children }) {
     return (
       <div className="flex flex-col h-screen overflow-hidden">
         {/* Header - Full Width at Top */}
-        <Header />
+        <Header onMenuToggle={() => setIsMobileOpen((prev) => !prev)} />
 
         {/* Sidebar and Main Content - Side by Side Below Header */}
         <div className="flex flex-1 overflow-hidden">
+          {/* Mobile backdrop */}
+          {isMobileOpen && (
+            <div
+              className="fixed inset-0 bg-black/40 z-30 md:hidden"
+              onClick={() => setIsMobileOpen(false)}
+            />
+          )}
+
           {/* Sidebar */}
-          <Sidebar />
+          <Sidebar
+            isMobileOpen={isMobileOpen}
+            onMobileClose={() => setIsMobileOpen(false)}
+          />
 
           {/* Page Content */}
           <main className="flex-1 overflow-y-auto bg-gray-50">
