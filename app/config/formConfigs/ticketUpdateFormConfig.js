@@ -23,11 +23,12 @@ export const ticketUpdateReadOnlyFields = [
 export const ticketUpdateEditableFields = [
   {
     name: 'resolutionNotes',
-    label: 'Resolution Notes',
+    label: 'Manager Comment',
     type: 'textarea',
     placeholder: 'Add resolution notes...',
     required: false,
     rows: 4,
+    disabled: true,
   },
   {
     name: 'timelineDate',
