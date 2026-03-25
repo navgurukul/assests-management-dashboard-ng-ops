@@ -324,6 +324,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 variant="primary"
                 size="md"
                 onClick={handleCreateAllocation}
+                disabled={!ticket.assigneeUser?.email}
+                title={!ticket.assigneeUser?.email ? 'Ticket must be assigned before creating an allocation' : undefined}
               />
             ) : ticket.status === 'RAISED' ? (
               <CustomButton
