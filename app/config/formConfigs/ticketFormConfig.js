@@ -26,6 +26,8 @@ export const ticketFormFields = [
     formatLabel: (asset) => {
       return asset?.assetTag || 'N/A';
     },
+    companionField: 'campusId',
+    companionKey: 'campusId',
     required: true,
     showIf: {
       field: 'ticketType',
@@ -101,6 +103,7 @@ export const ticketValidationSchema = Yup.object().shape({
 export const ticketInitialValues = {
   ticketType: '',
   assetId: '',
+  campusId: '',
   priority: '',
   address: '',
   description: '',

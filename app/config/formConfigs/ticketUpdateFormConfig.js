@@ -1,33 +1,11 @@
 import * as Yup from 'yup';
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-const formatCoordinatorLabel = (item) => {
-  const firstName = item.firstName || '';
-  const lastName = item.lastName || '';
-  return `${firstName} ${lastName}`.trim();
-};
-
 export const ticketUpdateReadOnlyFields = [
   {
     name: 'status',
     label: 'Status',
     type: 'text',
     placeholder: 'Status',
-    disabled: true,
-    required: false,
-  },
-  {
-    name: 'assigneeUserId',
-    label: 'Assign To',
-    type: 'api-autocomplete',
-    placeholder: 'Search and select IT Coordinator',
-    apiUrl: baseUrl + '/it-coordinators',
-    queryKey: ['it-coordinators'],
-    labelKey: 'firstName',
-    valueKey: 'id',
-    dataPath: 'data.users',
-    formatLabel: formatCoordinatorLabel,
     disabled: true,
     required: false,
   },
@@ -67,7 +45,6 @@ export const ticketUpdateFormFields = [
 
 export const ticketUpdateValidationSchema = Yup.object().shape({
   status: Yup.string(),
-  assigneeUserId: Yup.string(),
   description: Yup.string()
     .max(500, 'Description must not exceed 500 characters'),
   resolutionNotes: Yup.string()

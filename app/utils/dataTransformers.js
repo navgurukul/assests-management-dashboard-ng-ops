@@ -206,16 +206,25 @@ export const transformAllocationForTable = (allocation) => {
   
   // Handle asset display - supports both single asset and multiple assets
   let assetDisplay = 'N/A';
-  if (allocation.assetIds && Array.isArray(allocation.assetIds) && allocation.assetIds.length > 0) {
-    // Multiple assets or bulk allocation
-    assetDisplay = allocation.assetIds.length === 1 
-      ? allocation.assetIds[0] 
+  const firstAsset = Array.isArray(allocation.assets) && allocation.assets.length > 0 ? allocation.assets[0] : null;
+  if (firstAsset) {
+    assetDisplay = allocation.assets.length === 1
+      ? (firstAsset.assetTag || firstAsset.id || 'N/A')
+      : `${allocation.assets.length} Assets`;
+  } else if (allocation.assetIds && Array.isArray(allocation.assetIds) && allocation.assetIds.length > 0) {
+    assetDisplay = allocation.assetIds.length === 1
+      ? allocation.assetIds[0]
       : `${allocation.assetIds.length} Assets`;
   } else if (getNestedValue(allocation, 'asset.assetTag')) {
     assetDisplay = allocation.asset.assetTag;
   } else if (allocation.assetId) {
     assetDisplay = allocation.assetId;
   }
+
+  // Brand + Model from first asset
+  const brandModel = firstAsset
+    ? [firstAsset.brand, firstAsset.model].filter(Boolean).join(' ')
+    : 'N/A';
   
   // Format campus display — prefer nested object name, fallback to ID
   const sourceCampus = getNestedValue(allocation, 'sourceCampus.campusName', null) ||
@@ -230,6 +239,7 @@ export const transformAllocationForTable = (allocation) => {
     id: allocation.id,
     allocationId: allocation.id || 'N/A',
     assetTag: assetDisplay,
+    brandModel: brandModel || 'N/A',
     allocationType: allocation.allocationType || 'N/A',
     userName: userName,
     startDate: formatDate(allocation.createdAt || allocation.startDate),

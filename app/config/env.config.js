@@ -37,6 +37,8 @@ const config = {
       details: (id) => `/consignments/${id}`,
       updateStatus: (id) => `/consignments/${id}/status`,
       dispatch: (id) => `/consignments/${id}/dispatch`,
+      assets: (id) => `/consignments/${id}/assets`,
+      assetById: (consignmentId, assetId) => `/consignments/${consignmentId}/assets/${assetId}`,
       inTransitReturns: '/consignments/in-transit-returns',
     },
     
@@ -71,6 +73,13 @@ const config = {
       delete: (id) => `/allocations/${id}`,
       details: (id) => `/allocations/${id}`,
       myAssets: '/allocations/my-assets',
+    },
+
+    // Locations
+    locations: {
+      list: '/locations',
+      byCampus: (campusId) => `/locations/campus/${campusId}`,
+      details: (id) => `/locations/${id}`,
     },
     
     // Dashboard
