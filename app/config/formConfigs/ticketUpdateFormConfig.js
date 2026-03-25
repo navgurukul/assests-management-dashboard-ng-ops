@@ -31,6 +31,14 @@ export const ticketUpdateEditableFields = [
     disabled: true,
   },
   {
+    name: 'adminComment',
+    label: 'Admin Comment',
+    type: 'textarea',
+    placeholder: 'Add admin comment...',
+    required: false,
+    rows: 3,
+  },
+  {
     name: 'timelineDate',
     label: 'Expected Resolution Date',
     type: 'date',
@@ -64,4 +72,6 @@ export const ticketUpdateValidationSchema = Yup.object().shape({
         return value >= today;
       }
     ),
+  adminComment: Yup.string()
+    .max(1000, 'Admin comment must not exceed 1000 characters'),
 });

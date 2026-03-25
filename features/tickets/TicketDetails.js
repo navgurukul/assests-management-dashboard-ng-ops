@@ -75,7 +75,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         if (person?.email && !seen.has(person.email)) {
           seen.add(person.email);
           rows.push({
-            id:       campus.id,
+            id:       person?.user?.id,
             email:    person.email,
             name:     person.name  || '—',
             phone:    person.phone || '—',
@@ -135,7 +135,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     setIsSubmitting(true);
     try {
       const payload = {};
-      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
+      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description', 'adminComment'];
       apiFields.forEach((key) => {
         const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
         if (val !== '' && val !== null && val !== undefined) {
@@ -189,6 +189,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
     timelineDate: ticket.timelineDate ? new Date(ticket.timelineDate).toISOString().split('T')[0] : '',
+    adminComment: ticket.adminComment || '',
   };
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
@@ -323,6 +324,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 variant="primary"
                 size="md"
                 onClick={handleCreateAllocation}
+                disabled={!ticket.assigneeUser?.email}
+                title={!ticket.assigneeUser?.email ? 'Ticket must be assigned before creating an allocation' : undefined}
               />
             ) : ticket.status === 'RAISED' ? (
               <CustomButton
