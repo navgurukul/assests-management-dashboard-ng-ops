@@ -23,11 +23,6 @@ export function getTicketLeftSections(ticket, historyTimeline) {
   ];
 }
 
-/**
- * Builds the right panel sections for the Ticket Details page.
- * @param {object} ticket
- * @param {boolean} hasAsset
- */
 export function getTicketRightSections(ticket, hasAsset) {
   return [
     {
