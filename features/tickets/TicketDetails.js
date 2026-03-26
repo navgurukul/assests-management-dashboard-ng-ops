@@ -294,16 +294,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const leftSections = [
     {
-      title: 'HISTORY LOG',
-      color: 'gray',
-      content: historyTimeline,
-    },
-  ];
-
-  const rightSections = [
-    {
       title: 'SLA / TIMELINE',
-      span: 2,
       color: 'orange',
       content: (
         <SLAIndicator 
@@ -314,6 +305,14 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         />
       ),
     },
+    {
+      title: 'HISTORY LOG',
+      color: 'gray',
+      content: historyTimeline,
+    },
+  ];
+
+  const rightSections = [
     {
       title: 'TICKET INFO',
       color: 'blue',
