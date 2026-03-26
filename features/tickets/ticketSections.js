@@ -28,6 +28,7 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'TICKET INFO',
       color: 'blue',
+      span: 2,
       itemsGrid: true,
       items: [
         { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
@@ -74,7 +75,6 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'DATES',
       color: 'indigo',
-      span: hasAsset ? 1 : 2,
       itemsGrid: true,
       items: [
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
