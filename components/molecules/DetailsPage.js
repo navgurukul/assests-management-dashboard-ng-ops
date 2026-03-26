@@ -170,55 +170,53 @@ export default function DetailsPage({
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-5">
-      <div className="max-w-full">
-        {/* Back Button */}
-        {onBack && (
-          <div className="mb-4">
-            <CustomButton
-              text="Back"
-              icon={ArrowLeft}
-              onClick={onBack}
-              variant="secondary"
-              size="sm"
-            />
-          </div>
-        )}
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm px-7 py-5 mb-5 border border-gray-200">
-          <div className="flex justify-between items-center gap-4 flex-wrap">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
-              {subtitle && (
-                <p className={`text-sm mt-1 font-medium ${subtitleColor}`}>
-                  {subtitle}
-                </p>
-              )}
-            </div>
-            {headerActions && (
-              <div className="flex gap-2 items-center shrink-0 flex-wrap">
-                {headerActions}
-              </div>
+    <div className="h-full flex flex-col bg-gray-50 p-5">
+      {/* Back Button */}
+      {onBack && (
+        <div className="mb-4 shrink-0">
+          <CustomButton
+            text="Back"
+            icon={ArrowLeft}
+            onClick={onBack}
+            variant="secondary"
+            size="sm"
+          />
+        </div>
+      )}
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-sm px-7 py-5 mb-5 border border-gray-200 shrink-0">
+        <div className="flex justify-between items-center gap-4 flex-wrap">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
+            {subtitle && (
+              <p className={`text-sm mt-1 font-medium ${subtitleColor}`}>
+                {subtitle}
+              </p>
             )}
           </div>
-        </div>
-
-        {/* 30-70% Split Layout */}
-        <div className="flex flex-col lg:flex-row gap-5">
-          {/* Left Column - 30% */}
-          {leftSections.length > 0 && (
-            <div className="w-full lg:w-[30%] space-y-4">
-              {leftSections.map((section, index) => renderSection(section, index))}
-            </div>
-          )}
-
-          {/* Right Column - 70% */}
-          {rightSections.length > 0 && (
-            <div className={`w-full lg:w-[70%] ${rightGrid ? 'grid grid-cols-2 gap-4 content-start' : 'space-y-4'}`}>
-              {rightSections.map((section, index) => renderSection(section, index))}
+          {headerActions && (
+            <div className="flex gap-2 items-center shrink-0 flex-wrap">
+              {headerActions}
             </div>
           )}
         </div>
+      </div>
+
+      {/* 30-70% Split Layout */}
+      <div className="flex flex-col lg:flex-row gap-5 flex-1 min-h-0">
+        {/* Left Column - 30% */}
+        {leftSections.length > 0 && (
+          <div className="w-full lg:w-[30%] overflow-y-auto space-y-4 pr-1">
+            {leftSections.map((section, index) => renderSection(section, index))}
+          </div>
+        )}
+
+        {/* Right Column - 70% */}
+        {rightSections.length > 0 && (
+          <div className={`w-full lg:w-[70%] overflow-y-auto pr-1 ${rightGrid ? 'grid grid-cols-2 gap-4 content-start' : 'space-y-4'}`}>
+            {rightSections.map((section, index) => renderSection(section, index))}
+          </div>
+        )}
       </div>
     </div>
   );
