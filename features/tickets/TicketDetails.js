@@ -160,7 +160,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const historyTimeline = historyLogs.length > 0 ? (
     <div className="relative">
       {historyLogs.map((log, idx) => (
-        <div key={idx} className="flex gap-4 relative">
+        <div key={idx} className="flex gap-4 relative min-w-0 overflow-hidden">
           {/* Vertical line + dot */}
           <div className="flex flex-col items-center">
             <div className={`w-3 h-3 rounded-full border-2 mt-1 shrink-0 z-10 ${dotColorClass(log.status)}`} />
@@ -170,7 +170,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           </div>
 
           {/* Card */}
-          <div className={`mb-4 flex-1 rounded-lg border p-3 bg-white shadow-sm ${idx < historyLogs.length - 1 ? '' : ''}`}>
+          <div className={`mb-4 flex-1 min-w-0 overflow-hidden rounded-lg border p-3 bg-white shadow-sm ${idx < historyLogs.length - 1 ? '' : ''}`}>
             <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-800">
@@ -184,10 +184,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               )}
             </div>
             {log.resolutionNotes && (
-              <p className="text-sm text-gray-600 mb-1">{log.resolutionNotes}</p>
+              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.resolutionNotes}>{log.resolutionNotes}</p>
             )}
             {(log.notes) && (
-              <p className="text-sm text-gray-600 mb-1">{log.notes}</p>
+              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.notes}>{log.notes}</p>
             )}
             <p className="text-xs text-gray-400">{formatHistoryDate(log.createdAt)}</p>
           </div>
@@ -290,22 +290,12 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     return field;
   });
 
-  const leftSections = [
-    ...(ticket.status === 'APPROVED' ? [{
-      title: 'ACTIONS',
-      actions: [
-        { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
-      ],
-    }] : []),
-    {
-      title: 'HISTORY LOG',
-      content: historyTimeline,
-    },
-  ];
+  const hasAsset = !!(ticket.assetId || ticket.asset);
 
-  const rightSections = [
+  const leftSections = [
     {
       title: 'SLA / TIMELINE',
+      color: 'orange',
       content: (
         <SLAIndicator 
           allocationDate={ticket.assignDate}
@@ -316,49 +306,81 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       ),
     },
     {
-      title: 'DETAILS',
+      title: 'HISTORY LOG',
+      color: 'gray',
+      content: historyTimeline,
+    },
+  ];
+
+  const rightSections = [
+    {
+      title: 'TICKET INFO',
+      color: 'blue',
       itemsGrid: true,
       items: [
-        // { label: 'Ticket ID', value: ticket.id || '—' },
         { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
         { label: 'Is Escalated', value: ticket.isEscalated ? 'Yes' : 'No' },
-        { label: 'Address', value: ticket.address || '—' },
         { label: 'Manager Email', value: ticket.managerEmail || '—' },
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
-        { label: 'Campus Code', value: ticket.campus?.code || '—' },
-        { label: 'Campus Name', value: ticket.campus?.name || '—' },
-        { label: 'Description', value: ticket.description || '—', className: 'text-gray-900 line-clamp-2' },
-        { label: 'Resolution Notes', value: ticket.resolutionNotes || '—', className: 'text-gray-900 line-clamp-2' },
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
-        { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
-        { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
-
-        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        // { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
-        { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
-        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
-
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
-        { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
-        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
-        // { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
+        { label: 'Address', value: ticket.address || '—', className: 'col-span-2 line-clamp-2 break-all', title: ticket.address || undefined },
+        { label: 'Description', value: ticket.description || '—', className: 'col-span-2 line-clamp-2 break-all', title: ticket.description || undefined },
+        { label: 'Resolution Notes', value: ticket.resolutionNotes || '—', className: 'col-span-2 line-clamp-2' },
       ],
     },
-    ...(ticket.assetId || ticket.asset ? [{
-      title: 'DEVICE SUMMARY',
+    {
+      title: 'CAMPUS INFO',
+      color: 'teal',
+      itemsGrid: true,
       items: [
-        { label: 'Asset ID', value: ticket.assetId || '—' },
-        { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
+        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
+        { label: 'Campus Code', value: ticket.campus?.code || '—' },
+        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
+        { label: 'Campus Name', value: ticket.campus?.name || '—' },
+      ],
+    },
+    {
+      title: 'RAISED BY',
+      color: 'green',
+      items: [
+        { label: 'Name', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
+        { label: 'Role', value: ticket.raisedByUser?.role || '—' },
+        { label: 'Email', value: ticket.raisedByUser?.email || '—' },
+      ],
+    },
+    {
+      title: 'ASSIGNEE',
+      color: 'purple',
+      items: [
+        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
+        { label: 'Username', value: ticket.assigneeUser?.username || '—' },
+        { label: 'Role', value: ticket.assigneeUser?.role || '—' },
+        { label: 'Email', value: ticket.assigneeUser?.email || '—' },
+      ],
+    },
+    {
+      title: 'DATES',
+      color: 'indigo',
+      span: hasAsset ? 1 : 2,
+      itemsGrid: true,
+      items: [
+        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
+        { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
+        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleString() : '—' },
+        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
+        { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
+        { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
+      ],
+    },
+    ...(hasAsset ? [{
+      title: 'ASSET / DEVICE',
+      color: 'gray',
+      itemsGrid: true,
+      items: [
+        { label: 'Asset Tag', value: ticket.asset?.assetTag || ticket.assetId || '—' },
         { label: 'Brand', value: ticket.asset?.brand || '—' },
-        { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
+        { label: 'Location', value: ticket.asset?.location?.name || '—' },
         { label: 'Condition', value: ticket.asset?.condition || '—' },
       ],
     }] : []),
@@ -376,6 +398,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         subtitle={`Created: ${ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—'}`}
         leftSections={leftSections}
         rightSections={rightSections}
+        rightGrid={true}
         onBack={onBack}
         headerActions={
           <div className="flex items-center gap-3">
@@ -393,6 +416,14 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   </div>
                 ))}
               </div>
+            )}
+            {ticket.status === 'APPROVED' && (
+              <CustomButton
+                text="Update Ticket"
+                variant="secondary"
+                size="md"
+                onClick={handleUpdateClick}
+              />
             )}
             {ticket.status === 'APPROVED' ? (
               <CustomButton
