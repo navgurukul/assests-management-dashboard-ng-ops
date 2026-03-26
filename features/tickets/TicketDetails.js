@@ -176,9 +176,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 <span className="text-sm font-medium text-gray-800">
                   {log.performedByUser?.firstName || '—'}
                 </span>
-                {log.performedByUser?.email && (
-                  <span className="text-xs text-gray-400">{log.performedByUser.email}</span>
-                )}
               </div>
               {log.status && (
                 <span className={`text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${statusBadgeClass(log.status)}`}>
