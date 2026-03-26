@@ -65,6 +65,7 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'ASSIGNEE',
       color: 'purple',
+      itemsGrid: true,
       items: [
         { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
         { label: 'Username', value: ticket.assigneeUser?.username || '—' },
