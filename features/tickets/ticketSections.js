@@ -56,6 +56,7 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'RAISED BY',
       color: 'green',
+      itemsGrid: true,
       items: [
         { label: 'Name', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
         { label: 'Role', value: ticket.raisedByUser?.role || '—' },
