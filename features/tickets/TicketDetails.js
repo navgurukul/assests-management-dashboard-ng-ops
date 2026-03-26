@@ -355,7 +355,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     ...(ticket.assetId || ticket.asset ? [{
       title: 'DEVICE SUMMARY',
       items: [
-        { label: 'Asset ID', value: ticket.assetId || '—' },
         { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
         { label: 'Brand', value: ticket.asset?.brand || '—' },
         { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
