@@ -122,10 +122,84 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const ticket = ticketData;
 
-  const historyEntries = (ticket.historyLogs || []).map((log) => ({
-    time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
-    text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
-  }));
+  const historyLogs = ticket.historyLogs || [];
+
+  const formatHistoryDate = (dateStr) => {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    const day = d.getDate();
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${mins}`;
+  };
+
+  const statusBadgeClass = (status) => {
+    switch ((status || '').toUpperCase()) {
+      case 'APPROVED':  return 'bg-green-100 text-green-700 border-green-200';
+      case 'RAISED':    return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'RESOLVED':  return 'bg-teal-100 text-teal-700 border-teal-200';
+      case 'ESCALATED': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'CLOSED':    return 'bg-gray-100 text-gray-600 border-gray-200';
+      default:          return 'bg-gray-100 text-gray-600 border-gray-200';
+    }
+  };
+
+  const dotColorClass = (status) => {
+    switch ((status || '').toUpperCase()) {
+      case 'APPROVED':  return 'bg-green-500 border-green-300';
+      case 'RAISED':    return 'bg-blue-500 border-blue-300';
+      case 'RESOLVED':  return 'bg-teal-500 border-teal-300';
+      case 'ESCALATED': return 'bg-orange-500 border-orange-300';
+      case 'CLOSED':    return 'bg-gray-400 border-gray-300';
+      default:          return 'bg-gray-400 border-gray-300';
+    }
+  };
+
+  const historyTimeline = historyLogs.length > 0 ? (
+    <div className="relative">
+      {historyLogs.map((log, idx) => (
+        <div key={idx} className="flex gap-4 relative">
+          {/* Vertical line + dot */}
+          <div className="flex flex-col items-center">
+            <div className={`w-3 h-3 rounded-full border-2 mt-1 shrink-0 z-10 ${dotColorClass(log.status)}`} />
+            {idx < historyLogs.length - 1 && (
+              <div className="w-0.5 bg-gray-200 flex-1 my-1" />
+            )}
+          </div>
+
+          {/* Card */}
+          <div className={`mb-4 flex-1 rounded-lg border p-3 bg-white shadow-sm ${idx < historyLogs.length - 1 ? '' : ''}`}>
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-800">
+                  {log.performedByUser?.firstName || '—'}
+                </span>
+                {log.performedByUser?.email && (
+                  <span className="text-xs text-gray-400">{log.performedByUser.email}</span>
+                )}
+              </div>
+              {log.status && (
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${statusBadgeClass(log.status)}`}>
+                  {log.status}
+                </span>
+              )}
+            </div>
+            {log.resolutionNotes && (
+              <p className="text-sm text-gray-600 mb-1">{log.resolutionNotes}</p>
+            )}
+            {(log.notes) && (
+              <p className="text-sm text-gray-600 mb-1">{log.notes}</p>
+            )}
+            <p className="text-xs text-gray-400">{formatHistoryDate(log.createdAt)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-sm text-gray-600">No history for this ticket.</div>
+  );
 
   const handleUpdateClick = () => {
     setSelectedAssignee(null);
@@ -207,6 +281,19 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   });
 
   const leftSections = [
+    ...(ticket.status === 'APPROVED' ? [{
+      title: 'ACTIONS',
+      actions: [
+        { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
+      ],
+    }] : []),
+    {
+      title: 'HISTORY LOG',
+      content: historyTimeline,
+    },
+  ];
+
+  const rightSections = [
     {
       title: 'SLA / TIMELINE',
       content: (
@@ -218,29 +305,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         />
       ),
     },
-    {
-      title: 'DESCRIPTION',
-      content: <div className="text-sm text-gray-700">{ticket.description || '—'}</div>,
-    },
-    {
-      title: 'RESOLUTION NOTES',
-      content: <div className="text-sm text-gray-700">{ticket.resolutionNotes || '—'}</div>,
-    },
-    {
-      title: 'HISTORY LOG',
-      ...(historyEntries.length
-        ? { logEntries: historyEntries }
-        : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
-    },
-    ...(ticket.status === 'APPROVED' ? [{
-      title: 'ACTIONS',
-      actions: [
-        { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
-      ],
-    }] : []),
-  ];
-
-  const rightSections = [
     {
       title: 'DETAILS',
       itemsGrid: true,
@@ -257,6 +321,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
         { label: 'Campus Code', value: ticket.campus?.code || '—' },
         { label: 'Campus Name', value: ticket.campus?.name || '—' },
+        { label: 'Description', value: ticket.description || '—' },
+        { label: 'Resolution Notes', value: ticket.resolutionNotes || '—' },
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
         { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
         { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
@@ -266,13 +332,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
         { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
         // { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
-        { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
         { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
         { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
 
         { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Assignee ID', value: ticket.assigneeUserId || '—' },
-        { label: 'Assignee User ID', value: ticket.assigneeUser?.id || '—' },
         { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
         { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
         { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
