@@ -332,13 +332,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
         { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
         // { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
-        { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
         { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
         { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
 
         { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Assignee ID', value: ticket.assigneeUserId || '—' },
-        { label: 'Assignee User ID', value: ticket.assigneeUser?.id || '—' },
         { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
         { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
         { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
