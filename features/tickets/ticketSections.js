@@ -28,6 +28,7 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'TICKET INFO',
       color: 'blue',
+      span: 2,
       itemsGrid: true,
       items: [
         { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
@@ -55,6 +56,7 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'RAISED BY',
       color: 'green',
+      itemsGrid: true,
       items: [
         { label: 'Name', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
         { label: 'Role', value: ticket.raisedByUser?.role || '—' },
@@ -64,6 +66,7 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'ASSIGNEE',
       color: 'purple',
+      itemsGrid: true,
       items: [
         { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
         { label: 'Username', value: ticket.assigneeUser?.username || '—' },
@@ -74,7 +77,6 @@ export function getTicketRightSections(ticket, hasAsset) {
     {
       title: 'DATES',
       color: 'indigo',
-      span: hasAsset ? 1 : 2,
       itemsGrid: true,
       items: [
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
