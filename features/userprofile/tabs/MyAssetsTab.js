@@ -77,7 +77,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   const handleAssetReceivedSubmit = async (formData) => {
     try {
-      const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id || selectedAsset?.id;
+      const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id;
 
       if (!consignmentId) {
         toast.error('Consignment ID not found for this asset.');
@@ -89,11 +89,12 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
           config.endpoints.consignments?.deliver?.(consignmentId) ||
           `/consignments/${consignmentId}/deliver`,
         body: {
-          assetId: selectedAsset?.id,
-          workingFine: formData.workingFine || false,
-          havingIssue: formData.havingIssue || false,
-          issueType: formData.havingIssue ? formData.issueType : undefined,
-          description: formData.havingIssue ? formData.description : undefined,
+          asset_id: selectedAsset?.id,
+          deviceConditionOnReceive: formData.deviceConditionOnReceive,
+          receiveNotes: formData.receiveNotes || undefined,
+          issueType:
+            formData.deviceConditionOnReceive !== 'WORKING' ? formData.issueType : undefined,
+          havingIssue: formData.deviceConditionOnReceive !== 'WORKING',
         },
       });
       toast.success('Asset received confirmation submitted successfully.');
