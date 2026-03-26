@@ -33,7 +33,7 @@ export default function DetailsPage({
                 <span className="text-xs text-gray-500 mb-1">
                   {item.label}
                 </span>
-                <span className={`text-sm font-medium ${item.className || 'text-gray-900'}`}>
+                <span className={`text-sm font-medium ${item.className || 'text-gray-900'}`} title={item.title}>
                   {item.value}
                 </span>
               </div>
