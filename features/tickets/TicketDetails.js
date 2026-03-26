@@ -181,7 +181,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 )}
               </div>
               {log.status && (
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${statusBadgeClass(log.status)}`}>
+                <span className={`text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${statusBadgeClass(log.status)}`}>
                   {log.status}
                 </span>
               )}
@@ -321,8 +321,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
         { label: 'Campus Code', value: ticket.campus?.code || '—' },
         { label: 'Campus Name', value: ticket.campus?.name || '—' },
-        { label: 'Description', value: ticket.description || '—' },
-        { label: 'Resolution Notes', value: ticket.resolutionNotes || '—' },
+        { label: 'Description', value: ticket.description || '—', className: 'text-gray-900 line-clamp-2' },
+        { label: 'Resolution Notes', value: ticket.resolutionNotes || '—', className: 'text-gray-900 line-clamp-2' },
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
         { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
         { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
