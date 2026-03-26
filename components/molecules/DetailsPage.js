@@ -4,73 +4,102 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 
+const ACCENT_COLORS = {
+  blue:   { border: 'border-t-blue-500',   titleBg: 'bg-blue-50',   titleText: 'text-blue-700'   },
+  green:  { border: 'border-t-green-500',  titleBg: 'bg-green-50',  titleText: 'text-green-700'  },
+  purple: { border: 'border-t-purple-500', titleBg: 'bg-purple-50', titleText: 'text-purple-700' },
+  orange: { border: 'border-t-orange-500', titleBg: 'bg-orange-50', titleText: 'text-orange-700' },
+  teal:   { border: 'border-t-teal-500',   titleBg: 'bg-teal-50',   titleText: 'text-teal-700'   },
+  red:    { border: 'border-t-red-500',    titleBg: 'bg-red-50',    titleText: 'text-red-700'    },
+  indigo: { border: 'border-t-indigo-500', titleBg: 'bg-indigo-50', titleText: 'text-indigo-700' },
+  gray:   { border: 'border-t-gray-400',   titleBg: 'bg-gray-50',   titleText: 'text-gray-600'   },
+};
+
 export default function DetailsPage({
   title,
   subtitle,
-  subtitleColor = "text-gray-600",
+  subtitleColor = 'text-gray-600',
   leftSections = [],
   rightSections = [],
+  rightGrid = false,
   onBack,
   headerActions,
 }) {
   const renderSection = (section, index) => {
+    const accent = ACCENT_COLORS[section.color] || ACCENT_COLORS.gray;
+    const spanClass = rightGrid && section.span === 2 ? 'col-span-2' : '';
+
     return (
       <div
         key={index}
-        className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
+        className={`bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col ${spanClass}`}
       >
         {section.title && (
-          <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-            {section.title}
-          </h2>
-        )}
-        
-        {/* Render items if present */}
-        {section.items && section.items.length > 0 && (
-          <div className={section.itemsGrid ? "grid grid-cols-2 gap-x-4 gap-y-3" : "space-y-3"}>
-            {section.items.map((item, itemIndex) => (
-              <div key={itemIndex} className="flex flex-col">
-                <span className="text-xs text-gray-500 mb-1">
-                  {item.label}
-                </span>
-                <span className={`text-sm font-medium ${item.className || 'text-gray-900'}`} title={item.title}>
-                  {item.value}
-                </span>
-              </div>
-            ))}
+          <div className={`px-5 py-3 rounded-t-xl border-b border-gray-100 ${accent.titleBg}`}>
+            <h2 className={`text-[11px] font-bold uppercase tracking-widest ${accent.titleText}`}>
+              {section.title}
+            </h2>
           </div>
         )}
 
-        {/* Render table if present */}
-        {section.table && (
-          <div className={section.items && section.items.length > 0 ? "mt-4 border-t pt-4" : ""}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  {section.table.headers.map((header, idx) => (
-                    <th
-                      key={idx}
-                      className="text-left py-2 text-xs font-semibold text-gray-600"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {section.table.rows.map((row, rowIdx) => (
-                  <tr key={rowIdx} className="border-b last:border-0">
-                    {row.map((cell, cellIdx) => (
-                      <td key={cellIdx} className="py-2 text-gray-700">
-                        {cell}
-                      </td>
+        <div className="p-5 flex-1">
+          {/* Render items if present */}
+          {section.items && section.items.length > 0 && (
+            <div className={section.itemsGrid ? 'grid grid-cols-2 gap-x-6 gap-y-4' : 'space-y-4'}>
+              {section.items.map((item, itemIndex) => {
+                const isFullWidth =
+                  item.span === 2 ||
+                  item.className?.includes('col-span-2') ||
+                  item.className?.includes('col-span-full');
+                const rawClass = item.className?.replace(/col-span-\S+/g, '').trim() || '';
+                const textClass = rawClass || 'text-gray-800';
+                return (
+                  <div
+                    key={itemIndex}
+                    className={`flex flex-col gap-0.5 ${isFullWidth && section.itemsGrid ? 'col-span-2' : ''}`}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                      {item.label}
+                    </span>
+                    <span className={`text-sm font-medium leading-snug ${textClass}`} title={item.title}>
+                      {item.value}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Render table if present */}
+          {section.table && (
+            <div className={section.items && section.items.length > 0 ? 'mt-5 border-t border-gray-100 pt-4' : ''}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {section.table.headers.map((header, idx) => (
+                      <th
+                        key={idx}
+                        className="text-left py-2 text-[10px] font-bold uppercase tracking-wider text-gray-500"
+                      >
+                        {header}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {section.table.rows.map((row, rowIdx) => (
+                    <tr key={rowIdx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
+                      {row.map((cell, cellIdx) => (
+                        <td key={cellIdx} className="py-2.5 text-sm text-gray-700">
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
         {/* Render timeline if present */}
         {section.timeline && section.timeline.length > 0 && (
@@ -79,79 +108,78 @@ export default function DetailsPage({
               <React.Fragment key={idx}>
                 <div className="flex items-center gap-2">
                   <div
-                    className={`px-3 py-1.5 rounded text-sm font-medium w-full text-center ${
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold w-full text-center ${
                       item.active
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-blue-600 text-white shadow-sm'
                         : item.completed
                         ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-600'
+                        : 'bg-gray-100 text-gray-500'
                     }`}
                   >
                     {item.label}
                   </div>
                 </div>
                 {idx < section.timeline.length - 1 && (
-                  <div className="flex justify-center">
-                    <span className="text-gray-400">↓</span>
-                  </div>
+                  <div className="flex justify-center text-gray-300 text-sm">↓</div>
                 )}
               </React.Fragment>
             ))}
           </div>
         )}
 
-        {/* Render log entries if present */}
-        {section.logEntries && section.logEntries.length > 0 && (
-          <div className="space-y-3">
-            {section.logEntries.map((entry, idx) => (
-              <div
-                key={idx}
-                className="flex gap-3 pb-3 border-b last:border-0 last:pb-0"
-              >
-                <span className="text-xs text-gray-500 min-w-20">
-                  {entry.time}
-                </span>
-                <span className="text-sm text-gray-700">{entry.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
+          {/* Render log entries if present */}
+          {section.logEntries && section.logEntries.length > 0 && (
+            <div className="space-y-3">
+              {section.logEntries.map((entry, idx) => (
+                <div
+                  key={idx}
+                  className="flex gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0"
+                >
+                  <span className="text-xs text-gray-400 min-w-20 pt-0.5">
+                    {entry.time}
+                  </span>
+                  <span className="text-sm text-gray-700">{entry.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* Render action buttons if present */}
-        {section.actions && section.actions.length > 0 && (
-          <div className="flex flex-wrap gap-3">
-            {section.actions.map((action, idx) => (
-              <button
-                key={idx}
-                onClick={action.onClick}
-                disabled={action.disabled}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  action.variant === 'primary'
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300'
-                    : action.variant === 'danger'
-                    ? 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300'
-                    : action.variant === 'success'
-                    ? 'bg-green-600 text-white hover:bg-green-700 disabled:bg-green-300'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:bg-gray-50'
-                } disabled:cursor-not-allowed disabled:opacity-50`}
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        )}
+          {/* Render action buttons if present */}
+          {section.actions && section.actions.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {section.actions.map((action, idx) => (
+                <button
+                  key={idx}
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
+                    action.variant === 'primary'
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm disabled:bg-blue-300'
+                      : action.variant === 'danger'
+                      ? 'bg-red-600 text-white hover:bg-red-700 shadow-sm disabled:bg-red-300'
+                      : action.variant === 'success'
+                      ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm disabled:bg-green-300'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:bg-gray-50'
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          )}
 
-        {/* Render custom content if present */}
-        {section.content && (
-          <div>{section.content}</div>
-        )}
+          {/* Render custom content if present */}
+          {section.content && (
+            <div>{section.content}</div>
+          )}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="h-full overflow-y-auto bg-gray-50 p-5">
+      <div className="max-w-full">
         {/* Back Button */}
         {onBack && (
           <div className="mb-4">
@@ -165,18 +193,18 @@ export default function DetailsPage({
           </div>
         )}
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
-          <div className="flex justify-between items-start">
+        <div className="bg-white rounded-xl shadow-sm px-7 py-5 mb-5 border border-gray-200">
+          <div className="flex justify-between items-center gap-4 flex-wrap">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
               {subtitle && (
-                <p className={`text-sm font-medium ${subtitleColor}`}>
+                <p className={`text-sm mt-1 font-medium ${subtitleColor}`}>
                   {subtitle}
                 </p>
               )}
             </div>
             {headerActions && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center shrink-0 flex-wrap">
                 {headerActions}
               </div>
             )}
@@ -184,17 +212,17 @@ export default function DetailsPage({
         </div>
 
         {/* 30-70% Split Layout */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-5">
           {/* Left Column - 30% */}
           {leftSections.length > 0 && (
-            <div className="w-full lg:w-[30%] space-y-6">
+            <div className="w-full lg:w-[30%] space-y-4">
               {leftSections.map((section, index) => renderSection(section, index))}
             </div>
           )}
 
           {/* Right Column - 70% */}
           {rightSections.length > 0 && (
-            <div className="w-full lg:w-[70%] space-y-6">
+            <div className={`w-full lg:w-[70%] ${rightGrid ? 'grid grid-cols-2 gap-4 content-start' : 'space-y-4'}`}>
               {rightSections.map((section, index) => renderSection(section, index))}
             </div>
           )}
