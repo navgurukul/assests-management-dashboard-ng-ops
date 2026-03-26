@@ -293,13 +293,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const hasAsset = !!(ticket.assetId || ticket.asset);
 
   const leftSections = [
-    ...(ticket.status === 'APPROVED' ? [{
-      title: 'ACTIONS',
-      color: 'blue',
-      actions: [
-        { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
-      ],
-    }] : []),
     {
       title: 'HISTORY LOG',
       color: 'gray',
@@ -424,6 +417,14 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   </div>
                 ))}
               </div>
+            )}
+            {ticket.status === 'APPROVED' && (
+              <CustomButton
+                text="Update Ticket"
+                variant="secondary"
+                size="md"
+                onClick={handleUpdateClick}
+              />
             )}
             {ticket.status === 'APPROVED' ? (
               <CustomButton

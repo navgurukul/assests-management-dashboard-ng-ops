@@ -32,10 +32,10 @@ export default function DetailsPage({
     return (
       <div
         key={index}
-        className={`bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col ${spanClass}`}
+        className={`bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col ${spanClass}`}
       >
         {section.title && (
-          <div className={`px-5 py-3 rounded-t-xl border-b border-gray-100 ${accent.titleBg}`}>
+          <div className={`px-5 py-3 rounded-t-lg border-b border-gray-100 ${accent.titleBg}`}>
             <h2 className={`text-[11px] font-bold uppercase tracking-widest ${accent.titleText}`}>
               {section.title}
             </h2>
@@ -185,7 +185,7 @@ export default function DetailsPage({
           </div>
         )}
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm px-7 py-5 mb-5 border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm px-7 py-5 mb-5 border border-gray-200">
           <div className="flex justify-between items-center gap-4 flex-wrap">
             <div>
               <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
