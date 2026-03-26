@@ -148,22 +148,14 @@ export default function DetailsPage({
           {section.actions && section.actions.length > 0 && (
             <div className="flex flex-wrap gap-3">
               {section.actions.map((action, idx) => (
-                <button
+                <CustomButton
                   key={idx}
+                  text={action.label}
+                  variant={action.variant || 'primary'}
+                  size="md"
                   onClick={action.onClick}
                   disabled={action.disabled}
-                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
-                    action.variant === 'primary'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm disabled:bg-blue-300'
-                      : action.variant === 'danger'
-                      ? 'bg-red-600 text-white hover:bg-red-700 shadow-sm disabled:bg-red-300'
-                      : action.variant === 'success'
-                      ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm disabled:bg-green-300'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:bg-gray-50'
-                  } disabled:cursor-not-allowed disabled:opacity-50`}
-                >
-                  {action.label}
-                </button>
+                />
               ))}
             </div>
           )}
