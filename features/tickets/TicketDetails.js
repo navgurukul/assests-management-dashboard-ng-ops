@@ -11,6 +11,8 @@ import GenericForm from '@/components/molecules/GenericForm';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
+import AssigneeSelector from './AssigneeSelector';
+import { getTicketLeftSections, getTicketRightSections } from './ticketSections';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
@@ -292,99 +294,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const hasAsset = !!(ticket.assetId || ticket.asset);
 
-  const leftSections = [
-    {
-      title: 'SLA / TIMELINE',
-      color: 'orange',
-      content: (
-        <SLAIndicator 
-          allocationDate={ticket.assignDate}
-          expectedResolutionDate={ticket.timelineDate}
-          status={ticket.status}
-          compact={false}
-        />
-      ),
-    },
-    {
-      title: 'HISTORY LOG',
-      color: 'gray',
-      content: historyTimeline,
-    },
-  ];
-
-  const rightSections = [
-    {
-      title: 'TICKET INFO',
-      color: 'blue',
-      itemsGrid: true,
-      items: [
-        { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
-        { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Priority', value: ticket.priority || '—' },
-        { label: 'Status', value: ticket.status || '—' },
-        { label: 'Is Escalated', value: ticket.isEscalated ? 'Yes' : 'No' },
-        { label: 'Manager Email', value: ticket.managerEmail || '—' },
-        { label: 'Address', value: ticket.address || '—', className: 'col-span-2 line-clamp-2 break-all', title: ticket.address || undefined },
-        { label: 'Description', value: ticket.description || '—', className: 'col-span-2 line-clamp-2 break-all', title: ticket.description || undefined },
-        { label: 'Resolution Notes', value: ticket.resolutionNotes || '—', className: 'col-span-2 line-clamp-2' },
-      ],
-    },
-    {
-      title: 'CAMPUS INFO',
-      color: 'teal',
-      itemsGrid: true,
-      items: [
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Campus Code', value: ticket.campus?.code || '—' },
-        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
-        { label: 'Campus Name', value: ticket.campus?.name || '—' },
-      ],
-    },
-    {
-      title: 'RAISED BY',
-      color: 'green',
-      items: [
-        { label: 'Name', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        { label: 'Role', value: ticket.raisedByUser?.role || '—' },
-        { label: 'Email', value: ticket.raisedByUser?.email || '—' },
-      ],
-    },
-    {
-      title: 'ASSIGNEE',
-      color: 'purple',
-      items: [
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Username', value: ticket.assigneeUser?.username || '—' },
-        { label: 'Role', value: ticket.assigneeUser?.role || '—' },
-        { label: 'Email', value: ticket.assigneeUser?.email || '—' },
-      ],
-    },
-    {
-      title: 'DATES',
-      color: 'indigo',
-      span: hasAsset ? 1 : 2,
-      itemsGrid: true,
-      items: [
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
-        { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
-        { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
-      ],
-    },
-    ...(hasAsset ? [{
-      title: 'ASSET / DEVICE',
-      color: 'gray',
-      itemsGrid: true,
-      items: [
-        { label: 'Asset Tag', value: ticket.asset?.assetTag || ticket.assetId || '—' },
-        { label: 'Brand', value: ticket.asset?.brand || '—' },
-        { label: 'Location', value: ticket.asset?.location?.name || '—' },
-        { label: 'Condition', value: ticket.asset?.condition || '—' },
-      ],
-    }] : []),
-  ];
+  const leftSections = getTicketLeftSections(ticket, historyTimeline);
+  const rightSections = getTicketRightSections(ticket, hasAsset);
 
   const handleCreateAllocation = () => {
     dispatch(setSelectedTicket({ ...ticket, id: ticket?.id || ticketId }));
@@ -462,69 +373,14 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           </div>
         )}
 
-        {/* Assign To — selection table */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-700">Assign To</p>
-            <CustomButton
-              text={showAssignTable ? 'Hide' : 'Select Assignee'}
-              variant={showAssignTable ? 'secondary' : 'primary'}
-              size="sm"
-              onClick={() => setShowAssignTable((prev) => !prev)}
-            />
-          </div>
-          {selectedAssignee && (
-            <p className="text-xs text-blue-700 mb-2">
-              Selected: <span className="font-medium">{selectedAssignee.name} ({selectedAssignee.email})</span>
-            </p>
-          )}
-          {showAssignTable && (
-            campusInchargeLoading ? (
-              <div className="text-sm text-gray-500 py-2">Loading...</div>
-            ) : assigneeRows.length === 0 ? (
-              <div className="text-sm text-gray-500 py-2">No coordinators available.</div>
-            ) : (
-              <div className="overflow-auto max-h-52 border border-gray-200 rounded-lg">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-3 py-2 w-10"></th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Name</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Email</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Position</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Campus</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {assigneeRows.map((row) => (
-                      <tr
-                        key={row.email}
-                        onClick={() => setSelectedAssignee(selectedAssignee?.email === row.email ? null : row)}
-                        className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
-                          selectedAssignee?.email === row.email ? 'bg-blue-50' : ''
-                        }`}
-                      >
-                        <td className="px-3 py-2 text-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedAssignee?.email === row.email}
-                            onChange={() => setSelectedAssignee(selectedAssignee?.email === row.email ? null : row)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-4 h-4 accent-blue-600"
-                          />
-                        </td>
-                        <td className="px-3 py-2 text-gray-800">{row.name}</td>
-                        <td className="px-3 py-2 text-gray-600">{row.email}</td>
-                        <td className="px-3 py-2 text-gray-600">{row.position}</td>
-                        <td className="px-3 py-2 text-gray-600">{row.campus}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-          )}
-        </div>
+        <AssigneeSelector
+          selectedAssignee={selectedAssignee}
+          setSelectedAssignee={setSelectedAssignee}
+          showAssignTable={showAssignTable}
+          setShowAssignTable={setShowAssignTable}
+          assigneeRows={assigneeRows}
+          campusInchargeLoading={campusInchargeLoading}
+        />
 
         <GenericForm
           fields={updateFormFieldsModified}
