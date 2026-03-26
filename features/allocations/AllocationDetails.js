@@ -218,7 +218,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
       title: 'Allocation Info',
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
-        { label: 'Allocation ID', value: `#${allocationDetails.id || 'N/A'}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
         { label: 'Source Campus', value: sourceCampusDisplay },
         { label: 'Destination Campus', value: destinationCampusDisplay },
@@ -229,7 +228,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
     {
       title: 'Asset Information',
       items: [
-        { label: 'Asset ID', value: primaryAsset?.id || allocationDetails.assetId || 'N/A' },
         { label: 'Asset Tag', value: primaryAsset?.assetTag || allocationDetails.asset?.assetTag || 'N/A' },
         { label: 'Brand', value: primaryAsset?.brand || allocationDetails.asset?.brand || 'N/A' },
         { label: 'Model', value: primaryAsset?.model || allocationDetails.asset?.model || 'N/A' },

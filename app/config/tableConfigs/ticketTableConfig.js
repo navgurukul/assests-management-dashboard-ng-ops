@@ -100,6 +100,7 @@ export const defaultVisibleColumns = [
   'type',
   'priority',
   'status',
+  'sla',
   'createdAt',
   'assignDate',
   'raisedBy',
