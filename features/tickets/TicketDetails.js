@@ -160,7 +160,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const historyTimeline = historyLogs.length > 0 ? (
     <div className="relative">
       {historyLogs.map((log, idx) => (
-        <div key={idx} className="flex gap-4 relative">
+        <div key={idx} className="flex gap-4 relative min-w-0 overflow-hidden">
           {/* Vertical line + dot */}
           <div className="flex flex-col items-center">
             <div className={`w-3 h-3 rounded-full border-2 mt-1 shrink-0 z-10 ${dotColorClass(log.status)}`} />
@@ -170,7 +170,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           </div>
 
           {/* Card */}
-          <div className={`mb-4 flex-1 rounded-lg border p-3 bg-white shadow-sm ${idx < historyLogs.length - 1 ? '' : ''}`}>
+          <div className={`mb-4 flex-1 min-w-0 overflow-hidden rounded-lg border p-3 bg-white shadow-sm ${idx < historyLogs.length - 1 ? '' : ''}`}>
             <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-800">
@@ -184,10 +184,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               )}
             </div>
             {log.resolutionNotes && (
-              <p className="text-sm text-gray-600 mb-1">{log.resolutionNotes}</p>
+              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.resolutionNotes}>{log.resolutionNotes}</p>
             )}
             {(log.notes) && (
-              <p className="text-sm text-gray-600 mb-1">{log.notes}</p>
+              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.notes}>{log.notes}</p>
             )}
             <p className="text-xs text-gray-400">{formatHistoryDate(log.createdAt)}</p>
           </div>
