@@ -206,6 +206,19 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const handleUpdateSubmit = async (values, overrideStatus = null) => {
     setIsSubmitting(true);
+
+    if (!selectedAssignee) {
+      toast.warning('Please select an assignee before submitting.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!values.adminComment?.trim()) {
+      toast.warning('Admin comment is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const payload = {};
       const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description', 'adminComment'];
@@ -492,7 +505,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
           customActions={[
-            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting },
+            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || !selectedAssignee },
             ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
               { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
               { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
