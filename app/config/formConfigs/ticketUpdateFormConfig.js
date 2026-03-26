@@ -32,9 +32,9 @@ export const ticketUpdateEditableFields = [
   },
   {
     name: 'adminComment',
-    label: 'Admin Comment',
+    label: 'Comment',
     type: 'textarea',
-    placeholder: 'Add admin comment...',
+    placeholder: 'Add comment...',
     required: false,
     rows: 3,
   },

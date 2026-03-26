@@ -216,20 +216,23 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     }
 
     if (!values.adminComment?.trim()) {
-      toast.warning('Admin comment is required.');
+      toast.warning('Comment is required.');
       setIsSubmitting(false);
       return;
     }
 
     try {
       const payload = {};
-      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description', 'adminComment'];
+      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
       apiFields.forEach((key) => {
         const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
         if (val !== '' && val !== null && val !== undefined) {
           payload[key] = val;
         }
       });
+      if (values.adminComment?.trim()) {
+        payload.comment = values.adminComment;
+      }
 
       if (selectedAssignee) {
         payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
