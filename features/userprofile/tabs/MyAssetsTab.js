@@ -7,6 +7,8 @@ import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import usePost from '@/app/hooks/query/usePost';
+import usePatch from '@/app/hooks/query/usePatch';
+import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import {
   getReturnAssetFields,
@@ -28,8 +30,8 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
 
-  // Single React Query mutation — reused for all POST calls in this tab
-  const { mutateAsync, isPending } = usePost();
+  const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
+  const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
 
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -75,14 +77,24 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   const handleAssetReceivedSubmit = async (formData) => {
     try {
-      await mutateAsync({
-        endpoint: `/allocations/my-assets/${selectedAsset?.id}/received`,
+      const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id;
+
+      if (!consignmentId) {
+        toast.error('Consignment ID not found for this asset.');
+        return;
+      }
+
+      await patchMutation({
+        endpoint:
+          config.endpoints.consignments?.deliver?.(consignmentId) ||
+          `/consignments/${consignmentId}/deliver`,
         body: {
-          assetId: selectedAsset?.id,
-          workingFine: formData.workingFine || false,
-          havingIssue: formData.havingIssue || false,
-          issueType: formData.havingIssue ? formData.issueType : undefined,
-          description: formData.havingIssue ? formData.description : undefined,
+          asset_id: selectedAsset?.id,
+          deviceConditionOnReceive: formData.deviceConditionOnReceive,
+          receiveNotes: formData.receiveNotes || undefined,
+          issueType:
+            formData.deviceConditionOnReceive !== 'WORKING' ? formData.issueType : undefined,
+          havingIssue: formData.deviceConditionOnReceive !== 'WORKING',
         },
       });
       toast.success('Asset received confirmation submitted successfully.');
@@ -109,7 +121,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
       Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
       Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
 
-      await mutateAsync({
+      await postMutation({
         endpoint: '/allocations/my-assets/return',
         body: payload,
       });
@@ -129,7 +141,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
     }
 
     try {
-      await mutateAsync({
+      await postMutation({
         endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
         body: {
           leaseType: formData.leaseType,
@@ -320,7 +332,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Asset Received"
         fields={assetReceivedFields}
         onSubmit={handleAssetReceivedSubmit}
-        isSubmitting={isPending}
+        isSubmitting={isPatchPending}
         size="medium"
         validationSchema={assetReceivedValidationSchema}
       />
@@ -332,7 +344,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Extend Lease"
         fields={extendLeaseFields}
         onSubmit={handleExtendSubmit}
-        isSubmitting={isPending}
+        isSubmitting={isPostPending}
         size="small"
         validationSchema={extendLeaseValidationSchema}
       />
@@ -344,7 +356,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         actionType="Return Asset"
         fields={computedReturnFields}
         onSubmit={handleReturnSubmit}
-        isSubmitting={isPending}
+        isSubmitting={isPostPending}
         size="medium"
         validationSchema={returnAssetValidationSchema}
       />

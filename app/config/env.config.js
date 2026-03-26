@@ -37,6 +37,7 @@ const config = {
       details: (id) => `/consignments/${id}`,
       updateStatus: (id) => `/consignments/${id}/status`,
       dispatch: (id) => `/consignments/${id}/dispatch`,
+      deliver: (id) => `/consignments/${id}/deliver`,
       assets: (id) => `/consignments/${id}/assets`,
       assetById: (consignmentId, assetId) => `/consignments/${consignmentId}/assets/${assetId}`,
       inTransitReturns: '/consignments/in-transit-returns',

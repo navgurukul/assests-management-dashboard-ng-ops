@@ -4,58 +4,52 @@ import * as Yup from 'yup';
 
 export const assetReceivedFields = [
   {
-    name: 'workingFine',
-    type: 'checkbox',
-    label: 'I have received the laptop and tested thoroughly and it is working fine',
-    required: false,
-    showWhen: (formData) => !formData.havingIssue,
-  },
-  {
-    name: 'havingIssue',
-    type: 'checkbox',
-    label: 'Having some issue',
-    required: false,
-  },
-  {
-    name: 'issueType',
-    type: 'radio',
-    label: 'Issue Type',
-    layout: 'vertical',
+    name: 'deviceConditionOnReceive',
+    type: 'select',
+    label: 'Device Condition On Receive',
     required: true,
-    showWhen: (formData) => !!formData.havingIssue,
+    placeholder: 'Select device condition',
     options: [
-      { label: 'Laptop is working but having some issue in software', value: 'SOFTWARE_ISSUE' },
-      { label: 'Laptop is broken or damaged', value: 'PHYSICAL_DAMAGE' },
-      { label: 'Other issue', value: 'OTHER' },
+      { label: 'Working', value: 'WORKING' },
+      { label: 'Minor Issues', value: 'MINOR_ISSUES' },
+      { label: 'Not Working', value: 'NOT_WORKING' },
+      { label: 'Damaged', value: 'DAMAGED' },
     ],
   },
   {
-    name: 'description',
-    type: 'textarea',
-    label: 'Description',
-    placeholder: 'Describe the issue in detail...',
+    name: 'issueType',
+    type: 'select',
+    label: 'Issue Type',
     required: true,
+    showWhen: (formData) => formData.deviceConditionOnReceive && formData.deviceConditionOnReceive !== 'WORKING',
+    placeholder: 'Select issue type',
+    options: [
+      { label: 'Damage', value: 'DAMAGE' },
+      { label: 'Hardware Issue', value: 'HARDWARE_ISSUE' },
+      { label: 'Software Issue', value: 'SOFTWARE_ISSUE' },
+      { label: 'Other', value: 'OTHER' },
+    ],
+  },
+  {
+    name: 'receiveNotes',
+    type: 'textarea',
+    label: 'Receive Notes',
+    placeholder: 'Add any notes about received condition...',
+    required: false,
     rows: 4,
-    showWhen: (formData) => !!formData.havingIssue && !!formData.issueType,
   },
 ];
 
 // ─── Yup Validation Schema ─────────────────────────────────────────────────
 
 export const assetReceivedValidationSchema = Yup.object().shape({
-  workingFine: Yup.boolean(),
-  havingIssue: Yup.boolean(),
-  issueType: Yup.string().when('havingIssue', {
-    is: true,
+  deviceConditionOnReceive: Yup.string()
+    .oneOf(['WORKING', 'MINOR_ISSUES', 'NOT_WORKING', 'DAMAGED'])
+    .required('Please select device condition on receive'),
+  issueType: Yup.string().when('deviceConditionOnReceive', {
+    is: (value) => !!value && value !== 'WORKING',
     then: (schema) => schema.required('Please select an issue type'),
     otherwise: (schema) => schema.nullable(),
   }),
-  description: Yup.string().when('havingIssue', {
-    is: true,
-    then: (schema) =>
-      schema
-        .required('Description is required')
-        .min(10, 'Please provide more detail (at least 10 characters)'),
-    otherwise: (schema) => schema.nullable(),
-  }),
+  receiveNotes: Yup.string().nullable(),
 });
