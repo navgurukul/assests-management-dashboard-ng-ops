@@ -75,7 +75,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                   isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50',
                 ].join(' ')}
               >
-                <Icon className="w-5 h-5 shrink-0" />
+                <Icon className="w-6 h-6 shrink-0" />
                 {/* Always show text on mobile; hide on desktop when collapsed */}
                 <span className={isCollapsed ? 'md:hidden' : ''}>{item.name}</span>
               </Link>
@@ -106,7 +106,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 : 'text-gray-700 hover:bg-gray-50',
             ].join(' ')}
           >
-            <User className="w-5 h-5 shrink-0" />
+            <User className="w-6 h-6 shrink-0" />
             <span className={isCollapsed ? 'md:hidden' : ''}>User Profile</span>
           </Link>
         </TooltipWrapper>
