@@ -272,8 +272,30 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     handleUpdateSubmit(values, 'RESOLVED');
   };
 
-  const handleEscalationClick = (values) => {
-    handleUpdateSubmit(values, 'ESCALATED');
+  const handleEscalationClick = async (values) => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        status: 'ESCALATED',
+        ...(values.timelineDate && { timelineDate: values.timelineDate }),
+        ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
+      };
+
+      await post({
+        url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
+        method: 'PUT',
+        data: payload,
+      });
+
+      toast.success('Ticket escalated successfully!');
+      setIsUpdateModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
+    } catch (error) {
+      console.error('Error escalating ticket:', error);
+      toast.error(error?.message || 'Failed to escalate ticket. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const updateInitialValues = {
