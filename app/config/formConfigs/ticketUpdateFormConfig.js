@@ -48,8 +48,11 @@ export const ticketUpdateEditableFields = [
 ];
 
 export const ticketUpdateFormFields = [
-  ...ticketUpdateReadOnlyFields,
-  ...ticketUpdateEditableFields,
+  ticketUpdateReadOnlyFields[0], // status
+  ticketUpdateEditableFields[2], // timelineDate (Expected Resolution Date) — placed next to Status
+  ticketUpdateReadOnlyFields[1], // description
+  ticketUpdateEditableFields[0], // resolutionNotes
+  ticketUpdateEditableFields[1], // adminComment
 ];
 
 export const ticketUpdateValidationSchema = Yup.object().shape({

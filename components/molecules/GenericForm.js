@@ -29,7 +29,7 @@ export default function GenericForm({
       enableReinitialize
     >
       {(formik) => (
-        <Form className="space-y-6">
+        <Form className="space-y-3">
           {/* Render fields with sections */}
           {hasSection ? (
             fields.map((section, sectionIndex) => (
@@ -37,7 +37,7 @@ export default function GenericForm({
                 <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide border-b border-gray-300 pb-2">
                   {section.section}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {section.fields.map((field) => {
                     // Handle conditional fields (showIf)
                     if (field.showIf) {
@@ -69,7 +69,7 @@ export default function GenericForm({
             ))
           ) : (
             /* Render fields without sections */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {fields.map((field) => {
                 // Handle conditional fields (showIf)
                 if (field.showIf) {
@@ -102,7 +102,7 @@ export default function GenericForm({
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3 pt-2 border-t border-gray-200">
             {onCancel && (
               <CustomButton
                 text={cancelButtonText}
