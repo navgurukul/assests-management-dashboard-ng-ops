@@ -13,10 +13,10 @@ import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
 import AssigneeSelector from './AssigneeSelector';
 import { getTicketLeftSections, getTicketRightSections } from './ticketSections';
-import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePut from '@/app/hooks/query/usePut';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ticketUpdateFormFields,
@@ -28,9 +28,14 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [showAssignTable, setShowAssignTable] = useState(false);
+
+  const { mutateAsync: updateTicket, isPending: isSubmitting } = usePut({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
+    },
+  });
 
   const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
     url: config.getApiUrl(config.endpoints.campusIncharge.list),
@@ -207,58 +212,48 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleUpdateSubmit = async (values, overrideStatus = null) => {
-    setIsSubmitting(true);
- 
-    if (!selectedAssignee) {
+    if (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) {
       toast.warning('Please select an assignee before submitting.');
-      setIsSubmitting(false);
       return;
     }
 
     if (!values.adminComment?.trim()) {
       toast.warning('Comment is required.');
-      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {};
+    const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
+    apiFields.forEach((key) => {
+      const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
+      if (val !== '' && val !== null && val !== undefined) {
+        payload[key] = val;
+      }
+    });
+    if (values.adminComment?.trim()) {
+      payload.comment = values.adminComment;
+    }
+
+    if (selectedAssignee) {
+      payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      toast.warning('Please update at least one field.');
       return;
     }
 
     try {
-      const payload = {};
-      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
-      apiFields.forEach((key) => {
-        const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
-        if (val !== '' && val !== null && val !== undefined) {
-          payload[key] = val;
-        }
-      });
-      if (values.adminComment?.trim()) {
-        payload.comment = values.adminComment;
-      }
-
-      if (selectedAssignee) {
-        payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
-      }
-
-      if (Object.keys(payload).length === 0) {
-        toast.warning('Please update at least one field.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      await post({
-        url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
-        method: 'PUT',
-        data: payload,
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
       });
 
       toast.success('Ticket updated successfully!');
       setIsUpdateModalOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
-
     } catch (error) {
       console.error('Error updating ticket:', error);
       toast.error(error?.message || 'Failed to update ticket. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -272,8 +267,25 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     handleUpdateSubmit(values, 'RESOLVED');
   };
 
-  const handleEscalationClick = (values) => {
-    handleUpdateSubmit(values, 'ESCALATED');
+  const handleEscalationClick = async (values) => {
+    try {
+      const payload = {
+        status: 'ESCALATED',
+        ...(values.timelineDate && { timelineDate: values.timelineDate }),
+        ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
+      };
+
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
+      });
+
+      toast.success('Ticket escalated successfully!');
+      setIsUpdateModalOpen(false);
+    } catch (error) {
+      console.error('Error escalating ticket:', error);
+      toast.error(error?.message || 'Failed to escalate ticket. Please try again.');
+    }
   };
 
   const updateInitialValues = {
@@ -338,7 +350,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               onClick={handleUpdateClick}
               disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
             />
-            {ticket.status === 'APPROVED' ? (
+            {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
               <CustomButton
                 text="Create Allocation"
                 variant="primary"
@@ -367,22 +379,26 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         title="Update Ticket"
         size="large"
       >
-        {ticket.assigneeUser && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-900">
-              <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
-            </p>
-          </div>
-        )}
+        {ticket.ticketType?.toUpperCase() !== 'REPAIR' && (
+          <>
+            {ticket.assigneeUser && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900">
+                  <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
+                </p>
+              </div>
+            )}
 
-        <AssigneeSelector
-          selectedAssignee={selectedAssignee}
-          setSelectedAssignee={setSelectedAssignee}
-          showAssignTable={showAssignTable}
-          setShowAssignTable={setShowAssignTable}
-          assigneeRows={assigneeRows}
-          campusInchargeLoading={campusInchargeLoading}
-        />
+            <AssigneeSelector
+              selectedAssignee={selectedAssignee}
+              setSelectedAssignee={setSelectedAssignee}
+              showAssignTable={showAssignTable}
+              setShowAssignTable={setShowAssignTable}
+              assigneeRows={assigneeRows}
+              campusInchargeLoading={campusInchargeLoading}
+            />
+          </>
+        )}
 
         <GenericForm
           fields={updateFormFieldsModified}
@@ -394,7 +410,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
           customActions={[
-            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || !selectedAssignee },
+            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) },
             ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
               { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
               { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
