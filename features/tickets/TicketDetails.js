@@ -208,7 +208,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const handleUpdateSubmit = async (values, overrideStatus = null) => {
     setIsSubmitting(true);
-
+ 
     if (!selectedAssignee) {
       toast.warning('Please select an assignee before submitting.');
       setIsSubmitting(false);
