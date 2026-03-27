@@ -104,10 +104,8 @@ export default function TicketApprovalTab() {
 
       const payload = {
         status: currentAction === 'Approve' ? 'APPROVED' : 'REJECTED',
-        assigneeUserId: currentTicket?.assigneeUserId || '',
         timelineDate: currentTicket?.timelineDate || new Date().toISOString(),
         resolutionNotes: formData?.remarks || '',
-        description: currentTicket?.description || '',
       };
 
       await updateTicket({
