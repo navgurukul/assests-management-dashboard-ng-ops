@@ -14,9 +14,7 @@ export default function AllocationDetailsPage() {
   };
 
   return (
-    <div className="p-6 overflow-y-auto h-full">
-      <AllocationDetails allocationId={allocationId} onBack={handleBack} />
-    </div>
+    <AllocationDetails allocationId={allocationId} onBack={handleBack} />
   );
 }
 
