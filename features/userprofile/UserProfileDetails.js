@@ -149,7 +149,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
         actionType="Edit User Details"
         fields={editProfileFields}
         onSubmit={handleEditSubmit}
-        size="small"
+        size="medium"
         isSubmitting={isSubmitting}
         validationSchema={editProfileValidationSchema}
       />
