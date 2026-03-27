@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import DashboardCard from '@/components/atoms/DashboardCard';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
@@ -15,7 +13,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
-import { ticketDetailsData, ticketsSummaryCards } from '@/dummyJson/dummyJson';
+import { ticketDetailsData } from '@/dummyJson/dummyJson';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   TICKET_TABLE_ID,
@@ -113,25 +111,6 @@ export default function TicketsList() {
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
-  };
-
-  // Handle status card click
-  const handleStatusCardClick = (status) => {
-    if (status === null) {
-      // Total card clicked - remove status filter
-      const newFilters = { ...filters };
-      delete newFilters.status;
-      setFilters(newFilters);
-    } else if (filters.status === status) {
-      // If already filtered by this status, remove the filter
-      const newFilters = { ...filters };
-      delete newFilters.status;
-      setFilters(newFilters);
-    } else {
-      // Apply the status filter
-      setFilters({ ...filters, status });
-    }
     setCurrentPage(1); // Reset to first page when filters change
   };
 
@@ -303,19 +282,6 @@ export default function TicketsList() {
     });
   }, [data]);
 
-  const statusCounts = React.useMemo(() => {
-    const counts = {};
-    const tickets = data?.data?.tickets || [];
-
-    tickets.forEach((ticket) => {
-      const normalizedStatus = ticket?.status?.toString().toUpperCase().replace(/\s+/g, '_');
-      if (!normalizedStatus) return;
-      counts[normalizedStatus] = (counts[normalizedStatus] || 0) + 1;
-    });
-
-    return counts;
-  }, [data]);
-
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
 
@@ -395,51 +361,8 @@ export default function TicketsList() {
     );
   }
 
-  // Get count for a specific status
-  const getStatusCount = (status) => {
-    const statusAliases = {
-      OPEN: ['OPEN'],
-      IN_PROGRESS: ['IN_PROGRESS'],
-      RESOLVED: ['RESOLVED'],
-      RAISED: ['RAISED', 'CLOSED'],
-      ESCALATED: ['ESCALATED', 'REJECTED'],
-    };
-
-    if (status === null) {
-      return data?.data?.pagination?.totalCount || ticketsData.length;
-    }
-
-    const mappedStatuses = statusAliases[status] || [status];
-    return mappedStatuses.reduce((total, key) => total + (statusCounts[key] || 0), 0);
-  };
-
   return (
     <div className="space-y-6">
-      {/* Status Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {ticketsSummaryCards.map((card) => {
-          const isActive = card.status === null 
-            ? !filters.status 
-            : filters.status === card.status;
-          return (
-            <div
-              key={card.id}
-              onClick={() => handleStatusCardClick(card.status)}
-              className={`cursor-pointer transition-all hover:scale-105 ${isActive ? 'border-l-4 border-gray-500 rounded-lg' : ''}`}
-            >
-              <DashboardCard
-                count={getStatusCount(card.status)}
-                label={card.label}
-                icon={card.icon}
-                bgColor={card.bgColor || 'bg-gray-100'}
-                iconColor={card.iconColor}
-                borderColor={card.borderColor}
-              />
-            </div>
-          );
-        })}
-      </div>
-
       {/* Table */}
       <TableWrapper
         data={ticketsData}
