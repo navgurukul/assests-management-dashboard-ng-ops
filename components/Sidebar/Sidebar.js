@@ -55,12 +55,12 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
         isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         // Desktop: static inline, collapsible width
         'md:static md:inset-auto md:z-auto md:translate-x-0',
-        isCollapsed ? 'md:w-20' : 'md:w-64',
+        isCollapsed ? 'md:w-24' : 'md:w-64',
       ].join(' ')}
       onClick={() => setIsCollapsed(!isCollapsed)}
     >
       <nav className="p-4 flex-1">
-        <ul className="space-y-1" onClick={(e) => e.stopPropagation()}>
+        <ul className="space-y-3" onClick={(e) => e.stopPropagation()}>
           {menuItems.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.path;
@@ -72,10 +72,10 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 className={[
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                   isCollapsed ? 'md:justify-center' : '',
-                  isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50',
+                  isActive ? 'bg-orange-50 text-orange-400 font-medium' : 'text-gray-700 hover:bg-gray-50',
                 ].join(' ')}
               >
-                <Icon className="w-5 h-5 shrink-0" />
+                <Icon className="w-6 h-6 shrink-0" />
                 {/* Always show text on mobile; hide on desktop when collapsed */}
                 <span className={isCollapsed ? 'md:hidden' : ''}>{item.name}</span>
               </Link>
@@ -106,7 +106,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 : 'text-gray-700 hover:bg-gray-50',
             ].join(' ')}
           >
-            <User className="w-5 h-5 shrink-0" />
+            <User className="w-6 h-6 shrink-0" />
             <span className={isCollapsed ? 'md:hidden' : ''}>User Profile</span>
           </Link>
         </TooltipWrapper>
