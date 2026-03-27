@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import * as LucideIcons from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import DashboardCard from '@/components/atoms/DashboardCard';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import SearchInput from '@/components/molecules/SearchInput';
@@ -14,8 +12,10 @@ import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import StatusChip from '@/components/atoms/StatusChip';
+import SummaryCard from '@/components/atoms/SummaryCard';
+import { Ticket, AlertCircle, Clock, CheckCircle, XCircle, TrendingUp, BarChart2, AlertTriangle } from 'lucide-react';
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
-import { ticketDetailsData, ticketsSummaryCards } from '@/dummyJson/dummyJson';
+import { ticketDetailsData } from '@/dummyJson/dummyJson';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
   TICKET_TABLE_ID,
@@ -87,6 +87,12 @@ export default function TicketsList() {
     queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
   });
 
+  // Fetch consolidated data by campus
+  const { data: consolidatedData } = useFetch({
+    url: '/tickets/count',
+    queryKey: ['assets-consolidated-by-campus'],
+  });
+
   // Fetch campus options from API
   const { data: campusData } = useFetch({
     url: '/campuses',
@@ -113,25 +119,6 @@ export default function TicketsList() {
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
-  };
-
-  // Handle status card click
-  const handleStatusCardClick = (status) => {
-    if (status === null) {
-      // Total card clicked - remove status filter
-      const newFilters = { ...filters };
-      delete newFilters.status;
-      setFilters(newFilters);
-    } else if (filters.status === status) {
-      // If already filtered by this status, remove the filter
-      const newFilters = { ...filters };
-      delete newFilters.status;
-      setFilters(newFilters);
-    } else {
-      // Apply the status filter
-      setFilters({ ...filters, status });
-    }
     setCurrentPage(1); // Reset to first page when filters change
   };
 
@@ -303,19 +290,6 @@ export default function TicketsList() {
     });
   }, [data]);
 
-  const statusCounts = React.useMemo(() => {
-    const counts = {};
-    const tickets = data?.data?.tickets || [];
-
-    tickets.forEach((ticket) => {
-      const normalizedStatus = ticket?.status?.toString().toUpperCase().replace(/\s+/g, '_');
-      if (!normalizedStatus) return;
-      counts[normalizedStatus] = (counts[normalizedStatus] || 0) + 1;
-    });
-
-    return counts;
-  }, [data]);
-
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
 
@@ -395,49 +369,49 @@ export default function TicketsList() {
     );
   }
 
-  // Get count for a specific status
-  const getStatusCount = (status) => {
-    const statusAliases = {
-      OPEN: ['OPEN'],
-      IN_PROGRESS: ['IN_PROGRESS'],
-      RESOLVED: ['RESOLVED'],
-      RAISED: ['RAISED', 'CLOSED'],
-      ESCALATED: ['ESCALATED', 'REJECTED'],
-    };
+  const summary = consolidatedData?.data?.summary;
+  const summaryTotal = consolidatedData?.data?.total;
 
-    if (status === null) {
-      return data?.data?.pagination?.totalCount || ticketsData.length;
+  const handleCardClick = (status) => {
+    const newFilters = { ...filters };
+    if (!status) {
+      delete newFilters.status;
+    } else {
+      newFilters.status = status;
     }
-
-    const mappedStatuses = statusAliases[status] || [status];
-    return mappedStatuses.reduce((total, key) => total + (statusCounts[key] || 0), 0);
+    setFilters(newFilters);
+    setCurrentPage(1);
   };
+
+  const summaryCards = [
+    { label: 'Total', status: null, value: summaryTotal ?? 0, Icon: BarChart2, valueColor: 'text-gray-900', iconColor: 'text-gray-500', borderColor: 'border-gray-200' },
+    { label: 'Open', status: 'OPEN', value: summary?.open ?? 0, Icon: Ticket, valueColor: 'text-blue-600', iconColor: 'text-blue-400', borderColor: 'border-blue-200' },
+    { label: 'Raised', status: 'RAISED', value: summary?.raised ?? 0, Icon: TrendingUp, valueColor: 'text-indigo-600', iconColor: 'text-indigo-400', borderColor: 'border-indigo-200' },
+    { label: 'In Progress', status: 'IN_PROGRESS', value: summary?.inProgress ?? 0, Icon: Clock, valueColor: 'text-yellow-600', iconColor: 'text-yellow-400', borderColor: 'border-yellow-200' },
+    { label: 'Escalated', status: 'ESCALATED', value: summary?.escalated ?? 0, Icon: AlertCircle, valueColor: 'text-orange-600', iconColor: 'text-orange-400', borderColor: 'border-orange-200' },
+    { label: 'Overdue', status: 'OVERDUE', value: summary?.overdue ?? 0, Icon: AlertTriangle, valueColor: 'text-red-600', iconColor: 'text-red-400', borderColor: 'border-red-200' },
+    { label: 'Resolved', status: 'RESOLVED', value: summary?.resolved ?? 0, Icon: CheckCircle, valueColor: 'text-green-600', iconColor: 'text-green-400', borderColor: 'border-green-200' },
+    { label: 'Closed', status: 'CLOSED', value: summary?.closed ?? 0, Icon: XCircle, valueColor: 'text-gray-500', iconColor: 'text-gray-400', borderColor: 'border-gray-200' },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Status Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {ticketsSummaryCards.map((card) => {
-          const isActive = card.status === null 
-            ? !filters.status 
-            : filters.status === card.status;
-          return (
-            <div
-              key={card.id}
-              onClick={() => handleStatusCardClick(card.status)}
-              className={`cursor-pointer transition-all hover:scale-105 ${isActive ? 'border-l-4 border-gray-500 rounded-lg' : ''}`}
-            >
-              <DashboardCard
-                count={getStatusCount(card.status)}
-                label={card.label}
-                icon={card.icon}
-                bgColor={card.bgColor || 'bg-gray-100'}
-                iconColor={card.iconColor}
-                borderColor={card.borderColor}
-              />
-            </div>
-          );
-        })}
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {summaryCards.map((card) => (
+          <SummaryCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            Icon={card.Icon}
+            valueColor={card.valueColor}
+            iconColor={card.iconColor}
+            borderColor={card.borderColor}
+            clickable={true}
+            onClick={() => handleCardClick(card.status)}
+            isActive={card.status === null ? !filters.status : filters.status === card.status}
+          />
+        ))}
       </div>
 
       {/* Table */}
