@@ -110,7 +110,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
       Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
 
       await mutateAsync({
-        endpoint: '/allocations/my-assets/return',
+        endpoint: '/consignment/assets/return',
         body: payload,
       });
 

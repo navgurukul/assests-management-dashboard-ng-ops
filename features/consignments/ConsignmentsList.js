@@ -159,7 +159,7 @@ export default function ConsignmentsList() {
     isError: isInTransitError,
     refetch: refetchInTransit,
   } = useFetch({
-    url: `${config.endpoints.consignments?.inTransitReturns || '/consignments/in-transit-returns'}?${buildInTransitQueryString()}`,
+    url: `${config.endpoints.consignmentReturnAssets?.list || '/consignment/assets/return'}?${buildInTransitQueryString()}`,
     queryKey: ['inTransitReturns', inTransitPage, inTransitPageSize, debouncedInTransitSearch],
     enabled: showInTransit,
   });
