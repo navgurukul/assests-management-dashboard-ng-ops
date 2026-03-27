@@ -88,8 +88,9 @@ export function getTicketRightSections(ticket, hasAsset) {
       ],
     },
     ...(hasAsset ? [{
-      title: 'ASSET / DEVICE',
-      color: 'gray',
+      title: 'ASSET DETAILS',
+      color: 'orange',
+      span: 2,
       itemsGrid: true,
       items: [
         { label: 'Asset Tag', value: ticket.asset?.assetTag || ticket.assetId || '—' },
