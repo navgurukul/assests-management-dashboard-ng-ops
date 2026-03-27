@@ -206,14 +206,14 @@ export default function DetailsPage({
       <div className="flex flex-col lg:flex-row gap-5 flex-1 min-h-0">
         {/* Left Column - 30% */}
         {leftSections.length > 0 && (
-          <div className="w-full lg:w-[30%] overflow-y-auto space-y-4 pr-1">
+          <div className="w-full lg:w-[30%] lg:overflow-y-auto space-y-4 pr-1">
             {leftSections.map((section, index) => renderSection(section, index))}
           </div>
         )}
 
         {/* Right Column - 70% */}
         {rightSections.length > 0 && (
-          <div className={`w-full lg:w-[70%] overflow-y-auto pr-1 ${rightGrid ? 'grid grid-cols-2 gap-4 content-start' : 'space-y-4'}`}>
+          <div className={`w-full lg:w-[70%] lg:overflow-y-auto pr-1 ${rightGrid ? 'grid grid-cols-1 lg:grid-cols-2 gap-4 content-start' : 'space-y-4'}`}>
             {rightSections.map((section, index) => renderSection(section, index))}
           </div>
         )}
