@@ -331,14 +331,13 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 ))}
               </div>
             )}
-            {ticket.status === 'APPROVED' && (
-              <CustomButton
-                text="Update Ticket"
-                variant="secondary"
-                size="md"
-                onClick={handleUpdateClick}
-              />
-            )}
+            <CustomButton
+              text="Update Ticket"
+              variant="secondary"
+              size="md"
+              onClick={handleUpdateClick}
+              disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
+            />
             {ticket.status === 'APPROVED' ? (
               <CustomButton
                 text="Create Allocation"
