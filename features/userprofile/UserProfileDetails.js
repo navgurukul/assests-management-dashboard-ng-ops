@@ -136,6 +136,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const editProfileFields = getEditProfileFields({
     phone: userData.phone,
     location: userData.location,
+    campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
   });
 
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
