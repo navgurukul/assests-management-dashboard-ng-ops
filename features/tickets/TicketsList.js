@@ -12,6 +12,8 @@ import ColumnSelector from '@/components/molecules/ColumnSelector';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import StatusChip from '@/components/atoms/StatusChip';
+import SummaryCard from '@/components/atoms/SummaryCard';
+import { Ticket, AlertCircle, Clock, CheckCircle, XCircle, TrendingUp, BarChart2, AlertTriangle } from 'lucide-react';
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -83,6 +85,12 @@ export default function TicketsList() {
   const { data, isLoading, isError, error } = useFetch({
     url: `/tickets?${buildQueryString()}`,
     queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
+  });
+
+  // Fetch consolidated data by campus
+  const { data: consolidatedData } = useFetch({
+    url: '/tickets/count',
+    queryKey: ['assets-consolidated-by-campus'],
   });
 
   // Fetch campus options from API
@@ -361,8 +369,37 @@ export default function TicketsList() {
     );
   }
 
+  const summary = consolidatedData?.data?.summary;
+  const summaryTotal = consolidatedData?.data?.total;
+
+  const summaryCards = [
+    { label: 'Total', value: summaryTotal ?? 0, Icon: BarChart2, valueColor: 'text-gray-900', iconColor: 'text-gray-500', borderColor: 'border-gray-200' },
+    { label: 'Open', value: summary?.open ?? 0, Icon: Ticket, valueColor: 'text-blue-600', iconColor: 'text-blue-400', borderColor: 'border-blue-200' },
+    { label: 'Raised', value: summary?.raised ?? 0, Icon: TrendingUp, valueColor: 'text-indigo-600', iconColor: 'text-indigo-400', borderColor: 'border-indigo-200' },
+    { label: 'In Progress', value: summary?.inProgress ?? 0, Icon: Clock, valueColor: 'text-yellow-600', iconColor: 'text-yellow-400', borderColor: 'border-yellow-200' },
+    { label: 'Escalated', value: summary?.escalated ?? 0, Icon: AlertCircle, valueColor: 'text-orange-600', iconColor: 'text-orange-400', borderColor: 'border-orange-200' },
+    { label: 'Overdue', value: summary?.overdue ?? 0, Icon: AlertTriangle, valueColor: 'text-red-600', iconColor: 'text-red-400', borderColor: 'border-red-200' },
+    { label: 'Resolved', value: summary?.resolved ?? 0, Icon: CheckCircle, valueColor: 'text-green-600', iconColor: 'text-green-400', borderColor: 'border-green-200' },
+    { label: 'Closed', value: summary?.closed ?? 0, Icon: XCircle, valueColor: 'text-gray-500', iconColor: 'text-gray-400', borderColor: 'border-gray-200' },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {summaryCards.map((card) => (
+          <SummaryCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            Icon={card.Icon}
+            valueColor={card.valueColor}
+            iconColor={card.iconColor}
+            borderColor={card.borderColor}
+          />
+        ))}
+      </div>
+
       {/* Table */}
       <TableWrapper
         data={ticketsData}
