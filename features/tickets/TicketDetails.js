@@ -212,7 +212,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleUpdateSubmit = async (values, overrideStatus = null) => {
-    if (!selectedAssignee) {
+    if (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) {
       toast.warning('Please select an assignee before submitting.');
       return;
     }
@@ -379,22 +379,26 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         title="Update Ticket"
         size="large"
       >
-        {ticket.assigneeUser && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-900">
-              <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
-            </p>
-          </div>
-        )}
+        {ticket.ticketType?.toUpperCase() !== 'REPAIR' && (
+          <>
+            {ticket.assigneeUser && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900">
+                  <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
+                </p>
+              </div>
+            )}
 
-        <AssigneeSelector
-          selectedAssignee={selectedAssignee}
-          setSelectedAssignee={setSelectedAssignee}
-          showAssignTable={showAssignTable}
-          setShowAssignTable={setShowAssignTable}
-          assigneeRows={assigneeRows}
-          campusInchargeLoading={campusInchargeLoading}
-        />
+            <AssigneeSelector
+              selectedAssignee={selectedAssignee}
+              setSelectedAssignee={setSelectedAssignee}
+              showAssignTable={showAssignTable}
+              setShowAssignTable={setShowAssignTable}
+              assigneeRows={assigneeRows}
+              campusInchargeLoading={campusInchargeLoading}
+            />
+          </>
+        )}
 
         <GenericForm
           fields={updateFormFieldsModified}
@@ -406,7 +410,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
           customActions={[
-            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || !selectedAssignee },
+            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) },
             ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
               { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
               { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
