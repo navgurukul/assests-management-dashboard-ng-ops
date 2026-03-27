@@ -350,7 +350,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               onClick={handleUpdateClick}
               disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
             />
-            {ticket.status === 'APPROVED' ? (
+            {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
               <CustomButton
                 text="Create Allocation"
                 variant="primary"
