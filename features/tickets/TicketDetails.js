@@ -13,10 +13,10 @@ import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
 import AssigneeSelector from './AssigneeSelector';
 import { getTicketLeftSections, getTicketRightSections } from './ticketSections';
-import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePut from '@/app/hooks/query/usePut';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ticketUpdateFormFields,
@@ -28,9 +28,14 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [showAssignTable, setShowAssignTable] = useState(false);
+
+  const { mutateAsync: updateTicket, isPending: isSubmitting } = usePut({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
+    },
+  });
 
   const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
     url: config.getApiUrl(config.endpoints.campusIncharge.list),
@@ -207,58 +212,48 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleUpdateSubmit = async (values, overrideStatus = null) => {
-    setIsSubmitting(true);
- 
     if (!selectedAssignee) {
       toast.warning('Please select an assignee before submitting.');
-      setIsSubmitting(false);
       return;
     }
 
     if (!values.adminComment?.trim()) {
       toast.warning('Comment is required.');
-      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {};
+    const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
+    apiFields.forEach((key) => {
+      const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
+      if (val !== '' && val !== null && val !== undefined) {
+        payload[key] = val;
+      }
+    });
+    if (values.adminComment?.trim()) {
+      payload.comment = values.adminComment;
+    }
+
+    if (selectedAssignee) {
+      payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      toast.warning('Please update at least one field.');
       return;
     }
 
     try {
-      const payload = {};
-      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
-      apiFields.forEach((key) => {
-        const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
-        if (val !== '' && val !== null && val !== undefined) {
-          payload[key] = val;
-        }
-      });
-      if (values.adminComment?.trim()) {
-        payload.comment = values.adminComment;
-      }
-
-      if (selectedAssignee) {
-        payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
-      }
-
-      if (Object.keys(payload).length === 0) {
-        toast.warning('Please update at least one field.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      await post({
-        url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
-        method: 'PUT',
-        data: payload,
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
       });
 
       toast.success('Ticket updated successfully!');
       setIsUpdateModalOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
-
     } catch (error) {
       console.error('Error updating ticket:', error);
       toast.error(error?.message || 'Failed to update ticket. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -273,7 +268,6 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleEscalationClick = async (values) => {
-    setIsSubmitting(true);
     try {
       const payload = {
         status: 'ESCALATED',
@@ -281,20 +275,16 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
       };
 
-      await post({
-        url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
-        method: 'PUT',
-        data: payload,
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
       });
 
       toast.success('Ticket escalated successfully!');
       setIsUpdateModalOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
     } catch (error) {
       console.error('Error escalating ticket:', error);
       toast.error(error?.message || 'Failed to escalate ticket. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
