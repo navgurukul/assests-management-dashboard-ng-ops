@@ -1,12 +1,14 @@
 import * as Yup from 'yup';
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 // ─── Field definitions ─────────────────────────────────────────────────────
 
 /**
  * Edit-profile modal fields.
  * Pass `defaultValues` from current user data to pre-populate the form.
  *
- * @param {{ phone?: string; location?: string }} defaultValues
+ * @param {{ phone?: string; location?: string; campusId?: string }} defaultValues
  */
 export const getEditProfileFields = (defaultValues = {}) => [
   {
@@ -25,6 +27,18 @@ export const getEditProfileFields = (defaultValues = {}) => [
     required: false,
     defaultValue: defaultValues.location || '',
   },
+  {
+    name: 'campusId',
+    label: 'Campus',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select campus',
+    apiUrl: baseUrl + '/campuses',
+    queryKey: ['campuses'],
+    labelKey: 'campusName',
+    valueKey: 'id',
+    required: false,
+    defaultValue: defaultValues.campusId || '',
+  },
 ];
 
 // ─── Yup Validation Schema ─────────────────────────────────────────────────
@@ -39,6 +53,7 @@ export const editProfileValidationSchema = Yup.object().shape({
   location: Yup.string()
     .nullable()
     .min(2, 'Location must be at least 2 characters'),
+  campusId: Yup.string().nullable(),
 });
 
 // ─── Initial values ────────────────────────────────────────────────────────
@@ -46,4 +61,5 @@ export const editProfileValidationSchema = Yup.object().shape({
 export const editProfileInitialValues = {
   phone: '',
   location: '',
+  campusId: '',
 };

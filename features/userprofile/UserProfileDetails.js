@@ -136,6 +136,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const editProfileFields = getEditProfileFields({
     phone: userData.phone,
     location: userData.location,
+    campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
   });
 
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
@@ -149,7 +150,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
         actionType="Edit User Details"
         fields={editProfileFields}
         onSubmit={handleEditSubmit}
-        size="small"
+        size="medium"
         isSubmitting={isSubmitting}
         validationSchema={editProfileValidationSchema}
       />

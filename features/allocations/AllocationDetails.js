@@ -216,6 +216,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
   const leftSections = [
     {
       title: 'Allocation Info',
+      color: 'blue',
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
@@ -227,6 +228,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     },
     {
       title: 'Asset Information',
+      color: 'orange',
       items: [
         { label: 'Asset Tag', value: primaryAsset?.assetTag || allocationDetails.asset?.assetTag || 'N/A' },
         { label: 'Brand', value: primaryAsset?.brand || allocationDetails.asset?.brand || 'N/A' },
@@ -235,6 +237,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     },
     {
       title: 'User Information',
+      color: 'green',
       items: [
         // { label: 'User ID', value: allocationDetails.userId || 'N/A' },
         { label: 'User Name', value: userDisplayName },
@@ -248,6 +251,8 @@ export default function AllocationDetails({ allocationId, onBack }) {
   const rightSections = [
     {
       title: 'Timeline',
+      color: 'indigo',
+      itemsGrid: true,
       items: [
         {
           label: 'Start Date',
@@ -265,6 +270,8 @@ export default function AllocationDetails({ allocationId, onBack }) {
     },
     {
       title: 'Administrative Information',
+      color: 'purple',
+      itemsGrid: true,
       items: [
         {
           label: 'Created By',
@@ -294,18 +301,23 @@ export default function AllocationDetails({ allocationId, onBack }) {
       ? [
           {
             title: 'Ticket Information',
+            color: 'teal',
+            span: 2,
+            itemsGrid: true,
             items: [
               { label: 'Ticket Number', value: allocationDetails.ticket.ticketNumber || 'N/A' },
               { label: 'Ticket Type', value: allocationDetails.ticket.ticketType || 'N/A' },
               { label: 'Priority', value: allocationDetails.ticket.priority || 'N/A' },
               { label: 'Ticket Status', value: allocationDetails.ticket.status || 'N/A' },
-              { label: 'Description', value: allocationDetails.ticket.description || 'N/A' },
+              { label: 'Description', value: allocationDetails.ticket.description || 'N/A', className: 'col-span-2 line-clamp-2 break-all' },
             ],
           },
         ]
       : []),
     {
       title: 'Notes',
+      color: 'gray',
+      span: 2,
       items: [
         { 
           label: 'Allocation Notes', 
@@ -323,7 +335,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
         subtitleColor={getStatusColor()}
         leftSections={leftSections}
         rightSections={rightSections}
-        showTimeline={false}
+        rightGrid={true}
         onBack={onBack}
         headerActions={
           <CustomButton
