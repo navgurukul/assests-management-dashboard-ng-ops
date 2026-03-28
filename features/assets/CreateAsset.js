@@ -24,13 +24,22 @@ export default function CreateAsset() {
     const loadingToastId = toast.loading('Creating asset...');
     
     try {
+      // Coerce string fields the API expects as numbers; strip internal form-only fields
+      const { assetTypeName, ...rest } = values;
+      const payload = {
+        ...rest,
+        ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
+        storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
+        cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
+      };
+
       // Make API call to create asset
       const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
 
       // Dismiss loading toast
@@ -64,6 +73,18 @@ export default function CreateAsset() {
     router.push('/assets');
   };
 
+  const fieldCallbacks = {
+    onAssetTypeChange: (value, formik) => {
+      // Always clear assetTypeName first; onItemSelect will re-set it if the item is found
+      formik.setFieldValue('assetTypeName', '');
+      // Reset spec fields when asset type changes so hidden fields don't carry stale values
+      formik.setFieldValue('processor', '');
+      formik.setFieldValue('ramSizeGB', '');
+      formik.setFieldValue('storageSizeGB', '');
+      formik.setFieldValue('charger', false);
+    },
+  };
+
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-6xl mx-auto p-6">
@@ -94,6 +115,7 @@ export default function CreateAsset() {
             onCancel={handleCancel}
             submitButtonText="Create Asset"
             isSubmitting={isSubmitting}
+            fieldCallbacks={fieldCallbacks}
           />
         </div>
       </div>

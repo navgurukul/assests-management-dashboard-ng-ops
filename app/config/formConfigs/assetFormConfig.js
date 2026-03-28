@@ -12,6 +12,9 @@ export const assetFormFields = [
     labelKey: 'name',
     valueKey: 'id',
     required: true,
+    companionField: 'assetTypeName',
+    companionKey: 'name',
+    onFieldChange: 'onAssetTypeChange',
   },
   {
     name: 'brand',
@@ -56,6 +59,7 @@ export const assetFormFields = [
     type: 'text',
     placeholder: 'Enter processor (e.g., i5, i7, Ryzen 5)',
     required: false,
+    showIf: { field: 'assetTypeName', value: ['Laptop', 'Desktop', 'Tablet', 'Smartphone', 'Server', 'CPU'] },
   },
   {
     name: 'ramSizeGB',
@@ -76,6 +80,7 @@ export const assetFormFields = [
       { label: '64 GB', value: '64' },
     ],
     required: false,
+    showIf: { field: 'assetTypeName', value: ['Laptop', 'Desktop', 'Tablet', 'Smartphone', 'Server', 'RAM'] },
   },
   {
     name: 'storageSizeGB',
@@ -84,6 +89,7 @@ export const assetFormFields = [
     placeholder: 'Enter storage size in GB (e.g., 256, 512, 1024)',
     required: false,
     min: 0,
+    showIf: { field: 'assetTypeName', value: ['Laptop', 'Desktop', 'Tablet', 'Smartphone', 'Server', 'External Hard Drive', 'USB Flash Drive', 'SSD', 'HDD'] },
   },
   {
     name: 'serialNumber',
@@ -187,9 +193,10 @@ export const assetFormFields = [
   },
   {
     name: 'charger',
-    label: 'Charger',
+    label: 'Charger Included',
     type: 'checkbox',
     required: false,
+    showIf: { field: 'assetTypeName', value: ['Laptop', 'Tablet', 'Smartphone'] },
   },
 ];
 
@@ -204,18 +211,31 @@ export const assetValidationSchema = Yup.object().shape({
   specLabel: Yup.string()
     .required('Specification label is required')
     .min(2, 'Specification must be at least 2 characters'),
-  processor: Yup.string()
-    .min(2, 'Processor must be at least 2 characters'),
+  assetTypeName: Yup.string(),
+  processor: Yup.string().when('assetTypeName', {
+    is: (val) => ['Laptop', 'Desktop', 'Server', 'CPU'].includes(val),
+    then: (schema) => schema.required('Processor is required').min(2, 'Processor must be at least 2 characters'),
+    otherwise: (schema) => schema.notRequired().min(0),
+  }),
   ramSizeGB: Yup.string()
     .nullable()
+    .when('assetTypeName', {
+      is: (val) => ['Laptop', 'Desktop', 'Server'].includes(val),
+      then: (schema) => schema.required('RAM size is required'),
+      otherwise: (schema) => schema.notRequired(),
+    })
     .test('valid-ram', 'RAM size must be at least 1 GB', function(value) {
-      if (!value) return true; // Allow null/empty
+      if (!value) return true;
       const num = parseInt(value, 10);
       return num >= 1;
     }),
   storageSizeGB: Yup.number()
     .nullable()
-    .min(1, 'Storage size must be at least 1 GB'),
+    .when('assetTypeName', {
+      is: (val) => ['External Hard Drive', 'USB Flash Drive', 'SSD', 'HDD'].includes(val),
+      then: (schema) => schema.required('Storage size is required').min(1, 'Storage size must be at least 1 GB'),
+      otherwise: (schema) => schema.notRequired().min(0),
+    }),
   serialNumber: Yup.string()
     .required('Serial number is required')
     .min(2, 'Serial number must be at least 2 characters'),
@@ -244,6 +264,7 @@ export const assetValidationSchema = Yup.object().shape({
 
 export const assetInitialValues = {
   assetTypeId: '',
+  assetTypeName: '',
   brand: '',
   model: '',
   specLabel: '',
