@@ -15,7 +15,6 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
-import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -195,7 +194,6 @@ export default function ConsignmentsList() {
     enabled: Boolean(acceptReturnCampusId),
   });
 
-  const { mutateAsync: postMutation } = usePost();
   const { mutateAsync: patchMutation } = usePatch();
 
   // Handle page change
@@ -738,16 +736,14 @@ export default function ConsignmentsList() {
         const { consignmentId, assetId } = getReturnActionIdentifiers(item);
 
         const payload = {
-          assetId,
-          quantity: 1,
-          storedCampusId: null,
-          returnAcceptNotes: 'REJECTED',
+          status: 'REJECTED',
+          notes: 'Rejected from in-transit returns',
         };
 
-        await postMutation({
+        await patchMutation({
           endpoint:
-            config.endpoints.consignments?.assets?.(consignmentId) ||
-            `/consignments/${consignmentId}/assets`,
+            config.endpoints.consignmentReturnAssets?.assetById?.(consignmentId, assetId) ||
+            `/consignment/assets/return/${consignmentId}/${assetId}`,
           body: payload,
         });
 
@@ -763,7 +759,7 @@ export default function ConsignmentsList() {
     }
 
     toast.success(`Marked as ${action}: ${item.assetTag}`);
-  }, [getReturnActionIdentifiers, postMutation, refetchInTransit]);
+  }, [getReturnActionIdentifiers, patchMutation, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
