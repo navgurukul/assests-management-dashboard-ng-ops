@@ -31,11 +31,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // State for approval tickets
-  const [approvalTickets, setApprovalTickets] = useState([]);
-  const [isLoadingApprovalTickets, setIsLoadingApprovalTickets] = useState(false);
-  const [approvalTicketsError, setApprovalTicketsError] = useState(null);
-  const [hasApprovalTicketsFetched, setHasApprovalTicketsFetched] = useState(false);
+
   // Fetch user data using React Query
   const { 
     data: userDataResponse, 
@@ -93,9 +89,6 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     if (activeTab === 'ticketstatus' && !hasTicketsFetched) {
       fetchUserTickets();
     }
-    if (activeTab === 'ticketforapproval' && !hasApprovalTicketsFetched) {
-      fetchApprovalTickets();
-    }
   }, [activeTab]);
 
   const fetchUserTickets = async () => {
@@ -111,22 +104,6 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
       setUserTickets([]);
     } finally {
       setIsLoadingTickets(false);
-    }
-  };
-
-  const fetchApprovalTickets = async () => {
-    setIsLoadingApprovalTickets(true);
-    setApprovalTicketsError(null);
-    try {
-      const response = await apiService.get(config.endpoints.tickets.pendingApproval);
-      setApprovalTickets(response.data || response || []);
-      setHasApprovalTicketsFetched(true);
-    } catch (error) {
-      console.error('Error fetching approval tickets:', error);
-      setApprovalTicketsError(error.message || 'Failed to load approval tickets');
-      setApprovalTickets([]);
-    } finally {
-      setIsLoadingApprovalTickets(false);
     }
   };
 
@@ -159,6 +136,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
   const editProfileFields = getEditProfileFields({
     phone: userData.phone,
     location: userData.location,
+    campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
   });
 
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
@@ -172,7 +150,7 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
         actionType="Edit User Details"
         fields={editProfileFields}
         onSubmit={handleEditSubmit}
-        size="small"
+        size="medium"
         isSubmitting={isSubmitting}
         validationSchema={editProfileValidationSchema}
       />
@@ -243,10 +221,6 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
                 ticketsError={ticketsError}
                 isLoadingAssets={isLoadingAssets}
                 assetsError={assetsError?.message || (assetsError ? 'Failed to load assets' : null)}
-                approvalTickets={approvalTickets}
-                isLoadingApprovalTickets={isLoadingApprovalTickets}
-                approvalTicketsError={approvalTicketsError}
-                onRefresh={fetchApprovalTickets}
                 onEditProfile={() => setIsEditModalOpen(true)}
               />
             )}

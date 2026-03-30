@@ -14,7 +14,7 @@ const countWords = (str) =>
 export const getTicketActionFields = (actionType = '') => [
   {
     name: 'remarks',
-    label: 'Remarks',
+    label: 'Manager Comment',
     type: 'textarea',
     placeholder: `Enter remarks for ${actionType.toLowerCase()}ing this ticket...`,
     required: false,

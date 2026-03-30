@@ -211,7 +211,7 @@ export default function UsersList() {
       <TableWrapper
         data={usersListData}
         columns={visibleColumns}
-        title="User List"
+        title="User List - Assets Allocations"
         renderCell={renderCell}
         itemsPerPage={pageSize}
         showPagination={true}

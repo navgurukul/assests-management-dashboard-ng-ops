@@ -23,11 +23,20 @@ export const ticketUpdateReadOnlyFields = [
 export const ticketUpdateEditableFields = [
   {
     name: 'resolutionNotes',
-    label: 'Resolution Notes',
+    label: 'Manager Comment',
     type: 'textarea',
     placeholder: 'Add resolution notes...',
     required: false,
     rows: 4,
+    disabled: true,
+  },
+  {
+    name: 'adminComment',
+    label: 'Comment',
+    type: 'textarea',
+    placeholder: 'Add comment...',
+    required: false,
+    rows: 3,
   },
   {
     name: 'timelineDate',
@@ -39,8 +48,11 @@ export const ticketUpdateEditableFields = [
 ];
 
 export const ticketUpdateFormFields = [
-  ...ticketUpdateReadOnlyFields,
-  ...ticketUpdateEditableFields,
+  ticketUpdateReadOnlyFields[0], // status
+  ticketUpdateEditableFields[2], // timelineDate (Expected Resolution Date) — placed next to Status
+  ticketUpdateReadOnlyFields[1], // description
+  ticketUpdateEditableFields[0], // resolutionNotes
+  ticketUpdateEditableFields[1], // adminComment
 ];
 
 export const ticketUpdateValidationSchema = Yup.object().shape({
@@ -63,4 +75,6 @@ export const ticketUpdateValidationSchema = Yup.object().shape({
         return value >= today;
       }
     ),
+  adminComment: Yup.string()
+    .max(1000, 'Admin comment must not exceed 1000 characters'),
 });

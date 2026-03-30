@@ -8,6 +8,7 @@ import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 import FilterDropdown from './FilterDropdown';
 import ActiveFiltersChips from './ActiveFiltersChips';
 import AllocationConsignmentSelector from './AllocationConsignmentSelector';
+import CustomDatePicker from '@/components/atoms/CustomDatePicker';
 
 
 export default function FormModal({
@@ -348,7 +349,11 @@ export default function FormModal({
     // Validate form (async to support Yup)
     const isValid = await validateForm();
     if (isValid) {
-      onSubmit(formData);
+      try {
+        await onSubmit(formData);
+      } catch {
+        // errors are handled by the caller's onError callback
+      }
     }
   };
 
@@ -511,8 +516,26 @@ export default function FormModal({
           </div>
         );
 
+      case 'date': {
+        const dateValue = value ? new Date(value) : null;
+        return (
+          <CustomDatePicker
+            name={field.name}
+            selected={dateValue}
+            onChange={(date) => {
+              const formatted = date ? date.toISOString().split('T')[0] : '';
+              handleChange(field.name, formatted);
+            }}
+            onBlur={() => handleBlur(field.name)}
+            placeholder={field.placeholder}
+            hasError={!!error}
+            disabled={field.disabled || isSubmitting}
+            minDate={field.minDate}
+            maxDate={field.maxDate}
+          />
+        );
+      }
       case 'text':
-      case 'date':
       case 'email':
         return (
           <input

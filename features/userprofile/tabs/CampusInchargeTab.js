@@ -8,6 +8,7 @@ import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
+import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import { campusInchargeColumns } from '@/dummyJson/dummyJson';
@@ -19,6 +20,8 @@ import {
 
 export default function CampusInchargeTab() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: apiResponse, isLoading, isError, error } = useFetch({
@@ -37,6 +40,18 @@ export default function CampusInchargeTab() {
     },
   });
 
+  const { mutateAsync: updateCampusIncharge, isPending: isEditSubmitting } = usePatch({
+    onSuccess: () => {
+      toast.success('Campus Incharge updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['campus-incharge'] });
+      setIsEditModalOpen(false);
+      setSelectedItem(null);
+    },
+    onError: (err) => {
+      toast.error(err?.message || 'Failed to update Campus Incharge');
+    },
+  });
+
   const campusInchargeData = useMemo(() => {
     const records = apiResponse?.data ?? [];
     return records.map((item) => ({
@@ -44,6 +59,25 @@ export default function CampusInchargeTab() {
       campus: item.campusName,
     }));
   }, [apiResponse]);
+
+  const editFields = useMemo(() => {
+    if (!selectedItem) return campusInchargeModalFields;
+    return campusInchargeModalFields.map((field) => {
+      const valueMap = {
+        campus: selectedItem.campusName,
+        itCoordinatorName: selectedItem.itCoordinator?.name,
+        itCoordinatorEmail: selectedItem.itCoordinator?.email,
+        itCoordinatorPhone: selectedItem.itCoordinator?.phone,
+        operationName: selectedItem.operation?.name,
+        operationEmail: selectedItem.operation?.email,
+        operationPhone: selectedItem.operation?.phone,
+        itLeadName: selectedItem.itLead?.name,
+        itLeadEmail: selectedItem.itLead?.email,
+        itLeadPhone: selectedItem.itLead?.phone,
+      };
+      return { ...field, defaultValue: valueMap[field.name] ?? '' };
+    });
+  }, [selectedItem]);
 
   const handleCreateSubmit = async (formData) => {
     const payload = {
@@ -104,26 +138,47 @@ export default function CampusInchargeTab() {
               title="Edit"
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle edit
+                handleEditClick(item);
               }}
             >
               <Edit className="w-4 h-4" />
-            </button>
-            <button
-              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all duration-150 hover:scale-110"
-              title="Delete"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle delete
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         );
       default:
         return item[columnKey];
     }
+  };
+
+  const handleEditClick = (item) => {
+    setSelectedItem(item);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (formData) => {
+    const id = selectedItem?.id;
+    const payload = {
+      campusName: formData.campus,
+      itCoordinator: {
+        name: formData.itCoordinatorName,
+        email: formData.itCoordinatorEmail,
+        phone: formData.itCoordinatorPhone,
+      },
+      operation: {
+        name: formData.operationName,
+        email: formData.operationEmail,
+        phone: formData.operationPhone,
+      },
+      itLead: {
+        name: formData.itLeadName,
+        email: formData.itLeadEmail,
+        phone: formData.itLeadPhone,
+      },
+    };
+    await updateCampusIncharge({
+      endpoint: config.endpoints.campusIncharge.update(id),
+      body: payload,
+    });
   };
 
   const handleCreateClick = () => {
@@ -155,6 +210,18 @@ export default function CampusInchargeTab() {
         fields={campusInchargeModalFields}
         onSubmit={handleCreateSubmit}
         isSubmitting={isSubmitting}
+        size="large"
+        validationSchema={campusInchargeValidationSchema}
+      />
+
+      <FormModal
+        isOpen={isEditModalOpen}
+        onClose={() => { setIsEditModalOpen(false); setSelectedItem(null); }}
+        componentName="Campus Incharge"
+        actionType="Edit"
+        fields={editFields}
+        onSubmit={handleEditSubmit}
+        isSubmitting={isEditSubmitting}
         size="large"
         validationSchema={campusInchargeValidationSchema}
       />

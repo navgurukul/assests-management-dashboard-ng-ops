@@ -11,10 +11,13 @@ import GenericForm from '@/components/molecules/GenericForm';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
-import post from '@/app/api/post/post';
+import AssigneeSelector from './AssigneeSelector';
+import { getTicketLeftSections, getTicketRightSections } from './ticketSections';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePut from '@/app/hooks/query/usePut';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ticketUpdateFormFields,
   ticketUpdateValidationSchema,
@@ -23,10 +26,16 @@ import {
 export default function TicketDetails({ ticketId, ticketData, onBack, isLoading, isError, error }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [showAssignTable, setShowAssignTable] = useState(false);
+
+  const { mutateAsync: updateTicket, isPending: isSubmitting } = usePut({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
+    },
+  });
 
   const { data: campusInchargeData, isLoading: campusInchargeLoading } = useFetch({
     url: config.getApiUrl(config.endpoints.campusIncharge.list),
@@ -75,7 +84,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         if (person?.email && !seen.has(person.email)) {
           seen.add(person.email);
           rows.push({
-            id:       campus.id,
+            id:       person?.user?.id,
             email:    person.email,
             name:     person.name  || '—',
             phone:    person.phone || '—',
@@ -120,10 +129,81 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const ticket = ticketData;
 
-  const historyEntries = (ticket.historyLogs || []).map((log) => ({
-    time: log.createdAt ? new Date(log.createdAt).toLocaleString() : '—',
-    text: `${log.action || log.actionType || 'Update'}${log.notes ? `: ${log.notes}` : ''}${log.newValue ? ` → ${log.newValue}` : ''}`,
-  }));
+  const historyLogs = ticket.historyLogs || [];
+
+  const formatHistoryDate = (dateStr) => {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    const day = d.getDate();
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${mins}`;
+  };
+
+  const statusBadgeClass = (status) => {
+    switch ((status || '').toUpperCase()) {
+      case 'APPROVED':  return 'bg-green-100 text-green-700 border-green-200';
+      case 'RAISED':    return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'RESOLVED':  return 'bg-teal-100 text-teal-700 border-teal-200';
+      case 'ESCALATED': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'CLOSED':    return 'bg-gray-100 text-gray-600 border-gray-200';
+      default:          return 'bg-gray-100 text-gray-600 border-gray-200';
+    }
+  };
+
+  const dotColorClass = (status) => {
+    switch ((status || '').toUpperCase()) {
+      case 'APPROVED':  return 'bg-green-500 border-green-300';
+      case 'RAISED':    return 'bg-blue-500 border-blue-300';
+      case 'RESOLVED':  return 'bg-teal-500 border-teal-300';
+      case 'ESCALATED': return 'bg-orange-500 border-orange-300';
+      case 'CLOSED':    return 'bg-gray-400 border-gray-300';
+      default:          return 'bg-gray-400 border-gray-300';
+    }
+  };
+
+  const historyTimeline = historyLogs.length > 0 ? (
+    <div className="relative">
+      {historyLogs.map((log, idx) => (
+        <div key={idx} className="flex gap-4 relative min-w-0 overflow-hidden">
+          {/* Vertical line + dot */}
+          <div className="flex flex-col items-center">
+            <div className={`w-3 h-3 rounded-full border-2 mt-1 shrink-0 z-10 ${dotColorClass(log.status)}`} />
+            {idx < historyLogs.length - 1 && (
+              <div className="w-0.5 bg-gray-200 flex-1 my-1" />
+            )}
+          </div>
+
+          {/* Card */}
+          <div className={`mb-4 flex-1 min-w-0 overflow-hidden rounded-lg border p-3 bg-white shadow-sm ${idx < historyLogs.length - 1 ? '' : ''}`}>
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-800">
+                  {log.performedByUser?.firstName || '—'}
+                </span>
+              </div>
+              {log.status && (
+                <span className={`text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${statusBadgeClass(log.status)}`}>
+                  {log.status}
+                </span>
+              )}
+            </div>
+            {log.resolutionNotes && (
+              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.resolutionNotes}>{log.resolutionNotes}</p>
+            )}
+            {(log.notes) && (
+              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.notes}>{log.notes}</p>
+            )}
+            <p className="text-xs text-gray-400">{formatHistoryDate(log.createdAt)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-sm text-gray-600">No history for this ticket.</div>
+  );
 
   const handleUpdateClick = () => {
     setSelectedAssignee(null);
@@ -132,41 +212,48 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleUpdateSubmit = async (values, overrideStatus = null) => {
-    setIsSubmitting(true);
+    if (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) {
+      toast.warning('Please select an assignee before submitting.');
+      return;
+    }
+
+    if (!values.adminComment?.trim()) {
+      toast.warning('Comment is required.');
+      return;
+    }
+
+    const payload = {};
+    const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
+    apiFields.forEach((key) => {
+      const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
+      if (val !== '' && val !== null && val !== undefined) {
+        payload[key] = val;
+      }
+    });
+    if (values.adminComment?.trim()) {
+      payload.comment = values.adminComment;
+    }
+
+    if (selectedAssignee) {
+      payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      toast.warning('Please update at least one field.');
+      return;
+    }
+
     try {
-      const payload = {};
-      const apiFields = ['status', 'timelineDate', 'resolutionNotes', 'description'];
-      apiFields.forEach((key) => {
-        const val = key === 'status' && overrideStatus ? overrideStatus : values[key];
-        if (val !== '' && val !== null && val !== undefined) {
-          payload[key] = val;
-        }
-      });
-
-      if (selectedAssignee) {
-        payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
-      }
-
-      if (Object.keys(payload).length === 0) {
-        toast.warning('Please update at least one field.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      await post({
-        url: config.getApiUrl(config.endpoints.tickets.update(ticketId)),
-        method: 'PUT',
-        data: payload,
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
       });
 
       toast.success('Ticket updated successfully!');
       setIsUpdateModalOpen(false);
-
     } catch (error) {
       console.error('Error updating ticket:', error);
       toast.error(error?.message || 'Failed to update ticket. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -180,8 +267,25 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     handleUpdateSubmit(values, 'RESOLVED');
   };
 
-  const handleEscalationClick = (values) => {
-    handleUpdateSubmit(values, 'ESCALATED');
+  const handleEscalationClick = async (values) => {
+    try {
+      const payload = {
+        status: 'ESCALATED',
+        ...(values.timelineDate && { timelineDate: values.timelineDate }),
+        ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
+      };
+
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
+      });
+
+      toast.success('Ticket escalated successfully!');
+      setIsUpdateModalOpen(false);
+    } catch (error) {
+      console.error('Error escalating ticket:', error);
+      toast.error(error?.message || 'Failed to escalate ticket. Please try again.');
+    }
   };
 
   const updateInitialValues = {
@@ -189,6 +293,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     description: ticket.description || '',
     resolutionNotes: ticket.resolutionNotes || '',
     timelineDate: ticket.timelineDate ? new Date(ticket.timelineDate).toISOString().split('T')[0] : '',
+    adminComment: ticket.adminComment || '',
   };
 
   const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
@@ -202,90 +307,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     return field;
   });
 
-  const leftSections = [
-    {
-      title: 'SLA / TIMELINE',
-      content: (
-        <SLAIndicator 
-          allocationDate={ticket.assignDate}
-          expectedResolutionDate={ticket.timelineDate}
-          status={ticket.status}
-          compact={false}
-        />
-      ),
-    },
-    {
-      title: 'DESCRIPTION',
-      content: <div className="text-sm text-gray-700">{ticket.description || '—'}</div>,
-    },
-    {
-      title: 'RESOLUTION NOTES',
-      content: <div className="text-sm text-gray-700">{ticket.resolutionNotes || '—'}</div>,
-    },
-    {
-      title: 'HISTORY LOG',
-      ...(historyEntries.length
-        ? { logEntries: historyEntries }
-        : { content: <div className="text-sm text-gray-600">No history for this ticket.</div> }),
-    },
-    ...(ticket.status === 'APPROVED' ? [{
-      title: 'ACTIONS',
-      actions: [
-        { label: 'Update Ticket', variant: 'primary', onClick: handleUpdateClick },
-      ],
-    }] : []),
-  ];
+  const hasAsset = !!(ticket.assetId || ticket.asset);
 
-  const rightSections = [
-    {
-      title: 'DETAILS',
-      itemsGrid: true,
-      items: [
-        // { label: 'Ticket ID', value: ticket.id || '—' },
-        { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
-        { label: 'Ticket Type', value: ticket.ticketType || '—' },
-        { label: 'Priority', value: ticket.priority || '—' },
-        { label: 'Status', value: ticket.status || '—' },
-        { label: 'Is Escalated', value: ticket.isEscalated ? 'Yes' : 'No' },
-        { label: 'Address', value: ticket.address || '—' },
-        { label: 'Manager Email', value: ticket.managerEmail || '—' },
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
-        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
-        { label: 'Campus Code', value: ticket.campus?.code || '—' },
-        { label: 'Campus Name', value: ticket.campus?.name || '—' },
-        { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },
-        { label: 'Last Updated On', value: ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleString() : '—' },
-        { label: 'Resolved On', value: ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleString() : '—' },
-        { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
-        { label: 'Assignment Date', value: ticket.assignDate ? new Date(ticket.assignDate).toLocaleString() : '—' },
-        { label: 'Timeline Date', value: ticket.timelineDate ? new Date(ticket.timelineDate).toLocaleString() : '—' },
-
-        { label: 'Raised By', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
-        // { label: 'Raised By User ID', value: ticket.raisedByUserId || ticket.raisedByUser?.id || '—' },
-        { label: 'Raised By Username', value: ticket.raisedByUser?.username || '—' },
-        { label: 'Raised By Role', value: ticket.raisedByUser?.role || '—' },
-        { label: 'Raised By Email', value: ticket.raisedByUser?.email || '—' },
-
-        { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Assignee ID', value: ticket.assigneeUserId || '—' },
-        { label: 'Assignee User ID', value: ticket.assigneeUser?.id || '—' },
-        { label: 'Assignee Username', value: ticket.assigneeUser?.username || '—' },
-        { label: 'Assignee Role', value: ticket.assigneeUser?.role || '—' },
-        { label: 'Assignee Email', value: ticket.assigneeUser?.email || '—' },
-        // { label: 'Last Updated By User ID', value: ticket.lastUpdatedByUserId || '—' },
-      ],
-    },
-    {
-      title: 'DEVICE SUMMARY',
-      items: [
-        { label: 'Asset ID', value: ticket.assetId || '—' },
-        { label: 'Asset', value: ticket.asset?.assetTag || ticket.assetId || '—' },
-        { label: 'Brand', value: ticket.asset?.brand || '—' },
-        { label: 'Current Location', value: ticket.asset?.location?.name || '—' },
-        { label: 'Condition', value: ticket.asset?.condition || '—' },
-      ],
-    },
-  ];
+  const leftSections = getTicketLeftSections(ticket, historyTimeline);
+  const rightSections = getTicketRightSections(ticket, hasAsset);
 
   const handleCreateAllocation = () => {
     dispatch(setSelectedTicket({ ...ticket, id: ticket?.id || ticketId }));
@@ -299,6 +324,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         subtitle={`Created: ${ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—'}`}
         leftSections={leftSections}
         rightSections={rightSections}
+        rightGrid={true}
         onBack={onBack}
         headerActions={
           <div className="flex items-center gap-3">
@@ -317,12 +343,21 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 ))}
               </div>
             )}
-            {ticket.status === 'APPROVED' ? (
+            <CustomButton
+              text="Update Ticket"
+              variant="secondary"
+              size="md"
+              onClick={handleUpdateClick}
+              disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
+            />
+            {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
               <CustomButton
                 text="Create Allocation"
                 variant="primary"
                 size="md"
                 onClick={handleCreateAllocation}
+                disabled={!ticket.assigneeUser?.email}
+                title={!ticket.assigneeUser?.email ? 'Ticket must be assigned before creating an allocation' : undefined}
               />
             ) : ticket.status === 'RAISED' ? (
               <CustomButton
@@ -344,77 +379,26 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         title="Update Ticket"
         size="large"
       >
-        {ticket.assigneeUser && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-900">
-              <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
-            </p>
-          </div>
-        )}
-
-        {/* Assign To — selection table */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-700">Assign To</p>
-            <CustomButton
-              text={showAssignTable ? 'Hide' : 'Select Assignee'}
-              variant={showAssignTable ? 'secondary' : 'primary'}
-              size="sm"
-              onClick={() => setShowAssignTable((prev) => !prev)}
-            />
-          </div>
-          {selectedAssignee && (
-            <p className="text-xs text-blue-700 mb-2">
-              Selected: <span className="font-medium">{selectedAssignee.name} ({selectedAssignee.email})</span>
-            </p>
-          )}
-          {showAssignTable && (
-            campusInchargeLoading ? (
-              <div className="text-sm text-gray-500 py-2">Loading...</div>
-            ) : assigneeRows.length === 0 ? (
-              <div className="text-sm text-gray-500 py-2">No coordinators available.</div>
-            ) : (
-              <div className="overflow-auto max-h-52 border border-gray-200 rounded-lg">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-3 py-2 w-10"></th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Name</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Email</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Position</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Campus</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {assigneeRows.map((row) => (
-                      <tr
-                        key={row.email}
-                        onClick={() => setSelectedAssignee(selectedAssignee?.email === row.email ? null : row)}
-                        className={`cursor-pointer border-t border-gray-100 transition-colors hover:bg-blue-50 ${
-                          selectedAssignee?.email === row.email ? 'bg-blue-50' : ''
-                        }`}
-                      >
-                        <td className="px-3 py-2 text-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedAssignee?.email === row.email}
-                            onChange={() => setSelectedAssignee(selectedAssignee?.email === row.email ? null : row)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-4 h-4 accent-blue-600"
-                          />
-                        </td>
-                        <td className="px-3 py-2 text-gray-800">{row.name}</td>
-                        <td className="px-3 py-2 text-gray-600">{row.email}</td>
-                        <td className="px-3 py-2 text-gray-600">{row.position}</td>
-                        <td className="px-3 py-2 text-gray-600">{row.campus}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {ticket.ticketType?.toUpperCase() !== 'REPAIR' && (
+          <>
+            {ticket.assigneeUser && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900">
+                  <span className="font-medium">Currently Assigned To:</span> {ticket.assigneeUser.firstName} {ticket.assigneeUser.lastName}
+                </p>
               </div>
-            )
-          )}
-        </div>
+            )}
+
+            <AssigneeSelector
+              selectedAssignee={selectedAssignee}
+              setSelectedAssignee={setSelectedAssignee}
+              showAssignTable={showAssignTable}
+              setShowAssignTable={setShowAssignTable}
+              assigneeRows={assigneeRows}
+              campusInchargeLoading={campusInchargeLoading}
+            />
+          </>
+        )}
 
         <GenericForm
           fields={updateFormFieldsModified}
@@ -426,7 +410,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           submitButtonText="Update Ticket"
           cancelButtonText="Cancel"
           customActions={[
-            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting },
+            { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) },
             ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
               { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
               { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
