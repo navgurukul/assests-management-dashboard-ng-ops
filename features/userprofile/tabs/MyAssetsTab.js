@@ -107,8 +107,12 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   const handleReturnSubmit = async (formData) => {
     try {
+      const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id;
+      
       const fields = {
+        consignmentId,
         assetId: selectedAsset?.id,
+        sourceCampusId: selectedAsset?.sourceCampusId || selectedAsset?.campusId,
         assetSourceCampus: formData.assetSource,
         campusITCoordinatorEmail: formData.campusItCoordinator,
         exactAddress: formData.exactAddress,
@@ -122,7 +126,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
       Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
 
       await postMutation({
-        endpoint: '/allocations/my-assets/return',
+        endpoint: '/consignment/assets/return',
         body: payload,
       });
 

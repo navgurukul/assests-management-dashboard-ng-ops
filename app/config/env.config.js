@@ -37,9 +37,14 @@ const config = {
       details: (id) => `/consignments/${id}`,
       updateStatus: (id) => `/consignments/${id}/status`,
       dispatch: (id) => `/consignments/${id}/dispatch`,
+    },
+
+    // Consignment Return Assets
+    consignmentReturnAssets: {
+      list: '/consignment/assets/return',
       deliver: (id) => `/consignments/${id}/deliver`,
       assets: (id) => `/consignments/${id}/assets`,
-      assetById: (consignmentId, assetId) => `/consignments/${consignmentId}/assets/${assetId}`,
+      assetById: (consignmentId, assetId) => `/consignment/assets/return/${consignmentId}/${assetId}`,
       inTransitReturns: '/consignments/in-transit-returns',
     },
     

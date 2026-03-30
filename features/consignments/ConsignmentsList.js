@@ -15,7 +15,6 @@ import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
-import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
@@ -160,7 +159,7 @@ export default function ConsignmentsList() {
     isError: isInTransitError,
     refetch: refetchInTransit,
   } = useFetch({
-    url: `${config.endpoints.consignments?.inTransitReturns || '/consignments/in-transit-returns'}?${buildInTransitQueryString()}`,
+    url: `${config.endpoints.consignmentReturnAssets?.list || '/consignment/assets/return'}?${buildInTransitQueryString()}`,
     queryKey: ['inTransitReturns', inTransitPage, inTransitPageSize, debouncedInTransitSearch],
     enabled: showInTransit,
   });
@@ -175,6 +174,8 @@ export default function ConsignmentsList() {
     if (!isAcceptModalOpen || !currentInTransitItem) return null;
 
     return (
+      currentInTransitItem?.storedCampusId ||
+      currentInTransitItem?.action?.storedCampusId ||
       currentInTransitItem?.campusId ||
       currentInTransitItem?.campus?.id ||
       currentInTransitItem?.allocation?.campus?.id ||
@@ -193,7 +194,6 @@ export default function ConsignmentsList() {
     enabled: Boolean(acceptReturnCampusId),
   });
 
-  const { mutateAsync: postMutation } = usePost();
   const { mutateAsync: patchMutation } = usePatch();
 
   // Handle page change
@@ -393,26 +393,41 @@ export default function ConsignmentsList() {
 
   // Map API in-transit data to table row shape
   const inTransitTableData = React.useMemo(() => {
-    const source = Array.isArray(inTransitData?.data) ? inTransitData.data : [];
+    const nestedRows = inTransitData?.data?.data;
+    const flatRows = inTransitData?.data;
+    const source = Array.isArray(nestedRows)
+      ? nestedRows
+      : Array.isArray(flatRows)
+      ? flatRows
+      : [];
+
     return source.map((row) => ({
       ...row,
-      id: row.action?.consignmentAssetId || row.assetTag,
-      consignmentId: row.action?.consignmentId || row.consignmentId || row.consignment?.id || '',
-      consignmentCode: row.consignment || '-',
+      id: row.id || row.action?.consignmentAssetId || row.assetTag,
+      consignmentId: row.consignmentId || row.action?.consignmentId || row.consignment?.id || '',
+      consignmentCode: row.consignmentCode || row.consignment || '-',
       assetId:
-        row.action?.assetId ||
         row.assetId ||
+        row.action?.assetId ||
         row.asset?.id ||
         '',
       assetTag: row.assetTag || '-',
-      model: row.laptopModel || '-',
-      userName: row.returnedBy || '-',
-      trackingId: row.trackingId || '-',
-      estimatedArrival: row.estArrivalDate
-        ? new Date(row.estArrivalDate).toLocaleDateString()
+      model: row.laptopModel || row.model || row.asset?.model || '-',
+      userName: row.returnByUserEmail || row.returnedBy || '-',
+      userEmail: row.returnByUserEmail || row.userEmail || '',
+      trackingId: row.trackingNumber || row.trackingId || '-',
+      estimatedArrival: row.expectedDeliveryDate || row.estArrivalDate
+        ? new Date(row.expectedDeliveryDate || row.estArrivalDate).toLocaleDateString()
         : '-',
-      action: row.action || {},
+      action: row.action || {
+        consignmentId: row.consignmentId,
+        assetId: row.assetId,
+      },
     }));
+  }, [inTransitData]);
+
+  const inTransitPagination = React.useMemo(() => {
+    return inTransitData?.data?.pagination || inTransitData?.pagination;
   }, [inTransitData]);
 
   // Handle row click - navigate to details page
@@ -684,8 +699,8 @@ export default function ConsignmentsList() {
 
       await patchMutation({
         endpoint:
-          config.endpoints.consignments?.assetById?.(consignmentId, assetId) ||
-          `/consignments/${consignmentId}/assets/${assetId}`,
+          config.endpoints.consignmentReturnAssets?.assetById?.(consignmentId, assetId) ||
+          `/consignment/assets/return/${consignmentId}/${assetId}`,
         body: payload,
       });
 
@@ -721,16 +736,14 @@ export default function ConsignmentsList() {
         const { consignmentId, assetId } = getReturnActionIdentifiers(item);
 
         const payload = {
-          assetId,
-          quantity: 1,
-          storedCampusId: null,
-          returnAcceptNotes: 'REJECTED',
+          status: 'REJECTED',
+          notes: 'Rejected from in-transit returns',
         };
 
-        await postMutation({
+        await patchMutation({
           endpoint:
-            config.endpoints.consignments?.assets?.(consignmentId) ||
-            `/consignments/${consignmentId}/assets`,
+            config.endpoints.consignmentReturnAssets?.assetById?.(consignmentId, assetId) ||
+            `/consignment/assets/return/${consignmentId}/${assetId}`,
           body: payload,
         });
 
@@ -746,7 +759,7 @@ export default function ConsignmentsList() {
     }
 
     toast.success(`Marked as ${action}: ${item.assetTag}`);
-  }, [getReturnActionIdentifiers, postMutation, refetchInTransit]);
+  }, [getReturnActionIdentifiers, patchMutation, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
@@ -996,7 +1009,7 @@ export default function ConsignmentsList() {
           )
         }
         serverPagination={true}
-        paginationData={showInTransit ? inTransitData?.pagination : data?.pagination}
+        paginationData={showInTransit ? inTransitPagination : data?.pagination}
         onPageChange={showInTransit ? setInTransitPage : handlePageChange}
         onPageSizeChange={showInTransit ? (size) => { setInTransitPageSize(size); setInTransitPage(1); } : handlePageSizeChange}
       />
