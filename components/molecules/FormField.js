@@ -6,6 +6,7 @@ import DocumentSelector from './DocumentSelector';
 import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 import MultiSelect from '@/components/atoms/MultiSelect';
 import CampusAssetTable from './CampusAssetTable';
+import CustomDatePicker from '@/components/atoms/CustomDatePicker';
 
 export default function FormField({ field, formik, onFieldChange }) {
   const { name, label, type, placeholder, required, options, min, max, disabled, readOnly } = field;
@@ -54,12 +55,18 @@ export default function FormField({ field, formik, onFieldChange }) {
 
       case 'date':
         return (
-          <Field
+          <CustomDatePicker
             name={name}
-            type="date"
-            className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              hasError ? 'border-red-500' : 'border-gray-300'
-            }`}
+            selected={formik.values[name] ? new Date(formik.values[name]) : null}
+            onChange={(date) => {
+              formik.setFieldValue(name, date ? date.toISOString().split('T')[0] : '');
+            }}
+            onBlur={() => formik.setFieldTouched(name, true)}
+            placeholder={placeholder}
+            hasError={hasError}
+            disabled={disabled}
+            minDate={field.minDate}
+            maxDate={field.maxDate}
           />
         );
 
