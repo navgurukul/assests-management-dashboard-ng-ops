@@ -143,16 +143,6 @@ export default function CampusInchargeTab() {
             >
               <Edit className="w-4 h-4" />
             </button>
-            <button
-              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all duration-150 hover:scale-110"
-              title="Delete"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle delete
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
           </div>
         );
       default:

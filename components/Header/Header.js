@@ -1,6 +1,5 @@
-'use client';
-
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import { LogOut, User, ChevronDown, Menu } from 'lucide-react';
 
@@ -8,6 +7,7 @@ const Header = ({ onMenuToggle }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const router = useRouter();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -29,6 +29,11 @@ const Header = ({ onMenuToggle }) => {
   const handleLogout = () => {
     setIsDropdownOpen(false);
     logout();
+  };
+
+  const handleProfileClick = () => {
+    setIsDropdownOpen(false);
+    router.push('/userprofile');
   };
 
   return (
@@ -74,7 +79,14 @@ const Header = ({ onMenuToggle }) => {
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50">
+              <button
+                onClick={handleProfileClick}
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                <span>User Profile</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 hover:bg-gray-100 transition-colors"
