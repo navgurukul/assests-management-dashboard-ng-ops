@@ -701,8 +701,8 @@ export default function ConsignmentsList() {
 
       await patchMutation({
         endpoint:
-          config.endpoints.consignments?.assetById?.(consignmentId, assetId) ||
-          `/consignments/${consignmentId}/assets/${assetId}`,
+          config.endpoints.consignmentReturnAssets?.assetById?.(consignmentId, assetId) ||
+          `/consignment/assets/return/${consignmentId}/${assetId}`,
         body: payload,
       });
 

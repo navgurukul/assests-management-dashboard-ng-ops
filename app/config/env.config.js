@@ -44,7 +44,7 @@ const config = {
       list: '/consignment/assets/return',
       deliver: (id) => `/consignments/${id}/deliver`,
       assets: (id) => `/consignments/${id}/assets`,
-      assetById: (consignmentId, assetId) => `/consignments/${consignmentId}/assets/${assetId}`,
+      assetById: (consignmentId, assetId) => `/consignment/assets/return/${consignmentId}/${assetId}`,
       inTransitReturns: '/consignments/in-transit-returns',
     },
     
