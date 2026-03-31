@@ -715,30 +715,27 @@ export default function AllocationConsignmentSelector({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {allocationDetails.assets.map((asset) => {
+                {allocationDetails.assets.filter(a => !a.isConsignementCreated).map((asset) => {
                   const assetId = getAssetId(asset);
                   const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
-                  const isConsignmentCreated = asset.isConsignementCreated;
                   
                   return (
                     <tr
                       key={assetId}
-                      className={`transition-colors ${
-                        isConsignmentCreated 
-                          ? 'bg-gray-50 opacity-75' 
-                          : isSelected 
-                            ? 'bg-blue-50 cursor-pointer' 
-                            : 'hover:bg-gray-50 cursor-pointer'
+                      className={`cursor-pointer transition-colors ${
+                        isSelected 
+                          ? 'bg-blue-50' 
+                          : 'hover:bg-gray-50'
                       }`}
-                      onClick={() => !isDisabled && !isConsignmentCreated && handleAssetToggle(asset)}
+                      onClick={() => !isDisabled && handleAssetToggle(asset)}
                     >
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => !isConsignmentCreated && handleAssetToggle(asset)}
+                          onChange={() => handleAssetToggle(asset)}
                           onClick={(e) => e.stopPropagation()}
-                          disabled={isDisabled || isConsignmentCreated}
+                          disabled={isDisabled}
                           className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
@@ -747,11 +744,6 @@ export default function AllocationConsignmentSelector({
                           <span className="text-sm font-medium text-gray-900">
                             {getAssetTag(asset)}
                           </span>
-                          {isConsignmentCreated && (
-                            <span className="inline-flex w-fit items-center px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-800">
-                              Consignment Created
-                            </span>
-                          )}
                         </div>
                       </td>
                       <td className="px-4 py-3">
