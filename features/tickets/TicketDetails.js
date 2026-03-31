@@ -31,6 +31,15 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [showAssignTable, setShowAssignTable] = useState(false);
 
+    const loggedInEmail = React.useMemo(() => {
+    try {
+      const auth = JSON.parse(localStorage.getItem('__AUTH__') || '{}');
+      return auth?.user?.email || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const { mutateAsync: updateTicket, isPending: isSubmitting } = usePut({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
@@ -308,6 +317,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   });
 
   const hasAsset = !!(ticket.assetId || ticket.asset);
+  const assigneeEmail = ticket.assigneeUser?.email;
+  const isAssigneeCurrentUser = !!(loggedInEmail && assigneeEmail && loggedInEmail === assigneeEmail);
 
   const leftSections = getTicketLeftSections(ticket, historyTimeline);
   const rightSections = getTicketRightSections(ticket, hasAsset);
@@ -351,14 +362,18 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
             />
             {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
-              <CustomButton
-                text="Create Allocation"
-                variant="primary"
-                size="md"
-                onClick={handleCreateAllocation}
-                disabled={!ticket.assigneeUser?.email}
-                title={!ticket.assigneeUser?.email ? 'Ticket must be assigned before creating an allocation' : undefined}
-              />
+               isAssigneeCurrentUser ? (
+                <CustomButton
+                  text="Create Allocation"
+                  variant="primary"
+                  size="md"
+                  onClick={handleCreateAllocation}
+                />
+              ) : (
+                <span className="text-[10px] text-gray-500">
+                  Only &apos;{ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : 'the assignee'}&apos; can create the allocation
+                </span>
+              )
             ) : ticket.status === 'RAISED' ? (
               <CustomButton
                 text="Ticket is not approved"
