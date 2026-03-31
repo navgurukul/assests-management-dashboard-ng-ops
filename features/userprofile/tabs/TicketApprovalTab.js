@@ -103,9 +103,8 @@ export default function TicketApprovalTab() {
       loadingToastId = toast.loading(`${currentAction} in progress...`);
 
       const payload = {
-        status: currentAction === 'Approve' ? 'APPROVED' : 'REJECTED',
-        timelineDate: currentTicket?.timelineDate || new Date().toISOString(),
-        resolutionNotes: formData?.remarks || '',
+          status: currentAction === 'Approve' ? 'APPROVED' : 'REJECTED',
+          resolutionNotes: formData?.remarks || '',
       };
 
       await updateTicket({
