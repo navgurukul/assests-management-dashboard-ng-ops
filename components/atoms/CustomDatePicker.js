@@ -123,13 +123,14 @@ const CustomDatePicker = ({
         placeholderText={placeholder}
         minDate={minDate}
         maxDate={maxDate}
-        className={`w-full pl-2 pr-100 py-[0.600rem] text-sm rounded-lg  ${
+        className={`w-full pl-4 py-[0.600rem] text-sm rounded-lg  ${
           hasError ? 'border-red-500' : 'border-gray-300'
         } ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         dateFormat="dd-MM-yyyy"
         inputMode="numeric"
         pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}"
         maxLength={10}
+        wrapperClassName='w-full'
         onClickOutside={() => datepickerRef.current.setOpen(false)}
         {...props}
       />
