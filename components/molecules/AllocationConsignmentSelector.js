@@ -77,9 +77,11 @@ export default function AllocationConsignmentSelector({
       allocation.destinationCampusCode ||
       allocation.destination;
 
+    const assets = normalizeAssets(allocation);
+
     return {
       ...allocation,
-      assets: normalizeAssets(allocation),
+      assets,
       sourceCampus: hasSourceCampusObject
         ? {
             ...allocation.sourceCampus,
@@ -670,13 +672,19 @@ export default function AllocationConsignmentSelector({
                   <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedAssets.length === allocationDetails.assets.length}
+                      checked={
+                        allocationDetails.assets.filter(a => !a.isConsignementCreated).length > 0 &&
+                        allocationDetails.assets.filter(a => !a.isConsignementCreated).every(a => 
+                          selectedAssets.some(sa => (sa.id || sa.assetId) === getAssetId(a))
+                        )
+                      }
                       onChange={(e) => {
+                        const selectableAssets = allocationDetails.assets.filter(a => !a.isConsignementCreated);
                         if (e.target.checked) {
-                          setSelectedAssets([...allocationDetails.assets]);
+                          setSelectedAssets([...selectableAssets]);
                           onChange({
                             allocationId: selectedAllocation,
-                            selectedAssets: [...allocationDetails.assets],
+                            selectedAssets: [...selectableAssets],
                             allocationDetails,
                           });
                         } else {
@@ -688,8 +696,8 @@ export default function AllocationConsignmentSelector({
                           });
                         }
                       }}
-                      disabled={isDisabled}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      disabled={isDisabled || allocationDetails.assets.every(a => a.isConsignementCreated)}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
@@ -710,29 +718,41 @@ export default function AllocationConsignmentSelector({
                 {allocationDetails.assets.map((asset) => {
                   const assetId = getAssetId(asset);
                   const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
+                  const isConsignmentCreated = asset.isConsignementCreated;
                   
                   return (
                     <tr
                       key={assetId}
-                      className={`cursor-pointer transition-colors ${
-                        isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      className={`transition-colors ${
+                        isConsignmentCreated 
+                          ? 'bg-gray-50 opacity-75' 
+                          : isSelected 
+                            ? 'bg-blue-50 cursor-pointer' 
+                            : 'hover:bg-gray-50 cursor-pointer'
                       }`}
-                      onClick={() => !isDisabled && handleAssetToggle(asset)}
+                      onClick={() => !isDisabled && !isConsignmentCreated && handleAssetToggle(asset)}
                     >
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => handleAssetToggle(asset)}
+                          onChange={() => !isConsignmentCreated && handleAssetToggle(asset)}
                           onClick={(e) => e.stopPropagation()}
-                          disabled={isDisabled}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          disabled={isDisabled || isConsignmentCreated}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm font-medium text-gray-900">
-                          {getAssetTag(asset)}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-900">
+                            {getAssetTag(asset)}
+                          </span>
+                          {isConsignmentCreated && (
+                            <span className="inline-flex w-fit items-center px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-800">
+                              Consignment Created
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-medium text-gray-900">
