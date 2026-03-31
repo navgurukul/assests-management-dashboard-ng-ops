@@ -726,22 +726,7 @@ export default function AllocationConsignmentSelector({
                     Model
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Processor
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    RAM
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Storage
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Serial Number
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Condition
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Spec Label
+                    Specs
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                     Status
@@ -791,34 +776,24 @@ export default function AllocationConsignmentSelector({
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
-                          {asset.processor || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
-                          {asset.ramSizeGB ? `${asset.ramSizeGB} GB` : 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
-                          {asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
-                          {asset.serialNumber || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
-                          {asset.condition || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
-                          {asset.specLabel || 'N/A'}
-                        </span>
+                        <div className="text-sm text-gray-700 flex items-center flex-wrap gap-1">
+                          {(() => {
+                            const specs = [
+                              asset.processor,
+                              asset.ramSizeGB ? `${asset.ramSizeGB} GB` : null,
+                              asset.storageSizeGB ? `${asset.storageSizeGB} GB` : null,
+                            ].filter(Boolean);
+                            
+                            if (specs.length === 0) return <span>N/A</span>;
+                            
+                            return specs.map((spec, index) => (
+                              <React.Fragment key={index}>
+                                <span>{spec}</span>
+                                {index < specs.length - 1 && <span className="text-gray-300">|</span>}
+                              </React.Fragment>
+                            ));
+                          })()}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
