@@ -130,6 +130,11 @@ export default function TicketsList() {
     setCurrentPage(1);
   };
 
+  // Handle Show All - clear all filters and search
+  const handleShowAll = () => {
+    console.log("hi")
+  };
+
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
     if (!campusData || !campusData.data) return [];
@@ -426,6 +431,7 @@ export default function TicketsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        onShowAll={handleShowAll}
         // Search component
         searchComponent={
           <SearchInput
