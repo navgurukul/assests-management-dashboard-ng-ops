@@ -23,7 +23,7 @@ export function getTicketLeftSections(ticket, historyTimeline) {
   ];
 }
 
-export function getTicketRightSections(ticket, hasAsset) {
+export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair) {
   return [
     {
       title: 'TICKET INFO',
@@ -103,6 +103,10 @@ export function getTicketRightSections(ticket, hasAsset) {
         { label: 'Campus', value: ticket.asset?.campus?.name || '—' },
         // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
         { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
+      ],
+      headerActions: [
+        { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
+        { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
       ],
     }] : []),
   ];
