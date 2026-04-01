@@ -425,7 +425,7 @@ export default function AllocationConsignmentSelector({
     setSelectedAssets([]);
 
     if (allocationId) {
-      const allocation = allocations.find((a) => String(a.id) === String(allocationId));
+      const allocation = allocations.find((alloc) => String(alloc.id) === String(allocationId));
       const normalizedAllocation = normalizeAllocationData(allocation);
       setAllocationDetails(normalizedAllocation);
 
@@ -447,11 +447,11 @@ export default function AllocationConsignmentSelector({
   // Handle asset checkbox toggle
   const handleAssetToggle = (asset) => {
     const assetId = getAssetId(asset);
-    const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
+    const isSelected = selectedAssets.some(selectedAsset => (selectedAsset.id || selectedAsset.assetId) === assetId);
 
     let updatedAssets;
     if (isSelected) {
-      updatedAssets = selectedAssets.filter(a => (a.id || a.assetId) !== assetId);
+      updatedAssets = selectedAssets.filter(selectedAsset => (selectedAsset.id || selectedAsset.assetId) !== assetId);
     } else {
       updatedAssets = [...selectedAssets, asset];
     }
@@ -467,7 +467,7 @@ export default function AllocationConsignmentSelector({
   // Handle remove asset chip
   const handleRemoveAsset = (asset) => {
     const assetId = getAssetId(asset);
-    const updatedAssets = selectedAssets.filter(a => (a.id || a.assetId) !== assetId);
+    const updatedAssets = selectedAssets.filter(selectedAsset => (selectedAsset.id || selectedAsset.assetId) !== assetId);
     setSelectedAssets(updatedAssets);
     onChange({
       allocationId: selectedAllocation,
@@ -740,7 +740,7 @@ export default function AllocationConsignmentSelector({
               <tbody className="divide-y divide-gray-200 bg-white">
                 {allocationDetails.assets.map((asset) => {
                   const assetId = getAssetId(asset);
-                  const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
+                  const isSelected = selectedAssets.some(selectedAsset => (selectedAsset.id || selectedAsset.assetId) === assetId);
 
                   return (
                     <tr
