@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -259,25 +260,24 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="font-medium">{asset.model || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SPECS (PROCESSOR / RAM / STORAGE)</p>
-                  <div className="font-medium flex items-center flex-wrap gap-1">
-                    {(() => {
-                      const specs = [
-                        asset.processor,
-                        asset.ramSizeGB ? `${asset.ramSizeGB} GB` : null,
-                        asset.storageSizeGB ? `${asset.storageSizeGB} GB` : null,
-                      ].filter(Boolean);
-                      
-                      if (specs.length === 0) return <span>N/A</span>;
-                      
-                      return specs.map((spec, index) => (
-                        <React.Fragment key={index}>
-                          <span>{spec}</span>
-                          {index < specs.length - 1 && <span className="text-gray-300 font-normal">|</span>}
-                        </React.Fragment>
-                      ));
-                    })()}
-                  </div>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SPEC LABEL</p>
+                  <p className="font-medium">{asset.specLabel || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">PROCESSOR</p>
+                  <p className="font-medium">{asset.processor || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">RAM</p>
+                  <p className="font-medium">{asset.ramSizeGB ? `${asset.ramSizeGB} GB` : 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">STORAGE</p>
+                  <p className="font-medium">{asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">CONDITION</p>
+                  <p className="font-medium">{formatAssetStatus(asset.condition)}</p>
                 </div>
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SOURCE TYPE</p>
@@ -290,6 +290,10 @@ export default function AllocationDetails({ allocationId, onBack }) {
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">BAG</p>
                   <p className="font-medium">{formatBoolean(asset.bag)}</p>
+                </div>
+                <div className="col-span-full">
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SERIAL NUMBER</p>
+                  <p className="font-medium break-all">{asset.serialNumber || 'N/A'}</p>
                 </div>
                 {asset.notes && (
                   <div className="col-span-full">
@@ -454,4 +458,3 @@ export default function AllocationDetails({ allocationId, onBack }) {
     </>
   );
 }
-
