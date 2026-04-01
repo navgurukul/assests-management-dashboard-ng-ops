@@ -18,12 +18,35 @@ export const returnAssetFields = [
     placeholder: '',
   },
   {
+    name: 'returnMode',
+    label: 'Return Mode',
+    type: 'radio',
+    required: true,
+    options: [
+      { label: 'Returning physically by visiting campus', value: 'VISIT_CAMPUS' },
+      { label: 'Return to sourced campus', value: 'SOURCED_CAMPUS' },
+      { label: 'Return to other campus', value: 'OTHER_CAMPUS' },
+    ],
+  },
+  {
     name: 'assetSource',
     label: 'Asset Source (Campus)',
     type: 'text',
     required: false,
     disabled: true,
     placeholder: '',
+    showWhen: (formData) => formData.returnMode === 'SOURCED_CAMPUS',
+  },
+  {
+    name: 'destinationCampusId',
+    label: 'Select Campus',
+    type: 'api-autocomplete',
+    apiUrl: '/campuses',
+    valueKey: 'id',
+    labelKey: 'campusName',
+    required: true,
+    placeholder: 'Select a campus',
+    showWhen: (formData) => ['VISIT_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'campusItCoordinator',
@@ -31,6 +54,7 @@ export const returnAssetFields = [
     type: 'email',
     required: true,
     placeholder: 'IT coordinator email',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'exactAddress',
@@ -38,6 +62,7 @@ export const returnAssetFields = [
     type: 'textarea',
     required: true,
     placeholder: 'Enter exact pickup / drop address...',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'vendorName',
@@ -45,6 +70,7 @@ export const returnAssetFields = [
     type: 'text',
     required: true,
     placeholder: 'e.g. Bluedart',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'vendorReceipt',
@@ -54,6 +80,7 @@ export const returnAssetFields = [
     accept: 'image/*,application/pdf',
     multiple: true,
     hint: 'Accepted formats: JPG, PNG, PDF',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'managerEmail',
@@ -68,6 +95,7 @@ export const returnAssetFields = [
     type: 'date',
     required: true,
     placeholder: 'Select date',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
 ];
 
@@ -94,28 +122,56 @@ export const getReturnAssetFields = (selectedAsset = null, sourceName = '') =>
 // ─── Yup Validation Schema ─────────────────────────────────────────────────
 
 export const returnAssetValidationSchema = Yup.object().shape({
+  returnMode: Yup.string().required('Please select a return mode'),
   assetSource: Yup.string(),
-  campusItCoordinator: Yup.string()
-    .required('IT Coordinator email is required')
-    .email('Enter a valid email address'),
-  exactAddress: Yup.string()
-    .required('Exact address is required')
-    .min(10, 'Please enter a more detailed address'),
-  vendorName: Yup.string().required('Vendor name is required'),
-  vendorReceipt: Yup.mixed().required('Vendor receipt is required'),
+  destinationCampusId: Yup.string().when('returnMode', {
+    is: (val) => ['VISIT_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: () => Yup.string().required('Campus is required'),
+    otherwise: () => Yup.string().nullable(),
+  }),
+  campusItCoordinator: Yup.string().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: () => Yup.string()
+      .required('IT Coordinator email is required')
+      .email('Enter a valid email address'),
+    otherwise: () => Yup.string().nullable(),
+  }),
+  exactAddress: Yup.string().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: () => Yup.string()
+      .required('Exact address is required')
+      .min(10, 'Please enter a more detailed address'),
+    otherwise: () => Yup.string().nullable(),
+  }),
+  vendorName: Yup.string().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: () => Yup.string().required('Vendor name is required'),
+    otherwise: () => Yup.string().nullable(),
+  }),
+  vendorReceipt: Yup.mixed().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: () => Yup.mixed().required('Vendor receipt is required'),
+    otherwise: () => Yup.mixed().nullable(),
+  }),
   managerEmail: Yup.string()
     .required('Manager email is required')
     .email('Enter a valid email address'),
-  expectedDeliveryDate: Yup.date()
-    .required('Expected delivery date is required')
-    .min(new Date(), 'Delivery date must be today or in the future'),
+  expectedDeliveryDate: Yup.date().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: () => Yup.date()
+      .required('Expected delivery date is required')
+      .min(new Date(), 'Delivery date must be today or in the future'),
+    otherwise: () => Yup.date().nullable(),
+  }),
 });
 
 // ─── Initial values ────────────────────────────────────────────────────────
 
 export const returnAssetInitialValues = {
   assetId: '',
+  returnMode: 'SOURCED_CAMPUS',
   assetSource: '',
+  destinationCampusId: '',
   campusItCoordinator: '',
   exactAddress: '',
   vendorName: '',

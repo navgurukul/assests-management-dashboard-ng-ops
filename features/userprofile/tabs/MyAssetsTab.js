@@ -113,21 +113,31 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
     try {
       const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id;
       
-      const fields = {
-        consignmentId,
-        assetId: selectedAsset?.id,
-        sourceCampusId: selectedAsset?.sourceCampusId || selectedAsset?.campusId,
-        assetSourceCampus: formData.assetSource,
-        campusITCoordinatorEmail: formData.campusItCoordinator,
-        exactAddress: formData.exactAddress,
-        vendorName: formData.vendorName,
-        managerEmail: formData.managerEmail,
-        expectedDeliveryDate: formData.expectedDeliveryDate,
-      };
-
       const payload = new FormData();
-      Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
-      Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
+
+      // Common fields across all modes
+      payload.append('consignmentId', consignmentId || '');
+      payload.append('assetId', selectedAsset?.id || '');
+      payload.append('returnMode', formData.returnMode);
+      payload.append('managerEmail', formData.managerEmail || '');
+
+      // Specific fields based on return mode
+      if (formData.returnMode === 'VISIT_CAMPUS') {
+        payload.append('destinationCampusId', formData.destinationCampusId || '');
+      } else {
+        const sourceCampusId = formData.returnMode === 'SOURCED_CAMPUS' 
+          ? (selectedAsset?.sourceCampusId || selectedAsset?.campusId || '')
+          : (formData.destinationCampusId || '');
+          
+        payload.append('sourceCampusId', sourceCampusId);
+        payload.append('assetSourceCampus', formData.assetSource || '');
+        payload.append('campusITCoordinatorEmail', formData.campusItCoordinator || '');
+        payload.append('exactAddress', formData.exactAddress || '');
+        payload.append('vendorName', formData.vendorName || '');
+        payload.append('expectedDeliveryDate', formData.expectedDeliveryDate || '');
+        
+        Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
+      }
 
       await postMutation({
         endpoint: '/consignment/assets/return',
