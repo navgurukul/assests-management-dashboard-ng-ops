@@ -688,7 +688,7 @@ export default function AllocationConsignmentSelector({
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3 text-left">
+                  <th className="px-4 py-3 text-left align-top">
                     <input
                       type="checkbox"
                       checked={selectedAssets.length === allocationDetails.assets.length}
@@ -710,25 +710,26 @@ export default function AllocationConsignmentSelector({
                         }
                       }}
                       disabled={isDisabled}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 mt-0.5"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
                     Asset Tag
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
                     Asset Type
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
                     Brand
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
                     Model
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Specs
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
+                    Specs <br />
+                    <span className="text-[10px] text-gray-500 normal-case">(Processor / RAM / Storage)</span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
                     Status
                   </th>
                 </tr>
