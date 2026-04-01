@@ -71,6 +71,10 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   };
 
   const handleAssetReceived = (asset) => {
+    if (asset.consignmentStatus === 'DELIVERED') {
+      toast.error('Asset has already been delivered.');
+      return;
+    }
     setSelectedAsset(asset);
     setReceivedModalOpen(true);
   };
@@ -221,6 +225,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
                       onClick={() => handleAssetReceived(asset)}
                       variant="success"
                       size="sm"
+                      className={asset.consignmentStatus === 'DELIVERED' ? 'opacity-50' : ''}
                     />
                     <CustomButton
                       text="Return Asset"
