@@ -717,6 +717,9 @@ export default function AllocationConsignmentSelector({
                     Asset Tag
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
+                    Asset ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
                     Asset Type
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase align-top">
@@ -763,6 +766,11 @@ export default function AllocationConsignmentSelector({
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-700">
+                          {assetId || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
                           {getAssetType(asset)}
                         </span>
                       </td>
@@ -788,10 +796,10 @@ export default function AllocationConsignmentSelector({
                             if (specs.length === 0) return <span>N/A</span>;
                             
                             return specs.map((spec, index) => (
-                              <React.Fragment key={index}>
+                              <span key={index} className="flex items-center gap-1">
                                 <span>{spec}</span>
                                 {index < specs.length - 1 && <span className="text-gray-300">|</span>}
-                              </React.Fragment>
+                              </span>
                             ));
                           })()}
                         </div>
