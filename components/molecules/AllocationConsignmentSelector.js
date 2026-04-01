@@ -406,13 +406,13 @@ export default function AllocationConsignmentSelector({
   }, [selectedAllocation, allAllocations]);
 
   // Handle allocation selection
-  const handleAllocationChange = (e) => {
-    const allocationId = e.target.value;
+  const handleAllocationChange = (event) => {
+    const allocationId = event.target.value;
     setSelectedAllocation(allocationId);
     setSelectedAssets([]);
     
     if (allocationId) {
-      const allocation = allocations.find((a) => String(a.id) === String(allocationId));
+      const allocation = allocations.find((allocationRecord) => String(allocationRecord.id) === String(allocationId));
       const normalizedAllocation = normalizeAllocationData(allocation);
       setAllocationDetails(normalizedAllocation);
       
@@ -434,11 +434,11 @@ export default function AllocationConsignmentSelector({
   // Handle asset checkbox toggle
   const handleAssetToggle = (asset) => {
     const assetId = getAssetId(asset);
-    const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
+    const isSelected = selectedAssets.some(selectedAsset => (selectedAsset.id || selectedAsset.assetId) === assetId);
     
     let updatedAssets;
     if (isSelected) {
-      updatedAssets = selectedAssets.filter(a => (a.id || a.assetId) !== assetId);
+      updatedAssets = selectedAssets.filter(selectedAsset => (selectedAsset.id || selectedAsset.assetId) !== assetId);
     } else {
       updatedAssets = [...selectedAssets, asset];
     }
@@ -454,7 +454,7 @@ export default function AllocationConsignmentSelector({
   // Handle remove asset chip
   const handleRemoveAsset = (asset) => {
     const assetId = getAssetId(asset);
-    const updatedAssets = selectedAssets.filter(a => (a.id || a.assetId) !== assetId);
+    const updatedAssets = selectedAssets.filter(selectedAsset => (selectedAsset.id || selectedAsset.assetId) !== assetId);
     setSelectedAssets(updatedAssets);
     onChange({
       allocationId: selectedAllocation,
@@ -673,14 +673,14 @@ export default function AllocationConsignmentSelector({
                     <input
                       type="checkbox"
                       checked={
-                        allocationDetails.assets.filter(a => !a.isConsignementCreated).length > 0 &&
-                        allocationDetails.assets.filter(a => !a.isConsignementCreated).every(a => 
-                          selectedAssets.some(sa => (sa.id || sa.assetId) === getAssetId(a))
+                        allocationDetails.assets.filter(assetItem => !assetItem.isConsignementCreated).length > 0 &&
+                        allocationDetails.assets.filter(assetItem => !assetItem.isConsignementCreated).every(assetItem => 
+                          selectedAssets.some(selectedAsset => (selectedAsset.id || selectedAsset.assetId) === getAssetId(assetItem))
                         )
                       }
-                      onChange={(e) => {
-                        const selectableAssets = allocationDetails.assets.filter(a => !a.isConsignementCreated);
-                        if (e.target.checked) {
+                      onChange={(event) => {
+                        const selectableAssets = allocationDetails.assets.filter(assetItem => !assetItem.isConsignementCreated);
+                        if (event.target.checked) {
                           setSelectedAssets([...selectableAssets]);
                           onChange({
                             allocationId: selectedAllocation,
@@ -696,7 +696,7 @@ export default function AllocationConsignmentSelector({
                           });
                         }
                       }}
-                      disabled={isDisabled || allocationDetails.assets.every(a => a.isConsignementCreated)}
+                      disabled={isDisabled || allocationDetails.assets.every(assetItem => assetItem.isConsignementCreated)}
                       className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </th>
@@ -715,9 +715,9 @@ export default function AllocationConsignmentSelector({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {allocationDetails.assets.filter(a => !a.isConsignementCreated).map((asset) => {
+                {allocationDetails.assets.filter(assetItem => !assetItem.isConsignementCreated).map((asset) => {
                   const assetId = getAssetId(asset);
-                  const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
+                  const isSelected = selectedAssets.some(selectedAsset => (selectedAsset.id || selectedAsset.assetId) === assetId);
                   
                   return (
                     <tr
@@ -734,7 +734,7 @@ export default function AllocationConsignmentSelector({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleAssetToggle(asset)}
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(event) => event.stopPropagation()}
                           disabled={isDisabled}
                           className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
