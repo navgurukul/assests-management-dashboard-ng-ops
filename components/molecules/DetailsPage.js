@@ -35,10 +35,24 @@ export default function DetailsPage({
         className={`bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col ${spanClass}`}
       >
         {section.title && (
-          <div className={`px-5 py-3 rounded-t-lg border-b border-gray-100 ${accent.titleBg}`}>
+          <div className={`px-5 py-3 rounded-t-lg border-b border-gray-100 ${accent.titleBg} flex items-center justify-between gap-3`}>
             <h2 className={`text-[11px] font-bold uppercase tracking-widest ${accent.titleText}`}>
               {section.title}
             </h2>
+            {section.headerActions && section.headerActions.length > 0 && (
+              <div className="flex items-center gap-2">
+                {section.headerActions.map((action, idx) => (
+                  <CustomButton
+                    key={idx}
+                    text={action.label}
+                    variant={action.variant || 'primary'}
+                    size="sm"
+                    onClick={action.onClick}
+                    disabled={action.disabled}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 

@@ -7,6 +7,7 @@ import { Laptop, Monitor, Tablet, Smartphone, Package } from 'lucide-react';
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
+import FormModal from '@/components/molecules/FormModal';
 import GenericForm from '@/components/molecules/GenericForm';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
@@ -15,6 +16,7 @@ import AssigneeSelector from './AssigneeSelector';
 import { getTicketLeftSections, getTicketRightSections } from './ticketSections';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
+import apiService from '@/app/utils/apiService';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePut from '@/app/hooks/query/usePut';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,6 +32,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [showAssignTable, setShowAssignTable] = useState(false);
+  const [assetModalAction, setAssetModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
+  const [isAssetSubmitting, setIsAssetSubmitting] = useState(false);
 
     const loggedInEmail = React.useMemo(() => {
     try {
@@ -316,12 +320,49 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     return field;
   });
 
+  const handleAssetStatusUpdate = async (formData) => {
+    const assetId = ticket.asset?.id || ticket.assetId;
+    if (!assetId) {
+      toast.error('Asset ID not found');
+      return;
+    }
+
+    setIsAssetSubmitting(true);
+    try {
+      if (assetModalAction === 'REPAIR') {
+        await apiService.post(config.endpoints.assets.repair(assetId), {
+          reasonForRepair: formData.description,
+        });
+        toast.success('Asset moved to repair successfully.');
+      } else if (assetModalAction === 'SCRAP') {
+        await apiService.post(config.endpoints.assets.scrap(assetId), {
+          reasonForScrapping: formData.description,
+        });
+        toast.success('Asset marked as scrap successfully.');
+      }
+      setAssetModalAction(null);
+      queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
+    } catch (error) {
+      toast.error(error?.message || 'Failed to update asset status. Please try again.');
+    } finally {
+      setIsAssetSubmitting(false);
+    }
+  };
+
+  const onMarkAsScrap = () => {
+    setAssetModalAction('SCRAP');
+  };
+
+  const onMoveToRepair = () => {
+    setAssetModalAction('REPAIR');
+  };
+
   const hasAsset = !!(ticket.assetId || ticket.asset);
   const assigneeEmail = ticket.assigneeUser?.email;
   const isAssigneeCurrentUser = !!(loggedInEmail && assigneeEmail && loggedInEmail === assigneeEmail);
 
   const leftSections = getTicketLeftSections(ticket, historyTimeline);
-  const rightSections = getTicketRightSections(ticket, hasAsset);
+  const rightSections = getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair);
 
   const handleCreateAllocation = () => {
     dispatch(setSelectedTicket({ ...ticket, id: ticket?.id || ticketId }));
@@ -433,6 +474,26 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           ]}
         />
       </Modal>
+
+      <FormModal
+        isOpen={!!assetModalAction}
+        onClose={() => setAssetModalAction(null)}
+        title={assetModalAction === 'REPAIR' ? 'Move Asset to Repair' : 'Mark Asset as Scrap'}
+        fields={[
+          {
+            name: 'description',
+            label: assetModalAction === 'REPAIR' ? 'Reason for Repair' : 'Reason for Scrapping',
+            type: 'textarea',
+            required: true,
+            placeholder: assetModalAction === 'REPAIR' 
+              ? 'Describe the issue or reason this asset needs repair...' 
+              : 'Describe why this asset is being scrapped...',
+          },
+        ]}
+        initialValues={{ description: '' }}
+        onSubmit={handleAssetStatusUpdate}
+        isSubmitting={isAssetSubmitting}
+      />
     </>
   );
 }
