@@ -26,6 +26,7 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/allocationTableConfig';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
+import { allocationSummaryCardsConfig } from '@/dummyJson/dummyJson';
 
 const actionOptions = ['View', 'Return', 'Details'];
 
@@ -89,40 +90,14 @@ export default function AllocationsList() {
   const summaryCards = React.useMemo(() => {
     if (!allocationCountsData?.data) return [];
     
-    return [
-      { 
-        label: 'Total Allocations', 
-        value: allocationCountsData.data.totalAllocations ?? 0, 
-        Icon: BarChart2, 
-        valueColor: 'text-gray-900', 
-        iconColor: 'text-gray-500', 
-        borderColor: 'border-gray-200' 
-      },
-      { 
-        label: 'Active Allocations', 
-        value: allocationCountsData.data.activeAllocations ?? 0, 
-        Icon: CheckCircle, 
-        valueColor: 'text-green-600', 
-        iconColor: 'text-green-500', 
-        borderColor: 'border-green-200' 
-      },
-      { 
-        label: 'Returned', 
-        value: allocationCountsData.data.returnedAllocations ?? 0, 
-        Icon: XCircle, 
-        valueColor: 'text-gray-600', 
-        iconColor: 'text-gray-500', 
-        borderColor: 'border-gray-200' 
-      },
-      { 
-        label: 'This Month', 
-        value: allocationCountsData.data.thisMonthAllocations ?? 0, 
-        Icon: Calendar, 
-        valueColor: 'text-purple-600', 
-        iconColor: 'text-purple-500', 
-        borderColor: 'border-purple-200' 
-      },
-    ];
+    return allocationSummaryCardsConfig.map((config) => ({
+      label: config.label,
+      value: allocationCountsData.data[config.dataKey] ?? 0,
+      Icon: LucideIcons[config.iconName],
+      valueColor: config.valueColor,
+      iconColor: config.iconColor,
+      borderColor: config.borderColor,
+    }));
   }, [allocationCountsData]);
 
 
