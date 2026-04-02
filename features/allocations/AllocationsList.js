@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, UserPlus, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, UserPlus, Calendar, CheckCircle, XCircle, BarChart2 } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import {
   getAllocationTypeChipColor,
@@ -26,7 +26,6 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/allocationTableConfig';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
-import { allocationsSummaryCards } from '@/dummyJson/dummyJson';
 
 const actionOptions = ['View', 'Return', 'Details'];
 
@@ -79,6 +78,53 @@ export default function AllocationsList() {
     url: `/allocations?${buildQueryString()}`,
     queryKey: ['allocations', currentPage, pageSize, debouncedSearch],
   });
+
+  // Fetch allocation counts from API
+  const { data: allocationCountsData } = useFetch({
+    url: '/allocations/count',
+    queryKey: ['allocations-count'],
+  });
+
+  // Summary cards configuration
+  const summaryCards = React.useMemo(() => {
+    if (!allocationCountsData?.data) return [];
+    
+    return [
+      { 
+        label: 'Total Allocations', 
+        value: allocationCountsData.data.totalAllocations ?? 0, 
+        Icon: BarChart2, 
+        valueColor: 'text-gray-900', 
+        iconColor: 'text-gray-500', 
+        borderColor: 'border-gray-200' 
+      },
+      { 
+        label: 'Active Allocations', 
+        value: allocationCountsData.data.activeAllocations ?? 0, 
+        Icon: CheckCircle, 
+        valueColor: 'text-green-600', 
+        iconColor: 'text-green-500', 
+        borderColor: 'border-green-200' 
+      },
+      { 
+        label: 'Returned', 
+        value: allocationCountsData.data.returnedAllocations ?? 0, 
+        Icon: XCircle, 
+        valueColor: 'text-gray-600', 
+        iconColor: 'text-gray-500', 
+        borderColor: 'border-gray-200' 
+      },
+      { 
+        label: 'This Month', 
+        value: allocationCountsData.data.thisMonthAllocations ?? 0, 
+        Icon: Calendar, 
+        valueColor: 'text-purple-600', 
+        iconColor: 'text-purple-500', 
+        borderColor: 'border-purple-200' 
+      },
+    ];
+  }, [allocationCountsData]);
+
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -263,20 +309,17 @@ export default function AllocationsList() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
-        {allocationsSummaryCards.map((card) => {
-          const IconComponent = LucideIcons[card.icon];
-          return (
-            <SummaryCard
-              key={card.id}
-              label={card.label}
-              value={card.getValue(allocationsListData)}
-              Icon={IconComponent}
-              valueColor={card.valueColor}
-              iconColor={card.iconColor}
-              borderColor={card.borderColor}
-            />
-          );
-        })}
+        {summaryCards.map((card) => (
+          <SummaryCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            Icon={card.Icon}
+            valueColor={card.valueColor}
+            iconColor={card.iconColor}
+            borderColor={card.borderColor}
+          />
+        ))}
       </div>
 
       {/* Table */}
