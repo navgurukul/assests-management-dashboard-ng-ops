@@ -325,16 +325,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Duration', value: calculateDuration() },
       ],
     },
-    {
-      title: 'User Information',
-      color: 'green',
-      items: [
-        // { label: 'User ID', value: allocationDetails.userId || 'N/A' },
-        { label: 'User Name', value: userDisplayName },
-        { label: 'User Email', value: allocationDetails.user?.email || 'N/A' },
-        { label: 'User Role', value: allocationDetails.user?.role || 'N/A' },
-      ],
-    },
   ];
 
   // Right column sections (70%)
