@@ -326,15 +326,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
       ],
     },
     {
-      title: 'Asset Information',
-      color: 'orange',
-      items: [
-        { label: 'Asset Tag', value: primaryAsset?.assetTag || allocationDetails.asset?.assetTag || 'N/A' },
-        { label: 'Brand', value: primaryAsset?.brand || allocationDetails.asset?.brand || 'N/A' },
-        { label: 'Model', value: primaryAsset?.model || allocationDetails.asset?.model || 'N/A' },
-      ],
-    },
-    {
       title: 'User Information',
       color: 'green',
       items: [
