@@ -155,14 +155,18 @@ export default function TicketsList() {
     setCurrentPage(1);
   };
 
-  // Handle Show All - clear all filters and search
+  // Toggle between all tickets and my assigned tickets
   const handleShowAll = () => {
-    setIsShowAllMode(true);
+    setIsShowAllMode((prev) => !prev);
     setFilters({});
     setSearchInput('');
     setDebouncedSearch('');
     setCurrentPage(1);
   };
+
+  const showAllButtonText = isShowAllMode
+    ? 'My Tickets'
+    : 'Show All';
 
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -464,6 +468,7 @@ export default function TicketsList() {
         showCreateButton={true}
         onCreateClick={handleCreateClick}
         onShowAll={handleShowAll}
+        showAllButtonText={showAllButtonText}
         // Search component
         searchComponent={
           <SearchInput
