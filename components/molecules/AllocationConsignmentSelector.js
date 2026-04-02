@@ -1,21 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
-import useFetch from '@/app/hooks/query/useFetch';
 
 export default function AllocationConsignmentSelector({
   value = {},
   onChange,
-  apiUrl,
-  queryKey,
   filterStatus = 'ALLOCATED',
   isDisabled = false,
   lockAllocationSelection = false,
   lockedAllocationId = '',
   lockedAllocationData = null,
 }) {
-  const normalizeAssets = (allocation) => {
+  const normalizeAssets = useCallback((allocation) => {
     if (!allocation) return [];
 
     const directAssets = Array.isArray(allocation.assets) ? allocation.assets : [];
@@ -53,9 +50,9 @@ export default function AllocationConsignmentSelector({
       assetType: 'N/A',
       status: 'ACTIVE',
     }));
-  };
+  }, []);
 
-  const normalizeAllocationData = (allocation) => {
+  const normalizeAllocationData = useCallback((allocation) => {
     if (!allocation) return null;
 
     const hasSourceCampusObject = !!allocation.sourceCampus && typeof allocation.sourceCampus === 'object';
@@ -99,15 +96,11 @@ export default function AllocationConsignmentSelector({
       source: sourceCampusName || allocation.source || (typeof allocation.sourceCampus === 'string' ? allocation.sourceCampus : '') || 'N/A',
       destination: destinationCampusName || allocation.destination || (typeof allocation.destinationCampus === 'string' ? allocation.destinationCampus : '') || 'N/A',
     };
-  };
+  }, [normalizeAssets]);
 
   const [selectedAllocation, setSelectedAllocation] = useState(value.allocationId || '');
   const [selectedAssets, setSelectedAssets] = useState(value.selectedAssets || []);
   const [allocationDetails, setAllocationDetails] = useState(normalizeAllocationData(value.allocationDetails) || null);
-  const [assetTagsByFetchedId, setAssetTagsByFetchedId] = useState({});
-  const [assetTypesByFetchedId, setAssetTypesByFetchedId] = useState({});
-  const [attemptedAssetTagLookupById, setAttemptedAssetTagLookupById] = useState({});
-  const [currentAssetLookupId, setCurrentAssetLookupId] = useState('');
 
   const getAssetTypeLabel = (value) => {
     if (!value) return '';
@@ -124,26 +117,21 @@ export default function AllocationConsignmentSelector({
     return normalized && normalized !== 'N/A' ? normalized : '';
   };
 
-  // Fetch allocations data
-  const { data: allocationsData } = useFetch({
-    url: apiUrl ? apiUrl.replace(/^.*\/api/, '') : '/allocations',
-    queryKey: queryKey || ['allocations'],
-  });
-
-  const { data: campusesData } = useFetch({
-    url: '/campuses',
-    queryKey: ['campuses', 'allocation-consignment-selector'],
-  });
-
-  const { data: assetsData } = useFetch({
-    url: '/assets',
-    queryKey: ['assets', 'allocation-consignment-selector'],
-  });
-
-  // Filter allocations by status
   const allAllocations = React.useMemo(() => {
-    return Array.isArray(allocationsData?.data) ? allocationsData.data : [];
-  }, [allocationsData]);
+    const fallbackCandidates = [value?.allocationDetails, lockedAllocationData].filter(Boolean);
+    const fallbackAllocations = fallbackCandidates.map((allocation) => normalizeAllocationData(allocation));
+
+    const deduped = [];
+    const seen = new Set();
+    fallbackAllocations.forEach((allocation) => {
+      const id = String(allocation?.id || allocation?.allocationId || '').trim();
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      deduped.push(allocation);
+    });
+
+    return deduped;
+  }, [value?.allocationDetails, lockedAllocationData, normalizeAllocationData]);
 
   const allocations = React.useMemo(() => {
     let sourceData = [...allAllocations];
@@ -158,202 +146,18 @@ export default function AllocationConsignmentSelector({
     return sourceData;
   }, [allAllocations, filterStatus]);
 
-  const campusNameById = React.useMemo(() => {
-    const map = new Map();
-    const campuses = Array.isArray(campusesData?.data) ? campusesData.data : [];
-
-    campuses.forEach((campus) => {
-      const campusId = String(campus?.id || '').trim();
-      const campusName = campus?.campusName || campus?.name || '';
-      if (campusId && campusName) {
-        map.set(campusId, campusName);
-      }
-    });
-
-    return map;
-  }, [campusesData]);
-
-  const assetTagById = React.useMemo(() => {
-    const map = new Map();
-
-    const setTag = (idCandidate, tagCandidate) => {
-      const id = String(idCandidate || '').trim();
-      const tag = String(tagCandidate || '').trim();
-      if (!id || !tag || id === tag || map.has(id)) return;
-      map.set(id, tag);
-    };
-
-    const addFromAssets = (assets) => {
-      if (!Array.isArray(assets)) return;
-      assets.forEach((asset) => {
-        if (!asset) return;
-        setTag(asset.id || asset.assetId, asset.assetTag || asset.tag);
-      });
-    };
-
-    allAllocations.forEach((allocation) => {
-      addFromAssets(allocation?.assets);
-      if (allocation?.asset) {
-        setTag(
-          allocation.asset.id || allocation.asset.assetId || allocation.assetId,
-          allocation.asset.assetTag || allocation.asset.tag
-        );
-      }
-    });
-
-    const apiAssets =
-      (Array.isArray(assetsData?.data?.assets) && assetsData.data.assets) ||
-      (Array.isArray(assetsData?.data) && assetsData.data) ||
-      (Array.isArray(assetsData?.assets) && assetsData.assets) ||
-      (Array.isArray(assetsData) && assetsData) ||
-      [];
-
-    addFromAssets(apiAssets);
-
-    return map;
-  }, [allAllocations, assetsData]);
-
-  const assetTypeById = React.useMemo(() => {
-    const map = new Map();
-
-    const setType = (idCandidate, typeCandidate) => {
-      const id = String(idCandidate || '').trim();
-      const type = getAssetTypeLabel(typeCandidate);
-      if (!id || !type || map.has(id)) return;
-      map.set(id, type);
-    };
-
-    const addFromAssets = (assets) => {
-      if (!Array.isArray(assets)) return;
-      assets.forEach((asset) => {
-        if (!asset) return;
-        setType(asset.id || asset.assetId, asset.assetType || asset.type || asset.assetTypeName);
-      });
-    };
-
-    allAllocations.forEach((allocation) => {
-      addFromAssets(allocation?.assets);
-      if (allocation?.asset) {
-        setType(
-          allocation.asset.id || allocation.asset.assetId || allocation.assetId,
-          allocation.asset.assetType || allocation.asset.type || allocation.asset.assetTypeName
-        );
-      }
-    });
-
-    const apiAssets =
-      (Array.isArray(assetsData?.data?.assets) && assetsData.data.assets) ||
-      (Array.isArray(assetsData?.data) && assetsData.data) ||
-      (Array.isArray(assetsData?.assets) && assetsData.assets) ||
-      (Array.isArray(assetsData) && assetsData) ||
-      [];
-
-    addFromAssets(apiAssets);
-
-    return map;
-  }, [allAllocations, assetsData]);
-
   const getAssetId = (asset) => String(asset?.id || asset?.assetId || '').trim();
 
-  const unresolvedAssetIds = React.useMemo(() => {
-    const assets = Array.isArray(allocationDetails?.assets) ? allocationDetails.assets : [];
-
-    return assets
-      .map((asset) => ({
-        id: getAssetId(asset),
-        directTag: String(asset?.assetTag || '').trim(),
-        directType: getAssetTypeLabel(asset?.assetType || asset?.type),
-      }))
-      .filter(({ id, directTag, directType }) => {
-        if (!id) return false;
-        const tagResolved = (directTag && directTag !== id) || assetTagById.has(id) || !!assetTagsByFetchedId[id];
-        const typeResolved = !!directType || assetTypeById.has(id) || !!assetTypesByFetchedId[id];
-        if (tagResolved && typeResolved) return false;
-        if (attemptedAssetTagLookupById[id]) return false;
-        return true;
-      })
-      .map(({ id }) => id);
-  }, [allocationDetails, assetTagById, assetTagsByFetchedId, assetTypeById, assetTypesByFetchedId, attemptedAssetTagLookupById]);
-
-  const { data: unresolvedAssetByIdData, isError: isUnresolvedAssetByIdError } = useFetch({
-    url: currentAssetLookupId ? `/assets/${currentAssetLookupId}` : '/assets',
-    queryKey: ['assets', 'allocation-consignment-selector', 'detail-by-id', currentAssetLookupId],
-    enabled: !!currentAssetLookupId,
-  });
-
-  useEffect(() => {
-    if (currentAssetLookupId) return;
-    if (!unresolvedAssetIds.length) return;
-    setCurrentAssetLookupId(unresolvedAssetIds[0]);
-  }, [unresolvedAssetIds, currentAssetLookupId]);
-
-  useEffect(() => {
-    if (!currentAssetLookupId) return;
-    if (typeof unresolvedAssetByIdData === 'undefined' && !isUnresolvedAssetByIdError) return;
-
-    const payload = unresolvedAssetByIdData?.data || unresolvedAssetByIdData;
-    const assetData = payload?.asset || payload;
-    const resolvedTag = String(assetData?.assetTag || assetData?.tag || '').trim();
-    const resolvedType = getAssetTypeLabel(assetData?.assetType || assetData?.type || assetData?.assetTypeName);
-
-    setAttemptedAssetTagLookupById((prev) => ({
-      ...prev,
-      [currentAssetLookupId]: true,
-    }));
-
-    if (resolvedTag && resolvedTag !== currentAssetLookupId) {
-      setAssetTagsByFetchedId((prev) => ({
-        ...prev,
-        [currentAssetLookupId]: resolvedTag,
-      }));
-    }
-
-    if (resolvedType) {
-      setAssetTypesByFetchedId((prev) => ({
-        ...prev,
-        [currentAssetLookupId]: resolvedType,
-      }));
-    }
-
-    setCurrentAssetLookupId('');
-  }, [currentAssetLookupId, unresolvedAssetByIdData, isUnresolvedAssetByIdError]);
-
   const getAssetTag = (asset) => {
-    const assetId = getAssetId(asset);
     const directTag = String(asset?.assetTag || '').trim();
 
-    if (directTag && directTag !== assetId) {
-      return directTag;
-    }
-
-    if (assetId && assetTagsByFetchedId[assetId]) {
-      return assetTagsByFetchedId[assetId];
-    }
-
-    if (assetId && assetTagById.has(assetId)) {
-      return assetTagById.get(assetId);
-    }
-
-    return 'N/A';
+    return directTag || 'N/A';
   };
 
   const getAssetType = (asset) => {
-    const assetId = getAssetId(asset);
     const directType = getAssetTypeLabel(asset?.assetType || asset?.type);
 
-    if (directType) {
-      return directType;
-    }
-
-    if (assetId && assetTypesByFetchedId[assetId]) {
-      return assetTypesByFetchedId[assetId];
-    }
-
-    if (assetId && assetTypeById.has(assetId)) {
-      return assetTypeById.get(assetId);
-    }
-
-    return 'N/A';
+    return directType || 'N/A';
   };
 
   const isLikelyCampusId = (value) => {
@@ -370,20 +174,11 @@ export default function AllocationConsignmentSelector({
       if (typeof candidate === 'object') {
         const directName = candidate.campusName || candidate.name;
         if (directName) return directName;
-
-        const candidateId = String(candidate.id || candidate.campusId || '').trim();
-        if (candidateId && campusNameById.has(candidateId)) {
-          return campusNameById.get(candidateId);
-        }
         continue;
       }
 
       const value = String(candidate).trim();
       if (!value) continue;
-
-      if (campusNameById.has(value)) {
-        return campusNameById.get(value);
-      }
 
       if (!isLikelyCampusId(value)) {
         return value;
@@ -393,15 +188,86 @@ export default function AllocationConsignmentSelector({
     return 'N/A';
   };
 
-  const getAllocationById = (id) => {
-    if (!id) return null;
-    const normalizedId = String(id);
-    return allAllocations.find((allocation) => String(allocation.id) === normalizedId) || null;
+  const getAssigneeName = (details) => {
+    if (!details) return 'Not assigned';
+
+    return (
+      details.assigneeName ||
+      details.user?.name ||
+      [details.user?.firstName, details.user?.lastName].filter(Boolean).join(' ') ||
+      details.user?.username ||
+      details.assignedTo?.name ||
+      details.assignedTo?.username ||
+      details.userName ||
+      details.userEmail ||
+      details.user?.email ||
+      details.assignedTo?.email ||
+      'Not assigned'
+    );
   };
 
-  const selectedAllocationFromList = React.useMemo(() => {
-    return getAllocationById(selectedAllocation);
-  }, [selectedAllocation, allAllocations]);
+  const isAllocationLocked = lockAllocationSelection && !!lockedAllocationId;
+
+  const lockedAllocationDetails = React.useMemo(() => {
+    if (!isAllocationLocked) return null;
+
+    const lockedId = String(lockedAllocationId);
+    const fallbackAllocationById = allAllocations.find(
+      (allocation) => String(allocation.id) === lockedId
+    ) || null;
+
+    const hasCampusObject = (campus) => {
+      return !!campus && typeof campus === 'object' && (campus.campusName || campus.name);
+    };
+
+    const resolvedSourceCampus = hasCampusObject(lockedAllocationData?.sourceCampus)
+      ? lockedAllocationData.sourceCampus
+      : hasCampusObject(fallbackAllocationById?.sourceCampus)
+        ? fallbackAllocationById.sourceCampus
+        : lockedAllocationData?.sourceCampus || fallbackAllocationById?.sourceCampus;
+
+    const resolvedDestinationCampus = hasCampusObject(lockedAllocationData?.destinationCampus)
+      ? lockedAllocationData.destinationCampus
+      : hasCampusObject(fallbackAllocationById?.destinationCampus)
+        ? fallbackAllocationById.destinationCampus
+        : lockedAllocationData?.destinationCampus || fallbackAllocationById?.destinationCampus;
+
+    const mergedLockedAllocation = {
+      ...(fallbackAllocationById || {}),
+      ...(lockedAllocationData || {}),
+      sourceCampus: resolvedSourceCampus,
+      destinationCampus: resolvedDestinationCampus,
+      assets:
+        (Array.isArray(lockedAllocationData?.assets) && lockedAllocationData.assets.length > 0
+          ? lockedAllocationData.assets
+          : fallbackAllocationById?.assets) ||
+        [],
+      assetIds:
+        (Array.isArray(lockedAllocationData?.assetIds) && lockedAllocationData.assetIds.length > 0
+          ? lockedAllocationData.assetIds
+          : fallbackAllocationById?.assetIds) ||
+        [],
+      assetsId:
+        (Array.isArray(lockedAllocationData?.assetsId) && lockedAllocationData.assetsId.length > 0
+          ? lockedAllocationData.assetsId
+          : fallbackAllocationById?.assetsId) ||
+        [],
+    };
+
+    return normalizeAllocationData(mergedLockedAllocation);
+  }, [
+    isAllocationLocked,
+    lockedAllocationId,
+    lockedAllocationData,
+    allAllocations,
+    normalizeAllocationData,
+  ]);
+
+  const currentSelectedAllocation = isAllocationLocked ? String(lockedAllocationId) : selectedAllocation;
+  const currentAllocationDetails = isAllocationLocked ? lockedAllocationDetails : allocationDetails;
+  const selectableAssets = Array.isArray(currentAllocationDetails?.assets)
+    ? currentAllocationDetails.assets.filter((asset) => !asset?.isConsignementCreated)
+    : [];
 
   // Handle allocation selection
   const handleAllocationChange = (e) => {
@@ -443,9 +309,9 @@ export default function AllocationConsignmentSelector({
     
     setSelectedAssets(updatedAssets);
     onChange({
-      allocationId: selectedAllocation,
+      allocationId: currentSelectedAllocation,
       selectedAssets: updatedAssets,
-      allocationDetails,
+      allocationDetails: currentAllocationDetails,
     });
   };
 
@@ -455,92 +321,11 @@ export default function AllocationConsignmentSelector({
     const updatedAssets = selectedAssets.filter(a => (a.id || a.assetId) !== assetId);
     setSelectedAssets(updatedAssets);
     onChange({
-      allocationId: selectedAllocation,
+      allocationId: currentSelectedAllocation,
       selectedAssets: updatedAssets,
-      allocationDetails,
+      allocationDetails: currentAllocationDetails,
     });
   };
-
-  // Update state when value prop changes from parent
-  useEffect(() => {
-    const incomingAllocationId = value.allocationId || '';
-    const incomingSelectedAssets = value.selectedAssets || [];
-    const incomingAllocationDetails = normalizeAllocationData(value.allocationDetails) || null;
-
-    const selectedAssetsChanged = JSON.stringify(incomingSelectedAssets) !== JSON.stringify(selectedAssets);
-    const allocationDetailsChanged = JSON.stringify(incomingAllocationDetails) !== JSON.stringify(allocationDetails);
-
-    if (
-      incomingAllocationId !== selectedAllocation ||
-      selectedAssetsChanged ||
-      allocationDetailsChanged
-    ) {
-      setSelectedAllocation(incomingAllocationId);
-      setSelectedAssets(incomingSelectedAssets);
-      setAllocationDetails(incomingAllocationDetails);
-    }
-  }, [value]);
-
-  useEffect(() => {
-    if (!lockAllocationSelection || !lockedAllocationId) return;
-
-    const lockedId = String(lockedAllocationId);
-    const fetchedAllocationById = getAllocationById(lockedId);
-
-    const hasCampusObject = (campus) => {
-      return !!campus && typeof campus === 'object' && (campus.campusName || campus.name);
-    };
-
-    const resolvedSourceCampus = hasCampusObject(lockedAllocationData?.sourceCampus)
-      ? lockedAllocationData.sourceCampus
-      : hasCampusObject(fetchedAllocationById?.sourceCampus)
-        ? fetchedAllocationById.sourceCampus
-        : lockedAllocationData?.sourceCampus || fetchedAllocationById?.sourceCampus;
-
-    const resolvedDestinationCampus = hasCampusObject(lockedAllocationData?.destinationCampus)
-      ? lockedAllocationData.destinationCampus
-      : hasCampusObject(fetchedAllocationById?.destinationCampus)
-        ? fetchedAllocationById.destinationCampus
-        : lockedAllocationData?.destinationCampus || fetchedAllocationById?.destinationCampus;
-
-    const mergedLockedAllocation = {
-      ...(fetchedAllocationById || {}),
-      ...(lockedAllocationData || {}),
-      sourceCampus: resolvedSourceCampus,
-      destinationCampus: resolvedDestinationCampus,
-      assets:
-        (Array.isArray(lockedAllocationData?.assets) && lockedAllocationData.assets.length > 0
-          ? lockedAllocationData.assets
-          : fetchedAllocationById?.assets) ||
-        [],
-      assetIds:
-        (Array.isArray(lockedAllocationData?.assetIds) && lockedAllocationData.assetIds.length > 0
-          ? lockedAllocationData.assetIds
-          : fetchedAllocationById?.assetIds) ||
-        [],
-      assetsId:
-        (Array.isArray(lockedAllocationData?.assetsId) && lockedAllocationData.assetsId.length > 0
-          ? lockedAllocationData.assetsId
-          : fetchedAllocationById?.assetsId) ||
-        [],
-    };
-
-    const lockedAllocation = normalizeAllocationData(mergedLockedAllocation);
-
-    if (selectedAllocation !== lockedId || !allocationDetails) {
-      setSelectedAllocation(lockedId);
-      setSelectedAssets([]);
-      setAllocationDetails(lockedAllocation);
-
-      onChange({
-        allocationId: lockedId,
-        selectedAssets: [],
-        allocationDetails: lockedAllocation,
-      });
-    }
-  }, [lockAllocationSelection, lockedAllocationId, lockedAllocationData, allocations]);
-
-  const isAllocationLocked = lockAllocationSelection && !!lockedAllocationId;
 
   return (
     <div className="space-y-4">
@@ -550,10 +335,10 @@ export default function AllocationConsignmentSelector({
           <p className="text-xs text-gray-600 mb-1">Allocation ID</p>
           <div className="flex items-center justify-between gap-3">
             <p className="text-lg font-semibold text-gray-900 break-all">
-              {allocationDetails?.allocationCode || selectedAllocation}
+              {currentAllocationDetails?.allocationCode || currentSelectedAllocation}
             </p>
             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              {allocationDetails?.status || 'ACTIVE'}
+              {currentAllocationDetails?.status || 'ACTIVE'}
             </span>
           </div>
         </div>
@@ -563,7 +348,7 @@ export default function AllocationConsignmentSelector({
             Allocation ID <span className="text-red-500">*</span>
           </label>
           <select
-            value={selectedAllocation}
+            value={currentSelectedAllocation}
             onChange={handleAllocationChange}
             disabled={isDisabled}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -579,46 +364,37 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* Allocation Details Section */}
-      {allocationDetails && (
+      {currentAllocationDetails && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="text-sm font-semibold text-blue-900 mb-3">Allocation Details</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <p className="text-xs text-gray-600 mb-1">Allocated To</p>
+              <p className="text-xs text-gray-600 mb-1">Assignee Name</p>
               <p className="text-sm font-medium text-gray-900">
-                {allocationDetails.user?.email || 
-                 allocationDetails.userEmail || 
-                 allocationDetails.assignedTo?.email ||
-                 'Not assigned'}
+                {getAssigneeName(currentAllocationDetails)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-600 mb-1">Source</p>
+              <p className="text-xs text-gray-600 mb-1">Source Campus</p>
               <p className="text-sm font-medium text-gray-900">
                 {resolveCampusLabel(
-                  selectedAllocationFromList?.sourceCampus,
-                  selectedAllocationFromList?.sourceCampusName,
-                  selectedAllocationFromList?.source,
-                  selectedAllocationFromList?.sourceCampusId,
-                  allocationDetails.sourceCampus,
-                  allocationDetails.sourceCampusId,
-                  allocationDetails.sourceCampusName,
-                  allocationDetails.source
+                  currentAllocationDetails.sourceCampusDisplay,
+                  currentAllocationDetails.sourceCampus,
+                  currentAllocationDetails.sourceCampusId,
+                  currentAllocationDetails.sourceCampusName,
+                  currentAllocationDetails.source
                 )}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-600 mb-1">Destination</p>
+              <p className="text-xs text-gray-600 mb-1">Destination Campus</p>
               <p className="text-sm font-medium text-gray-900">
                 {resolveCampusLabel(
-                  selectedAllocationFromList?.destinationCampus,
-                  selectedAllocationFromList?.destinationCampusName,
-                  selectedAllocationFromList?.destination,
-                  selectedAllocationFromList?.destinationCampusId,
-                  allocationDetails.destinationCampus,
-                  allocationDetails.destinationCampusId,
-                  allocationDetails.destinationCampusName,
-                  allocationDetails.destination
+                  currentAllocationDetails.destinationCampusDisplay,
+                  currentAllocationDetails.destinationCampus,
+                  currentAllocationDetails.destinationCampusId,
+                  currentAllocationDetails.destinationCampusName,
+                  currentAllocationDetails.destination
                 )}
               </p>
             </div>
@@ -655,7 +431,7 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* Assets Table */}
-      {allocationDetails && allocationDetails.assets && allocationDetails.assets.length > 0 && (
+      {currentAllocationDetails && currentAllocationDetails.assets && currentAllocationDetails.assets.length > 0 && (
         <div className="border border-gray-300 rounded-lg overflow-hidden">
           <div className="bg-gray-100 px-4 py-3 border-b border-gray-300">
             <h4 className="text-sm font-semibold text-gray-900">
@@ -670,21 +446,21 @@ export default function AllocationConsignmentSelector({
                   <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedAssets.length === allocationDetails.assets.length}
+                      checked={selectableAssets.length > 0 && selectedAssets.length === selectableAssets.length}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedAssets([...allocationDetails.assets]);
+                          setSelectedAssets([...selectableAssets]);
                           onChange({
-                            allocationId: selectedAllocation,
-                            selectedAssets: [...allocationDetails.assets],
-                            allocationDetails,
+                            allocationId: currentSelectedAllocation,
+                            selectedAssets: [...selectableAssets],
+                            allocationDetails: currentAllocationDetails,
                           });
                         } else {
                           setSelectedAssets([]);
                           onChange({
-                            allocationId: selectedAllocation,
+                            allocationId: currentSelectedAllocation,
                             selectedAssets: [],
-                            allocationDetails,
+                            allocationDetails: currentAllocationDetails,
                           });
                         }
                       }}
@@ -696,10 +472,34 @@ export default function AllocationConsignmentSelector({
                     Asset Tag
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Asset ID
+                    Asset Type
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Asset Type
+                    Brand
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Model
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Spec Label
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Processor
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    RAM (GB)
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Storage (GB)
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Serial Number
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Condition
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                    Source Type
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                     Status
@@ -707,27 +507,34 @@ export default function AllocationConsignmentSelector({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {allocationDetails.assets.map((asset) => {
+                {currentAllocationDetails.assets.map((asset) => {
                   const assetId = getAssetId(asset);
+                  const isConsignmentCreated = asset?.isConsignementCreated === true;
                   const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
                   
                   return (
                     <tr
                       key={assetId}
                       className={`cursor-pointer transition-colors ${
-                        isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                        isConsignmentCreated
+                          ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : isSelected
+                            ? 'bg-blue-50'
+                            : 'hover:bg-gray-50'
                       }`}
-                      onClick={() => !isDisabled && handleAssetToggle(asset)}
+                      onClick={() => !isDisabled && !isConsignmentCreated && handleAssetToggle(asset)}
                     >
                       <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleAssetToggle(asset)}
-                          onClick={(e) => e.stopPropagation()}
-                          disabled={isDisabled}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                        />
+                        {!isConsignmentCreated && (
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleAssetToggle(asset)}
+                            onClick={(e) => e.stopPropagation()}
+                            disabled={isDisabled}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-medium text-gray-900">
@@ -735,13 +542,53 @@ export default function AllocationConsignmentSelector({
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm font-medium text-gray-900">
-                          {assetId || 'N/A'}
+                        <span className="text-sm text-gray-700">
+                          {getAssetType(asset)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-700">
-                          {getAssetType(asset)}
+                          {asset.brand || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.model || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.specLabel || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.processor || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.ramSizeGB || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.storageSizeGB || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.serialNumber || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.condition || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-700">
+                          {asset.sourceType || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -760,7 +607,7 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* No Assets Message */}
-      {allocationDetails && (!allocationDetails.assets || allocationDetails.assets.length === 0) && (
+      {currentAllocationDetails && (!currentAllocationDetails.assets || currentAllocationDetails.assets.length === 0) && (
         <div className="text-center py-8 text-gray-500">
           <p>No assets found in this allocation.</p>
         </div>
