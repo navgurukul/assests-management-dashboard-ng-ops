@@ -400,9 +400,9 @@ export default function TicketsList() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 p-6">
         {summaryCards.map((card) => (
           <SummaryCard
             key={card.label}
