@@ -2045,3 +2045,42 @@ export const extendLeaseFields = [
     placeholder: 'Reason for extending lease...',
   },
 ];
+
+export const allocationSummaryCardsConfig = [
+  { 
+    id: 'total',
+    label: 'Total Allocations', 
+    dataKey: 'totalAllocations',
+    iconName: 'BarChart2',
+    valueColor: 'text-gray-900', 
+    iconColor: 'text-gray-500', 
+    borderColor: 'border-gray-200' 
+  },
+  { 
+    id: 'active',
+    label: 'Active Allocations', 
+    dataKey: 'activeAllocations',
+    iconName: 'CheckCircle',
+    valueColor: 'text-green-600', 
+    iconColor: 'text-green-500', 
+    borderColor: 'border-green-200' 
+  },
+  { 
+    id: 'returned',
+    label: 'Returned', 
+    dataKey: 'returnedAllocations',
+    iconName: 'XCircle',
+    valueColor: 'text-gray-600', 
+    iconColor: 'text-gray-500', 
+    borderColor: 'border-gray-200' 
+  },
+  { 
+    id: 'thisMonth',
+    label: 'This Month', 
+    dataKey: 'thisMonthAllocations',
+    iconName: 'Calendar',
+    valueColor: 'text-purple-600', 
+    iconColor: 'text-purple-500', 
+    borderColor: 'border-purple-200' 
+  },
+];
