@@ -1,11 +1,19 @@
 'use client';
 
 import { Ticket } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import StateHandler from '@/components/atoms/StateHandler';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 
 export default function TicketStatusTab({ userTickets, isLoadingTickets, ticketsError }) {
+  const router = useRouter();
+
+  const handleRowClick = (ticketId) => {
+    if (!ticketId) return;
+    router.push(`/tickets/${ticketId}`);
+  };
+
   if (isLoadingTickets || ticketsError) {
     return (
       <div>
@@ -61,7 +69,11 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {userTickets.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={ticket.id}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => handleRowClick(ticket.id)}
+                  >
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600">
                       {ticket.ticketNumber}
                     </td>

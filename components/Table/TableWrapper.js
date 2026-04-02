@@ -25,6 +25,7 @@ export default function TableWrapper({
   activeFiltersComponent, // New prop for filter chips
   searchComponent, // New prop for search bar
   onShowAll, // New prop for Show All button handler
+  showAllButtonText = "Show All",
   // Server-side pagination props
   serverPagination = false,
   paginationData = null, // { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage }
@@ -87,7 +88,7 @@ export default function TableWrapper({
         <div className="flex items-center gap-3">
           {onShowAll && (
             <CustomButton
-              text="Show All"
+              text={showAllButtonText}
               onClick={onShowAll}
               variant="secondary"
               size="md"
