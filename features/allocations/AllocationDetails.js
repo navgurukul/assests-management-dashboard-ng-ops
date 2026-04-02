@@ -61,10 +61,12 @@ export default function AllocationDetails({ allocationId, onBack }) {
   const normalizedAssets = assetsFromAllocation.length > 0 ? assetsFromAllocation : singleAssetFallback;
   const primaryAsset = normalizedAssets[0] || null;
 
-  const normalizedAllocationDetails = {
-    ...allocationDetails,
-    assets: normalizedAssets,
-  };
+  const userDisplayName =
+    allocationDetails.user?.name ||
+    [allocationDetails.user?.firstName, allocationDetails.user?.lastName].filter(Boolean).join(' ') ||
+    allocationDetails.user?.username ||
+    allocationDetails.userId ||
+    'Unknown';
 
   const getCampusLabel = (details, campusType) => {
     if (!details) return 'N/A';
@@ -85,6 +87,14 @@ export default function AllocationDetails({ allocationId, onBack }) {
 
   const sourceCampusDisplay = getCampusLabel(allocationDetails, 'source');
   const destinationCampusDisplay = getCampusLabel(allocationDetails, 'destination');
+
+  const normalizedAllocationDetails = {
+    ...allocationDetails,
+    assets: normalizedAssets,
+    assigneeName: userDisplayName,
+    sourceCampusDisplay,
+    destinationCampusDisplay,
+  };
 
   const createFieldsForAllocation = createConsignmentFields.map((field) => {
     if (field.type !== 'allocation-consignment-selector') {
@@ -181,13 +191,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
   const getStatusColor = () => {
     return isActive ? 'text-green-600' : 'text-gray-600';
   };
-
-  const userDisplayName =
-    allocationDetails.user?.name ||
-    [allocationDetails.user?.firstName, allocationDetails.user?.lastName].filter(Boolean).join(' ') ||
-    allocationDetails.user?.username ||
-    allocationDetails.userId ||
-    'Unknown';
 
   // Calculate duration
   const calculateDuration = () => {
@@ -450,7 +453,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
         actionType="Create"
         fields={createFieldsForAllocation}
         onSubmit={handleCreateConsignment}
-        size="large"
+        size="xlarge"
         isSubmitting={isSubmitting}
         helpText="Select assets from this allocation to create a new consignment. The allocation is pre-selected and locked."
       />
