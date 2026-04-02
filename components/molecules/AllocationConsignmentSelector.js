@@ -331,16 +331,56 @@ export default function AllocationConsignmentSelector({
     <div className="space-y-4">
       {/* Allocation ID */}
       {isAllocationLocked ? (
-        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-          <p className="text-xs text-gray-600 mb-1">Allocation ID</p>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-lg font-semibold text-gray-900 break-all">
-              {currentAllocationDetails?.allocationCode || currentSelectedAllocation}
-            </p>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              {currentAllocationDetails?.status || 'ACTIVE'}
-            </span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="border border-gray-300 rounded-lg p-3 bg-gray-50">
+            <p className="text-[11px] text-gray-600 mb-1">Allocation ID</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-base font-semibold text-gray-900 break-all leading-tight">
+                {currentAllocationDetails?.allocationCode || currentSelectedAllocation}
+              </p>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-800 shrink-0">
+                {currentAllocationDetails?.status || 'ACTIVE'}
+              </span>
+            </div>
           </div>
+
+          {currentAllocationDetails && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <h4 className="text-xs font-semibold text-blue-900 mb-2">Allocation Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                <div>
+                  <p className="text-[11px] text-gray-600 mb-1">Assignee Name</p>
+                  <p className="text-sm font-medium text-gray-900 leading-tight">
+                    {getAssigneeName(currentAllocationDetails)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-600 mb-1">Source Campus</p>
+                  <p className="text-sm font-medium text-gray-900 leading-tight">
+                    {resolveCampusLabel(
+                      currentAllocationDetails.sourceCampusDisplay,
+                      currentAllocationDetails.sourceCampus,
+                      currentAllocationDetails.sourceCampusId,
+                      currentAllocationDetails.sourceCampusName,
+                      currentAllocationDetails.source
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-600 mb-1">Destination Campus</p>
+                  <p className="text-sm font-medium text-gray-900 leading-tight">
+                    {resolveCampusLabel(
+                      currentAllocationDetails.destinationCampusDisplay,
+                      currentAllocationDetails.destinationCampus,
+                      currentAllocationDetails.destinationCampusId,
+                      currentAllocationDetails.destinationCampusName,
+                      currentAllocationDetails.destination
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div>
@@ -364,7 +404,7 @@ export default function AllocationConsignmentSelector({
       )}
 
       {/* Allocation Details Section */}
-      {currentAllocationDetails && (
+      {!isAllocationLocked && currentAllocationDetails && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="text-sm font-semibold text-blue-900 mb-3">Allocation Details</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -537,57 +577,57 @@ export default function AllocationConsignmentSelector({
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-xs font-medium text-gray-900">
                           {getAssetTag(asset)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {getAssetType(asset)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.brand || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.model || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.specLabel || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.processor || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.ramSizeGB || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.storageSizeGB || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.serialNumber || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.condition || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-700">
+                        <span className="text-xs text-gray-700">
                           {asset.sourceType || 'N/A'}
                         </span>
                       </td>
