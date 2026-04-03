@@ -115,26 +115,36 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
       
       const payload = new FormData();
 
-      // Common fields across all modes
       payload.append('consignmentId', consignmentId || '');
       payload.append('assetId', selectedAsset?.id || '');
-      payload.append('returnMode', formData.returnMode);
       payload.append('managerEmail', formData.managerEmail || '');
+      
+      const expDate = formData.expectedDeliveryDate;
+        
+      const formattedDate = expDate instanceof Date
+        ? expDate.toISOString().split('T')[0]
+        : (typeof expDate === 'string' ? expDate : '');
+      payload.append('expectedDeliveryDate', formattedDate);
 
-      // Specific fields based on return mode
+      // We still map from the form's destinationCampusId or from selected asset
+      let storedCampusId = '';
+      if (formData.returnMode === 'VISIT_CAMPUS' || formData.returnMode === 'OTHER_CAMPUS') {
+        storedCampusId = formData.destinationCampusId || formData.sourceCampusId || '';
+      } else if (formData.returnMode === 'SOURCED_CAMPUS') {
+        storedCampusId = selectedAsset?.sourceCampusId || selectedAsset?.campusId || '';
+      }
+      payload.append('storedCampusId', storedCampusId);
+
+      // Remaining fields
       if (formData.returnMode === 'VISIT_CAMPUS') {
-        payload.append('destinationCampusId', formData.destinationCampusId || '');
+        // Now campusItCoordinator is included in VISIT_CAMPUS
+        payload.append('campusITCoordinatorEmail', formData.campusItCoordinator || '');
+        payload.append('exactAddress', '');
+        payload.append('courierPartnerName', '');
       } else {
-        const sourceCampusId = formData.returnMode === 'SOURCED_CAMPUS' 
-          ? (selectedAsset?.sourceCampusId || selectedAsset?.campusId || '')
-          : (formData.destinationCampusId || '');
-          
-        payload.append('sourceCampusId', sourceCampusId);
-        payload.append('assetSourceCampus', formData.assetSource || '');
         payload.append('campusITCoordinatorEmail', formData.campusItCoordinator || '');
         payload.append('exactAddress', formData.exactAddress || '');
-        payload.append('vendorName', formData.vendorName || '');
-        payload.append('expectedDeliveryDate', formData.expectedDeliveryDate || '');
+        payload.append('courierPartnerName', formData.vendorName || '');
         
         Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
       }

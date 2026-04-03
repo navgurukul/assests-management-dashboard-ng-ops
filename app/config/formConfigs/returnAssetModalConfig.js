@@ -54,7 +54,6 @@ export const returnAssetFields = [
     type: 'email',
     required: true,
     placeholder: 'IT coordinator email',
-    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'exactAddress',
@@ -95,7 +94,6 @@ export const returnAssetFields = [
     type: 'date',
     required: true,
     placeholder: 'Select date',
-    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
 ];
 
@@ -126,43 +124,36 @@ export const returnAssetValidationSchema = Yup.object().shape({
   assetSource: Yup.string(),
   destinationCampusId: Yup.string().when('returnMode', {
     is: (val) => ['VISIT_CAMPUS', 'OTHER_CAMPUS'].includes(val),
-    then: () => Yup.string().required('Campus is required'),
-    otherwise: () => Yup.string().nullable(),
+    then: (schema) => schema.required('Campus is required'),
+    otherwise: (schema) => schema.nullable(),
   }),
-  campusItCoordinator: Yup.string().when('returnMode', {
-    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
-    then: () => Yup.string()
-      .required('IT Coordinator email is required')
-      .email('Enter a valid email address'),
-    otherwise: () => Yup.string().nullable(),
-  }),
+  campusItCoordinator: Yup.string()
+    .required('IT Coordinator email is required')
+    .email('Enter a valid email address'),
   exactAddress: Yup.string().when('returnMode', {
     is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
-    then: () => Yup.string()
+    then: (schema) => schema
       .required('Exact address is required')
       .min(10, 'Please enter a more detailed address'),
-    otherwise: () => Yup.string().nullable(),
+    otherwise: (schema) => schema.nullable(),
   }),
   vendorName: Yup.string().when('returnMode', {
     is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
-    then: () => Yup.string().required('Vendor name is required'),
-    otherwise: () => Yup.string().nullable(),
+    then: (schema) => schema.required('Vendor name is required'),
+    otherwise: (schema) => schema.nullable(),
   }),
   vendorReceipt: Yup.mixed().when('returnMode', {
     is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
-    then: () => Yup.mixed().required('Vendor receipt is required'),
-    otherwise: () => Yup.mixed().nullable(),
+    then: (schema) => schema.required('Vendor receipt is required'),
+    otherwise: (schema) => schema.nullable(),
   }),
   managerEmail: Yup.string()
     .required('Manager email is required')
     .email('Enter a valid email address'),
-  expectedDeliveryDate: Yup.date().when('returnMode', {
-    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
-    then: () => Yup.date()
-      .required('Expected delivery date is required')
-      .min(new Date(), 'Delivery date must be today or in the future'),
-    otherwise: () => Yup.date().nullable(),
-  }),
+  expectedDeliveryDate: Yup.date()
+    .transform((curr, orig) => (orig === '' ? null : curr))
+    .required('Expected delivery date is required')
+    .min(new Date(new Date().setHours(0,0,0,0)), 'Delivery date must be today or in the future'),
 });
 
 // ─── Initial values ────────────────────────────────────────────────────────
