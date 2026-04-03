@@ -15,7 +15,7 @@ export default function SLAIndicator({
     return (
       <div className={`flex items-center gap-2 ${compact ? 'text-xs' : 'text-sm'} text-gray-500`}>
         <Clock size={compact ? 14 : 16} />
-        <span>SLA Not Set</span>
+        <span>Timeline Not Set</span>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function SLAIndicator({
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-semibold text-sm text-inherit">{statusText}</h4>
             <span className={`text-xs font-medium px-2 py-1 rounded border-none ${themeClass}`}>
-              {totalDays} days SLA
+              {totalDays} days
             </span>
           </div>
           

@@ -4,7 +4,7 @@ import SLAIndicator from '@/components/molecules/SLAIndicator';
 export function getTicketLeftSections(ticket, historyTimeline) {
   return [
     {
-      title: 'SLA / TIMELINE',
+      title: 'TIMELINE',
       color: 'orange',
       content: (
         <SLAIndicator
