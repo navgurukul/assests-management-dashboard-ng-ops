@@ -43,7 +43,7 @@ export const ticketUpdateEditableFields = [
     label: 'Expected Resolution Date',
     type: 'date',
     required: false,
-    helperText: 'SLA timeline — can only be set once.',
+    helperText: 'Timeline — can only be set once.',
   },
 ];
 

@@ -4,7 +4,7 @@ import SLAIndicator from '@/components/molecules/SLAIndicator';
 export function getTicketLeftSections(ticket, historyTimeline) {
   return [
     {
-      title: 'SLA / TIMELINE',
+      title: 'TIMELINE',
       color: 'orange',
       content: (
         <SLAIndicator
@@ -42,6 +42,28 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         { label: 'Manager Comment', value: ticket.resolutionNotes || '—', className: 'col-span-2 line-clamp-2' },
       ],
     },
+    ...(hasAsset ? [{
+      title: 'ASSET DETAILS',
+      color: 'orange',
+      span: 2,
+      itemsGrid: true,
+      items: [
+        { label: 'Asset Tag', value: ticket.asset?.assetTag || ticket.assetId || '—' },
+        { label: 'Brand', value: ticket.asset?.brand || '—' },
+        { label: 'Model', value: ticket.asset?.model || '—' },
+        { label: 'Status', value: ticket.asset?.status || '—' },
+        { label: 'Condition', value: ticket.asset?.condition || '—' },
+        { label: 'Asset Type', value: ticket.asset?.assetType?.name || '—' },
+        { label: 'Category', value: ticket.asset?.assetType?.category || '—' },
+        { label: 'Campus', value: ticket.asset?.campus?.name || '—' },
+        // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
+        { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
+      ],
+      headerActions: [
+        { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
+        { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
+      ],
+    }] : []),
     {
       title: 'CAMPUS INFO',
       color: 'teal',
@@ -87,27 +109,5 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         { label: 'Closed On', value: ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '—' },
       ],
     },
-    ...(hasAsset ? [{
-      title: 'ASSET DETAILS',
-      color: 'orange',
-      span: 2,
-      itemsGrid: true,
-      items: [
-        { label: 'Asset Tag', value: ticket.asset?.assetTag || ticket.assetId || '—' },
-        { label: 'Brand', value: ticket.asset?.brand || '—' },
-        { label: 'Model', value: ticket.asset?.model || '—' },
-        { label: 'Status', value: ticket.asset?.status || '—' },
-        { label: 'Condition', value: ticket.asset?.condition || '—' },
-        { label: 'Asset Type', value: ticket.asset?.assetType?.name || '—' },
-        { label: 'Category', value: ticket.asset?.assetType?.category || '—' },
-        { label: 'Campus', value: ticket.asset?.campus?.name || '—' },
-        // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
-        { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
-      ],
-      headerActions: [
-        { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
-        { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
-      ],
-    }] : []),
   ];
 }
