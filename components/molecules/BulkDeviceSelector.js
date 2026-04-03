@@ -111,16 +111,24 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
 
   // Filter assets based on search term
   const filteredAssets = useMemo(() => {
-    if (!searchTerm) return availableAssets;
-    const lowerSearch = searchTerm.toLowerCase();
-    return availableAssets.filter(asset => 
-      asset.assetId.toLowerCase().includes(lowerSearch) ||
-      asset.assetType.toLowerCase().includes(lowerSearch) ||
-      asset.brand?.toLowerCase().includes(lowerSearch) ||
-      asset.model?.toLowerCase().includes(lowerSearch) ||
-      asset.condition?.toLowerCase().includes(lowerSearch)
-    );
-  }, [searchTerm, availableAssets]);
+    let result = availableAssets;
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      result = availableAssets.filter(asset => 
+        asset.assetId.toLowerCase().includes(lowerSearch) ||
+        asset.assetType.toLowerCase().includes(lowerSearch) ||
+        asset.brand?.toLowerCase().includes(lowerSearch) ||
+        asset.model?.toLowerCase().includes(lowerSearch) ||
+        asset.condition?.toLowerCase().includes(lowerSearch)
+      );
+    }
+    
+    // Add _isChecked and create new object instances to ensure NextUI Table re-renders row states
+    return result.map(asset => ({
+      ...asset,
+      _isChecked: checkedAssets.has(asset.id)
+    }));
+  }, [searchTerm, availableAssets, checkedAssets]);
 
   const handleCheckboxChange = (asset) => {
     setCheckedAssets((prevCheckedAssets) => {
@@ -146,15 +154,27 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setCheckedAssets(new Set(filteredAssets.map(a => a.id)));
-      setSelectedAssetObjects((prevMap) => {
-        const newMap = new Map(prevMap);
-        filteredAssets.forEach(a => newMap.set(a.id, a));
-        return newMap;
+      setCheckedAssets((prevCheckedAssets) => {
+        const nextCheckedAssets = new Set(prevCheckedAssets);
+        filteredAssets.forEach(asset => nextCheckedAssets.add(asset.id));
+        return nextCheckedAssets;
+      });
+      setSelectedAssetObjects((prevAssetMap) => {
+        const nextAssetMap = new Map(prevAssetMap);
+        filteredAssets.forEach(asset => nextAssetMap.set(asset.id, asset));
+        return nextAssetMap;
       });
     } else {
-      setCheckedAssets(new Set());
-      setSelectedAssetObjects(new Map());
+      setCheckedAssets((prevCheckedAssets) => {
+        const nextCheckedAssets = new Set(prevCheckedAssets);
+        filteredAssets.forEach(asset => nextCheckedAssets.delete(asset.id));
+        return nextCheckedAssets;
+      });
+      setSelectedAssetObjects((prevAssetMap) => {
+        const nextAssetMap = new Map(prevAssetMap);
+        filteredAssets.forEach(asset => nextAssetMap.delete(asset.id));
+        return nextAssetMap;
+      });
     }
   };
 
@@ -201,9 +221,22 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     return condition.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   };
 
+  const isAllSelected = filteredAssets.length > 0 && filteredAssets.every(asset => checkedAssets.has(asset.id));
+
   // Table columns configuration
   const columns = [
-    { key: 'select', label: '', className: 'w-12' },
+    { 
+      key: 'select', 
+      label: (
+        <input
+          type="checkbox"
+          checked={isAllSelected}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        />
+      ),
+      className: 'w-12' 
+    },
     { key: 'assetId', label: 'Asset Tag' },
     { key: 'brand', label: 'Brand' },
     { key: 'model', label: 'Model' },
@@ -215,12 +248,11 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     switch (columnKey) {
       case 'select':
         return (
-          <div onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
             <input
               type="checkbox"
-              checked={checkedAssets.has(asset.id)}
+              checked={asset._isChecked}
               onChange={(e) => {
-                e.stopPropagation();
                 handleCheckboxChange(asset);
               }}
               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
