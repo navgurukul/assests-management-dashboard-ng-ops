@@ -34,6 +34,16 @@
   --sidebar-profile-active-fg: #bfdbfe;
 }
 
+.profile-box-bg-light {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb; /* gray-200 */
+}
+
+.profile-box-bg-dark {
+  background-color: #1f2937; /* gray-800 */
+  border: 1px solid #374151; /* gray-700 */
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

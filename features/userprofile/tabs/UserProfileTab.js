@@ -12,10 +12,12 @@ import {
   getEditProfileFields,
   editProfileValidationSchema,
 } from '@/app/config/formConfigs/editProfileModalConfig';
+import { useTheme } from '@/app/context/ThemeContext';
 
 export default function UserProfileTab() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isDark } = useTheme();
 
   // Fetch user data using React Query
   const { 
@@ -109,7 +111,7 @@ export default function UserProfileTab() {
       {/* Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email */}
-        <div className="flex items-start space-x-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg">
             <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
@@ -120,7 +122,7 @@ export default function UserProfileTab() {
         </div>
 
         {/* Phone */}
-        <div className="flex items-start space-x-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-lg">
             <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
@@ -131,7 +133,7 @@ export default function UserProfileTab() {
         </div>
 
         {/* Department */}
-        <div className="flex items-start space-x-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-lg">
             <Building className="w-5 h-5 text-purple-600 dark:text-purple-400" />
           </div>
@@ -142,7 +144,7 @@ export default function UserProfileTab() {
         </div>
 
         {/* Location */}
-        <div className="flex items-start space-x-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className="bg-orange-100 dark:bg-orange-900/50 p-2 rounded-lg">
             <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-400" />
           </div>
@@ -153,7 +155,7 @@ export default function UserProfileTab() {
         </div>
 
         {/* Join Date */}
-        <div className="flex items-start space-x-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-lg">
             <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           </div>
