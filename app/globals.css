@@ -39,7 +39,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
   --font-mono: var(--font-poppins);
-  
+  --sidebar-bg: var(--surface);
 }
 
 body {

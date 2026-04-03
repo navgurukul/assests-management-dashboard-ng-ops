@@ -49,7 +49,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
   return (
     <aside
       className={[
-        'bg-white border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col shrink-0',
+        'bg-sidebar-bg border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col shrink-0',
         // Mobile: fixed drawer overlay
         'fixed inset-y-0 left-0 z-40 w-64',
         isMobileOpen ? 'translate-x-0' : '-translate-x-full',
