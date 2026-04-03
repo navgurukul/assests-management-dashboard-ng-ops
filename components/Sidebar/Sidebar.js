@@ -72,7 +72,9 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 className={[
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                   isCollapsed ? 'md:justify-center' : '',
-                  isActive ? 'bg-orange-50 text-orange-400 font-medium' : 'text-gray-700 hover:bg-gray-50',
+                  isActive
+                    ? 'bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg) font-medium'
+                    : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
                 ].join(' ')}
               >
                 <Icon className="w-6 h-6 shrink-0" />
@@ -102,8 +104,8 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
               'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
               isCollapsed ? 'md:justify-center' : '',
               pathname === '/userprofile'
-                ? 'bg-blue-50 text-blue-600 font-medium'
-                : 'text-gray-700 hover:bg-gray-50',
+                ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg) font-medium'
+                : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
             ].join(' ')}
           >
             <User className="w-6 h-6 shrink-0" />
