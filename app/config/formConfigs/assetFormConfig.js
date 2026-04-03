@@ -85,10 +85,19 @@ export const assetFormFields = [
   {
     name: 'storageSizeGB',
     label: 'Storage Size (GB)',
-    type: 'number',
-    placeholder: 'Enter storage size in GB (e.g., 256, 512, 1024)',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select storage size (GB)',
+    apiUrl: '', // No API URL since we are using static items for storage sizes
+    queryKey: [],
+    labelKey: 'label',
+    valueKey: 'value',
+    staticItems: [
+      { label: '128 GB', value: '128' },
+      { label: '256 GB', value: '256' },
+      { label: '512 GB', value: '512' },
+      { label: '1024 GB (1 TB)', value: '1024' }
+    ],
     required: false,
-    min: 0,
     showIf: { field: 'assetTypeName', value: ['Laptop', 'Desktop', 'Tablet', 'Smartphone', 'Server', 'External Hard Drive', 'USB Flash Drive', 'SSD', 'HDD'] },
   },
   {
