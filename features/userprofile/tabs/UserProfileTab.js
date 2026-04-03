@@ -112,56 +112,56 @@ export default function UserProfileTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
-          <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg">
-            <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-900/50' : 'bg-blue-100'}`}>
+            <Mail className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Email</p>
-            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{userData.email}</p>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Email</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.email}</p>
           </div>
         </div>
 
         {/* Phone */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
-          <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-lg">
-            <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div className={`p-2 rounded-lg ${isDark ? 'bg-green-900/50' : 'bg-green-100'}`}>
+            <Phone className={`w-5 h-5 ${isDark ? 'text-green-400' : 'text-green-600'}`} />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Phone</p>
-            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{userData.phone}</p>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Phone</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.phone}</p>
           </div>
         </div>
 
         {/* Department */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
-          <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-lg">
-            <Building className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-900/50' : 'bg-purple-100'}`}>
+            <Building className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Department</p>
-            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{userData.department}</p>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Department</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.department}</p>
           </div>
         </div>
 
         {/* Location */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
-          <div className="bg-orange-100 dark:bg-orange-900/50 p-2 rounded-lg">
-            <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+          <div className={`p-2 rounded-lg ${isDark ? 'bg-orange-900/50' : 'bg-orange-100'}`}>
+            <MapPin className={`w-5 h-5 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Location</p>
-            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{userData.location}</p>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Location</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.location}</p>
           </div>
         </div>
 
         {/* Join Date */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
-          <div className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-lg">
-            <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <div className={`p-2 rounded-lg ${isDark ? 'bg-indigo-900/50' : 'bg-indigo-100'}`}>
+            <Calendar className={`w-5 h-5 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Member Since</p>
-            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{userData.joinDate}</p>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Member Since</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.joinDate}</p>
           </div>
         </div>
       </div>
