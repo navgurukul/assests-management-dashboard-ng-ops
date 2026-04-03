@@ -108,24 +108,26 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
       </nav>
 
       {/* User Profile at Bottom */}
-      <div className="p-4 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
-        <TooltipWrapper show={isCollapsed} content="User Profile">
-          <Link
-            href="/userprofile"
-            onClick={onMobileClose}
-            className={[
-              'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-              isCollapsed ? 'md:justify-center' : '',
-              pathname === '/userprofile'
-                ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg) font-medium'
-                : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
-            ].join(' ')}
-          >
-            <User className="w-6 h-6 shrink-0" />
-            <span className={isCollapsed ? 'md:hidden' : ''}>User Profile</span>
-          </Link>
-        </TooltipWrapper>
-      </div>
+      {userRole !== 'Student' && (
+        <div className="p-4 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
+          <TooltipWrapper show={isCollapsed} content="User Profile">
+            <Link
+              href="/userprofile"
+              onClick={onMobileClose}
+              className={[
+                'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                isCollapsed ? 'md:justify-center' : '',
+                pathname === '/userprofile'
+                  ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg) font-medium'
+                  : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
+              ].join(' ')}
+            >
+              <User className="w-6 h-6 shrink-0" />
+              <span className={isCollapsed ? 'md:hidden' : ''}>User Profile</span>
+            </Link>
+          </TooltipWrapper>
+        </div>
+      )}
     </aside>
   );
 }
