@@ -94,7 +94,7 @@ export default function CreateAllocation() {
         
       } else if (values.allocationType === 'CAMPUS') {
         // Campus allocation - bulk assets transfer
-        const assetIds = values.campusAssets.map(asset => asset.assetId);
+        const assetIds = values.campusAssets.map(asset => asset.id);
         allocationData = {
           allocationType: 'Campus',
           assetIds: assetIds,
