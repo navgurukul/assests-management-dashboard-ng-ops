@@ -101,10 +101,8 @@ export const allocationTableColumns = [
 // Default visible columns (shown when user first visits or resets)
 export const defaultVisibleColumns = [
   'assetTag',
-  'brandModel',
   'allocationType',
   'startDate',
-  'reason',
   'status',
   'deviceSelectionMode',
   'sourceCampus',
