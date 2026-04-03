@@ -14,6 +14,7 @@ import {
   FileText,
   User,
   Users,
+  Building2,
 } from 'lucide-react';
 import { menuItems } from '@/dummyJson/dummyJson';
 
@@ -26,6 +27,8 @@ const iconMap = {
   Archive,
   FileText,
   Users,
+  User,
+  Building2,
 };
 
 function TooltipWrapper({ show, content, children }) {

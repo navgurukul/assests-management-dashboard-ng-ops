@@ -7,6 +7,11 @@ export const menuItems = [
   { name: 'Components', icon: 'Component', path: '/components' },
   { name: 'User List', icon: 'Users', path: '/userlist' },
   { name: 'Reports', icon: 'FileText', path: '/reports' },
+  { name: 'User Profile', icon: 'User', path: '/userprofile' },
+  { name: 'My Assets', icon: 'Package', path: '/myassets' },
+  { name: 'My Ticket Status', icon: 'Ticket', path: '/ticketstatus' },
+  { name: 'Ticket for Approval', icon: 'Ticket', path: '/ticketforapproval' },
+  { name: 'Campus Incharge', icon: 'Building2', path: '/campusincharge' },
 ];
 
 export const userListData = [
