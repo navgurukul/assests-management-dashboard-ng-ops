@@ -53,6 +53,11 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
 
   // Selector for userRole from Redux store
   const userRole = useSelector(selectUserRole);
+  const isStudentOrEmployee = userRole === 'Student' || userRole === 'Employee';
+
+  const filteredMenuItems = menuItems.filter(
+    (item) => (isStudentOrEmployee ? item.studentOnly : !item.studentOnly)
+  );
 
   return (
     <aside
@@ -69,7 +74,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
     >
       <nav className="p-4 flex-1">
         <ul className="space-y-3" onClick={(e) => e.stopPropagation()}>
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.path;
 
