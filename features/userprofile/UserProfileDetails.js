@@ -22,7 +22,7 @@ const tabs = [
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
 ];
 
-export default function UserProfileDetails({ userAssets: initialAssets, userTickets: initialTickets }) {
+export default function UserProfileDetails({ userTickets: initialTickets }) {
   const [activeTab, setActiveTab] = useState('userprofile');
   const [userTickets, setUserTickets] = useState(initialTickets || []);
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
@@ -73,16 +73,6 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     joinDate: '',
     avatar: null,
   };
-  // Use React Query hook for assets with lazy loading
-  const { 
-    data: userAssets = [], 
-    isLoading: isLoadingAssets, 
-    error: assetsError 
-  } = useFetch({
-    url: config.endpoints.allocations.myAssets,
-    queryKey: ['myAssets'],
-    enabled: activeTab === 'myassets'
-  });
 
   // Fetch tickets when the ticket status tab becomes active for the first time
   useEffect(() => {
@@ -215,12 +205,9 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
             {ActiveTabComponent && (
               <ActiveTabComponent 
                 userData={userData}
-                userAssets={userAssets}
                 userTickets={userTickets}
                 isLoadingTickets={isLoadingTickets}
                 ticketsError={ticketsError}
-                isLoadingAssets={isLoadingAssets}
-                assetsError={assetsError?.message || (assetsError ? 'Failed to load assets' : null)}
                 onEditProfile={() => setIsEditModalOpen(true)}
               />
             )}
