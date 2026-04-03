@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Chart } from 'react-google-charts';
+import { useTheme } from '@/app/context/ThemeContext';
+import { getThemeCssColor } from '@/app/utils/themeColor';
 
 const StackedColumnChart = ({ 
   data, 
@@ -15,6 +17,9 @@ const StackedColumnChart = ({
   dropdownLabel = "",
   showLegendLabels = {}
 }) => {
+  const { theme } = useTheme();
+  const foreground = getThemeCssColor('--foreground');
+
   // Transform data to show full legend labels
   const transformedData = data.map((row, index) => {
     if (index === 0 && Object.keys(showLegendLabels).length > 0) {
@@ -28,7 +33,7 @@ const StackedColumnChart = ({
     titleTextStyle: {
       fontSize: 18,
       bold: true,
-      color: '#1F2937',
+      color: foreground,
       fontName: 'Poppins'
     },
     chartArea: { 
@@ -42,10 +47,12 @@ const StackedColumnChart = ({
     hAxis: {
       title: hAxisTitle,
       textStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 11
       },
       titleTextStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 13,
         bold: true,
@@ -58,10 +65,12 @@ const StackedColumnChart = ({
       title: vAxisTitle,
       minValue: 0,
       textStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 12
       },
       titleTextStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 13,
         bold: true,
@@ -72,6 +81,7 @@ const StackedColumnChart = ({
       position: 'right',
       alignment: 'start',
       textStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 10
       },
@@ -95,6 +105,7 @@ const StackedColumnChart = ({
         )}
       </div>
       <Chart
+        key={theme}
         chartType="ColumnChart"
         data={transformedData}
         options={options}

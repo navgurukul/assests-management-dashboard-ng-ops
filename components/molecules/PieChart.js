@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Chart } from 'react-google-charts';
+import { useTheme } from '@/app/context/ThemeContext';
+import { getThemeCssColor } from '@/app/utils/themeColor';
 
 const PieChart = ({ 
   data, 
@@ -12,12 +14,15 @@ const PieChart = ({
   showLegend = true,
   legendPosition = 'right'
 }) => {
+  const { theme } = useTheme();
+  const foreground = getThemeCssColor('--foreground');
+
   const options = {
     title: title,
     titleTextStyle: {
       fontSize: 18,
       bold: true,
-      color: '#1F2937',
+      color: foreground,
       fontName: 'Poppins'
     },
     colors: colors,
@@ -26,6 +31,7 @@ const PieChart = ({
       alignment: 'center',
       textStyle: {
         fontSize: 14,
+        color: foreground,
         fontName: 'Poppins'
       }
     },
@@ -46,6 +52,7 @@ const PieChart = ({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <Chart
+        key={theme}
         chartType="PieChart"
         data={data}
         options={options}
