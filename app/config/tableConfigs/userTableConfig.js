@@ -110,7 +110,6 @@ export const defaultVisibleColumns = [
   'assetBrand',
   'assetModel',
   'assetCondition',
-  'assetCampus',
   'allocationDate',
   'allocationStatus',
   'actions',
