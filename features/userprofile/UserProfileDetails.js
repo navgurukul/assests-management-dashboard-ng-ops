@@ -3,16 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Package, Ticket, Building2 } from 'lucide-react';
 import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab } from './tabs';
-import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
-import FormModal from '@/components/molecules/FormModal';
-import post from '@/app/api/post/post';
-import { toast } from '@/app/utils/toast';
-import {
-  getEditProfileFields,
-  editProfileValidationSchema,
-} from '@/app/config/formConfigs/editProfileModalConfig';
 
 const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
@@ -24,23 +16,15 @@ const tabs = [
 
 export default function UserProfileDetails() {
   const [activeTab, setActiveTab] = useState('userprofile');
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
 
   // Fetch user data using React Query
   const { 
     data: userDataResponse, 
-    isLoading: isLoadingUserData, 
-    error: userDataError,
-    refetch: refetchUserData
   } = useFetch({
     url: config.endpoints.user.me,
     queryKey: ['userMe'],
     enabled: true
   });
-
-   
 
   // Extract user data from response or use fallback
   const rawUserData = userDataResponse?.data || userDataResponse || null;
@@ -70,56 +54,10 @@ export default function UserProfileDetails() {
     avatar: null,
   };
 
-  // Fetch tickets when the ticket status tab becomes active for the first time
-
-
-  const handleEditSubmit = async (formData) => {
-    setIsSubmitting(true);
-    const loadingToastId = toast.loading('Updating profile...');
-    
-    try {
-      await post({
-        url: config.getApiUrl(config.endpoints.user.me),
-        method: 'PUT',
-        data: formData,
-      });
-      
-      toast.dismiss(loadingToastId);
-      toast.success('Profile updated successfully');
-      setIsEditModalOpen(false);
-      
-      // Refetch user data without page reload
-      refetchUserData();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.dismiss(loadingToastId);
-      toast.error(error?.message || 'Failed to update profile');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const editProfileFields = getEditProfileFields({
-    phone: userData.phone,
-    location: userData.location,
-    campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
-  });
-
   const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
 
   return (
     <>
-      <FormModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        componentName=""
-        actionType="Edit User Details"
-        fields={editProfileFields}
-        onSubmit={handleEditSubmit}
-        size="medium"
-        isSubmitting={isSubmitting}
-        validationSchema={editProfileValidationSchema}
-      />
       <div className="h-full overflow-y-auto bg-gray-50 p-4"> 
         {/* Breadcrumb */}
         <div className="mb-3 text-xs text-gray-600">
@@ -181,7 +119,6 @@ export default function UserProfileDetails() {
             {ActiveTabComponent && (
               <ActiveTabComponent 
                 userData={userData}
-                onEditProfile={() => setIsEditModalOpen(true)}
               />
             )}
           </div>
