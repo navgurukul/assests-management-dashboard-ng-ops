@@ -3,16 +3,7 @@
 import React from 'react';
 import { Clock, AlertTriangle, CheckCircle, Calendar } from 'lucide-react';
 
-/**
- * SLAIndicator Component
- * Displays SLA timeline status with visual indicators
- * 
- * @param {Object} props
- * @param {string} props.allocationDate - Date when ticket was allocated (ISO string)
- * @param {string} props.expectedResolutionDate - Expected resolution date (ISO string)
- * @param {string} props.status - Current ticket status
- * @param {boolean} props.compact - Show compact version
- */
+
 export default function SLAIndicator({ 
   allocationDate, 
   expectedResolutionDate, 
@@ -43,40 +34,32 @@ export default function SLAIndicator({
   // Determine status
   let slaStatus = 'on-track'; // green
   let statusText = 'On Track';
-  let icon = <Clock size={compact ? 14 : 16} />;
-  let bgColor = 'bg-green-50';
-  let textColor = 'text-green-700';
-  let borderColor = 'border-green-200';
+  let icon = <Clock size={compact ? 14 : 16} className="currentColor" />;
+  let themeClass = 'sla-on-track';
 
   if (isCompleted) {
     slaStatus = 'completed';
     statusText = daysElapsed <= totalDays ? 'Resolved On Time' : 'Resolved (Overdue)';
-    icon = <CheckCircle size={compact ? 14 : 16} />;
-    bgColor = daysElapsed <= totalDays ? 'bg-green-50' : 'bg-orange-50';
-    textColor = daysElapsed <= totalDays ? 'text-green-700' : 'text-orange-700';
-    borderColor = daysElapsed <= totalDays ? 'border-green-200' : 'border-orange-200';
+    icon = <CheckCircle size={compact ? 14 : 16} className="currentColor" />;
+    themeClass = daysElapsed <= totalDays ? 'sla-on-track' : 'sla-completed-overdue';
   } else if (daysRemaining < 0) {
     slaStatus = 'overdue';
     statusText = 'Overdue';
-    icon = <AlertTriangle size={compact ? 14 : 16} />;
-    bgColor = 'bg-red-50';
-    textColor = 'text-red-700';
-    borderColor = 'border-red-200';
+    icon = <AlertTriangle size={compact ? 14 : 16} className="currentColor" />;
+    themeClass = 'sla-overdue';
   } else if (daysRemaining <= 2) {
     slaStatus = 'warning';
     statusText = 'Due Soon';
-    icon = <AlertTriangle size={compact ? 14 : 16} />;
-    bgColor = 'bg-yellow-50';
-    textColor = 'text-yellow-700';
-    borderColor = 'border-yellow-200';
+    icon = <AlertTriangle size={compact ? 14 : 16} className="currentColor" />;
+    themeClass = 'sla-warning';
   }
 
   // Compact version for table/list views
   if (compact) {
     return (
-      <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md border ${bgColor} ${textColor} ${borderColor}`}>
+      <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md border ${themeClass}`}>
         {icon}
-        <span className="font-medium text-xs">
+        <span className="font-medium text-xs text-inherit">
           {isCompleted ? statusText : `${Math.abs(daysRemaining)}d ${daysRemaining < 0 ? 'overdue' : 'left'}`}
         </span>
       </div>
@@ -85,15 +68,15 @@ export default function SLAIndicator({
 
   // Full version for detail views
   return (
-    <div className={`p-4 rounded-lg border ${bgColor} ${borderColor}`}>
+    <div className={`p-4 rounded-lg border ${themeClass}`}>
       <div className="flex items-start gap-3">
-        <div className={`${textColor} mt-0.5`}>
+        <div className="text-inherit mt-0.5">
           {icon}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <h4 className={`font-semibold text-sm ${textColor}`}>{statusText}</h4>
-            <span className={`text-xs font-medium px-2 py-1 rounded ${bgColor} ${textColor}`}>
+            <h4 className="font-semibold text-sm text-inherit">{statusText}</h4>
+            <span className={`text-xs font-medium px-2 py-1 rounded border-none ${themeClass}`}>
               {totalDays} days SLA
             </span>
           </div>
@@ -101,11 +84,11 @@ export default function SLAIndicator({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs text-gray-600">
               <Calendar size={12} />
-              <span>Allocated: {allocation.toLocaleDateString()}</span>
+              <span className="text-gray-800">Allocated: {allocation.toLocaleDateString()}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-600">
               <Calendar size={12} />
-              <span>Expected: {expectedResolution.toLocaleDateString()}</span>
+              <span className="text-gray-800">Expected: {expectedResolution.toLocaleDateString()}</span>
             </div>
             
             {/* Progress bar */}
