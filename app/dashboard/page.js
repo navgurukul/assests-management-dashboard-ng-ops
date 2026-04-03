@@ -23,7 +23,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-6 overflow-y-auto h-full bg-gradient-to-br from-gray-50 to-blue-50"> 
+    <div className="p-6 overflow-y-auto h-full bg-[linear-gradient(135deg,var(--background)_0%,var(--surface-soft)_100%)]">
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {dashboardCards.map((card) => (
