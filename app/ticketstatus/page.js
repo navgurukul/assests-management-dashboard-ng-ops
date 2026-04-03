@@ -1,3 +1,7 @@
+import { TicketStatusTab } from "@/features/userprofile/tabs";
+
 export default function TicketStatusPage() {
-  return <div>Hi</div>;
+  return <div>
+    <TicketStatusTab />
+  </div>;
 }

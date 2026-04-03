@@ -1,3 +1,7 @@
+import { MyAssetsTab } from "@/features/userprofile/tabs";
+
 export default function MyAssetsPage() {
-  return <div>Hi</div>;
+  return <div>
+    <MyAssetsTab />
+  </div>;
 }

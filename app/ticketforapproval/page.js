@@ -1,3 +1,7 @@
+import { TicketApprovalTab } from "@/features/userprofile/tabs";
+
 export default function TicketForApprovalPage() {
-  return <div>Hi</div>;
+  return <div>
+    <TicketApprovalTab />
+  </div>;
 }
