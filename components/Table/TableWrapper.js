@@ -24,6 +24,8 @@ export default function TableWrapper({
   columnSelectorComponent, // New prop for column selector
   activeFiltersComponent, // New prop for filter chips
   searchComponent, // New prop for search bar
+  onShowAll, // New prop for Show All button handler
+  showAllButtonText = "Show All",
   // Server-side pagination props
   serverPagination = false,
   paginationData = null, // { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage }
@@ -84,6 +86,14 @@ export default function TableWrapper({
         
         {/* Buttons on the right */}
         <div className="flex items-center gap-3">
+          {onShowAll && (
+            <CustomButton
+              text={showAllButtonText}
+              onClick={onShowAll}
+              variant="secondary"
+              size="md"
+            />
+          )}
           {filterComponent}
           {columnSelectorComponent}
           {showCreateButton && (

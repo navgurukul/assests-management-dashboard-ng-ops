@@ -36,6 +36,9 @@ export default function TicketsList() {
   // Search state
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [assigneeEmail, setAssigneeEmail] = useState('');
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isShowAllMode, setIsShowAllMode] = useState(false);
 
   // Column visibility management
   const {
@@ -58,6 +61,22 @@ export default function TicketsList() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // Read assignee email from localStorage auth key on first render
+  useEffect(() => {
+    try {
+      const authRaw = localStorage.getItem('__AUTH__');
+      if (authRaw) {
+        const authData = JSON.parse(authRaw);
+        const email = authData?.email || authData?.user?.email || '';
+        setAssigneeEmail(email);
+      }
+    } catch (error) {
+      console.error('Error reading __AUTH__ from localStorage:', error);
+    } finally {
+      setIsAuthReady(true);
+    }
+  }, []);
+
   // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
@@ -69,9 +88,13 @@ export default function TicketsList() {
     
     // Add search parameter first
     if (debouncedSearch) params.append('search', debouncedSearch);
-    
-    params.append('page', currentPage);
-    params.append('limit', pageSize);
+
+    if (isShowAllMode) {
+      params.append('page', currentPage);
+      params.append('limit', pageSize);
+    } else if (assigneeEmail) {
+      params.append('assigneeEmail', assigneeEmail);
+    }
 
     // Add filters
     if (filters.campus) params.append('campusId', filters.campus);
@@ -84,7 +107,8 @@ export default function TicketsList() {
   // Fetch tickets data from API with pagination, filters, and search
   const { data, isLoading, isError, error } = useFetch({
     url: `/tickets?${buildQueryString()}`,
-    queryKey: ['tickets', currentPage, pageSize, filters, debouncedSearch],
+    queryKey: ['tickets', isShowAllMode, assigneeEmail, currentPage, pageSize, filters, debouncedSearch],
+    enabled: isAuthReady,
   });
 
   // Fetch consolidated data by campus
@@ -119,6 +143,7 @@ export default function TicketsList() {
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+    setIsShowAllMode(false);
     setCurrentPage(1); // Reset to first page when filters change
   };
 
@@ -129,6 +154,19 @@ export default function TicketsList() {
     setFilters(newFilters);
     setCurrentPage(1);
   };
+
+  // Toggle between all tickets and my assigned tickets
+  const handleShowAll = () => {
+    setIsShowAllMode((prev) => !prev);
+    setFilters({});
+    setSearchInput('');
+    setDebouncedSearch('');
+    setCurrentPage(1);
+  };
+
+  const showAllButtonText = isShowAllMode
+    ? 'My Tickets'
+    : 'Show All';
 
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -190,9 +228,10 @@ export default function TicketsList() {
   };
 
   const ticketsData = React.useMemo(() => {
-    if (!data?.data?.tickets) return [];
+    const tickets = data?.data?.tickets || data?.data || [];
+    if (!Array.isArray(tickets)) return [];
 
-    return data.data.tickets.map((ticket) => {
+    return tickets.map((ticket) => {
       const deviceTag = ticket.asset?.assetTag || ticket.assetTag || ticket.assetId || '-';
       const updatedLabel = ticket.updatedAt
         ? new Date(ticket.updatedAt).toLocaleDateString('en-GB', {
@@ -289,6 +328,8 @@ export default function TicketsList() {
       };
     });
   }, [data]);
+
+  const hasServerPagination = Boolean(data?.data?.pagination?.totalPages);
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -395,9 +436,9 @@ export default function TicketsList() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 p-6">
         {summaryCards.map((card) => (
           <SummaryCard
             key={card.label}
@@ -421,11 +462,13 @@ export default function TicketsList() {
         title="Tickets"
         renderCell={renderCell}
         itemsPerPage={pageSize}
-        showPagination={true}
+        showPagination={isShowAllMode && hasServerPagination}
         ariaLabel="Tickets table"
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        onShowAll={handleShowAll}
+        showAllButtonText={showAllButtonText}
         // Search component
         searchComponent={
           <SearchInput
@@ -466,7 +509,7 @@ export default function TicketsList() {
         // Loading state
         isLoading={isLoading}
         // Server-side pagination props
-        serverPagination={true}
+        serverPagination={isShowAllMode && hasServerPagination}
         paginationData={data?.data?.pagination}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
