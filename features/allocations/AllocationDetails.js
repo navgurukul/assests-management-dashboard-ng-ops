@@ -325,12 +325,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Duration', value: calculateDuration() },
       ],
     },
-  ];
-
-  // Right column sections (70%)
-  const rightSections = [
-    assetCardsSection,
-    {
+     {
       title: 'Timeline',
       color: 'indigo',
       itemsGrid: true,
@@ -378,6 +373,12 @@ export default function AllocationDetails({ allocationId, onBack }) {
         },
       ],
     },
+  ];
+
+  // Right column sections (70%)
+  const rightSections = [
+    assetCardsSection,
+   
     ...(allocationDetails.ticket
       ? [
           {
