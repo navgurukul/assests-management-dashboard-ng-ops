@@ -46,13 +46,13 @@ export const assetFormFields = [
     placeholder: 'Enter model (e.g., Latitude 5400)',
     required: true,
   },
-  {
-    name: 'specLabel',
-    label: 'Specification Label',
-    type: 'text',
-    placeholder: 'Enter full specs (e.g., Intel i5, 8GB RAM, 256GB SSD)',
-    required: true,
-  },
+  // {
+  //   name: 'specLabel',
+  //   label: 'Specification Label',
+  //   type: 'text',
+  //   placeholder: 'Enter full specs (e.g., Intel i5, 8GB RAM, 256GB SSD)',
+  //   required: true,
+  // },
   {
     name: 'processor',
     label: 'Processor',
