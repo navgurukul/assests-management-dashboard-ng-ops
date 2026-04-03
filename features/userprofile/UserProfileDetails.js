@@ -22,12 +22,8 @@ const tabs = [
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
 ];
 
-export default function UserProfileDetails({ userTickets: initialTickets }) {
+export default function UserProfileDetails() {
   const [activeTab, setActiveTab] = useState('userprofile');
-  const [userTickets, setUserTickets] = useState(initialTickets || []);
-  const [isLoadingTickets, setIsLoadingTickets] = useState(false);
-  const [ticketsError, setTicketsError] = useState(null);
-  const [hasTicketsFetched, setHasTicketsFetched] = useState(!!initialTickets);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -75,27 +71,7 @@ export default function UserProfileDetails({ userTickets: initialTickets }) {
   };
 
   // Fetch tickets when the ticket status tab becomes active for the first time
-  useEffect(() => {
-    if (activeTab === 'ticketstatus' && !hasTicketsFetched) {
-      fetchUserTickets();
-    }
-  }, [activeTab]);
 
-  const fetchUserTickets = async () => {
-    setIsLoadingTickets(true);
-    setTicketsError(null);
-    try {
-      const response = await apiService.get(config.endpoints.tickets.myTickets);
-      setUserTickets(response.data || response || []);
-      setHasTicketsFetched(true);
-    } catch (error) {
-      console.error('Error fetching user tickets:', error);
-      setTicketsError(error.message || 'Failed to load tickets');
-      setUserTickets([]);
-    } finally {
-      setIsLoadingTickets(false);
-    }
-  };
 
   const handleEditSubmit = async (formData) => {
     setIsSubmitting(true);
@@ -205,9 +181,6 @@ export default function UserProfileDetails({ userTickets: initialTickets }) {
             {ActiveTabComponent && (
               <ActiveTabComponent 
                 userData={userData}
-                userTickets={userTickets}
-                isLoadingTickets={isLoadingTickets}
-                ticketsError={ticketsError}
                 onEditProfile={() => setIsEditModalOpen(true)}
               />
             )}
