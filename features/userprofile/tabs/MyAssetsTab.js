@@ -195,7 +195,7 @@ export default function MyAssetsTab() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">My Assets</h2>
+      <h1 className="text-xl font-semibold text-gray-900 mb-4">My Assets</h1>
       
       {assets && assets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
