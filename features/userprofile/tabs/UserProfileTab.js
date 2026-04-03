@@ -108,6 +108,14 @@ export default function UserProfileTab() {
         isSubmitting={isSubmitting}
         validationSchema={editProfileValidationSchema}
       />
+      
+      {/* Tab Heading */}
+      <div className="mb-5">
+        <h2 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+          Personal Information
+        </h2>
+      </div>
+
       {/* Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email */}
