@@ -160,6 +160,17 @@ export default function AllocationConsignmentSelector({
     return directType || 'N/A';
   };
 
+  const getHardwareSpecs = (asset) => {
+    const processor = String(asset?.processor || '').trim() || 'N/A';
+    const ram = asset?.ramSizeGB ?? null;
+    const storage = asset?.storageSizeGB ?? null;
+
+    const ramValue = ram === null || ram === '' ? 'N/A' : `${ram} GB`;
+    const storageValue = storage === null || storage === '' ? 'N/A' : `${storage} GB`;
+
+    return `Processor: ${processor} | RAM: ${ramValue} | Storage: ${storageValue}`;
+  };
+
   const isLikelyCampusId = (value) => {
     if (typeof value !== 'string') return false;
     const trimmed = value.trim();
@@ -521,16 +532,7 @@ export default function AllocationConsignmentSelector({
                     Model
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Spec Label
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Processor
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    RAM (GB)
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    Storage (GB)
+                    Hardware Specs
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                     Serial Number
@@ -598,22 +600,7 @@ export default function AllocationConsignmentSelector({
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs text-gray-700">
-                          {asset.specLabel || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-700">
-                          {asset.processor || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-700">
-                          {asset.ramSizeGB || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-700">
-                          {asset.storageSizeGB || 'N/A'}
+                          {getHardwareSpecs(asset)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
