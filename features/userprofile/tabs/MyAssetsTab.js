@@ -6,6 +6,7 @@ import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
@@ -33,6 +34,14 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
   const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
 
+  const { data: campusesResponse, refetch: fetchCampuses } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+    enabled: false,
+  });
+
+  const campusesData = campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
+
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
   const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
@@ -48,6 +57,7 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
           allocationReason: allocation.allocationReason,
           sourceName: allocation.sourceName,
           destinationName: allocation.destinationName,
+          userAddress: allocation.userAddress,
         };
       });
     });
@@ -55,7 +65,11 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
   }, [allocations]);
 
   const computedReturnFields = useMemo(
-    () => getReturnAssetFields(selectedAsset, allocationMap[selectedAsset?.id]?.sourceName),
+    () => getReturnAssetFields(
+      selectedAsset, 
+      allocationMap[selectedAsset?.id]?.sourceName,
+      allocationMap[selectedAsset?.id]?.userAddress
+    ),
     [selectedAsset, allocationMap]
   );
 
@@ -113,41 +127,32 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
     try {
       const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id;
       
-      const payload = new FormData();
-
-      payload.append('consignmentId', consignmentId || '');
-      payload.append('assetId', selectedAsset?.id || '');
-      payload.append('managerEmail', formData.managerEmail || '');
-      
       const expDate = formData.expectedDeliveryDate;
-        
       const formattedDate = expDate instanceof Date
         ? expDate.toISOString().split('T')[0]
         : (typeof expDate === 'string' ? expDate : '');
-      payload.append('expectedDeliveryDate', formattedDate);
 
-      // We still map from the form's destinationCampusId or from selected asset
-      let storedCampusId = '';
+      let sourceCampusIdValue = '';
       if (formData.returnMode === 'VISIT_CAMPUS' || formData.returnMode === 'OTHER_CAMPUS') {
-        storedCampusId = formData.destinationCampusId || formData.sourceCampusId || '';
+        sourceCampusIdValue = formData.destinationCampusId || formData.sourceCampusId;
       } else if (formData.returnMode === 'SOURCED_CAMPUS') {
-        storedCampusId = selectedAsset?.sourceCampusId || selectedAsset?.campusId || '';
+        sourceCampusIdValue = selectedAsset?.sourceCampusId || selectedAsset?.campusId;
       }
-      payload.append('storedCampusId', storedCampusId);
 
-      // Remaining fields
-      if (formData.returnMode === 'VISIT_CAMPUS') {
-        // Now campusItCoordinator is included in VISIT_CAMPUS
-        payload.append('campusITCoordinatorEmail', formData.campusItCoordinator || '');
-        payload.append('exactAddress', '');
-        payload.append('courierPartnerName', '');
-      } else {
-        payload.append('campusITCoordinatorEmail', formData.campusItCoordinator || '');
-        payload.append('exactAddress', formData.exactAddress || '');
-        payload.append('courierPartnerName', formData.vendorName || '');
-        
-        Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
-      }
+      const fields = {
+        consignmentId,
+        assetId: selectedAsset?.id,
+        sourceCampusId: sourceCampusIdValue,
+        campusITCoordinatorEmail: formData.campusItCoordinator || '',
+        exactAddress: formData.exactAddress || '',
+        vendorName: formData.returnMode === 'VISIT_CAMPUS' ? '' : (formData.vendorName || ''),
+        managerEmail: formData.managerEmail || '',
+        expectedDeliveryDate: formattedDate,
+      };
+
+      const payload = new FormData();
+      Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
+      Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
 
       await postMutation({
         endpoint: '/consignment/assets/return',
@@ -388,6 +393,43 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
         isSubmitting={isPostPending}
         size="medium"
         validationSchema={returnAssetValidationSchema}
+        onFormDataChange={(updatedData, fieldChanged) => {
+          // Trigger fetch when user selects OTHER_CAMPUS
+          if (fieldChanged?.name === 'returnMode' && updatedData.returnMode === 'OTHER_CAMPUS') {
+            fetchCampuses();
+          }
+
+          // Auto-fill address when switching back to SOURCED_CAMPUS
+          if (fieldChanged?.name === 'returnMode' && updatedData.returnMode === 'SOURCED_CAMPUS') {
+            const assetAddress = selectedAsset?.campus?.address || allocationMap[selectedAsset?.id]?.userAddress || '';
+            return {
+              ...updatedData,
+              exactAddress: assetAddress,
+              destinationCampusId: '',
+            };
+          }
+
+          // Clear address when switching to OTHER_CAMPUS or VISIT_CAMPUS
+          if (fieldChanged?.name === 'returnMode' && (updatedData.returnMode === 'OTHER_CAMPUS' || updatedData.returnMode === 'VISIT_CAMPUS')) {
+            return {
+              ...updatedData,
+              exactAddress: '',
+              destinationCampusId: '',
+            };
+          }
+
+          // Handle campus selection from API autocomplete
+          if (fieldChanged?.name === 'destinationCampusId' && updatedData.returnMode === 'OTHER_CAMPUS') {
+            const selectedCampus = campusesData.find((c) => c.id === updatedData.destinationCampusId);
+            if (selectedCampus && selectedCampus.address) {
+              return {
+                ...updatedData,
+                exactAddress: selectedCampus.address
+              };
+            }
+          }
+          return updatedData;
+        }}
       />
     </div>
   );

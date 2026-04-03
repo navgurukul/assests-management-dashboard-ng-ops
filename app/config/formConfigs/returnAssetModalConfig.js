@@ -47,6 +47,12 @@ export const returnAssetFields = [
     required: true,
     placeholder: 'Select a campus',
     showWhen: (formData) => ['VISIT_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
+    onItemSelect: (item) => {
+      if (item && item.address) {
+        return { exactAddress: item.address };
+      }
+      return null;
+    },
   },
   {
     name: 'campusItCoordinator',
@@ -54,6 +60,7 @@ export const returnAssetFields = [
     type: 'email',
     required: true,
     placeholder: 'IT coordinator email',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
   {
     name: 'exactAddress',
@@ -102,7 +109,7 @@ export const returnAssetFields = [
  *
  * @param {{ assetTag?: string; id?: string; campus?: { name?: string }; campusName?: string } | null} selectedAsset
  */
-export const getReturnAssetFields = (selectedAsset = null, sourceName = '') =>
+export const getReturnAssetFields = (selectedAsset = null, sourceName = '', userAddress = '') =>
   returnAssetFields.map((f) => {
     if (f.name === 'assetId')
       return {
@@ -113,6 +120,11 @@ export const getReturnAssetFields = (selectedAsset = null, sourceName = '') =>
       return {
         ...f,
         defaultValue: sourceName || selectedAsset?.campus?.name || selectedAsset?.campusName || '',
+      };
+    if (f.name === 'exactAddress')
+      return {
+        ...f,
+        defaultValue: selectedAsset?.campus?.address || userAddress || '',
       };
     return f;
   });
@@ -127,9 +139,13 @@ export const returnAssetValidationSchema = Yup.object().shape({
     then: (schema) => schema.required('Campus is required'),
     otherwise: (schema) => schema.nullable(),
   }),
-  campusItCoordinator: Yup.string()
-    .required('IT Coordinator email is required')
-    .email('Enter a valid email address'),
+  campusItCoordinator: Yup.string().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: (schema) => schema
+      .required('IT Coordinator email is required')
+      .email('Enter a valid email address'),
+    otherwise: (schema) => schema.nullable(),
+  }),
   exactAddress: Yup.string().when('returnMode', {
     is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
     then: (schema) => schema
