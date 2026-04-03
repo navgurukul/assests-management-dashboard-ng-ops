@@ -73,6 +73,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     
     params.append('page', currentPage);
     params.append('limit', pageSize);
+    params.append('isConsignmentCreated', 'false');
     
     if (assetTypeId) params.append('type', assetTypeId);
     if (sourceCampusId) params.append('campusId', sourceCampusId);
@@ -94,16 +95,18 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   // Extract assets from API response
   const availableAssets = useMemo(() => {
     if (!data?.data || !Array.isArray(data.data)) return [];
-    return data.data.map(asset => ({
-      id: asset.id,
-      assetId: asset.assetTag,
-      assetType: asset.assetType?.name || 'N/A',
-      brand: asset.brand,
-      model: asset.model,
-      condition: asset.condition,
-      workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
-      status: asset.status,
-    }));
+    return data.data
+      .filter(asset => asset.isConsignmentCreated === false)
+      .map(asset => ({
+        id: asset.id,
+        assetId: asset.assetTag,
+        assetType: asset.assetType?.name || 'N/A',
+        brand: asset.brand,
+        model: asset.model,
+        condition: asset.condition,
+        workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
+        status: asset.status,
+      }));
   }, [data]);
 
   // Filter assets based on search term
