@@ -15,7 +15,10 @@ const StackedBarChart = ({
   vAxisTitle = ""
 }) => {
   const { theme } = useTheme();
-  const foreground = getThemeCssColor('--foreground');
+  const foreground = getThemeCssColor(
+    theme === 'dark' ? '--foreground-dark' : '--foreground-light',
+    theme === 'dark' ? '#f3f4f6' : '#111827'
+  );
 
   const options = {
     title: title,

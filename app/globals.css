@@ -5,6 +5,8 @@
   --surface: #ffffff;
   --surface-soft: #f3f5f8;
   --foreground: #111827;
+  --foreground-light: #111827;
+  --foreground-dark: #f3f4f6;
   --muted: #4b5563;
   --border: #e5e7eb;
   --sidebar-item-fg: #374151;
