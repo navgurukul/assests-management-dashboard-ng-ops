@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Chart } from 'react-google-charts';
+import { useTheme } from '@/app/context/ThemeContext';
+import { getThemeCssColor } from '@/app/utils/themeColor';
 
 const StackedBarChart = ({ 
   data, 
@@ -12,12 +14,15 @@ const StackedBarChart = ({
   hAxisTitle = "",
   vAxisTitle = ""
 }) => {
+  const { theme } = useTheme();
+  const foreground = getThemeCssColor('--foreground');
+
   const options = {
     title: title,
     titleTextStyle: {
       fontSize: 18,
       bold: true,
-      color: '#1F2937',
+      color: foreground,
       fontName: 'Poppins'
     },
     chartArea: { 
@@ -30,10 +35,12 @@ const StackedBarChart = ({
       title: hAxisTitle,
       minValue: 0,
       textStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 12
       },
       titleTextStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 14,
         bold: true,
@@ -43,10 +50,12 @@ const StackedBarChart = ({
     vAxis: {
       title: vAxisTitle,
       textStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 12
       },
       titleTextStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 14,
         bold: true,
@@ -57,6 +66,7 @@ const StackedBarChart = ({
       position: 'right',
       alignment: 'center',
       textStyle: {
+        color: foreground,
         fontName: 'Poppins',
         fontSize: 12
       }
@@ -67,6 +77,7 @@ const StackedBarChart = ({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <Chart
+        key={theme}
         chartType="BarChart"
         data={data}
         options={options}
