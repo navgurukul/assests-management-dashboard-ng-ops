@@ -23,7 +23,7 @@ import {
 
 const formatRole = (role) => {
   if (!role) return 'N/A';
-  return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+  return role.toUpperCase().replace(/_/g, ' ');
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
