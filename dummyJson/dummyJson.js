@@ -10,7 +10,7 @@ export const menuItems = [
   { name: 'User Profile', icon: 'User', path: '/userprofile', studentOnly: false },
   { name: 'My Assets', icon: 'Package', path: '/myassets', studentOnly: true },
   { name: 'My Ticket Status', icon: 'Ticket', path: '/ticketstatus', studentOnly: true },
-  { name: 'Ticket for Approval', icon: 'Ticket', path: '/ticketforapproval', studentOnly: true },
+  { name: 'Ticket for Approval', icon: 'TicketCheck', path: '/ticketforapproval', studentOnly: true },
   // { name: 'Campus Incharge', icon: 'Building2', path: '/campusincharge', studentOnly: true },
 ];
 

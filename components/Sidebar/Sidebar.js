@@ -17,6 +17,7 @@ import {
   User,
   Users,
   Building2,
+  TicketCheck,
 } from 'lucide-react';
 import { menuItems } from '@/dummyJson/dummyJson';
 
@@ -31,6 +32,7 @@ const iconMap = {
   Users,
   User,
   Building2,
+  TicketCheck,
 };
 
 function TooltipWrapper({ show, content, children }) {
