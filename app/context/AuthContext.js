@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { setUserRole } from '@/app/store/slices/appSlice';
 import { jwtDecode } from 'jwt-decode';
 import { isTokenExpired, clearAuthData } from '@/app/utils/authUtils';
 import { AUTH_KEY as _AUTH_KEY } from '@/app/utils/authConstants';
@@ -18,6 +20,7 @@ export function AuthProvider({ children }) {
     data: null,
   });
   const router = useRouter();
+  // const dispatch = useDispatch();
 
   // Load auth state from localStorage on mount
   useEffect(() => {
@@ -31,7 +34,10 @@ export function AuthProvider({ children }) {
           if (parsedAuth?.token) {
             try {
               const decodedToken = jwtDecode(parsedAuth.token);
-              console.log("Decoded Token Data:===>>>", decodedToken);
+              // console.log("Decoded Token Data:===>>>", decodedToken);
+              // Map/Extract role and dispatch to Redux (Assume 'Student' if not present for placeholder)
+              // const role = decodedToken?.userRole;
+              // dispatch(setUserRole(role));
             } catch (err) {
               console.error("Invalid token format:", err);
             }

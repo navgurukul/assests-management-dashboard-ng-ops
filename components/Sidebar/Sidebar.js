@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 import { Tooltip } from '@nextui-org/react';
 import {
   LayoutDashboard,
@@ -48,6 +50,9 @@ function TooltipWrapper({ show, content, children }) {
 export default function Sidebar({ isMobileOpen, onMobileClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  // Selector for userRole from Redux store
+  const userRole = useSelector(selectUserRole);
 
   return (
     <aside
