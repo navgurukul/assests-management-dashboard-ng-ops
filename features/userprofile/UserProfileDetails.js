@@ -22,12 +22,8 @@ const tabs = [
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
 ];
 
-export default function UserProfileDetails({ userAssets: initialAssets, userTickets: initialTickets }) {
+export default function UserProfileDetails() {
   const [activeTab, setActiveTab] = useState('userprofile');
-  const [userTickets, setUserTickets] = useState(initialTickets || []);
-  const [isLoadingTickets, setIsLoadingTickets] = useState(false);
-  const [ticketsError, setTicketsError] = useState(null);
-  const [hasTicketsFetched, setHasTicketsFetched] = useState(!!initialTickets);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -73,39 +69,9 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
     joinDate: '',
     avatar: null,
   };
-  // Use React Query hook for assets with lazy loading
-  const { 
-    data: userAssets = [], 
-    isLoading: isLoadingAssets, 
-    error: assetsError 
-  } = useFetch({
-    url: config.endpoints.allocations.myAssets,
-    queryKey: ['myAssets'],
-    enabled: activeTab === 'myassets'
-  });
 
   // Fetch tickets when the ticket status tab becomes active for the first time
-  useEffect(() => {
-    if (activeTab === 'ticketstatus' && !hasTicketsFetched) {
-      fetchUserTickets();
-    }
-  }, [activeTab]);
 
-  const fetchUserTickets = async () => {
-    setIsLoadingTickets(true);
-    setTicketsError(null);
-    try {
-      const response = await apiService.get(config.endpoints.tickets.myTickets);
-      setUserTickets(response.data || response || []);
-      setHasTicketsFetched(true);
-    } catch (error) {
-      console.error('Error fetching user tickets:', error);
-      setTicketsError(error.message || 'Failed to load tickets');
-      setUserTickets([]);
-    } finally {
-      setIsLoadingTickets(false);
-    }
-  };
 
   const handleEditSubmit = async (formData) => {
     setIsSubmitting(true);
@@ -215,12 +181,6 @@ export default function UserProfileDetails({ userAssets: initialAssets, userTick
             {ActiveTabComponent && (
               <ActiveTabComponent 
                 userData={userData}
-                userAssets={userAssets}
-                userTickets={userTickets}
-                isLoadingTickets={isLoadingTickets}
-                ticketsError={ticketsError}
-                isLoadingAssets={isLoadingAssets}
-                assetsError={assetsError?.message || (assetsError ? 'Failed to load assets' : null)}
                 onEditProfile={() => setIsEditModalOpen(true)}
               />
             )}

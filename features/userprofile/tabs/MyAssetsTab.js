@@ -8,6 +8,7 @@ import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
+import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import {
@@ -23,7 +24,7 @@ import {
   assetReceivedValidationSchema,
 } from '@/app/config/formConfigs/assetReceivedModalConfig';
 
-export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }) {
+export default function MyAssetsTab() {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [receivedModalOpen, setReceivedModalOpen] = useState(false);
@@ -32,6 +33,15 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
 
   const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
   const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
+
+  const { 
+    data: userAssets = [], 
+    isLoading: isLoadingAssets, 
+    error: assetsError 
+  } = useFetch({
+    url: config.endpoints.allocations.myAssets,
+    queryKey: ['myAssets']
+  });
 
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -178,14 +188,14 @@ export default function MyAssetsTab({ userAssets, isLoadingAssets, assetsError }
     return (
       <div className="text-center py-12">
         <XCircle className="mx-auto h-12 w-12 text-red-400" />
-        <p className="mt-2 text-sm text-red-500">{assetsError}</p>
+        <p className="mt-2 text-sm text-red-500">{assetsError?.message || 'Failed to load assets'}</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">My Assets</h2>
+      <h1 className="text-xl font-semibold text-gray-900 mb-4">My Assets</h1>
       
       {assets && assets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

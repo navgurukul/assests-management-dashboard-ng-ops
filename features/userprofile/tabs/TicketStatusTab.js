@@ -3,6 +3,8 @@
 import { Ticket } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
+import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 import StateHandler from '@/components/atoms/StateHandler';
 import StatusChip from '@/components/atoms/StatusChip';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -19,9 +21,16 @@ const columns = [
   { key: 'createdAt', label: 'CREATED DATE' },
 ];
 
-export default function TicketStatusTab({ userTickets, isLoadingTickets, ticketsError }) {
+export default function TicketStatusTab() {
   const router = useRouter();
   
+  const { data: ticketsResponse, isLoading: isLoadingTickets, error: ticketsError } = useFetch({
+    url: config.endpoints.tickets.myTickets,
+    queryKey: ['myTickets']
+  });
+
+  const userTickets = ticketsResponse?.data || ticketsResponse || [];
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -74,7 +83,7 @@ export default function TicketStatusTab({ userTickets, isLoadingTickets, tickets
         <StateHandler
           isLoading={isLoadingTickets}
           isError={!!ticketsError}
-          error={ticketsError}
+          error={ticketsError?.message || ticketsError}
           loadingMessage="Loading tickets..."
           errorMessage="Error loading tickets"
           icon={Ticket}

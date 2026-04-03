@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 import { Tooltip } from '@nextui-org/react';
 import {
   LayoutDashboard,
@@ -14,6 +16,8 @@ import {
   FileText,
   User,
   Users,
+  Building2,
+  TicketCheck,
 } from 'lucide-react';
 import { menuItems } from '@/dummyJson/dummyJson';
 
@@ -26,6 +30,9 @@ const iconMap = {
   Archive,
   FileText,
   Users,
+  User,
+  Building2,
+  TicketCheck,
 };
 
 function TooltipWrapper({ show, content, children }) {
@@ -46,6 +53,14 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
+  // Selector for userRole from Redux store
+  const userRole = useSelector(selectUserRole);
+  const isStudentOrEmployee = userRole === 'Student' || userRole === 'Employee';
+
+  const filteredMenuItems = menuItems.filter(
+    (item) => (isStudentOrEmployee ? item.studentOnly : !item.studentOnly)
+  );
+
   return (
     <aside
       className={[
@@ -61,7 +76,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
     >
       <nav className="p-4 flex-1">
         <ul className="space-y-3" onClick={(e) => e.stopPropagation()}>
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.path;
 
@@ -95,24 +110,26 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
       </nav>
 
       {/* User Profile at Bottom */}
-      <div className="p-4 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
-        <TooltipWrapper show={isCollapsed} content="User Profile">
-          <Link
-            href="/userprofile"
-            onClick={onMobileClose}
-            className={[
-              'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-              isCollapsed ? 'md:justify-center' : '',
-              pathname === '/userprofile'
-                ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg) font-medium'
-                : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
-            ].join(' ')}
-          >
-            <User className="w-6 h-6 shrink-0" />
-            <span className={isCollapsed ? 'md:hidden' : ''}>User Profile</span>
-          </Link>
-        </TooltipWrapper>
-      </div>
+      {userRole !== 'Student' && (
+        <div className="p-4 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
+          <TooltipWrapper show={isCollapsed} content="User Profile">
+            <Link
+              href="/userprofile"
+              onClick={onMobileClose}
+              className={[
+                'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                isCollapsed ? 'md:justify-center' : '',
+                pathname === '/userprofile'
+                  ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg) font-medium'
+                  : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
+              ].join(' ')}
+            >
+              <User className="w-6 h-6 shrink-0" />
+              <span className={isCollapsed ? 'md:hidden' : ''}>User Profile</span>
+            </Link>
+          </TooltipWrapper>
+        </div>
+      )}
     </aside>
   );
 }
