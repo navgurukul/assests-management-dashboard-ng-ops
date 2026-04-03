@@ -280,7 +280,7 @@ export default function TicketApprovalTab() {
           <div className="flex items-center gap-2">
             Tickets for Approval
             <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-              {paginationData?.totalCount || ticketsToDisplay.length} pending
+              Total - {paginationData?.totalCount || ticketsToDisplay.length}
             </span>
           </div>
         }
