@@ -5,6 +5,8 @@
 
 export const CONSIGNMENT_TABLE_ID = 'consignments';
 
+import { getStatusChipColor } from '@/app/utils/statusHelpers';
+
 // All available columns for the consignments table
 export const consignmentTableColumns = [
   // Column order: consignment id, asset tags, source, destination, courier partner, tracking id, status, actions
@@ -14,7 +16,8 @@ export const consignmentTableColumns = [
     key: 'consignmentCode', 
     label: 'CONSIGNMENT ID', 
     alwaysVisible: true,
-    description: 'Unique consignment identifier'
+    description: 'Unique consignment identifier',
+    type: 'id'
   },
   
   // 2. Asset Tags
@@ -56,14 +59,17 @@ export const consignmentTableColumns = [
   { 
     key: 'allocatedTo', 
     label: 'ALLOCATED TO',
-    description: 'User allocated to this consignment'
+    description: 'User allocated to this consignment',
+    type: 'userWithEmail'
   },
   
   // 8. Status
   { 
     key: 'status', 
     label: 'STATUS',
-    description: 'Current status (In Transit, Delivered, etc.)'
+    description: 'Current status (In Transit, Delivered, etc.)',
+    type: 'chip',
+    colorFn: getStatusChipColor
   },
   
   // 9. Actions
@@ -83,17 +89,20 @@ export const consignmentTableColumns = [
   { 
     key: 'shippedAt', 
     label: 'SHIPPED AT',
-    description: 'Date when consignment was shipped'
+    description: 'Date when consignment was shipped',
+    type: 'date'
   },
   { 
     key: 'estimatedDeliveryDate', 
     label: 'EST. DELIVERY',
-    description: 'Estimated delivery date'
+    description: 'Estimated delivery date',
+    type: 'date'
   },
   { 
     key: 'deliveredAt', 
     label: 'DELIVERED AT',
-    description: 'Actual delivery date'
+    description: 'Actual delivery date',
+    type: 'date'
   },
   { 
     key: 'createdBy', 
@@ -103,7 +112,8 @@ export const consignmentTableColumns = [
   { 
     key: 'createdAt', 
     label: 'CREATED AT',
-    description: 'When consignment was created'
+    description: 'When consignment was created',
+    type: 'date'
   },
 ];
 
