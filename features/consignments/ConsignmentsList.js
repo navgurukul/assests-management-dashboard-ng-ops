@@ -31,6 +31,7 @@ import {
   getAcceptReturnFields,
 } from '@/app/config/formConfigs/consignmentFormConfig';
 import { toast } from '@/app/utils/toast';
+import GenericCellRenderer from '@/components/Table/GenericCellRenderer';
 
 const actionOptions = ['View', 'Details', 'Update Status'];
 
@@ -813,111 +814,84 @@ export default function ConsignmentsList() {
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
 
-    switch (columnKey) {
-      case 'consignmentCode':
-        return (
-          <span className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
-            {cellValue}
-          </span>
-        );
-        
-      case 'assetCount':
-        const sourceData = Array.isArray(data?.data) ? data.data : [];
-        const fullConsignment = sourceData.find(c => c.id === item.id) || item.consignmentData;
-        const assets = fullConsignment?.assets || [];
-        
-        return (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedAssets(assets);
-              setAssetModalOpen(true);
-            }}
-            className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
-          >
-            {cellValue}
-          </button>
-        );
-        
-      case 'status':
-        return (
-          <div className="relative">
-            <StatusChip value={cellValue} />
-          </div>
-        );
-        
-      case 'allocatedTo':
-        const assignee = item.allocatedTo;
-        const allocatedToName =
-          typeof assignee === 'object'
-            ? assignee?.name || '-'
-            : (assignee || '-');
-        const allocatedToEmail =
-          typeof assignee === 'object'
-            ? (assignee?.email || '')
-            : '';
-
-        return (
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-900">{allocatedToName}</span>
-            <span className="text-xs text-gray-500">{allocatedToEmail}</span>
-          </div>
-        );
-        
-      case 'actions':
-        const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
-        const trackingUrl = String(item.trackingLink || '').trim();
-        const canTrack =
-          normalizedItemStatus === 'dispatched' &&
-          item.trackingId &&
-          item.trackingId !== '-' &&
-          trackingUrl;
-        
-        return (
-          <div className="flex items-center justify-start gap-2 flex-wrap">
-            {/* Dispatch button for draft status */}
-            {normalizedItemStatus === 'draft' && (
-              <CustomButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleReadyToDispatch(item);
-                }}
-                variant="success"
-                size="sm"
-                icon={Package}
-                text="Dispatch"
-                title="Dispatch consignment"
-              />
-            )}
-            
-            {/* Track button only for dispatched status */}
-            {canTrack && (
-              <CustomButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(trackingUrl, '_blank', 'noopener,noreferrer');
-                }}
-                variant="secondary"
-                size="sm"
-                icon={ExternalLink}
-                text="Track"
-                title="Track consignment"
-              />
-            )}
-            
-            {/* Show message if no actions available */}
-            {normalizedItemStatus !== 'draft' && !canTrack && (
-              <span className="text-xs text-gray-400">-</span>
-            )}
-          </div>
-        );
-        
-      default:
-        if (typeof cellValue === 'object' && cellValue !== null) {
-          return '-';
-        }
-        return cellValue;
+    if (columnKey === 'consignmentCode') {
+      return (
+        <span className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
+          {cellValue}
+        </span>
+      );
     }
+        
+    if (columnKey === 'assetCount') {
+      const sourceData = Array.isArray(data?.data) ? data.data : [];
+      const fullConsignment = sourceData.find(c => c.id === item.id) || item.consignmentData;
+      const assets = fullConsignment?.assets || [];
+      
+      return (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedAssets(assets);
+            setAssetModalOpen(true);
+          }}
+          className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
+        >
+          {cellValue}
+        </button>
+      );
+    }
+        
+    if (columnKey === 'actions') {
+      const normalizedItemStatus = item.status?.toLowerCase().replace(/\s+/g, '_');
+      const trackingUrl = String(item.trackingLink || '').trim();
+      const canTrack =
+        normalizedItemStatus === 'dispatched' &&
+        item.trackingId &&
+        item.trackingId !== '-' &&
+        trackingUrl;
+      
+      return (
+        <div className="flex items-center justify-start gap-2 flex-wrap">
+          {/* Dispatch button for draft status */}
+          {normalizedItemStatus === 'draft' && (
+            <CustomButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReadyToDispatch(item);
+              }}
+              variant="success"
+              size="sm"
+              icon={Package}
+              text="Dispatch"
+              title="Dispatch consignment"
+            />
+          )}
+          
+          {/* Track button only for dispatched status */}
+          {canTrack && (
+            <CustomButton
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(trackingUrl, '_blank', 'noopener,noreferrer');
+              }}
+              variant="secondary"
+              size="sm"
+              icon={ExternalLink}
+              text="Track"
+              title="Track consignment"
+            />
+          )}
+          
+          {/* Show message if no actions available */}
+          {normalizedItemStatus !== 'draft' && !canTrack && (
+            <span className="text-xs text-gray-400">-</span>
+          )}
+        </div>
+      );
+    }
+
+    const columnDef = consignmentTableColumns.find(col => col.key === columnKey); 
+    return <GenericCellRenderer item={item} column={columnDef || { key: columnKey }} />;
   };
 
   return (
