@@ -314,7 +314,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       return {
         ...field,
         disabled: true,
-        helperText: 'SLA timeline is already set and cannot be changed.',
+        helperText: 'Timeline is already set and cannot be changed.',
       };
     }
     return field;
