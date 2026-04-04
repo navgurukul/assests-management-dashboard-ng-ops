@@ -27,6 +27,7 @@ import {
 } from '@/app/config/tableConfigs/allocationTableConfig';
 import { transformAllocationForTable } from '@/app/utils/dataTransformers';
 import { allocationSummaryCardsConfig } from '@/dummyJson/dummyJson';
+import GenericCellRenderer from '@/components/Table/GenericCellRenderer';
 
 const actionOptions = ['View', 'Return', 'Details'];
 
@@ -122,112 +123,8 @@ export default function AllocationsList() {
   }, [data]);
 
   const renderCell = (item, columnKey) => {
-    const cellValue = item[columnKey];
-
-    switch (columnKey) {
-      case "allocationId":
-        return <span className="font-medium text-blue-600">#{cellValue}</span>;
-      case "assetTag":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">—</span>;
-        }
-        return <span className="font-medium text-gray-800">{cellValue}</span>;
-      case "brandModel":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">—</span>;
-        }
-        return <span className="text-gray-700 text-sm">{cellValue}</span>;
-      case "allocationType":
-        return <StatusChip value={cellValue} colorFn={getAllocationTypeChipColor} />;
-      case "userName":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">Not assigned</span>;
-        }
-        return (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <span className="text-blue-600 font-medium text-sm">
-                {cellValue.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <span>{cellValue}</span>
-          </div>
-        );
-      case "status":
-        return <StatusChip value={cellValue} colorFn={getStatusChipColor} />;
-      case "reason":
-        return <StatusChip value={cellValue} colorFn={getAllocationReasonChipColor} />;
-      case "endDate":
-        if (cellValue === 'Active') {
-          return <span className="text-green-600 font-medium">{cellValue}</span>;
-        }
-        return cellValue;
-      case "deviceSelectionMode":
-        return <StatusChip value={cellValue} colorFn={getDeviceModeChipColor} />;
-      case "sourceCampus":
-      case "destinationCampus":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">—</span>;
-        }
-        return <span className="text-gray-700 text-sm">{cellValue}</span>;
-      case "isTemporary":
-        return (
-          <StatusChip
-            value={cellValue}
-            colorFn={() => cellValue === 'Yes' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-600'}
-          />
-        );
-      case "expectedReturnDate":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">—</span>;
-        }
-        return <span className="text-gray-700">{cellValue}</span>;
-      case "ticketId":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">—</span>;
-        }
-        return <span className="font-medium text-purple-600">#{cellValue}</span>;
-      case "notes":
-        if (!cellValue || cellValue === 'N/A') {
-          return <span className="text-gray-400">—</span>;
-        }
-        return (
-          <span className="text-gray-700 text-sm max-w-[180px] truncate block" title={cellValue}>
-            {cellValue}
-          </span>
-        );
-      case "createdAt":
-        return <span className="text-gray-600 text-sm">{cellValue}</span>;
-      // case "actions":
-      //   return (
-      //     <div className="flex items-center gap-2">
-      //       <button 
-      //         onClick={(e) => {
-      //           e.stopPropagation();
-      //           router.push(`/allocations/${item.id}`);
-      //         }}
-      //         className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded transition-colors"
-      //         title="View Details"
-      //       >
-      //         <Eye className="w-4 h-4" />
-      //       </button>
-      //       {item.isActive && (
-      //         <button 
-      //           onClick={(e) => {
-      //             e.stopPropagation();
-      //             handleReturnAllocation(item.id);
-      //           }}
-      //           className="text-orange-600 hover:text-orange-800 p-1 hover:bg-orange-50 rounded transition-colors"
-      //           title="Mark as Returned"
-      //         >
-      //           <Calendar className="w-4 h-4" />
-      //         </button>
-      //       )}
-      //     </div>
-      //   );
-      default:
-        return cellValue;
-    }
+    const columnDef = allocationTableColumns.find(col => col.key === columnKey); 
+    return <GenericCellRenderer item={item} column={columnDef || { key: columnKey }} />;
   };
 
   const handleRowClick = (allocation) => {
