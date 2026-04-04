@@ -87,15 +87,7 @@ export const allocationTableColumns = [
     key: 'createdAt', 
     label: 'CREATED AT',
     description: 'Date allocation was created'
-  },
-  
-  // Actions column - always visible
-  { 
-    key: 'actions', 
-    label: 'ACTIONS', 
-    alwaysVisible: true,
-    description: 'Available actions'
-  },
+  }
 ];
 
 // Default visible columns (shown when user first visits or resets)
@@ -106,8 +98,7 @@ export const defaultVisibleColumns = [
   'status',
   'deviceSelectionMode',
   'sourceCampus',
-  'destinationCampus',
-  'actions',
+  'destinationCampus'
 ];
 
 // Get column configuration
