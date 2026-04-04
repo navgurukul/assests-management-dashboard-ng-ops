@@ -118,7 +118,6 @@ export default function AllocationsList() {
     
     return data.data.map((allocation) => ({
       ...transformAllocationForTable(allocation),
-      actions: actionOptions[0], // Default to 'View'
     }));
   }, [data]);
 
@@ -199,33 +198,33 @@ export default function AllocationsList() {
         );
       case "createdAt":
         return <span className="text-gray-600 text-sm">{cellValue}</span>;
-      case "actions":
-        return (
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/allocations/${item.id}`);
-              }}
-              className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded transition-colors"
-              title="View Details"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-            {item.isActive && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleReturnAllocation(item.id);
-                }}
-                className="text-orange-600 hover:text-orange-800 p-1 hover:bg-orange-50 rounded transition-colors"
-                title="Mark as Returned"
-              >
-                <Calendar className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        );
+      // case "actions":
+      //   return (
+      //     <div className="flex items-center gap-2">
+      //       <button 
+      //         onClick={(e) => {
+      //           e.stopPropagation();
+      //           router.push(`/allocations/${item.id}`);
+      //         }}
+      //         className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded transition-colors"
+      //         title="View Details"
+      //       >
+      //         <Eye className="w-4 h-4" />
+      //       </button>
+      //       {item.isActive && (
+      //         <button 
+      //           onClick={(e) => {
+      //             e.stopPropagation();
+      //             handleReturnAllocation(item.id);
+      //           }}
+      //           className="text-orange-600 hover:text-orange-800 p-1 hover:bg-orange-50 rounded transition-colors"
+      //           title="Mark as Returned"
+      //         >
+      //           <Calendar className="w-4 h-4" />
+      //         </button>
+      //       )}
+      //     </div>
+      //   );
       default:
         return cellValue;
     }
