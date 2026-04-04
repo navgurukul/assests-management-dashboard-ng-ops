@@ -7,7 +7,7 @@ export const menuItems = [
   { name: 'Components', icon: 'Component', path: '/components', studentOnly: false },
   { name: 'User List', icon: 'Users', path: '/userlist', studentOnly: false },
   { name: 'Reports', icon: 'FileText', path: '/reports', studentOnly: false },
-  { name: 'User Profile', icon: 'User', path: '/userprofile', studentOnly: false },
+  // { name: 'User Profile', icon: 'User', path: '/userprofile', studentOnly: false },
   { name: 'My Assets', icon: 'Package', path: '/myassets', studentOnly: true },
   { name: 'My Ticket Status', icon: 'Ticket', path: '/ticketstatus', studentOnly: true },
   { name: 'Ticket for Approval', icon: 'TicketCheck', path: '/ticketforapproval', studentOnly: true },
