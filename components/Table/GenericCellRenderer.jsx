@@ -35,11 +35,13 @@ export default function GenericCellRenderer({ item, column }) {
       );
       
     case 'userWithEmail':
+      const userName = typeof cellValue === 'object' ? (cellValue?.name || '—') : (cellValue || '—');
+      const userEmail = typeof cellValue === 'object' ? cellValue?.email : '';
       return (
         <div className="flex flex-col">
-          <span className="text-gray-700 text-sm font-medium">{cellValue?.name || '—'}</span>
-          {cellValue?.email && (
-            <span className="text-gray-500 text-xs">{cellValue.email}</span>
+          <span className="text-gray-700 text-sm font-medium">{userName}</span>
+          {userEmail && (
+            <span className="text-gray-500 text-xs">{userEmail}</span>
           )}
         </div>
       );
