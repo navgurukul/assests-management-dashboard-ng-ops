@@ -56,7 +56,9 @@ const Header = ({ onMenuToggle }) => {
         <button
           type="button"
           onClick={toggleTheme}
-          className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className={`p-2 rounded-md transition-colors ${
+            theme === 'dark' ? 'header-btn-dark' : 'header-btn-light'
+          }`}
           aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
           title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
         >
@@ -66,35 +68,49 @@ const Header = ({ onMenuToggle }) => {
         {isAuthenticated && user && (
           <div className="relative" ref={dropdownRef}>
             <button
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-2 rounded-md transition-colors"
+              className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md transition-colors ${
+                theme === 'dark' ? 'header-btn-dark' : 'header-btn-light'
+              }`}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <span className="hidden sm:block text-sm font-normal text-gray-700 dark:text-gray-300">
+              <span className="hidden sm:block text-sm font-normal inherit-color">
                 Hi, {user.firstName || user.name}
               </span>
 
-              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  theme === 'dark' ? 'header-icon-bg-dark text-gray-300' : 'header-icon-bg-light text-gray-900'
+                }`}
+              >
+                <User className="w-4 h-4" />
               </div>
 
               <ChevronDown
-                className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 z-50">
+              <div
+                className={`absolute right-0 mt-2 w-48 border rounded-md shadow-lg py-1 z-50 ${
+                  theme === 'dark' ? 'header-dropdown-dark' : 'header-dropdown-light'
+                }`}
+              >
                 <button
                   onClick={handleProfileClick}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className={`w-full flex items-center gap-2 px-4 py-2 text-sm font-normal transition-colors ${
+                    theme === 'dark' ? 'header-btn-dark' : 'header-btn-light'
+                  }`}
                 >
                   <User className="w-4 h-4" />
                   <span>User Profile</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className={`w-full flex items-center gap-2 px-4 py-2 text-sm font-normal transition-colors ${
+                    theme === 'dark' ? 'header-btn-dark' : 'header-btn-light'
+                  }`}
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
