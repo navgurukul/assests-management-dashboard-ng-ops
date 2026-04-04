@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -30,6 +30,7 @@ export default function MyAssetsTab() {
   const [receivedModalOpen, setReceivedModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
+  const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
 
   const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
   const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
@@ -49,7 +50,41 @@ export default function MyAssetsTab() {
     enabled: false,
   });
 
+  const { data: coordinatorResponse, error: coordinatorError } = useFetch({
+    url: `/campus-incharge/campus/${coordinatorCampusId}`,
+    queryKey: ['campus-incharge', coordinatorCampusId],
+    enabled: !!coordinatorCampusId,
+  });
+
   const campusesData = campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
+
+  const coordinatorEmail = useMemo(() => {
+    if (!coordinatorResponse) return '';
+    const data = coordinatorResponse?.data || coordinatorResponse;
+    if (data?.success === false) return '';
+    return data?.data?.itCoordinator?.email || data?.itCoordinator?.email || '';
+  }, [coordinatorResponse]);
+
+  useEffect(() => {
+    if (!coordinatorCampusId) return;
+
+    const data = coordinatorResponse?.data || coordinatorResponse;
+    const isErrorState = coordinatorError || data?.success === false;
+
+    const input = document.querySelector('input[name="campusItCoordinator"]');
+    if (!input) return;
+
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+
+    if (isErrorState) {
+      toast.error('This campus is not having an IT coordinator at present.');
+      nativeInputValueSetter.call(input, '');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    } else if (coordinatorEmail) {
+      nativeInputValueSetter.call(input, coordinatorEmail);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }, [coordinatorEmail, coordinatorError, coordinatorResponse, coordinatorCampusId]);
 
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -73,14 +108,13 @@ export default function MyAssetsTab() {
     return map;
   }, [allocations]);
 
-  const computedReturnFields = useMemo(
-    () => getReturnAssetFields(
+  const computedReturnFields = useMemo(() => {
+    return getReturnAssetFields(
       selectedAsset, 
       allocationMap[selectedAsset?.id]?.sourceName,
       allocationMap[selectedAsset?.id]?.userAddress
-    ),
-    [selectedAsset, allocationMap]
-  );
+    );
+  }, [selectedAsset, allocationMap]);
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
@@ -152,9 +186,9 @@ export default function MyAssetsTab() {
         consignmentId,
         assetId: selectedAsset?.id,
         sourceCampusId: sourceCampusIdValue,
-        campusITCoordinatorEmail: formData.campusItCoordinator || '',
+        campusITCoordinatorEmail: formData.campusItCoordinator || coordinatorEmail || '',
         exactAddress: formData.exactAddress || '',
-        vendorName: formData.returnMode === 'VISIT_CAMPUS' ? '' : (formData.vendorName || ''),
+        vendorName: formData.returnMode === 'VISIT_CAMPUS' ? 'NA' : (formData.vendorName || ''),
         managerEmail: formData.managerEmail || '',
         expectedDeliveryDate: formattedDate,
       };
@@ -394,7 +428,7 @@ export default function MyAssetsTab() {
 
       <FormModal
         isOpen={returnModalOpen}
-        onClose={() => { setReturnModalOpen(false); setSelectedAsset(null); }}
+        onClose={() => { setReturnModalOpen(false); setSelectedAsset(null); setCoordinatorCampusId(null); }}
         componentName=""
         actionType="Return Asset"
         fields={computedReturnFields}
@@ -405,12 +439,16 @@ export default function MyAssetsTab() {
         onFormDataChange={(updatedData, fieldChanged) => {
           // Trigger fetch when user selects OTHER_CAMPUS or VISIT_CAMPUS
           if (fieldChanged?.name === 'returnMode' && (updatedData.returnMode === 'OTHER_CAMPUS' || updatedData.returnMode === 'VISIT_CAMPUS')) {
-            fetchCampuses();
+            setTimeout(() => fetchCampuses(), 0);
           }
 
           // Auto-fill address when switching back to SOURCED_CAMPUS
           if (fieldChanged?.name === 'returnMode' && updatedData.returnMode === 'SOURCED_CAMPUS') {
             const assetAddress = selectedAsset?.campus?.address || allocationMap[selectedAsset?.id]?.userAddress || '';
+            const sourceId = selectedAsset?.sourceCampusId || selectedAsset?.campusId;
+            if (sourceId) {
+              setTimeout(() => setCoordinatorCampusId(sourceId), 0);
+            }
             return {
               ...updatedData,
               exactAddress: assetAddress,
@@ -420,16 +458,30 @@ export default function MyAssetsTab() {
 
           // Clear address when switching to OTHER_CAMPUS or VISIT_CAMPUS
           if (fieldChanged?.name === 'returnMode' && (updatedData.returnMode === 'OTHER_CAMPUS' || updatedData.returnMode === 'VISIT_CAMPUS')) {
+            setTimeout(() => setCoordinatorCampusId(null), 0);
             return {
               ...updatedData,
               exactAddress: '',
               destinationCampusId: '',
+              campusItCoordinator: '',
             };
           }
 
           // Handle campus selection from API autocomplete
           if (fieldChanged?.name === 'destinationCampusId' && (updatedData.returnMode === 'OTHER_CAMPUS' || updatedData.returnMode === 'VISIT_CAMPUS')) {
             const selectedCampus = campusesData.find((c) => c.id === updatedData.destinationCampusId);
+            
+            if (updatedData.destinationCampusId) {
+              setTimeout(() => setCoordinatorCampusId(updatedData.destinationCampusId), 0);
+            } else {
+              setTimeout(() => setCoordinatorCampusId(null), 0);
+              return {
+                ...updatedData,
+                exactAddress: '',
+                campusItCoordinator: '',
+              };
+            }
+
             if (selectedCampus && selectedCampus.address) {
               return {
                 ...updatedData,
