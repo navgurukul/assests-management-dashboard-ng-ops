@@ -17,6 +17,7 @@ import { Ticket, AlertCircle, Clock, CheckCircle, XCircle, TrendingUp, BarChart2
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import GenericCellRenderer from '@/components/Table/GenericCellRenderer';
 import {
   TICKET_TABLE_ID,
   ticketTableColumns,
@@ -332,61 +333,15 @@ export default function TicketsList() {
   const hasServerPagination = Boolean(data?.data?.pagination?.totalPages);
 
   const renderCell = (item, columnKey) => {
-    const cellValue = item[columnKey];
-
-    switch (columnKey) {
-      case "ticketId":
-        return <span className="font-medium text-gray-800">{cellValue}</span>;
-      case "device":
-        // Derive device from details data when available
-        const details = ticketDetailsData[item.id];
-        const deviceTag = details?.deviceSummary?.asset || cellValue;
-        return <span className="text-gray-700">{deviceTag}</span>;
-      case "status":
-        return <StatusChip value={cellValue} />;
-      case "priority":
-        return <StatusChip value={cellValue} colorFn={getPriorityChipColor} />;
-      case "sla":
-        return (
-          <SLAIndicator 
-            allocationDate={cellValue.allocationDate}
-            expectedResolutionDate={cellValue.expectedResolutionDate}
-            status={cellValue.status}
-            compact={true}
-          />
-        );
-      case "updated":
-      case "createdAt":
-      case "assignDate":
-      case "resolvedAt":
-      case "closedAt":
-        return <span className="text-gray-500 text-sm">{cellValue || '—'}</span>;
-      case "raisedBy":
-        return (
-          <div className="flex flex-col">
-            <span className="text-gray-700 text-sm font-medium">{cellValue?.name || '—'}</span>
-            {cellValue?.email && (
-              <span className="text-gray-500 text-xs">{cellValue.email}</span>
-            )}
-          </div>
-        );
-      case "assignedTo":
-        return (
-          <div className="flex flex-col">
-            <span className="text-gray-700 text-sm font-medium">{cellValue?.name || '—'}</span>
-            {cellValue?.email && (
-              <span className="text-gray-500 text-xs">{cellValue.email}</span>
-            )}
-          </div>
-        );
-      case "actionTakenBy":
-      case "raisedByEmail":
-      case "assigneeEmail":
-      case "campus":
-        return <span className="text-gray-700 text-sm">{cellValue || '—'}</span>;
-      default:
-        return cellValue;
+    // Special handling just for 'device' to retrieve derived info from ticketDetailsData
+    if (columnKey === 'device') {
+      const details = ticketDetailsData[item.id];
+      const deviceTag = details?.deviceSummary?.asset || item[columnKey];
+      return <span className="text-gray-700">{deviceTag}</span>;
     }
+
+    const columnDef = ticketTableColumns.find(col => col.key === columnKey); 
+    return <GenericCellRenderer item={item} column={columnDef || { key: columnKey }} />;
   };
 
   const handleCreateClick = () => {
