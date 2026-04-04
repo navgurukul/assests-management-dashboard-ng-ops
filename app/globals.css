@@ -97,6 +97,37 @@ body {
   border-color: var(--border) !important;
 }
 
+/* Header Theme toggle classes */
+.header-btn-light {
+  color: #111827; /* black tone */
+}
+.header-btn-light:hover {
+  background-color: #f3f4f6; /* light gray hover */
+}
+
+.header-btn-dark {
+  color: #f3f4f6; /* white tone for dark mode */
+}
+.header-btn-dark:hover {
+  background-color: #374151; /* dark gray hover */
+}
+
+.header-icon-bg-light {
+  background-color: #e5e7eb;
+}
+.header-icon-bg-dark {
+  background-color: #4b5563;
+}
+
+.header-dropdown-light {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+.header-dropdown-dark {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
 .dark input,
 .dark textarea,
 .dark select {
