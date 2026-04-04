@@ -9,7 +9,6 @@ import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
-import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import {
@@ -404,8 +403,8 @@ export default function MyAssetsTab() {
         size="medium"
         validationSchema={returnAssetValidationSchema}
         onFormDataChange={(updatedData, fieldChanged) => {
-          // Trigger fetch when user selects OTHER_CAMPUS
-          if (fieldChanged?.name === 'returnMode' && updatedData.returnMode === 'OTHER_CAMPUS') {
+          // Trigger fetch when user selects OTHER_CAMPUS or VISIT_CAMPUS
+          if (fieldChanged?.name === 'returnMode' && (updatedData.returnMode === 'OTHER_CAMPUS' || updatedData.returnMode === 'VISIT_CAMPUS')) {
             fetchCampuses();
           }
 
@@ -429,7 +428,7 @@ export default function MyAssetsTab() {
           }
 
           // Handle campus selection from API autocomplete
-          if (fieldChanged?.name === 'destinationCampusId' && updatedData.returnMode === 'OTHER_CAMPUS') {
+          if (fieldChanged?.name === 'destinationCampusId' && (updatedData.returnMode === 'OTHER_CAMPUS' || updatedData.returnMode === 'VISIT_CAMPUS')) {
             const selectedCampus = campusesData.find((c) => c.id === updatedData.destinationCampusId);
             if (selectedCampus && selectedCampus.address) {
               return {
