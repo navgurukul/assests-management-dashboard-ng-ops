@@ -73,17 +73,9 @@ const Header = ({ onMenuToggle }) => {
                 Hi, {user.firstName || user.name}
               </span>
 
-              {user.profile_picture ? (
-                <img
-                  src={user.profile_picture}
-                  alt={user.firstName || user.name}
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                  <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                </div>
-              )}
+              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </div>
 
               <ChevronDown
                 className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
