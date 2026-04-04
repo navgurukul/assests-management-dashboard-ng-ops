@@ -67,9 +67,19 @@ export default function TableWrapper({
   };
 
   const displayData = showPagination ? paginatedData : data;
+  const tableClassNames = {
+    ...classNames,
+    wrapper: `shadow-none border-none ${classNames.wrapper || ""}`,
+    base: `min-w-full ${classNames.base || ""}`,
+    table: `border-collapse min-w-full ${classNames.table || ""}`,
+    thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
+    th: `bg-(--surface-soft) text-(--foreground) font-semibold text-sm h-12 border-b-2 border-(--border) whitespace-nowrap ${classNames.th || ""}`,
+    td: `text-(--foreground) text-sm h-16 border-b border-(--border) ${classNames.td || ""}`,
+    tr: `hover:bg-(--surface-soft) hover:text-(--foreground) data-[hover=true]:bg-(--surface-soft) data-[hover=true]:text-(--foreground) transition-colors ${classNames.tr || ""}`,
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white shadow-md p-6">
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
@@ -119,16 +129,7 @@ export default function TableWrapper({
       <div className="overflow-x-auto">
         <Table 
           aria-label={ariaLabel}
-          classNames={{
-            wrapper: "shadow-none border-none",
-            base: "min-w-full",
-            table: "border-collapse min-w-full",
-            thead: "[&>tr]:first:shadow-none",
-            th: "bg-gray-50 text-gray-700 font-semibold text-sm h-12 border-b-2 border-gray-200 whitespace-nowrap",
-            td: "text-gray-600 text-sm h-16 border-b border-gray-200",
-            tr: "hover:bg-gray-50 transition-colors",
-            ...classNames
-          }}
+          classNames={tableClassNames}
         >
           <TableHeader>
             {columns.map((column) => (

@@ -5,8 +5,17 @@
   --surface: #ffffff;
   --surface-soft: #f3f5f8;
   --foreground: #111827;
+  --foreground-light: #111827;
+  --foreground-dark: #f3f4f6;
   --muted: #4b5563;
   --border: #e5e7eb;
+  --sidebar-item-fg: #374151;
+  --sidebar-item-hover-bg: #f9fafb;
+  --sidebar-item-hover-fg: #111827;
+  --sidebar-item-active-bg: #fff7ed;
+  --sidebar-item-active-fg: #fb923c;
+  --sidebar-profile-active-bg: #eff6ff;
+  --sidebar-profile-active-fg: #2563eb;
 }
 
 .dark {
@@ -16,6 +25,23 @@
   --foreground: #f3f4f6;
   --muted: #d1d5db;
   --border: #374151;
+  --sidebar-item-fg: #d1d5db;
+  --sidebar-item-hover-bg: #243247;
+  --sidebar-item-hover-fg: #f9fafb;
+  --sidebar-item-active-bg: #7c2d12;
+  --sidebar-item-active-fg: #fed7aa;
+  --sidebar-profile-active-bg: #1e3a8a;
+  --sidebar-profile-active-fg: #bfdbfe;
+}
+
+.profile-box-bg-light {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb; /* gray-200 */
+}
+
+.profile-box-bg-dark {
+  background-color: #1f2937; /* gray-800 */
+  border: 1px solid #374151; /* gray-700 */
 }
 
 @theme inline {
@@ -23,7 +49,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
   --font-mono: var(--font-poppins);
-  
+  --sidebar-bg: var(--surface);
 }
 
 body {
@@ -91,6 +117,51 @@ body {
 .api-autocomplete-wrapper [data-slot="inner-wrapper"] {
   border: none !important;
   box-shadow: none !important;
+}
+
+/* SLA Indicator Custom Component Theme Classes */
+.sla-on-track {
+  background-color: #f0fdf4; /* bg-green-50 */
+  border-color: #bbf7d0; /* border-green-200 */
+  color: #166534; /* text-green-800 */
+}
+.dark .sla-on-track {
+  background-color: rgba(20, 83, 45, 0.2);
+  border-color: #14532d;
+  color: #4ade80;
+}
+
+.sla-completed-overdue {
+  background-color: #fff7ed; /* bg-orange-50 */
+  border-color: #fed7aa; /* border-orange-200 */
+  color: #9a3412; /* text-orange-800 */
+}
+.dark .sla-completed-overdue {
+  background-color: rgba(154, 52, 18, 0.2); 
+  border-color: #7c2d12; 
+  color: #fb923c; 
+}
+
+.sla-overdue {
+  background-color: #fef2f2; /* bg-red-50 */
+  border-color: #fecaca; /* border-red-200 */
+  color: #991b1b; /* text-red-800 */
+}
+.dark .sla-overdue {
+  background-color: rgba(153, 27, 27, 0.2); 
+  border-color: #7f1d1d; 
+  color: #f87171; 
+}
+
+.sla-warning {
+  background-color: #fefce8; /* bg-yellow-50 */
+  border-color: #fef08a; /* border-yellow-200 */
+  color: #854d0e; /* text-yellow-800 */
+}
+.dark .sla-warning {
+  background-color: rgba(133, 77, 14, 0.2); 
+  border-color: #713f12; 
+  color: #facc15; 
 }
 
 .api-autocomplete-wrapper [data-slot="input"] {

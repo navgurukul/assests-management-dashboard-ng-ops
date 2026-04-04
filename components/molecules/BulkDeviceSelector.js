@@ -1,63 +1,134 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Package, X } from 'lucide-react';
 import CustomButton from '../atoms/CustomButton';
 import Modal from './Modal';
 import TableWrapper from '../Table/TableWrapper';
 import SearchInput from './SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
+import FilterDropdown from './FilterDropdown';
+import ActiveFiltersChips from './ActiveFiltersChips';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
 
 export default function BulkDeviceSelector({ selectedAssets = [], onChange, assetTypeId = null, sourceCampusId = null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [checkedAssets, setCheckedAssets] = useState(new Set(selectedAssets.map(a => a.id)));
+  const [selectedAssetObjects, setSelectedAssetObjects] = useState(new Map(selectedAssets.map(a => [a.id, a])));
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState({});
 
-  // Build API URL with assetType and sourceCampus filter
+  const filterStatusOptions = [
+    { value: 'IN_STOCK', label: 'In Stock' },
+    { value: 'ALLOCATED', label: 'Allocated' },
+    { value: 'REPAIR', label: 'Under Repair' },
+    { value: 'SCRAP', label: 'Scrap' },
+    { value: 'PARTED_OUT', label: 'Parted Out' },
+  ];
+
+  const filterConditionOptions = [
+    { value: 'WORKING', label: 'Working' },
+    { value: 'MINOR_ISSUES', label: 'Minor Issues' },
+    { value: 'NOT_WORKING', label: 'Not Working' },
+  ];
+
+  const getCategoryName = (key) => {
+    switch (key) {
+      case 'status': return 'Status';
+      case 'condition': return 'Condition';
+      default: return key;
+    }
+  };
+
+  const getFilterLabel = (key, value) => {
+    if (key === 'status') {
+      const option = filterStatusOptions.find(opt => opt.value === value);
+      return option ? option.label : value;
+    }
+    if (key === 'condition') {
+      const option = filterConditionOptions.find(opt => opt.value === value);
+      return option ? option.label : value;
+    }
+    return value;
+  };
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1); // Reset to first page on new search
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Build API URL
   const apiUrl = useMemo(() => {
     const params = new URLSearchParams();
-    if (assetTypeId) params.set('type', assetTypeId);
-    if (sourceCampusId) params.set('campusId', sourceCampusId);
+    
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+    params.append('isConsignmentCreated', 'false');
+    
+    if (assetTypeId) params.append('type', assetTypeId);
+    if (sourceCampusId) params.append('campusId', sourceCampusId);
+    
+    if (filters.status) params.append('status', filters.status);
+    if (filters.condition) params.append('condition', filters.condition);
+    
     const queryString = params.toString();
     return queryString ? `${baseUrl}/assets?${queryString}` : `${baseUrl}/assets`;
-  }, [assetTypeId, sourceCampusId]);
+  }, [assetTypeId, sourceCampusId, currentPage, pageSize, filters, debouncedSearch]);
   
   // Fetch assets from API
   const { data, isLoading, isError } = useFetch({
     url: apiUrl,
-    queryKey: ['assets-bulk', assetTypeId, sourceCampusId],
+    queryKey: ['assets-bulk', assetTypeId, sourceCampusId, currentPage, pageSize, filters, debouncedSearch],
     enabled: !!assetTypeId, // Only fetch when assetType is selected
   });
 
   // Extract assets from API response
   const availableAssets = useMemo(() => {
     if (!data?.data || !Array.isArray(data.data)) return [];
-    return data.data.map(asset => ({
-      id: asset.id,
-      assetId: asset.assetTag,
-      assetType: asset.assetType?.name || 'N/A',
-      brand: asset.brand,
-      model: asset.model,
-      condition: asset.condition,
-      workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
-      status: asset.status,
-    }));
+    return data.data
+      .filter(asset => asset.isConsignmentCreated === false)
+      .map(asset => ({
+        id: asset.id,
+        assetId: asset.assetTag,
+        assetType: asset.assetType?.name || 'N/A',
+        brand: asset.brand,
+        model: asset.model,
+        condition: asset.condition,
+        workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
+        status: asset.status,
+      }));
   }, [data]);
 
   // Filter assets based on search term
   const filteredAssets = useMemo(() => {
-    if (!searchTerm) return availableAssets;
-    const lowerSearch = searchTerm.toLowerCase();
-    return availableAssets.filter(asset => 
-      asset.assetId.toLowerCase().includes(lowerSearch) ||
-      asset.assetType.toLowerCase().includes(lowerSearch) ||
-      asset.brand?.toLowerCase().includes(lowerSearch) ||
-      asset.model?.toLowerCase().includes(lowerSearch) ||
-      asset.condition?.toLowerCase().includes(lowerSearch)
-    );
-  }, [searchTerm, availableAssets]);
+    let result = availableAssets;
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      result = availableAssets.filter(asset => 
+        asset.assetId.toLowerCase().includes(lowerSearch) ||
+        asset.assetType.toLowerCase().includes(lowerSearch) ||
+        asset.brand?.toLowerCase().includes(lowerSearch) ||
+        asset.model?.toLowerCase().includes(lowerSearch) ||
+        asset.condition?.toLowerCase().includes(lowerSearch)
+      );
+    }
+    
+    // Add _isChecked and create new object instances to ensure NextUI Table re-renders row states
+    return result.map(asset => ({
+      ...asset,
+      _isChecked: checkedAssets.has(asset.id)
+    }));
+  }, [searchTerm, availableAssets, checkedAssets]);
 
   const handleCheckboxChange = (asset) => {
     setCheckedAssets((prevCheckedAssets) => {
@@ -69,13 +140,41 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
       }
       return newCheckedAssets;
     });
+
+    setSelectedAssetObjects((prevMap) => {
+      const newMap = new Map(prevMap);
+      if (newMap.has(asset.id)) {
+        newMap.delete(asset.id);
+      } else {
+        newMap.set(asset.id, asset);
+      }
+      return newMap;
+    });
   };
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setCheckedAssets(new Set(filteredAssets.map(a => a.id)));
+      setCheckedAssets((prevCheckedAssets) => {
+        const nextCheckedAssets = new Set(prevCheckedAssets);
+        filteredAssets.forEach(asset => nextCheckedAssets.add(asset.id));
+        return nextCheckedAssets;
+      });
+      setSelectedAssetObjects((prevAssetMap) => {
+        const nextAssetMap = new Map(prevAssetMap);
+        filteredAssets.forEach(asset => nextAssetMap.set(asset.id, asset));
+        return nextAssetMap;
+      });
     } else {
-      setCheckedAssets(new Set());
+      setCheckedAssets((prevCheckedAssets) => {
+        const nextCheckedAssets = new Set(prevCheckedAssets);
+        filteredAssets.forEach(asset => nextCheckedAssets.delete(asset.id));
+        return nextCheckedAssets;
+      });
+      setSelectedAssetObjects((prevAssetMap) => {
+        const nextAssetMap = new Map(prevAssetMap);
+        filteredAssets.forEach(asset => nextAssetMap.delete(asset.id));
+        return nextAssetMap;
+      });
     }
   };
 
@@ -83,10 +182,16 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     const newCheckedAssets = new Set(checkedAssets);
     newCheckedAssets.delete(assetId);
     setCheckedAssets(newCheckedAssets);
+
+    setSelectedAssetObjects((prevMap) => {
+      const newMap = new Map(prevMap);
+      newMap.delete(assetId);
+      return newMap;
+    });
   };
 
   const handleSaveSelection = () => {
-    const selected = availableAssets.filter(asset => checkedAssets.has(asset.id));
+    const selected = Array.from(selectedAssetObjects.values());
     onChange(selected);
     setIsModalOpen(false);
   };
@@ -94,7 +199,11 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   const handleOpenModal = () => {
     // Initialize checked assets from current selection
     setCheckedAssets(new Set(selectedAssets.map(a => a.id)));
+    setSelectedAssetObjects(new Map(selectedAssets.map(a => [a.id, a])));
     setSearchTerm('');
+    setDebouncedSearch('');
+    setCurrentPage(1);
+    setFilters({});
     setIsModalOpen(true);
   };
 
@@ -112,9 +221,22 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     return condition.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   };
 
+  const isAllSelected = filteredAssets.length > 0 && filteredAssets.every(asset => checkedAssets.has(asset.id));
+
   // Table columns configuration
   const columns = [
-    { key: 'select', label: '', className: 'w-12' },
+    { 
+      key: 'select', 
+      label: (
+        <input
+          type="checkbox"
+          checked={isAllSelected}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        />
+      ),
+      className: 'w-12' 
+    },
     { key: 'assetId', label: 'Asset Tag' },
     { key: 'brand', label: 'Brand' },
     { key: 'model', label: 'Model' },
@@ -126,12 +248,11 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     switch (columnKey) {
       case 'select':
         return (
-          <div onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
             <input
               type="checkbox"
-              checked={checkedAssets.has(asset.id)}
+              checked={asset._isChecked}
               onChange={(e) => {
-                e.stopPropagation();
                 handleCheckboxChange(asset);
               }}
               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -196,7 +317,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
             ))}
           </div>
         ) : assetTypeId ? (
-          <p className="text-sm text-gray-500 mt-2">No assets selected. Click "Select Bulk Devices" to choose assets.</p>
+          <p className="text-sm text-gray-500 mt-2">No assets selected. Click &quot;Select Bulk Devices&quot; to choose assets.</p>
         ) : null}
       </div>
 
@@ -252,14 +373,20 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
             </div>
           )}
 
-          {/* TableWrapper with Search */}
+          {/* TableWrapper with Search, Filters, and Pagination */}
           {!isLoading && !isError && (
             <TableWrapper
-              key={checkedAssets.size}
               data={filteredAssets}
               columns={columns}
               renderCell={renderCell}
-              showPagination={false}
+              showPagination={true}
+              serverPagination={true}
+              paginationData={data?.pagination}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
               ariaLabel="Asset selection table"
               onRowClick={handleCheckboxChange}
               searchComponent={
@@ -267,6 +394,30 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                   value={searchTerm}
                   onChange={setSearchTerm}
                   placeholder="Search by Asset Tag, Brand, Model, or Condition..."
+                />
+              }
+              filterComponent={
+                <FilterDropdown
+                  onFilterChange={(newFilters) => {
+                    setFilters(newFilters);
+                    setCurrentPage(1);
+                  }}
+                  statusOptions={filterStatusOptions}
+                  conditionOptions={filterConditionOptions}
+                  selectedFilters={filters}
+                />
+              }
+              activeFiltersComponent={
+                <ActiveFiltersChips
+                  filters={filters}
+                  onRemoveFilter={(key) => {
+                    const newFilters = { ...filters };
+                    delete newFilters[key];
+                    setFilters(newFilters);
+                    setCurrentPage(1);
+                  }}
+                  getCategoryName={getCategoryName}
+                  getFilterLabel={getFilterLabel}
                 />
               }
               classNames={{

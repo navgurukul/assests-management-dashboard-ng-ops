@@ -1,7 +1,10 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { setUserRole } from '@/app/store/slices/appSlice';
+import { jwtDecode } from 'jwt-decode';
 import { isTokenExpired, clearAuthData } from '@/app/utils/authUtils';
 import { AUTH_KEY as _AUTH_KEY } from '@/app/utils/authConstants';
 
@@ -17,49 +20,58 @@ export function AuthProvider({ children }) {
     data: null,
   });
   const router = useRouter();
+  // const dispatch = useDispatch();
 
   // Load auth state from localStorage on mount
   useEffect(() => {
-    try {
-      const storedAuth = localStorage.getItem(AUTH_KEY);
-      if (storedAuth) {
-        const parsedAuth = JSON.parse(storedAuth);
-        // If the JWT is expired, clear stale data and treat as logged out
-        if (isTokenExpired(parsedAuth?.token)) {
-          clearAuthData();
-          setAuthState({ loading: false, error: null, data: null });
+    const loadAuth = async () => {
+      try {
+        const storedAuth = localStorage.getItem(AUTH_KEY);
+        if (storedAuth) {
+          const parsedAuth = JSON.parse(storedAuth);
+          
+          // Decode Token
+          if (parsedAuth?.token) {
+            try {
+              const decodedToken = jwtDecode(parsedAuth.token);
+              // console.log("Decoded Token Data:===>>>", decodedToken);
+              // Map/Extract role and dispatch to Redux (Assume 'Student' if not present for placeholder)
+              // const role = decodedToken?.userRole;
+              // dispatch(setUserRole(role));
+            } catch (err) {
+              console.error("Invalid token format:", err);
+            }
+          }
+
+          // If the JWT is expired, clear stale data and treat as logged out
+          if (isTokenExpired(parsedAuth?.token)) {
+            clearAuthData();
+            setAuthState({ loading: false, error: null, data: null });
+          } else {
+            setAuthState({ loading: false, error: null, data: parsedAuth });
+          }
         } else {
-          setAuthState({ loading: false, error: null, data: parsedAuth });
+          setAuthState({
+            loading: false,
+            error: null,
+            data: null,
+          });
         }
-      } else {
+      } catch (error) {
+        console.error('Error loading auth state:', error);
         setAuthState({
           loading: false,
           error: null,
           data: null,
         });
       }
-    } catch (error) {
-      console.error('Error loading auth state:', error);
-      setAuthState({
-        loading: false,
-        error: null,
-        data: null,
-      });
-    }
-  }, []);
-
-  // Listen for 401 Unauthorized events from API calls
-  useEffect(() => {
-    const handleUnauthorized = () => {
-      saveAuthState(null);
-      router.push('/login');
     };
-    window.addEventListener('auth:unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    
+    loadAuth();
   }, []);
 
   // Save auth state to localStorage and cookies whenever it changes
-  const saveAuthState = (data) => {
+  const saveAuthState = useCallback((data) => {
     try {
       if (data) {
         localStorage.setItem(AUTH_KEY, JSON.stringify(data));
@@ -83,7 +95,17 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Error saving auth state:', error);
     }
-  };
+  }, []);
+
+  // Listen for 401 Unauthorized events from API calls
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      saveAuthState(null);
+      router.push('/login');
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, [router, saveAuthState]);
 
   const login = (userData) => {
     const authData = {
