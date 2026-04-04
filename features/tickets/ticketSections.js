@@ -59,10 +59,10 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
         { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
       ],
-      headerActions: [
+      headerActions: ticket.ticketType?.toUpperCase() === 'REPAIR' ? [
         { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
         { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
-      ],
+      ] : [],
     }] : []),
     {
       title: 'CAMPUS INFO',

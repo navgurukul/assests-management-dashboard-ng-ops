@@ -32,7 +32,7 @@ export const ticketTableColumns = [
   },
   { 
     key: 'sla', 
-    label: 'SLA',
+    label: 'TIMELINE',
     description: 'Service Level Agreement indicator',
     type: 'sla'
   },
