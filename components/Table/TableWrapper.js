@@ -79,7 +79,7 @@ export default function TableWrapper({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white shadow-md p-6">
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
