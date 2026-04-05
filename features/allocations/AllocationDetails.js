@@ -378,8 +378,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
 
   // Right column sections (70%)
   const rightSections = [
-    assetCardsSection,
-   
     ...(allocationDetails.ticket
       ? [
           {
@@ -408,6 +406,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
         },
       ],
     },
+    assetCardsSection,
   ];
 
   return (
