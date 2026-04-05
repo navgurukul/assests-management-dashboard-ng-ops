@@ -229,7 +229,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
 
   const assetCardsSection = {
     title: 'Assets in Allocation',
-    color: 'teal',
+    color: 'theme',
     span: 2,
     content: normalizedAssets.length === 0 ? (
       <p className="text-xs text-gray-600">No assets linked to this allocation.</p>
@@ -315,7 +315,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
   const leftSections = [
     {
       title: 'Allocation Info',
-      color: 'blue',
+      color: 'theme',
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
@@ -327,7 +327,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     },
      {
       title: 'Timeline',
-      color: 'indigo',
+      color: 'theme',
       itemsGrid: true,
       items: [
         {
@@ -346,7 +346,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     },
     {
       title: 'Administrative Information',
-      color: 'purple',
+      color: 'theme',
       itemsGrid: true,
       items: [
         {
@@ -383,7 +383,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
       ? [
           {
             title: 'Ticket Information',
-            color: 'teal',
+            color: 'theme',
             span: 2,
             itemsGrid: true,
             items: [
@@ -398,7 +398,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
       : []),
     {
       title: 'Notes',
-      color: 'gray',
+      color: 'theme',
       span: 2,
       items: [
         { 
