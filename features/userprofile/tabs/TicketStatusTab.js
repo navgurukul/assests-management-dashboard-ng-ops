@@ -42,7 +42,7 @@ export default function TicketStatusTab() {
   const renderCell = useCallback((ticket, columnKey) => {
     switch (columnKey) {
       case 'ticketNumber':
-        return <span className="font-medium text-blue-600">{ticket.ticketNumber}</span>;
+        return <span className="font-medium text-[var(--theme-main)]">{ticket.ticketNumber}</span>;
       case 'description':
         return (
           <span className="text-gray-900 max-w-xs truncate block" title={ticket.description || '-'}>
