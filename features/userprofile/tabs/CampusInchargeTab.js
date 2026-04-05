@@ -200,6 +200,8 @@ export default function CampusInchargeTab() {
         ariaLabel="Campus Incharge table"
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        margin="m-0"
+        shadow="shadow-none"
       />
 
       <FormModal

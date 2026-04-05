@@ -39,7 +39,7 @@ const Header = ({ onMenuToggle }) => {
   };
 
   return (
-    <header className="w-full border-b border-gray-200 h-14 flex items-center justify-between px-4 bg-white z-10 shrink-0">
+    <header className="w-full border-b border-[var(--border)] h-14 flex items-center justify-between px-4 bg-[var(--background)] z-10 shrink-0">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger */}
         <button
@@ -49,7 +49,7 @@ const Header = ({ onMenuToggle }) => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="font-bold text-gray-800">Assets Management Dashboard</span>
+        <span className="font-bold text-[var(--foreground)]">Assets Management Dashboard</span>
       </div>
 
       <div className="flex items-center gap-3">

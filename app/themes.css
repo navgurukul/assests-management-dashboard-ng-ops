@@ -1,0 +1,72 @@
+:root {
+  /* Custom Color Palette - Main Theme (Light) */
+  --theme-main: #6B6158;
+  --theme-dark: #4A4440;
+  --theme-light: #9C958E;
+  --theme-darkest: #2E2A27;
+
+  /* Basic Theme Variables */
+  --background: #E8E4DF; /* Platinum */
+  --surface: #FFFFFF; /* White Cards */
+  --surface-soft: #F2EFE9; /* Table Header / Hover */
+  --foreground: #1A1714; /* Smoky Black Primary Text */
+  --muted: #5C5650; /* Dim Gray Secondary Text */
+  --border: #CCC8C1; /* Pale Silver */
+  
+  /* Sidebar */
+  --sidebar-item-fg: #FFFFFF;
+  --sidebar-item-hover-bg: #9C958E;
+  --sidebar-item-hover-fg: #FFFFFF;
+  --sidebar-item-active-bg: #4A4440;
+  --sidebar-item-active-fg: #FFFFFF;
+  --sidebar-profile-active-bg: #2E2A27;
+  --sidebar-profile-active-fg: #FFFFFF;
+  --sidebar-bg: #6B6158;
+  
+  /* Buttons and Actions */
+  --btn-bg: #6B6158;
+  --btn-fg: #FFFFFF;
+  --btn-hover-bg: #4A4440;
+}
+
+.dark {
+  /* Retaining existing dark theme logic or skipping as requested (only light theme for now) */
+  --background: #0b1220;
+  --surface: #111827;
+  --surface-soft: #1f2937;
+  --foreground: #f3f4f6;
+  --muted: #d1d5db;
+  --border: #374151;
+  --sidebar-item-fg: #d1d5db;
+  --sidebar-item-hover-bg: #243247;
+  --sidebar-item-hover-fg: #f9fafb;
+  --sidebar-item-active-bg: #dcfce7;
+  --sidebar-item-active-fg: #14532d;
+  --sidebar-profile-active-bg: #1e3a8a;
+  --sidebar-profile-active-fg: #bfdbfe;
+  
+  --btn-bg: #374151;
+  --btn-fg: #ffffff;
+  --btn-hover-bg: #4b5563;
+}
+
+@layer components {
+  .btn, button {
+    background-color: var(--btn-bg);
+    color: var(--btn-fg);
+  }
+  .btn:hover, button:hover {
+    background-color: var(--btn-hover-bg);
+  }
+  
+  /* Additional specific bg classes based on the new palette */
+  .bg-theme-main { background-color: var(--theme-main); }
+  .bg-theme-dark { background-color: var(--theme-dark); }
+  .bg-theme-light { background-color: var(--theme-light); }
+  .bg-theme-darkest { background-color: var(--theme-darkest); }
+  
+  .text-theme-main { color: var(--theme-main); }
+  .text-theme-dark { color: var(--theme-dark); }
+  .text-theme-light { color: var(--theme-light); }
+  .text-theme-darkest { color: var(--theme-darkest); }
+}
