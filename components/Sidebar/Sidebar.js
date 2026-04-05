@@ -75,7 +75,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
       onClick={() => setIsCollapsed(!isCollapsed)}
     >
       <nav className="p-4 flex-1">
-        <ul className="space-y-3" onClick={(e) => e.stopPropagation()}>
+        <ul className="space-y-1" onClick={(e) => e.stopPropagation()}>
           {filteredMenuItems.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.path;

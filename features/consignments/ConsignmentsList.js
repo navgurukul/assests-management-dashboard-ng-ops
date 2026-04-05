@@ -923,7 +923,7 @@ export default function ConsignmentsList() {
         itemsPerPage={showInTransit ? inTransitPageSize : pageSize}
         showPagination={true}
         ariaLabel={showInTransit ? 'In-transit returns table' : 'Consignments table'}
-        showCreateButton={!showInTransit}
+        showCreateButton={false}
         onCreateClick={handleCreateClick}
         isLoading={showInTransit ? isInTransitLoading : showLoading}
         searchComponent={
