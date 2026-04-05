@@ -153,6 +153,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   const leftSections = [
     {
       title: 'Quick Info',
+      color: 'theme',
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
@@ -162,6 +163,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
     {
       title: 'Shipping Timeline',
+      color: 'theme',
       items: [
         { label: 'Shipped At', value: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : 'Not shipped yet' },
         { label: 'Est. Delivery', value: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A' },
@@ -176,6 +178,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
     {
       title: 'Notes',
+      color: 'theme',
       items: [
         { label: 'Notes', value: consignment.notes || 'No notes available' },
       ],
@@ -186,6 +189,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   const rightSections = [
     {
       title: 'Consignment Details',
+      color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Source', value: sourceName },
@@ -210,6 +214,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
     {
       title: 'Assets in Consignment',
+      color: 'theme',
       itemsList: true, // Render as a list instead of grid
       items: consignment.assets?.length > 0 ? consignment.assets.map((asset, index) => ({
         label: `Asset ${index + 1}`,
@@ -227,6 +232,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
     {
       title: 'Allocation Information',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Allocation Code', value: consignment.allocation?.id || 'N/A' },
@@ -244,6 +250,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
     {
       title: 'System Information',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Consignment ID', value: consignment.id || 'N/A' },
