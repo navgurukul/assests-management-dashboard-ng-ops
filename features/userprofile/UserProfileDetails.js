@@ -58,30 +58,30 @@ export default function UserProfileDetails() {
 
   return (
     <>
-      <div className="h-full overflow-y-auto bg-gray-50 p-4"> 
+      <div className="h-full overflow-y-auto bg-[var(--background)] p-4"> 
         {/* Breadcrumb */}
-        <div className="mb-3 text-xs text-gray-600">
+        <div className="mb-3 text-xs text-[var(--muted)]">
           <span className="hover:text-blue-600 cursor-pointer">Dashboard</span>
           <span className="mx-2">›</span>
-          <span className="font-medium text-gray-900">User Profile</span>
+          <span className="font-medium text-[var(--foreground)]">User Profile</span>
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-4 border border-gray-200">
+        <div className="bg-[var(--surface)] rounded-lg shadow-sm p-4 mb-4 border border-[var(--border)]">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
               <div className="bg-gray-200 rounded-full flex items-center justify-center w-16 h-16">
                 <User className="w-8 h-8 text-gray-500" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 mb-1">
+                <h1 className="text-xl font-bold text-[var(--foreground)] mb-1">
                   {userData.name}
                 </h1>
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded text-xs font-semibold border bg-blue-100 text-blue-800 border-blue-300">
                     {userData.role}
                   </span>
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-[var(--muted)]">
                     {userData.department}
                   </span>
                 </div>
@@ -91,8 +91,8 @@ export default function UserProfileDetails() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4">
-          <div className="border-b border-gray-200">
+        <div className="bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] mb-4">
+          <div className="border-b border-[var(--border)]">
             <div className="flex overflow-x-auto">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -103,7 +103,7 @@ export default function UserProfileDetails() {
                     className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'border-blue-600 text-blue-600 bg-blue-50'
-                        : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                        : 'border-transparent text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--border)]'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
