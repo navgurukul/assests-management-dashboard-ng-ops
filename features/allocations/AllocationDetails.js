@@ -316,6 +316,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
     {
       title: 'Allocation Info',
       color: 'theme',
+      itemsGrid: true,
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
