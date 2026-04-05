@@ -33,7 +33,7 @@ export default function DetailsPage({
     return (
       <div
         key={index}
-        className={`bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] flex flex-col ${spanClass}`}
+        className={`bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] flex flex-col ${spanClass} ${section.className || ''}`}
       >
         {section.title && (
           <div className={`px-5 py-3 rounded-t-lg flex items-center justify-between gap-3 ${accent.titleBg} ${accent.border}`}>
@@ -57,7 +57,7 @@ export default function DetailsPage({
           </div>
         )}
 
-        <div className="p-5 flex-1">
+        <div className="p-5 flex-1 overflow-y-auto">
           {/* Render items if present */}
           {section.items && section.items.length > 0 && (
             <div className={section.itemsGrid ? 'grid grid-cols-2 gap-x-6 gap-y-4' : 'space-y-4'}>

@@ -311,11 +311,15 @@ export default function AllocationDetails({ allocationId, onBack }) {
     ),
   };
 
+  const sharedHeightClass = 'lg:h-[280px] xl:h-[260px] cursor-default';
+
   // Left column sections (30%)
   const leftSections = [
     {
       title: 'Allocation Info',
       color: 'theme',
+      itemsGrid: true,
+      className: sharedHeightClass,
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
@@ -323,12 +327,14 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Destination Campus', value: destinationCampusDisplay },
         { label: 'Temporary', value: allocationDetails.isTemporary ? 'Yes' : 'No' },
         { label: 'Duration', value: calculateDuration() },
+        { label: 'Allocation Notes', value: allocationDetails.notes || 'No additional notes provided', className: 'col-span-2' },
       ],
     },
      {
       title: 'Timeline',
       color: 'theme',
       itemsGrid: true,
+      className: sharedHeightClass,
       items: [
         {
           label: 'Start Date',
@@ -348,6 +354,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
       title: 'Administrative Information',
       color: 'theme',
       itemsGrid: true,
+      className: sharedHeightClass,
       items: [
         {
           label: 'Created By',
@@ -377,8 +384,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
 
   // Right column sections (70%)
   const rightSections = [
-    assetCardsSection,
-   
     ...(allocationDetails.ticket
       ? [
           {
@@ -386,6 +391,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
             color: 'theme',
             span: 2,
             itemsGrid: true,
+            className: sharedHeightClass,
             items: [
               { label: 'Ticket Number', value: allocationDetails.ticket.ticketNumber || 'N/A' },
               { label: 'Ticket Type', value: allocationDetails.ticket.ticketType || 'N/A' },
@@ -396,17 +402,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
           },
         ]
       : []),
-    {
-      title: 'Notes',
-      color: 'theme',
-      span: 2,
-      items: [
-        { 
-          label: 'Allocation Notes', 
-          value: allocationDetails.notes || 'No additional notes provided' 
-        },
-      ],
-    },
+    assetCardsSection,
   ];
 
   return (
