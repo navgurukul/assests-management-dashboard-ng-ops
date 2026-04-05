@@ -276,6 +276,8 @@ export default function TicketApprovalTab() {
         key={`table-${openMenuId || 'none'}`}
         data={ticketsToDisplay}
         columns={columns}
+        margin="m-0"
+        shadow="shadow-none"
         title={
           <div className="flex items-center gap-2">
             Tickets for Approval

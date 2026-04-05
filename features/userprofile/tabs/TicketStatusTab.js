@@ -114,6 +114,8 @@ export default function TicketStatusTab() {
       <TableWrapper
         data={paginatedTickets}
         columns={columns}
+        margin='m-0'
+        shadow='shadow-none'
         title="My Ticket Status"
         renderCell={renderCell}
         showPagination={true}
