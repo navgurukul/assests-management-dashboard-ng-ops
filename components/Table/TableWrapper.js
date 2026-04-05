@@ -33,6 +33,8 @@ export default function TableWrapper({
   onPageSizeChange,
   // Loading state
   isLoading = false,
+  margin = "m-5",
+  shadow = "shadow-md",
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
@@ -73,13 +75,13 @@ export default function TableWrapper({
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
-    th: `bg-(--surface-soft) text-(--foreground) font-semibold text-sm h-12 border-b-2 border-(--border) whitespace-nowrap ${classNames.th || ""}`,
-    td: `text-(--foreground) text-sm h-16 border-b border-(--border) ${classNames.td || ""}`,
-    tr: `hover:bg-(--surface-soft) hover:text-(--foreground) data-[hover=true]:bg-(--surface-soft) data-[hover=true]:text-(--foreground) transition-colors ${classNames.tr || ""}`,
+    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-sm h-12 border-b-2 border-[var(--border)] whitespace-nowrap ${classNames.th || ""}`,
+    td: `text-[var(--foreground)] text-sm h-16 border-b border-[var(--border)] ${classNames.td || ""}`,
+    tr: `hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)] data-[hover=true]:bg-[var(--surface-soft)] data-[hover=true]:text-[var(--foreground)] transition-colors ${classNames.tr || ""}`,
   };
 
   return (
-    <div className="bg-white shadow-md p-6">
+    <div className={`bg-[var(--surface)] p-6 rounded-lg ${shadow} ${margin}`}>
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">

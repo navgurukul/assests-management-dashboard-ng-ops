@@ -87,6 +87,8 @@ export default function AssetsTable() {
       columns={columns}
       title="Consolidated Laptop Data - Navgurukul"
       renderCell={renderCell}
+      margin="m-0"
+      shadow="shadow-none"
       itemsPerPage={pageSize}
       showPagination={true}
       serverPagination={true}
