@@ -134,7 +134,7 @@ export default function CampusInchargeTab() {
         return (
           <div className="flex justify-center gap-3">
             <button
-              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-150 hover:scale-110"
+              className="p-2 text-[var(--theme-main)] hover:bg-[var(--surface-soft)] rounded-lg transition-all duration-150 hover:scale-110"
               title="Edit"
               onClick={(e) => {
                 e.stopPropagation();

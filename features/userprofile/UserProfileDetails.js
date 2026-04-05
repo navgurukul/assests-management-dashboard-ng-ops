@@ -61,7 +61,7 @@ export default function UserProfileDetails() {
       <div className="h-full overflow-y-auto bg-[var(--background)] p-4"> 
         {/* Breadcrumb */}
         <div className="mb-3 text-xs text-[var(--muted)]">
-          <span className="hover:text-blue-600 cursor-pointer">Dashboard</span>
+          <span className="hover:text-[var(--theme-main)] cursor-pointer">Dashboard</span>
           <span className="mx-2">›</span>
           <span className="font-medium text-[var(--foreground)]">User Profile</span>
         </div>
@@ -78,7 +78,7 @@ export default function UserProfileDetails() {
                   {userData.name}
                 </h1>
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold border bg-blue-100 text-blue-800 border-blue-300">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold border border-[var(--theme-light)] bg-[var(--surface-soft)] text-[var(--theme-main)]">
                     {userData.role}
                   </span>
                   <span className="text-xs text-[var(--muted)]">
@@ -102,7 +102,7 @@ export default function UserProfileDetails() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'border-blue-600 text-blue-600 bg-blue-50'
+                        ? 'border-[var(--theme-main)] text-[var(--theme-main)] bg-[var(--surface-soft)]'
                         : 'border-transparent text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--border)]'
                     }`}
                   >

@@ -217,8 +217,8 @@ export default function MyAssetsTab() {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 rounded-lg p-2">
-                      <Laptop className="w-5 h-5 text-blue-600" />
+                    <div className="bg-[var(--surface-soft)] rounded-lg p-2">
+                      <Laptop className="w-5 h-5 text-[var(--theme-main)]" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{asset.brand} {asset.model}</h3>
