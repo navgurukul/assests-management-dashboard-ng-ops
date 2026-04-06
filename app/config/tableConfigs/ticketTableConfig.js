@@ -1,6 +1,8 @@
 
 export const TICKET_TABLE_ID = 'tickets';
 
+import { getPriorityChipColor, getStatusChipColor } from '@/app/utils/statusHelpers';
+
 // All available columns for the tickets table
 export const ticketTableColumns = [
   // Always visible columns
@@ -8,7 +10,8 @@ export const ticketTableColumns = [
     key: 'ticketId', 
     label: 'TICKET ID', 
     alwaysVisible: true,
-    description: 'Unique ticket identifier'
+    description: 'Unique ticket identifier',
+    type: 'boldText'
   },
   
   { 
@@ -24,12 +27,14 @@ export const ticketTableColumns = [
   { 
     key: 'status', 
     label: 'STATUS',
-    description: 'Current ticket status'
+    description: 'Current ticket status',
+    type: 'chip'
   },
   { 
     key: 'sla', 
-    label: 'SLA',
-    description: 'Service Level Agreement indicator'
+    label: 'TIMELINE',
+    description: 'Service Level Agreement indicator',
+    type: 'sla'
   },
   { 
     key: 'actionTakenBy', 
@@ -39,13 +44,16 @@ export const ticketTableColumns = [
   { 
     key: 'updated', 
     label: 'UPDATED',
-    description: 'Last update date'
+    description: 'Last update date',
+    type: 'date'
   },
   
   { 
     key: 'priority', 
     label: 'PRIORITY',
-    description: 'Ticket priority level'
+    description: 'Ticket priority level',
+    type: 'chip',
+    colorFn: getPriorityChipColor
   },
   { 
     key: 'campus', 
@@ -55,12 +63,14 @@ export const ticketTableColumns = [
   { 
     key: 'raisedBy', 
     label: 'RAISED BY',
-    description: 'User who created the ticket'
+    description: 'User who created the ticket',
+    type: 'userWithEmail'
   },
   { 
     key: 'assignedTo', 
     label: 'ASSIGNED TO',
-    description: 'User assigned to the ticket'
+    description: 'User assigned to the ticket',
+    type: 'userWithEmail'
   },
   { 
     key: 'raisedByEmail', 
@@ -75,22 +85,26 @@ export const ticketTableColumns = [
   { 
     key: 'createdAt', 
     label: 'CREATED AT',
-    description: 'Ticket creation date'
+    description: 'Ticket creation date',
+    type: 'date'
   },
   { 
     key: 'assignDate', 
     label: 'ASSIGN DATE',
-    description: 'Date when ticket was assigned'
+    description: 'Date when ticket was assigned',
+    type: 'date'
   },
   { 
     key: 'resolvedAt', 
     label: 'RESOLVED AT',
-    description: 'Date when ticket was resolved'
+    description: 'Date when ticket was resolved',
+    type: 'date'
   },
   { 
     key: 'closedAt', 
     label: 'CLOSED AT',
-    description: 'Date when ticket was closed'
+    description: 'Date when ticket was closed',
+    type: 'date'
   },
 ];
 

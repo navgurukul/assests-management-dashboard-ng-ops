@@ -12,7 +12,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['your/action/type'],
+        ignoredActions: ['tableColumns/initializeTableColumns'],
+        ignoredPaths: ['tableColumns.tables'],
       },
     }),
 });

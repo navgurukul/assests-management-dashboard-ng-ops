@@ -5,7 +5,7 @@ export function getTicketLeftSections(ticket, historyTimeline) {
   return [
     {
       title: 'TIMELINE',
-      color: 'orange',
+      color: 'theme',
       content: (
         <SLAIndicator
           allocationDate={ticket.assignDate}
@@ -17,7 +17,7 @@ export function getTicketLeftSections(ticket, historyTimeline) {
     },
     {
       title: 'HISTORY LOG',
-      color: 'gray',
+      color: 'theme',
       content: historyTimeline,
     },
   ];
@@ -27,7 +27,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
   return [
     {
       title: 'TICKET INFO',
-      color: 'blue',
+      color: 'theme',
       span: 2,
       itemsGrid: true,
       items: [
@@ -44,7 +44,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
     },
     ...(hasAsset ? [{
       title: 'ASSET DETAILS',
-      color: 'orange',
+      color: 'theme',
       span: 2,
       itemsGrid: true,
       items: [
@@ -59,14 +59,14 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
         { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
       ],
-      headerActions: [
+      headerActions: ticket.ticketType?.toUpperCase() === 'REPAIR' ? [
         { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
         { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
-      ],
+      ] : [],
     }] : []),
     {
       title: 'CAMPUS INFO',
-      color: 'teal',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
@@ -77,7 +77,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
     },
     {
       title: 'RAISED BY',
-      color: 'green',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Name', value: ticket.raisedByUser ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}`.trim() : '—' },
@@ -87,7 +87,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
     },
     {
       title: 'ASSIGNEE',
-      color: 'purple',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
@@ -98,7 +98,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
     },
     {
       title: 'DATES',
-      color: 'indigo',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Raised On', value: ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : '—' },

@@ -13,6 +13,7 @@ const ACCENT_COLORS = {
   red:    { border: 'border-t-red-500',    titleBg: 'bg-red-50',    titleText: 'text-red-700'    },
   indigo: { border: 'border-t-indigo-500', titleBg: 'bg-indigo-50', titleText: 'text-indigo-700' },
   gray:   { border: 'border-t-gray-400',   titleBg: 'bg-gray-50',   titleText: 'text-gray-600'   },
+  theme:  { border: 'border-b-[#6B6158] border-t-[#9C958E]', titleBg: 'bg-[#9C958E]', titleText: 'text-white' },
 };
 
 export default function DetailsPage({
@@ -32,10 +33,10 @@ export default function DetailsPage({
     return (
       <div
         key={index}
-        className={`bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col ${spanClass}`}
+        className={`bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] flex flex-col ${spanClass} ${section.className || ''}`}
       >
         {section.title && (
-          <div className={`px-5 py-3 rounded-t-lg border-b border-gray-100 ${accent.titleBg} flex items-center justify-between gap-3`}>
+          <div className={`px-5 py-3 rounded-t-lg flex items-center justify-between gap-3 ${accent.titleBg} ${accent.border}`}>
             <h2 className={`text-[11px] font-bold uppercase tracking-widest ${accent.titleText}`}>
               {section.title}
             </h2>
@@ -56,7 +57,7 @@ export default function DetailsPage({
           </div>
         )}
 
-        <div className="p-5 flex-1">
+        <div className="p-5 flex-1 overflow-y-auto">
           {/* Render items if present */}
           {section.items && section.items.length > 0 && (
             <div className={section.itemsGrid ? 'grid grid-cols-2 gap-x-6 gap-y-4' : 'space-y-4'}>
@@ -184,7 +185,7 @@ export default function DetailsPage({
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 p-5">
+    <div className="h-full flex flex-col bg-[var(--background)] p-5">
       {/* Back Button */}
       {onBack && (
         <div className="mb-4 shrink-0">
@@ -198,7 +199,7 @@ export default function DetailsPage({
         </div>
       )}
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm px-7 py-5 mb-5 border border-gray-200 shrink-0">
+      <div className="bg-[var(--surface)] rounded-lg shadow-sm px-7 py-5 mb-5 border border-[var(--border)] shrink-0">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div>
             <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>

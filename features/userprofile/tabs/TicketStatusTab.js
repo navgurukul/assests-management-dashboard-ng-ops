@@ -42,7 +42,7 @@ export default function TicketStatusTab() {
   const renderCell = useCallback((ticket, columnKey) => {
     switch (columnKey) {
       case 'ticketNumber':
-        return <span className="font-medium text-blue-600">{ticket.ticketNumber}</span>;
+        return <span className="font-medium text-[var(--theme-main)]">{ticket.ticketNumber}</span>;
       case 'description':
         return (
           <span className="text-gray-900 max-w-xs truncate block" title={ticket.description || '-'}>
@@ -114,6 +114,8 @@ export default function TicketStatusTab() {
       <TableWrapper
         data={paginatedTickets}
         columns={columns}
+        margin='m-0'
+        shadow='shadow-none'
         title="My Ticket Status"
         renderCell={renderCell}
         showPagination={true}

@@ -137,7 +137,7 @@ export default function TicketApprovalTab() {
   const renderCell = useCallback((ticket, columnKey) => {
     switch (columnKey) {
       case 'ticketNumber':
-        return <span className="font-medium text-blue-600">{ticket.ticketNumber}</span>;
+        return <span className="font-medium text-[var(--theme-main)]">{ticket.ticketNumber}</span>;
       
       case 'description':
         return (
@@ -276,6 +276,8 @@ export default function TicketApprovalTab() {
         key={`table-${openMenuId || 'none'}`}
         data={ticketsToDisplay}
         columns={columns}
+        margin="m-0"
+        shadow="shadow-none"
         title={
           <div className="flex items-center gap-2">
             Tickets for Approval

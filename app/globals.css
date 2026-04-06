@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f8fb;
-  --surface: #ffffff;
-  --surface-soft: #f3f5f8;
-  --foreground: #111827;
-  --foreground-light: #111827;
-  --foreground-dark: #f3f4f6;
-  --muted: #4b5563;
-  --border: #e5e7eb;
-  --sidebar-item-fg: #374151;
-  --sidebar-item-hover-bg: #f9fafb;
-  --sidebar-item-hover-fg: #111827;
-  --sidebar-item-active-bg: #fff7ed;
-  --sidebar-item-active-fg: #fb923c;
-  --sidebar-profile-active-bg: #eff6ff;
-  --sidebar-profile-active-fg: #2563eb;
+  --background: #E8E4DF;
+  --surface: #FFFFFF;
+  --surface-soft: #F2EFE9;
+  --foreground: #1A1714;
+  --foreground-light: #1A1714;
+  --foreground-dark: #FFFFFF;
+  --muted: #5C5650;
+  --border: #CCC8C1;
+  --sidebar-item-fg: #FFFFFF;
+  --sidebar-item-hover-bg: #4A4440;
+  --sidebar-item-hover-fg: #FFFFFF;
+  --sidebar-item-active-bg: #2E2A27;
+  --sidebar-item-active-fg: #FFFFFF;
+  --sidebar-profile-active-bg: #9C958E;
+  --sidebar-profile-active-fg: #FFFFFF;
+  --sidebar-bg: #6B6158;
 }
 
 .dark {
@@ -28,10 +29,11 @@
   --sidebar-item-fg: #d1d5db;
   --sidebar-item-hover-bg: #243247;
   --sidebar-item-hover-fg: #f9fafb;
-  --sidebar-item-active-bg: #7c2d12;
-  --sidebar-item-active-fg: #fed7aa;
+  --sidebar-item-active-bg: #dcfce7;
+  --sidebar-item-active-fg: #14532d;
   --sidebar-profile-active-bg: #1e3a8a;
   --sidebar-profile-active-fg: #bfdbfe;
+  --sidebar-bg: #111827;
 }
 
 .profile-box-bg-light {
@@ -49,7 +51,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
   --font-mono: var(--font-poppins);
-  --sidebar-bg: var(--surface);
+  --sidebar-bg: var(--sidebar-bg); /* updated to use its own variable */
 }
 
 body {
@@ -95,6 +97,37 @@ body {
 .dark .divide-gray-300 {
   --tw-divide-opacity: 1;
   border-color: var(--border) !important;
+}
+
+/* Header Theme toggle classes */
+.header-btn-light {
+  color: #111827; /* black tone */
+}
+.header-btn-light:hover {
+  background-color: #f3f4f6; /* light gray hover */
+}
+
+.header-btn-dark {
+  color: #f3f4f6; /* white tone for dark mode */
+}
+.header-btn-dark:hover {
+  background-color: #374151; /* dark gray hover */
+}
+
+.header-icon-bg-light {
+  background-color: #e5e7eb;
+}
+.header-icon-bg-dark {
+  background-color: #4b5563;
+}
+
+.header-dropdown-light {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+.header-dropdown-dark {
+  background-color: #1f2937;
+  border-color: #374151;
 }
 
 .dark input,

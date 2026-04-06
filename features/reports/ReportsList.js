@@ -16,7 +16,7 @@ const reportCards = [
   },
   {
     id: 'ticket-sla',
-    title: 'Ticket SLA',
+    title: 'Ticket Timeline',
     subtitle: 'IT performance',
     icon: Clock,
     bgColor: 'bg-green-100',
@@ -81,7 +81,7 @@ export default function ReportsList() {
       case 'ticket-sla':
         return (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-500 text-lg">Ticket SLA report content coming soon...</p>
+            <p className="text-gray-500 text-lg">Ticket Timeline report content coming soon...</p>
           </div>
         );
       case 'movement-tracking':

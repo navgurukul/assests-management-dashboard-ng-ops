@@ -10,7 +10,7 @@ export default function SummaryCard({
   onClick = null,
   isActive = false
 }) {
-  const baseClasses = "bg-white rounded-lg shadow p-4";
+  const baseClasses = "bg-[var(--surface)] rounded-lg shadow p-4";
   const clickableClasses = clickable 
     ? "cursor-pointer transition-all hover:shadow-md hover:scale-105" 
     : "";

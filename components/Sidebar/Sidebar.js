@@ -64,7 +64,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
   return (
     <aside
       className={[
-        'bg-sidebar-bg border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col shrink-0',
+        'bg-[var(--sidebar-bg)] border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col shrink-0',
         // Mobile: fixed drawer overlay
         'fixed inset-y-0 left-0 z-40 w-64',
         isMobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -75,7 +75,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
       onClick={() => setIsCollapsed(!isCollapsed)}
     >
       <nav className="p-4 flex-1">
-        <ul className="space-y-3" onClick={(e) => e.stopPropagation()}>
+        <ul className="space-y-1" onClick={(e) => e.stopPropagation()}>
           {filteredMenuItems.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.path;
@@ -88,8 +88,8 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                   isCollapsed ? 'md:justify-center' : '',
                   isActive
-                    ? 'bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg) font-medium'
-                    : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
+                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)] font-medium'
+                    : 'text-[var(--sidebar-item-fg)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-[var(--sidebar-item-hover-fg)]',
                 ].join(' ')}
               >
                 <Icon className="w-6 h-6 shrink-0" />
@@ -120,8 +120,8 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                 isCollapsed ? 'md:justify-center' : '',
                 pathname === '/userprofile'
-                  ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg) font-medium'
-                  : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
+                  ? 'bg-[var(--sidebar-profile-active-bg)] text-[var(--sidebar-profile-active-fg)] font-medium'
+                  : 'text-[var(--sidebar-item-fg)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-[var(--sidebar-item-hover-fg)]',
               ].join(' ')}
             >
               <User className="w-6 h-6 shrink-0" />

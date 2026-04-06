@@ -149,10 +149,14 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     }
   };
 
+  const sharedHeightClass = 'lg:h-[280px] xl:h-[260px] cursor-default';
+
   // Left column sections (30%) - Multiple smaller information cards
   const leftSections = [
     {
       title: 'Quick Info',
+      color: 'theme',
+      className: sharedHeightClass,
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
@@ -161,7 +165,29 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       ],
     },
     {
-      title: 'Shipping Timeline',
+      title: 'Assets in Consignment',
+      color: 'theme',
+      itemsGrid: true, // Render as a 2-column grid
+      className: sharedHeightClass,
+      items: consignment.assets?.length > 0 ? consignment.assets.map((asset, index) => ({
+        label: `Asset ${index + 1}`,
+        value:
+          asset?.asset?.assetTag ||
+          asset?.assetTag ||
+          asset?.asset?.serialNumber ||
+          asset?.serialNumber ||
+          asset?.asset?.id ||
+          asset?.assetId ||
+          asset?.id ||
+          'Unknown',
+        className: 'text-blue-600 font-medium'
+      })) : [{ label: 'No assets', value: 'No assets found in this consignment' }],
+    },
+    {
+      title: 'Shipping Timeline & Notes',
+      color: 'theme',
+      itemsGrid: true,
+      className: sharedHeightClass,
       items: [
         { label: 'Shipped At', value: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : 'Not shipped yet' },
         { label: 'Est. Delivery', value: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A' },
@@ -170,14 +196,9 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
           value: (consignment.receivedAt || consignment.deliveredAt)
             ? new Date(consignment.receivedAt || consignment.deliveredAt).toLocaleDateString()
             : shippingDestinationDisplay,
-          className: (consignment.receivedAt || consignment.deliveredAt) ? 'text-green-600 font-semibold' : 'text-gray-500'
+          className: (consignment.receivedAt || consignment.deliveredAt) ? 'col-span-2 text-green-600 font-semibold' : 'col-span-2 text-gray-500'
         },
-      ],
-    },
-    {
-      title: 'Notes',
-      items: [
-        { label: 'Notes', value: consignment.notes || 'No notes available' },
+        { label: 'Notes', value: consignment.notes || 'No notes available', className: 'col-span-2' },
       ],
     },
   ];
@@ -186,7 +207,9 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   const rightSections = [
     {
       title: 'Consignment Details',
+      color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
+      className: sharedHeightClass,
       items: [
         { label: 'Source', value: sourceName },
         { label: 'Destination', value: destinationName },
@@ -209,25 +232,10 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       ],
     },
     {
-      title: 'Assets in Consignment',
-      itemsList: true, // Render as a list instead of grid
-      items: consignment.assets?.length > 0 ? consignment.assets.map((asset, index) => ({
-        label: `Asset ${index + 1}`,
-        value:
-          asset?.asset?.assetTag ||
-          asset?.assetTag ||
-          asset?.asset?.serialNumber ||
-          asset?.serialNumber ||
-          asset?.asset?.id ||
-          asset?.assetId ||
-          asset?.id ||
-          'Unknown',
-        className: 'text-blue-600 font-medium'
-      })) : [{ label: 'No assets', value: 'No assets found in this consignment' }],
-    },
-    {
       title: 'Allocation Information',
+      color: 'theme',
       itemsGrid: true,
+      className: sharedHeightClass,
       items: [
         { label: 'Allocation Code', value: consignment.allocation?.id || 'N/A' },
         { label: 'Allocation Type', value: consignment.allocation?.allocationType || 'N/A' },
@@ -244,7 +252,9 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
     {
       title: 'System Information',
+      color: 'theme',
       itemsGrid: true,
+      className: sharedHeightClass,
       items: [
         { label: 'Consignment ID', value: consignment.id || 'N/A' },
         { label: 'Created By', value: resolveUserDisplay(consignment.createdBy) },
