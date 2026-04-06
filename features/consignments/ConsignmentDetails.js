@@ -5,10 +5,12 @@ import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
 import PdfPreviewModal from '@/components/molecules/PdfPreviewModal';
 import CustomButton from '@/components/atoms/CustomButton';
+import BulkConsignmentModal from './BulkConsignmentModal';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -241,9 +243,20 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       itemsGrid: true,
       className: sharedHeightClass,
       items: [
-        { label: 'Allocation Code', value: consignment.allocation?.id || 'N/A' },
-        { label: 'Allocation Type', value: consignment.allocation?.allocationType || 'N/A' },
-        { label: 'Allocation Status', value: consignment.allocation?.status || 'N/A' },
+        { 
+          label: 'Allocation Code', 
+          value: consignment.allocation?.allocationCode || 
+                 (typeof consignment.allocation?.id === 'object' ? consignment.allocation.id?.name || consignment.allocation.id?.id : consignment.allocation?.id) || 
+                 'N/A' 
+        },
+        { 
+          label: 'Allocation Type', 
+          value: typeof consignment.allocation?.allocationType === 'object' ? consignment.allocation?.allocationType?.name || 'N/A' : consignment.allocation?.allocationType || 'N/A' 
+        },
+        { 
+          label: 'Allocation Status', 
+          value: typeof consignment.allocation?.status === 'object' ? consignment.allocation?.status?.name || 'N/A' : consignment.allocation?.status || 'N/A' 
+        },
         {
           label: 'User Email',
           value: resolveUserEmail(
@@ -280,13 +293,29 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         rightSections={rightSections}
         onBack={onBack}
         headerActions={
-          <CustomButton
-            text="Print PDF"
-            variant="secondary"
-            size="md"
-            onClick={() => setShowPdfModal(true)}
-          />
+          <div className="flex gap-2">
+            {destinationName?.toUpperCase() !== 'REMOTE' && (
+              <CustomButton
+                text="Bulk Consignment"
+                variant="primary"
+                size="md"
+                onClick={() => setShowBulkModal(true)}
+              />
+            )}
+            <CustomButton
+              text="Print PDF"
+              variant="secondary"
+              size="md"
+              onClick={() => setShowPdfModal(true)}
+            />
+          </div>
         }
+      />
+
+      <BulkConsignmentModal 
+        isOpen={showBulkModal}
+        onClose={() => setShowBulkModal(false)}
+        consignment={consignment}
       />
 
       <PdfPreviewModal
