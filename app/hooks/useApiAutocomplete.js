@@ -19,8 +19,8 @@ const buildApiUrl = (baseUrl, dependsOn, dependentValue, additionalParams) => {
     if (baseUrl.endsWith('/')) {
       // If URL ends with '/', treat dependent value as path parameter
       finalUrl = `${baseUrl}${dependentValue}`;
-    } else {
-      // Otherwise, add as query parameter
+    } else if (dependsOn.paramKey) {
+      // Otherwise, add as query parameter if paramKey is defined
       queryParams.push(`${dependsOn.paramKey}=${dependentValue}`);
     }
   }
