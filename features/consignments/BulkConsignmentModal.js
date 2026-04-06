@@ -79,7 +79,11 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
             const processor = specObj?.processor || 'Unknown Processor';
             const ram = specObj?.ram || 'Unknown RAM';
             const storage = specObj?.storage || 'Unknown Storage';
-            const type = assetObj?.assetType || assetObj?.type || 'Device';
+            
+            let type = assetObj?.assetType || assetObj?.type || 'Device';
+            if (typeof type === 'object') {
+              type = type?.name || 'Device';
+            }
 
             const isSelected = feedbacks[assetValue]?.selected || false;
             const currentFeedback = feedbacks[assetValue]?.text || '';
