@@ -243,11 +243,19 @@ export default function AllocationDetails({ allocationId, onBack }) {
               className="border border-gray-100 rounded-lg bg-white p-2 flex flex-col gap-2"
             >
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">ASSET TAG</p>
-                  <p className="text-xs font-semibold text-gray-900">{asset.assetTag || 'N/A'}</p>
+                <div className="flex items-start gap-4">
+                  <div className="border border-gray-200 rounded-md px-3 py-1.5 bg-gray-50">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">ASSET TAG</p>
+                    <p className="text-sm font-bold text-gray-900">{asset.assetTag || 'N/A'}</p>
+                  </div>
+                  {asset.assetHistory?.[0]?.previousAssetTag && (
+                    <div className="border border-gray-200 rounded-md px-3 py-1.5 bg-gray-50">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">PREVIOUS ASSET TAG</p>
+                      <p className="text-sm font-bold text-gray-900">{asset.assetHistory[0].previousAssetTag}</p>
+                    </div>
+                  )}
                 </div>
-                <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-700">
+                <span className="px-2 py-1 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-700 mt-1">
                   {String(formatAssetStatus(asset.status || allocationDetails.status)).toUpperCase()}
                 </span>
               </div>
@@ -265,17 +273,11 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SPEC LABEL</p>
                   <p className="font-medium">{asset.specLabel || 'N/A'}</p>
                 </div>
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">PROCESSOR</p>
-                  <p className="font-medium">{asset.processor || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">RAM</p>
-                  <p className="font-medium">{asset.ramSizeGB ? `${asset.ramSizeGB} GB` : 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">STORAGE</p>
-                  <p className="font-medium">{asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A'}</p>
+                <div className="col-span-1 sm:col-span-2">
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">PROCESSOR / RAM / STORAGE</p>
+                  <p className="font-medium">
+                    {`${asset.processor || 'N/A'} : ${asset.ramSizeGB ? `${asset.ramSizeGB}GB` : 'N/A'} : ${asset.storageSizeGB ? `${asset.storageSizeGB}GB` : 'N/A'}`}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">CONDITION</p>
@@ -293,9 +295,9 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">BAG</p>
                   <p className="font-medium">{formatBoolean(asset.bag)}</p>
                 </div>
-                <div className="col-span-full">
+                <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SERIAL NUMBER</p>
-                  <p className="font-medium break-all">{asset.serialNumber || 'N/A'}</p>
+                  <p className="font-medium break-left">{asset.serialNumber || 'N/A'}</p>
                 </div>
                 {asset.notes && (
                   <div className="col-span-full">
