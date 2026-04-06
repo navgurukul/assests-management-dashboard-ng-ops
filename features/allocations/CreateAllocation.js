@@ -79,8 +79,7 @@ export default function CreateAllocation() {
         allocationData = {
           allocationType: 'Remote',
           assetIds: [values.assetId],
-          sourceCampusName: values.sourceCampusName,
-          destinationCampusName: 'Remote',
+          sourceCampusId: values.campusId,
           allocationReason: values.allocationReason,
           notes: values.notes || null,
         };
@@ -89,22 +88,25 @@ export default function CreateAllocation() {
         if (values.userEmail) allocationData.userEmail = values.userEmail;
         if (values.phoneNumber) allocationData.phoneNumber = values.phoneNumber;
         if (values.userAddress) allocationData.userAddress = values.userAddress;
-        const resolvedTicketId = selectedTicket?.id || ticketIdFromQuery;
-        if (resolvedTicketId) allocationData.ticketId = resolvedTicketId;
-        
       } else if (values.allocationType === 'CAMPUS') {
         // Campus allocation - bulk assets transfer
         const assetIds = values.campusAssets.map(asset => asset.id);
         allocationData = {
           allocationType: 'Campus',
           assetIds: assetIds,
-          sourceCampusName: values.sourceCampusName,
-          destinationCampusName: values.destinationCampus,
+          sourceCampusId: values.sourceCampus,
+          destinationCampusId: values.destinationCampus,
           allocationReason: values.allocationReason,
           notes: values.notes || null,
         };
       } else {
         throw new Error('Invalid allocation type');
+      }
+
+      // Add ticketId for both allocation types if available
+      const resolvedTicketId = selectedTicket?.id || ticketIdFromQuery;
+      if (resolvedTicketId) {
+        allocationData.ticketId = resolvedTicketId;
       }
 
       // Make API call to create allocation using apiService wrapper
