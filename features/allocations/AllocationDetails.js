@@ -324,10 +324,8 @@ export default function AllocationDetails({ allocationId, onBack }) {
       className: sharedHeightClass,
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
-        { label: 'Reason', value: formatReason(allocationDetails.allocationReason) },
         { label: 'Source Campus', value: sourceCampusDisplay },
         { label: 'Destination Campus', value: destinationCampusDisplay },
-        { label: 'Temporary', value: allocationDetails.isTemporary ? 'Yes' : 'No' },
         { label: 'Duration', value: calculateDuration() },
         { label: 'Allocation Notes', value: allocationDetails.notes || 'No additional notes provided', className: 'col-span-2' },
       ],
