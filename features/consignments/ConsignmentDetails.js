@@ -166,7 +166,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
-        { label: 'Allocation', value: consignment.allocation?.id || consignment.allocationId || 'N/A' },
         { label: 'Total Assets', value: String(totalAssets) },
       ],
     },
