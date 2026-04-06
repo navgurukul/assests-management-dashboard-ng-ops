@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
 import PdfPreviewModal from '@/components/molecules/PdfPreviewModal';
+import CustomButton from '@/components/atoms/CustomButton';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
@@ -213,13 +214,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       className: sharedHeightClass,
-      headerActions: [
-        {
-          label: 'Print PDF',
-          onClick: () => setShowPdfModal(true),
-          variant: 'secondary'
-        }
-      ],
       items: [
         { label: 'Source', value: sourceName },
         { label: 'Destination', value: destinationName },
@@ -285,6 +279,14 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         leftSections={leftSections}
         rightSections={rightSections}
         onBack={onBack}
+        headerActions={
+          <CustomButton
+            text="Print PDF"
+            variant="secondary"
+            size="md"
+            onClick={() => setShowPdfModal(true)}
+          />
+        }
       />
 
       <PdfPreviewModal
