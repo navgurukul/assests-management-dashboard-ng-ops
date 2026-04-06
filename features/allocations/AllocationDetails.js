@@ -295,9 +295,9 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">BAG</p>
                   <p className="font-medium">{formatBoolean(asset.bag)}</p>
                 </div>
-                <div className="col-span-full">
+                <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SERIAL NUMBER</p>
-                  <p className="font-medium break-all">{asset.serialNumber || 'N/A'}</p>
+                  <p className="font-medium break-left">{asset.serialNumber || 'N/A'}</p>
                 </div>
                 {asset.notes && (
                   <div className="col-span-full">
