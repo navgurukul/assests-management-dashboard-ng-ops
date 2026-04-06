@@ -18,6 +18,7 @@ export default function TableWrapper({
   ariaLabel = "Data table",
   onRowClick,
   showCreateButton = false,
+  createButtonText = "Create",
   onCreateClick,
   // Filter props
   filterComponent,
@@ -110,7 +111,7 @@ export default function TableWrapper({
           {columnSelectorComponent}
           {showCreateButton && (
             <CustomButton
-              text="Create"
+              text={createButtonText}
               icon={Plus}
               onClick={onCreateClick}
               variant="primary"

@@ -1,7 +1,7 @@
 'use client';
 
 import { Ticket } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
@@ -23,6 +23,8 @@ const columns = [
 
 export default function TicketStatusTab() {
   const router = useRouter();
+  const pathname = usePathname();
+  const showCreateTicketButton = pathname === '/ticketstatus';
   
   const { data: ticketsResponse, isLoading: isLoadingTickets, error: ticketsError } = useFetch({
     url: config.endpoints.tickets.myTickets,
@@ -37,6 +39,10 @@ export default function TicketStatusTab() {
   const handleRowClick = (ticket) => {
     if (!ticket?.id) return;
     router.push(`/tickets/${ticket.id}`);
+  };
+
+  const handleCreateClick = () => {
+    router.push('/tickets/create');
   };
 
   const renderCell = useCallback((ticket, columnKey) => {
@@ -119,6 +125,10 @@ export default function TicketStatusTab() {
         title="My Ticket Status"
         renderCell={renderCell}
         showPagination={true}
+        
+        showCreateButton={showCreateTicketButton}
+        createButtonText="Create Ticket"
+        onCreateClick={handleCreateClick}
         itemsPerPage={pageSize}
         ariaLabel="My Tickets table"
         onRowClick={handleRowClick}
