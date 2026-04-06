@@ -44,10 +44,45 @@ export default function AssetsTable() {
   });
 
   const tableData = (response?.data ?? []).map(transformRow);
+
+  // Calculate totals across all rows
+  const totals = tableData.reduce(
+    (acc, row) => {
+      acc.lws += row.lws || 0;
+      acc.lis += row.lis || 0;
+      acc.lct += row.lct || 0;
+      acc.lr += row.lr || 0;
+      acc.subTotal += row.subTotal || 0;
+      acc.lnw += row.lnw || 0;
+      acc.lwfhe += row.lwfhe || 0;
+      acc.lsdb += row.lsdb || 0;
+      acc.grandTotal += row.grandTotal || 0;
+      return acc;
+    },
+    {
+      id: "total-row",
+      campus: "Total",
+      lws: 0,
+      lis: 0,
+      lct: 0,
+      lr: 0,
+      subTotal: 0,
+      lnw: 0,
+      lwfhe: 0,
+      lsdb: 0,
+      grandTotal: 0,
+    }
+  );
+
   const totalCount = tableData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedData = tableData.slice(startIndex, startIndex + pageSize);
+
+  // Append totals row at the bottom of the current page view
+  if (tableData.length > 0) {
+    paginatedData.push(totals);
+  }
 
   const handlePageChange = (page) => setCurrentPage(page);
   const handlePageSizeChange = (newSize) => {
@@ -57,6 +92,15 @@ export default function AssetsTable() {
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
+
+    const isTotalRow = item.id === "total-row";
+    
+    if (isTotalRow) {
+      if (columnKey === "campus") {
+        return <span className="font-extrabold text-blue-800 uppercase">TOTAL</span>;
+      }
+      return <span className="font-extrabold text-blue-800">{cellValue}</span>;
+    }
 
     switch (columnKey) {
       case "campus":
