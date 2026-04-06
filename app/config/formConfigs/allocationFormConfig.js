@@ -114,10 +114,12 @@ export const allocationFormFields = [
     apiUrl: baseUrl + '/campuses',
     queryKey: ['campuses-destination'],
     labelKey: 'campusName',
-    valueKey: 'campusName',
+    valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-    excludeField: 'sourceCampusName',
+    excludeField: 'sourceCampus',
+    companionField: 'destinationCampusName',
+    companionKey: 'campusName',
   }, 
   {
     name: 'assetType',
@@ -242,6 +244,7 @@ export const allocationValidationSchema = Yup.object().shape({
   
   // Helper fields for Campus - not validated for submission
   sourceCampusName: Yup.string().nullable(),
+  destinationCampusName: Yup.string().nullable(),
   assetType: Yup.string().nullable(),
   
   // Common fields
@@ -263,6 +266,7 @@ export const allocationInitialValues = {
   sourceCampus: '',
   sourceCampusName: '',
   destinationCampus: '',
+  destinationCampusName: '',
   personRaising: '',
   campusAssets: [],
   // Common fields

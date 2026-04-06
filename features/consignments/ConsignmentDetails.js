@@ -1,11 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
+import PdfPreviewModal from '@/components/molecules/PdfPreviewModal';
+import CustomButton from '@/components/atoms/CustomButton';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
+  const [showPdfModal, setShowPdfModal] = useState(false);
+
   if (isLoading) {
     return (
       <StateHandler
@@ -264,13 +268,40 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     },
   ];
 
+  const sourceAddress = consignment.sourceLocation?.campus?.address || 'N/A';
+  const destinationAddress = consignment.destinationLocation?.campus?.address || 'N/A';
+
   return (
-    <DetailsPage
-      title="Consignment Details"
-      subtitle={`Consignment: ${consignment.consignmentCode || consignment.code || consignment.id}`}
-      leftSections={leftSections}
-      rightSections={rightSections}
-      onBack={onBack}
-    />
+    <>
+      <DetailsPage
+        title="Consignment Details"
+        subtitle={`Consignment: ${consignment.consignmentCode || consignment.code || consignment.id}`}
+        leftSections={leftSections}
+        rightSections={rightSections}
+        onBack={onBack}
+        headerActions={
+          <CustomButton
+            text="Print PDF"
+            variant="secondary"
+            size="md"
+            onClick={() => setShowPdfModal(true)}
+          />
+        }
+      />
+
+      <PdfPreviewModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        title="Consignment PDF Preview"
+        documentTitle="Consignment Receipt"
+        documentCode={consignment.consignmentCode || "\x27N/A\x27"}
+        date={consignment.createdAt}
+        destinationName={destinationName}
+        destinationAddress={destinationAddress}
+        sourceName={sourceName}
+        sourceAddress={sourceAddress}
+        filename={`Consignment_${consignment?.consignmentCode || consignment?.id || "Details"}.pdf`}
+      />
+    </>
   );
 }
