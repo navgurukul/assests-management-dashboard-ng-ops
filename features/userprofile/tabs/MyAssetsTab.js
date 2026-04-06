@@ -73,7 +73,7 @@ export default function MyAssetsTab() {
   const coordinatorData = coordinatorResponse?.data || coordinatorResponse;
   const isCoordinatorError = coordinatorError || coordinatorData?.success === false || failureCount > 0;
 
-  useEffect(() => {
+  useEffect(() => { 
     if (!coordinatorCampusId) {
       hasToastedRef.current = null;
       return;
@@ -127,9 +127,10 @@ export default function MyAssetsTab() {
     return fields.map((f) => {
       const newField = { ...f };
 
-      // Force ApiAutocomplete to clear out visually stuck text when switching return forms
+      // Keep the campus picker local to this screen so returnMode never becomes a query param.
       if (newField.name === 'destinationCampusId') {
-        newField.dependsOn = { field: 'returnMode' };
+        newField.dependsOn = null;
+        newField.staticItems = campusesData;
       }
 
       // Preserve whatever the user actually typed previously, and apply new coordinator values
@@ -139,7 +140,7 @@ export default function MyAssetsTab() {
 
       return newField;
     });
-  }, [selectedAsset, allocationMap, coordinatorUpdateTick]);
+  }, [selectedAsset, allocationMap, coordinatorUpdateTick, campusesData]);
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
