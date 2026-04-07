@@ -5,6 +5,8 @@ import { User, Package, Ticket, Building2 } from 'lucide-react';
 import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab } from './tabs';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 
 const tabs = [
   { id: 'userprofile', label: 'User Profile', icon: User, Component: UserProfileTab },
@@ -16,6 +18,7 @@ const tabs = [
 
 export default function UserProfileDetails() {
   const [activeTab, setActiveTab] = useState('userprofile');
+  const storeUserRole = useAppSelector(selectUserRole);
 
   // Fetch user data using React Query
   const { 
@@ -54,7 +57,17 @@ export default function UserProfileDetails() {
     avatar: null,
   };
 
-  const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.Component;
+  const currentRole = storeUserRole || userData.role;
+
+  const filteredTabs = tabs.filter(tab => {
+    if ((currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && 
+        (tab.id === 'ticketforapproval' || tab.id === 'campusincharge' || tab.id === 'myassets' || tab.id === 'ticketstatus')) {
+      return false;
+    }
+    return true;
+  });
+
+  const ActiveTabComponent = filteredTabs.find(tab => tab.id === activeTab)?.Component;
 
   return (
     <>
@@ -94,7 +107,7 @@ export default function UserProfileDetails() {
         <div className="bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] mb-4">
           <div className="border-b border-[var(--border)]">
             <div className="flex overflow-x-auto">
-              {tabs.map((tab) => {
+              {filteredTabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
