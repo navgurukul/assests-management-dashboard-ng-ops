@@ -19,6 +19,7 @@ function applyThemeClass(theme) {
 }
 
 export function ThemeProvider({ children }) {
+  /*
   const [theme, setThemeState] = useState(() => {
     if (typeof window === 'undefined') {
       return 'light';
@@ -30,6 +31,16 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     applyThemeClass(theme);
   }, [theme]);
+  */
+
+  const [theme, setThemeState] = useState('light');
+
+  useEffect(() => {
+    applyThemeClass('light');
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    }
+  }, []);
 
   const setTheme = useCallback((nextTheme) => {
     const normalized = nextTheme === 'dark' ? 'dark' : 'light';

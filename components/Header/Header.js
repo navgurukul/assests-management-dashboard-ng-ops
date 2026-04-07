@@ -53,7 +53,7 @@ const Header = ({ onMenuToggle }) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <button
+        {/* <button
           type="button"
           onClick={toggleTheme}
           className={`p-2 rounded-md transition-colors ${
@@ -63,7 +63,7 @@ const Header = ({ onMenuToggle }) => {
           title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
         >
           {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-        </button>
+        </button> */}
 
         {isAuthenticated && user && (
           <div className="relative" ref={dropdownRef}>
