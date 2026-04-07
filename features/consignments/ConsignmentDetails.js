@@ -87,7 +87,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
 
   const trackingLink = consignment.link || consignment.trackingLink;
   const trackingId = consignment.trackingNumber || consignment.trackingId;
-  const courierServiceName = consignment.courierPartnerName ;
+  const courierServiceName = consignment.courierPartnerName  ;
   const totalAssets = consignment.assetCount ?? consignment.assets?.length ?? 0;
 
   const resolveUserDisplay = (userValue) => {
