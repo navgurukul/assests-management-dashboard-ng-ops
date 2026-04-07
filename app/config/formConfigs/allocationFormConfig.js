@@ -93,7 +93,7 @@ export const allocationFormFields = [
     required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
-  // Campus Allocation Fields (shown when allocationType === 'CAMPUS')
+  // Campus Allocation Fields (shown when allocationType === 'CAMPUS') 
   {
     name: 'sourceCampus',
     label: 'Source Campus',
