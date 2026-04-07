@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   loading: false,
-  userRole: 'Admin',
+  userRole: '',
 };
 
 const appSlice = createSlice({
