@@ -171,6 +171,7 @@ export const useApiAutocomplete = ({
   value,
   valueKey = 'id',
   staticItems = null,
+  filterFn = null,
 }) => {
   // For allocation fields, always use dummy data as fallback
   // Exception: my-assets endpoint should use real API data
@@ -225,12 +226,17 @@ export const useApiAutocomplete = ({
     const finalItems = shouldUseFallback ? allocationsListData : allItems;
     
     // Filter by category if specified
-    const filteredItems = filterByCategory(finalItems, filterCategory);
+    let filteredItems = filterByCategory(finalItems, filterCategory);
+    
+    // Apply custom filter function if provided
+    if (filterFn && typeof filterFn === 'function') {
+      filteredItems = filteredItems.filter(filterFn);
+    }
     
     // Add selected item if needed
     const result = prepareItems(filteredItems, selectedItem, value, valueKey);
     return result;
-  }, [staticItems, data, dataPath, filterCategory, selectedItem, value, valueKey, isAllocationField, isError, apiUrl, name]);
+  }, [staticItems, data, dataPath, filterCategory, filterFn, selectedItem, value, valueKey, isAllocationField, isError, apiUrl, name]);
 
   return {
     items,

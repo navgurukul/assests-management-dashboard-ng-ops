@@ -200,6 +200,8 @@ export default function FormField({ field, formik, onFieldChange }) {
             dependentValue={dependentValue}
             additionalParams={additionalParams}
             filterCategory={field.filterCategory}
+            filterFn={field.filterFn}
+            emptyContent={field.emptyContent}
             dataPath={field.dataPath}
             formatLabel={field.formatLabel}
             selectedItem={field.selectedItem}
