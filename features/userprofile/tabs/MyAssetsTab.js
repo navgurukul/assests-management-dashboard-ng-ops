@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
-import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import {
@@ -30,6 +30,11 @@ export default function MyAssetsTab() {
   const [receivedModalOpen, setReceivedModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
+  const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
+
+  const formStateRef = useRef({});
+  const hasToastedRef = useRef(null);
+  const [coordinatorUpdateTick, setCoordinatorUpdateTick] = useState(0);
 
   const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
   const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
@@ -42,6 +47,53 @@ export default function MyAssetsTab() {
     url: config.endpoints.allocations.myAssets,
     queryKey: ['myAssets']
   });
+
+  const { data: campusesResponse, refetch: fetchCampuses } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+    enabled: false,
+  });
+
+  const { data: coordinatorResponse, error: coordinatorError, failureCount } = useFetch({
+    url: `/campus-incharge/campus/${coordinatorCampusId}`,
+    queryKey: ['campus-incharge', coordinatorCampusId],
+    enabled: !!coordinatorCampusId,
+  });
+
+  const campusesData = campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
+
+  const coordinatorEmail = useMemo(() => {
+    if (!coordinatorResponse) return '';
+    const data = coordinatorResponse?.data || coordinatorResponse;
+    if (data?.success === false) return '';
+    return data?.data?.itCoordinator?.email || data?.itCoordinator?.email || '';
+  }, [coordinatorResponse]);
+
+  // Extract variables locally so they are guaranteed to exist identically on every render sequence
+  const coordinatorData = coordinatorResponse?.data || coordinatorResponse;
+  const isCoordinatorError = coordinatorError || coordinatorData?.success === false || failureCount > 0;
+
+  useEffect(() => { 
+    if (!coordinatorCampusId) {
+      hasToastedRef.current = null;
+      return;
+    }
+
+    if (isCoordinatorError) {
+      if (hasToastedRef.current !== coordinatorCampusId) {
+        toast.error('This campus is not having an IT coordinator at present.');
+        formStateRef.current.campusItCoordinator = '';
+        setCoordinatorUpdateTick(t => t + 1);
+        hasToastedRef.current = coordinatorCampusId;
+      }
+    } else if (coordinatorEmail) {
+      if (hasToastedRef.current !== coordinatorCampusId) {
+        formStateRef.current.campusItCoordinator = coordinatorEmail;
+        setCoordinatorUpdateTick(t => t + 1);
+        hasToastedRef.current = coordinatorCampusId;
+      }
+    }
+  }, [coordinatorEmail, coordinatorCampusId, isCoordinatorError]);
 
   // Extract assets and build allocationMap early so handlers can access it
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -58,16 +110,37 @@ export default function MyAssetsTab() {
           allocationReason: allocation.allocationReason,
           sourceName: allocation.sourceName,
           destinationName: allocation.destinationName,
+          userAddress: allocation.userAddress,
         };
       });
     });
     return map;
   }, [allocations]);
 
-  const computedReturnFields = useMemo(
-    () => getReturnAssetFields(selectedAsset, allocationMap[selectedAsset?.id]?.sourceName),
-    [selectedAsset, allocationMap]
-  );
+  const computedReturnFields = useMemo(() => {
+    const fields = getReturnAssetFields(
+      selectedAsset, 
+      allocationMap[selectedAsset?.id]?.sourceName,
+      allocationMap[selectedAsset?.id]?.userAddress
+    );
+
+    return fields.map((f) => {
+      const newField = { ...f };
+
+      // Keep the campus picker local to this screen so returnMode never becomes a query param.
+      if (newField.name === 'destinationCampusId') {
+        newField.dependsOn = null;
+        newField.staticItems = campusesData;
+      }
+
+      // Preserve whatever the user actually typed previously, and apply new coordinator values
+      if (formStateRef.current[newField.name] !== undefined) {
+        newField.defaultValue = formStateRef.current[newField.name];
+      }
+
+      return newField;
+    });
+  }, [selectedAsset, allocationMap, coordinatorUpdateTick, campusesData]);
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
@@ -81,6 +154,10 @@ export default function MyAssetsTab() {
   };
 
   const handleAssetReceived = (asset) => {
+    if (asset.consignmentStatus === 'DELIVERED') {
+      toast.error('Asset has already been delivered.');
+      return;
+    }
     setSelectedAsset(asset);
     setReceivedModalOpen(true);
   };
@@ -119,21 +196,38 @@ export default function MyAssetsTab() {
     try {
       const consignmentId = selectedAsset?.consignmentId || selectedAsset?.consignment?.id;
       
+      const expDate = formData.expectedDeliveryDate;
+      const formattedDate = expDate instanceof Date
+        ? expDate.toISOString().split('T')[0]
+        : (typeof expDate === 'string' ? expDate : '');
+
+      let sourceCampusIdValue = '';
+      if (formData.returnMode === 'VISIT_CAMPUS' || formData.returnMode === 'OTHER_CAMPUS') {
+        sourceCampusIdValue = formData.destinationCampusId || formData.sourceCampusId;
+      } else if (formData.returnMode === 'SOURCED_CAMPUS') {
+        sourceCampusIdValue = selectedAsset?.sourceCampusId || selectedAsset?.campusId;
+      }
+
       const fields = {
         consignmentId,
         assetId: selectedAsset?.id,
-        sourceCampusId: selectedAsset?.sourceCampusId || selectedAsset?.campusId,
-        assetSourceCampus: formData.assetSource,
-        campusITCoordinatorEmail: formData.campusItCoordinator,
-        exactAddress: formData.exactAddress,
-        vendorName: formData.vendorName,
-        managerEmail: formData.managerEmail,
-        expectedDeliveryDate: formData.expectedDeliveryDate,
+        sourceCampusId: sourceCampusIdValue,
+        campusITCoordinatorEmail: formData.campusItCoordinator || coordinatorEmail || '',
+        exactAddress: formData.exactAddress || '',
+        vendorName: formData.returnMode === 'VISIT_CAMPUS' ? 'NA' : (formData.vendorName || ''),
+        managerEmail: formData.managerEmail || '',
+        expectedDeliveryDate: formattedDate,
       };
 
       const payload = new FormData();
       Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
-      Array.from(formData.vendorReceipt || []).forEach((file) => payload.append('vendorReceipt', file));
+      
+      const vendorReceipts = Array.from(formData.vendorReceipt || []);
+      if (vendorReceipts.length > 0) {
+        vendorReceipts.forEach((file) => payload.append('vendorReceipt', file));
+      } else if (formData.returnMode === 'VISIT_CAMPUS') {
+        payload.append('vendorReceipt', new File(['dummy'], 'NA.pdf', { type: 'application/pdf' }));
+      }
 
       await postMutation({
         endpoint: '/consignment/assets/return',
@@ -143,6 +237,7 @@ export default function MyAssetsTab() {
       toast.success('Return asset request created successfully.');
       setReturnModalOpen(false);
       setSelectedAsset(null);
+      formStateRef.current = {};
     } catch (err) {
       toast.error(err?.message || 'Failed to submit return asset request.');
     }
@@ -171,6 +266,76 @@ export default function MyAssetsTab() {
     } catch (err) {
       toast.error(err?.message || 'Failed to submit lease extension request.');
     }
+  };
+
+  const handleReturnFormChange = (updatedData, fieldChanged) => {
+    let nextData = updatedData;
+    
+    if (fieldChanged) {
+      const { name } = fieldChanged;
+      const { returnMode, destinationCampusId } = updatedData;
+      const isOtherOrVisit = returnMode === 'OTHER_CAMPUS' || returnMode === 'VISIT_CAMPUS';
+
+      switch (name) {
+        case 'returnMode':
+          if (isOtherOrVisit) {
+            setTimeout(() => fetchCampuses(), 0);
+            setTimeout(() => setCoordinatorCampusId(null), 0);
+            nextData = {
+              ...updatedData,
+              exactAddress: '',
+              destinationCampusId: '',
+              campusItCoordinator: '',
+              managerEmail: '',
+              expectedDeliveryDate: '',
+              vendorName: '',
+              vendorReceipt: null,
+            };
+          } else if (returnMode === 'SOURCED_CAMPUS') {
+            const assetAddress = selectedAsset?.campus?.address || allocationMap[selectedAsset?.id]?.userAddress || '';
+            const sourceId = selectedAsset?.sourceCampusId || selectedAsset?.campusId;
+            
+            if (sourceId) {
+              setTimeout(() => setCoordinatorCampusId(sourceId), 0);
+            }
+            nextData = {
+              ...updatedData,
+              exactAddress: assetAddress,
+              destinationCampusId: '',
+              managerEmail: '',
+              expectedDeliveryDate: '',
+              vendorName: '',
+              vendorReceipt: null,
+            };
+          }
+          break;
+
+        case 'destinationCampusId':
+          if (isOtherOrVisit) {
+            if (destinationCampusId) {
+              setTimeout(() => setCoordinatorCampusId(destinationCampusId), 0);
+              const selectedCampus = campusesData.find((c) => c.id === destinationCampusId);
+              if (selectedCampus?.address) {
+                nextData = { ...updatedData, exactAddress: selectedCampus.address };
+              }
+            } else {
+              setTimeout(() => setCoordinatorCampusId(null), 0);
+              nextData = {
+                ...updatedData,
+                exactAddress: '',
+                campusItCoordinator: '',
+              };
+            }
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    formStateRef.current = nextData;
+    return nextData;
   };
 
   // allocationMap and assets are computed via useMemo above
@@ -231,6 +396,7 @@ export default function MyAssetsTab() {
                       onClick={() => handleAssetReceived(asset)}
                       variant="success"
                       size="sm"
+                      className={asset.consignmentStatus === 'DELIVERED' ? 'opacity-50' : ''}
                     />
                     <CustomButton
                       text="Return Asset"
@@ -365,7 +531,7 @@ export default function MyAssetsTab() {
 
       <FormModal
         isOpen={returnModalOpen}
-        onClose={() => { setReturnModalOpen(false); setSelectedAsset(null); }}
+        onClose={() => { setReturnModalOpen(false); setSelectedAsset(null); setCoordinatorCampusId(null); formStateRef.current = {}; }}
         componentName=""
         actionType="Return Asset"
         fields={computedReturnFields}
@@ -373,6 +539,7 @@ export default function MyAssetsTab() {
         isSubmitting={isPostPending}
         size="medium"
         validationSchema={returnAssetValidationSchema}
+        onFormDataChange={handleReturnFormChange}
       />
     </div>
   );
