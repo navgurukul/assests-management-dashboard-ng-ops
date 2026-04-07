@@ -85,10 +85,10 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 href={item.path}
                 onClick={onMobileClose}
                 className={[
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold',
                   isCollapsed ? 'md:justify-center' : '',
                   isActive
-                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)] font-medium'
+                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)]'
                     : 'text-[var(--sidebar-item-fg)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-[var(--sidebar-item-hover-fg)]',
                 ].join(' ')}
               >
@@ -117,10 +117,10 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
               href="/userprofile"
               onClick={onMobileClose}
               className={[
-                'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold',
                 isCollapsed ? 'md:justify-center' : '',
                 pathname === '/userprofile'
-                  ? 'bg-[var(--sidebar-profile-active-bg)] text-[var(--sidebar-profile-active-fg)] font-medium'
+                  ? 'bg-[var(--sidebar-profile-active-bg)] text-[var(--sidebar-profile-active-fg)]'
                   : 'text-[var(--sidebar-item-fg)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-[var(--sidebar-item-hover-fg)]',
               ].join(' ')}
             >
