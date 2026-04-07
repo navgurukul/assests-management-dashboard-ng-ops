@@ -61,6 +61,8 @@ export default function ApiAutocomplete({
   excludeValue = null,
   onItemSelect = null,
   staticItems = null,
+  filterFn = null,
+  emptyContent = "No results found",
 }) {
   // Use custom hook to handle data fetching and processing
   const { items, isLoading } = useApiAutocomplete({
@@ -76,6 +78,7 @@ export default function ApiAutocomplete({
     value,
     valueKey,
     staticItems,
+    filterFn,
   });
 
   // Ensure items is always an array to prevent iteration errors
@@ -138,7 +141,7 @@ export default function ApiAutocomplete({
             selectorButton: "text-gray-400",
           }}
           listboxProps={{
-            emptyContent: "No results found",
+            emptyContent: emptyContent,
             itemClasses: {
               base: "text-gray-900 data-[hover=true]:bg-gray-100 data-[selected=true]:bg-blue-50",
             },

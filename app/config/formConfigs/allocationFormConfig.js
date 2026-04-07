@@ -65,6 +65,8 @@ export const allocationFormFields = [
       campusId: formData?.campusId || undefined,
       status: 'IN_STOCK',
     }),
+    filterFn: (item) => item.isConsignmentCreated === false,
+    emptyContent: 'No available assets. They may be out of stock or already assigned to a consignment.',
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
   },
   {
