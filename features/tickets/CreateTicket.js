@@ -13,10 +13,13 @@ import {
   ticketInitialValues,
 } from '@/app/config/formConfigs/ticketFormConfig';
 import { toast } from '@/app/utils/toast';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 
 export default function CreateTicket() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const userRole = useSelector(selectUserRole);
 
   const handleFormSubmit = async (values) => {
     setIsSubmitting(true);
@@ -48,8 +51,12 @@ export default function CreateTicket() {
       // Show success toast
       toast.success(`Ticket created successfully! Ticket Number: ${result.data.ticketNumber}`);
       
-      // Navigate back to tickets list
-      router.push('/tickets');
+      // Navigate based on user role
+      if (userRole === 'STUDENT' || userRole === 'EMPLOYEE') {
+        router.push('/ticketstatus');
+      } else {
+        router.push('/tickets');
+      }
       
     } catch (error) {
       console.error('Error creating ticket:', error);
@@ -68,7 +75,11 @@ export default function CreateTicket() {
   };
 
   const handleCancel = () => {
-    router.push('/tickets');
+    if (userRole === 'STUDENT' || userRole === 'EMPLOYEE') {
+      router.push('/ticketstatus');
+    } else {
+      router.push('/tickets');
+    }
   };
 
   return (
@@ -77,9 +88,9 @@ export default function CreateTicket() {
         {/* Header */}
         <div className="mb-4">
           <CustomButton
-            text="Back to Tickets"
+            text="Back"
             icon={ArrowLeft}
-            onClick={() => router.push('/tickets')}
+            onClick={handleCancel}
             variant="secondary"
             size="sm"
             className="mb-6"
