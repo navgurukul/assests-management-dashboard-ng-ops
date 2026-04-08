@@ -206,10 +206,10 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               )}
             </div>
             {log.resolutionNotes && (
-              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.resolutionNotes}>{log.resolutionNotes}</p>
+              <p className="text-sm text-gray-600 mb-1 line-clamp-3 break-all cursor-default" title={log.resolutionNotes}>{log.resolutionNotes}</p>
             )}
             {(log.notes) && (
-              <p className="text-sm text-gray-600 mb-1 line-clamp-2 break-all cursor-default" title={log.notes}>{log.notes}</p>
+              <p className="text-sm text-gray-600 mb-1 line-clamp-3 break-all cursor-default" title={log.notes}>{log.notes}</p>
             )}
             <p className="text-xs text-gray-400">{formatHistoryDate(log.createdAt)}</p>
           </div>
