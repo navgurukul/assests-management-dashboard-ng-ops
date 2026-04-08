@@ -30,23 +30,27 @@ function LoginContent() {
 
   // Role-based landing pages
   const rolesLandingPages = {
-    volunteer: '/batch',
-    admin: '/partners',
-    partner: '/partners',
-    default: '/dashboard',
+    ADMIN: '/dashboard',
+    STUDENT: '/myassets',
+    EMPLOYEE: '/myassets',
   };
 
   // Amazon pathway ID for special redirection
   const amazonPathwayId = '99';
 
   useEffect(() => {
-    setIsLoaded(true);
-    
     // Load theme preference from localStorage
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === 'dark');
-    }
+    
+    // Defer setting states to avoid sync update warnings
+    const timer = setTimeout(() => {
+      if (savedTheme) {
+        setIsDarkMode(savedTheme === 'dark');
+      }
+      setIsLoaded(true);
+    }, 0);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Toggle theme and save preference
@@ -55,13 +59,6 @@ function LoginContent() {
     setIsDarkMode(newTheme);
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
-
-  useEffect(() => {
-    // If already authenticated, redirect based on role
-    if (!loading && isAuthenticated && user) {
-      handleRedirect();
-    }
-  }, [isAuthenticated, user, loading]);
 
   const handleRedirect = () => {
     const rolesList = user?.rolesList || [];
@@ -108,10 +105,17 @@ function LoginContent() {
     }
 
     // Default role-based redirection
-    const primaryRole = rolesList[0];
+    const primaryRole = rolesList[0] || user?.role;
     const landingPage = rolesLandingPages[primaryRole] || rolesLandingPages.default;
     router.push(landingPage);
   };
+
+  useEffect(() => {
+    // If already authenticated, redirect based on role
+    if (!loading && isAuthenticated && user) {
+      handleRedirect();
+    }
+  }, [isAuthenticated, user, loading]);
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
@@ -615,9 +619,14 @@ export default function LoginPage() {
   useEffect(() => {
     // Load theme preference from localStorage
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === 'dark');
-    }
+    
+    // Defer setting state to avoid sync update warnings
+    const timer = setTimeout(() => {
+      if (savedTheme) {
+        setIsDarkMode(savedTheme === 'dark');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
