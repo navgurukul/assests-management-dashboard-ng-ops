@@ -5,6 +5,8 @@ import { Laptop, Settings, Ticket, BarChart3, ArrowRight, CheckCircle2, Zap, Loc
 import { useRouter, useSearchParams } from 'next/navigation';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '@/app/context/AuthContext';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 import { authenticateWithGoogle, updateUserReferrer } from '@/app/services/authService';
 import toast from 'react-hot-toast';
 import { LayoutGroup, motion } from 'motion/react';
@@ -15,6 +17,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isAuthenticated, loading, user } = useAuth();
+  const userRole = useSelector(selectUserRole);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -64,7 +67,15 @@ function LoginContent() {
     const rolesList = user?.rolesList || [];
     const partnerId = user?.partner_id;
     const referrer = searchParams.get('referrer');
-    
+    const primaryRole = rolesList[0] || userRole || user?.role; 
+
+    // ALWAYS redirect STUDENT and EMPLOYEE to /myassets instantly
+    if (primaryRole === 'STUDENT' || primaryRole === 'EMPLOYEE') {
+      sessionStorage.removeItem('redirectAfterLogin'); // clear any stuck redirects
+      router.push('/myassets');
+      return;
+    }
+
     // Handle referrer-based redirection
     if (referrer) {
       if (referrer.includes('amazon')) {
@@ -105,17 +116,18 @@ function LoginContent() {
     }
 
     // Default role-based redirection
-    const primaryRole = rolesList[0] || user?.role;
-    const landingPage = rolesLandingPages[primaryRole] || rolesLandingPages.default;
+
+    const landingPage = rolesLandingPages[primaryRole] || '/dashboard'; // Safe fallback
     router.push(landingPage);
   };
 
   useEffect(() => {
     // If already authenticated, redirect based on role
-    if (!loading && isAuthenticated && user) {
+    // userRole from Redux should be populated immediately when login sets isAuthenticated
+    if (!loading && isAuthenticated && user && userRole) {
       handleRedirect();
     }
-  }, [isAuthenticated, user, loading]);
+  }, [isAuthenticated, user, loading, userRole]);
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {

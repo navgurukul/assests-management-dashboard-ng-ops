@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 import { useAuth } from '@/app/context/AuthContext';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Header from '@/components/Header/Header';
@@ -11,6 +13,7 @@ export default function ClientLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
+  const userRole = useSelector(selectUserRole);
   const [isReady, setIsReady] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -29,7 +32,7 @@ export default function ClientLayout({ children }) {
     // Case 1: User is authenticated and trying to access login page
     // Redirect to dashboard
     if (isAuthenticated && isPublicPath) {
-      router.replace('/dashboard');
+      setIsReady(true);
       return;
     }
 
@@ -44,7 +47,7 @@ export default function ClientLayout({ children }) {
 
     // Case 3: User is on correct page (authenticated on protected, or not authenticated on public)
     setIsReady(true);
-  }, [isAuthenticated, loading, pathname, isPublicPath, router]);
+  }, [isAuthenticated, loading, pathname, isPublicPath, router, userRole]);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -64,7 +67,7 @@ export default function ClientLayout({ children }) {
   }
 
   // PUBLIC LAYOUT: For login page (no sidebar, no header)
-  if (isPublicPath && !isAuthenticated) {
+  if (isPublicPath) {
     return <>{children}</>;
   }
 

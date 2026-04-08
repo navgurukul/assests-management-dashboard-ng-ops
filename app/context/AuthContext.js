@@ -128,6 +128,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     saveAuthState(null);
+    sessionStorage.removeItem('redirectAfterLogin');
     router.push('/login');
   };
 
