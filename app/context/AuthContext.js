@@ -77,6 +77,16 @@ export function AuthProvider({ children }) {
         localStorage.setItem(AUTH_KEY, JSON.stringify(data));
         // Also save to cookie for middleware access
         document.cookie = `${AUTH_KEY}=${data.token || 'authenticated'}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+        
+        if (data.token) {
+          try {
+            const decodedToken = jwtDecode(data.token);
+            dispatch(setUserRole(decodedToken?.role));
+          } catch (err) {
+            console.error("Invalid token format:", err);
+          }
+        }
+        
         setAuthState({
           loading: false,
           error: null,
@@ -86,6 +96,7 @@ export function AuthProvider({ children }) {
         localStorage.removeItem(AUTH_KEY);
         // Remove cookie
         document.cookie = `${AUTH_KEY}=; path=/; max-age=0`;
+        dispatch(setUserRole(''));
         setAuthState({
           loading: false,
           error: null,
@@ -95,7 +106,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Error saving auth state:', error);
     }
-  }, []);
+  }, [dispatch]);
 
   // Listen for 401 Unauthorized events from API calls
   useEffect(() => {
