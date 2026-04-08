@@ -93,7 +93,6 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     if (!data?.data || !Array.isArray(data.data)) return [];
     
     const filtered = data.data.filter(asset => {
-      // Make sure we handle both boolean `true` and string `"true"`
       return String(asset.isConsignmentCreated).toLowerCase() !== 'true';
     });
 
@@ -375,6 +374,12 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
 
           {/* TableWrapper with Search, Filters, and Pagination */}
           {!isLoading && !isError && (
+            filteredAssets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200 mt-4">
+                <p className="text-base font-semibold text-gray-700 mb-1">No Assets Available</p>
+                <p className="text-sm">No assets available in stock, or all available devices have already been assigned to a consignment.</p>
+              </div>
+            ) : (
             <TableWrapper
               data={filteredAssets}
               columns={columns}
@@ -424,6 +429,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                 tr: "hover:bg-blue-50 cursor-pointer"
               }}
             />
+            )
           )}
         </div>
 
