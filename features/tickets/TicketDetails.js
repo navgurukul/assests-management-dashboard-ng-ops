@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Laptop, Monitor, Tablet, Smartphone, Package } from 'lucide-react';
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import FormModal from '@/components/molecules/FormModal';
@@ -28,6 +29,7 @@ import {
 export default function TicketDetails({ ticketId, ticketData, onBack, isLoading, isError, error }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const loggedInUserRole = useSelector(selectUserRole);
   const queryClient = useQueryClient();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState(null);
@@ -369,6 +371,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     router.push(`/allocations/create?ticketId=${ticket?.id || ticketId}`);
   }
 
+  const isStudentOrEmployee = loggedInUserRole === 'STUDENT' || loggedInUserRole === 'EMPLOYEE';
+
   return (
     <>
       <DetailsPage
@@ -395,36 +399,40 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 ))}
               </div>
             )}
-            <CustomButton
-              text="Update Ticket"
-              variant="secondary"
-              size="md"
-              onClick={handleUpdateClick}
-              disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
-            />
-            {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
-               isAssigneeCurrentUser ? (
+            {!isStudentOrEmployee && (
+              <>
                 <CustomButton
-                  text="Create Allocation"
-                  variant="primary"
+                  text="Update Ticket"
+                  variant="secondary"
                   size="md"
-                  onClick={handleCreateAllocation}
+                  onClick={handleUpdateClick}
+                  disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
                 />
-              ) : (
-                <span className="text-[10px] text-gray-500">
-                  Only &apos;{ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : 'the assignee'}&apos; can create the allocation
-                </span>
-              )
-            ) : ticket.status === 'RAISED' ? (
-              <CustomButton
-                text="Ticket is not approved"
-                variant="warning"
-                size="md"
-                className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
-                onClick={() => {}}
-                title="Please contact your manager"
-              />
-            ) : null}
+                {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
+                   isAssigneeCurrentUser ? (
+                    <CustomButton
+                      text="Create Allocation"
+                      variant="primary"
+                      size="md"
+                      onClick={handleCreateAllocation}
+                    />
+                  ) : (
+                    <span className="text-[10px] text-gray-500">
+                      Only &apos;{ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : 'the assignee'}&apos; can create the allocation
+                    </span>
+                  )
+                ) : ticket.status === 'RAISED' ? (
+                  <CustomButton
+                    text="Ticket is not approved"
+                    variant="warning"
+                    size="md"
+                    className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
+                    onClick={() => {}}
+                    title="Please contact your manager"
+                  />
+                ) : null}
+              </>
+            )}
           </div>
         }
       />
