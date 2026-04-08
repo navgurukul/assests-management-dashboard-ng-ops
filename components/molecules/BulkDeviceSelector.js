@@ -20,7 +20,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({ status: 'IN_STOCK' });
 
   const filterStatusOptions = [
     { value: 'IN_STOCK', label: 'In Stock' },
@@ -71,10 +71,6 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     
     if (debouncedSearch) params.append('search', debouncedSearch);
     
-    params.append('page', currentPage);
-    params.append('limit', pageSize);
-    params.append('isConsignmentCreated', 'false');
-    
     if (assetTypeId) params.append('type', assetTypeId);
     if (sourceCampusId) params.append('campusId', sourceCampusId);
     
@@ -95,10 +91,14 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   // Extract assets from API response
   const availableAssets = useMemo(() => {
     if (!data?.data || !Array.isArray(data.data)) return [];
-    return data.data
-      .filter(asset => asset.isConsignmentCreated === false)
-      .map(asset => ({
-        id: asset.id,
+    
+    const filtered = data.data.filter(asset => {
+      // Make sure we handle both boolean `true` and string `"true"`
+      return String(asset.isConsignmentCreated).toLowerCase() !== 'true';
+    });
+
+    return filtered.map(asset => ({
+      id: asset.id,
         assetId: asset.assetTag,
         assetType: asset.assetType?.name || 'N/A',
         brand: asset.brand,
@@ -203,7 +203,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     setSearchTerm('');
     setDebouncedSearch('');
     setCurrentPage(1);
-    setFilters({});
+    setFilters({ status: 'IN_STOCK' });
     setIsModalOpen(true);
   };
 
