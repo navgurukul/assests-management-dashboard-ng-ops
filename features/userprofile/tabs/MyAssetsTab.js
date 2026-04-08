@@ -35,6 +35,11 @@ export default function MyAssetsTab() {
   const formStateRef = useRef({});
   const hasToastedRef = useRef(null);
   const [coordinatorUpdateTick, setCoordinatorUpdateTick] = useState(0);
+  const [localFormState, setLocalFormState] = useState({});
+  
+  useEffect(() => {
+    setLocalFormState(formStateRef.current);
+  }, [coordinatorUpdateTick]);
 
   const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
   const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
@@ -83,13 +88,13 @@ export default function MyAssetsTab() {
       if (hasToastedRef.current !== coordinatorCampusId) {
         toast.error('This campus is not having an IT coordinator at present.');
         formStateRef.current.campusItCoordinator = '';
-        setCoordinatorUpdateTick(t => t + 1);
+        setTimeout(() => setCoordinatorUpdateTick(t => t + 1), 0);
         hasToastedRef.current = coordinatorCampusId;
       }
     } else if (coordinatorEmail) {
       if (hasToastedRef.current !== coordinatorCampusId) {
         formStateRef.current.campusItCoordinator = coordinatorEmail;
-        setCoordinatorUpdateTick(t => t + 1);
+        setTimeout(() => setCoordinatorUpdateTick(t => t + 1), 0);
         hasToastedRef.current = coordinatorCampusId;
       }
     }
@@ -124,7 +129,7 @@ export default function MyAssetsTab() {
       allocationMap[selectedAsset?.id]?.userAddress
     );
 
-    return fields.map((f) => {
+    return (fields || []).map((f) => {
       const newField = { ...f };
 
       // Keep the campus picker local to this screen so returnMode never becomes a query param.
@@ -134,13 +139,13 @@ export default function MyAssetsTab() {
       }
 
       // Preserve whatever the user actually typed previously, and apply new coordinator values
-      if (formStateRef.current[newField.name] !== undefined) {
-        newField.defaultValue = formStateRef.current[newField.name];
+      if (localFormState[newField.name] !== undefined) {
+        newField.defaultValue = localFormState[newField.name];
       }
 
       return newField;
     });
-  }, [selectedAsset, allocationMap, coordinatorUpdateTick, campusesData]);
+  }, [selectedAsset, allocationMap, coordinatorUpdateTick, campusesData, localFormState]);
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
