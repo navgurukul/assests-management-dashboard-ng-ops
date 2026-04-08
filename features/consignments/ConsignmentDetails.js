@@ -41,7 +41,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     );
   }
 
-  const consignment = consignmentData;
+  const consignment = consignmentData?.data || consignmentData;
 
   const displayStatus = formatConsignmentStatus(consignment.status);
 
@@ -87,7 +87,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
 
   const trackingLink = consignment.link || consignment.trackingLink;
   const trackingId = consignment.trackingNumber || consignment.trackingId;
-  const courierServiceName = consignment.courierName || consignment.courierService?.name || consignment.courierServiceName;
+  const courierServiceName = consignment.courierPartnerName  ;
   const totalAssets = consignment.assetCount ?? consignment.assets?.length ?? 0;
 
   const resolveUserDisplay = (userValue) => {
@@ -218,7 +218,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: [
         { label: 'Source', value: sourceName },
         { label: 'Destination', value: destinationName },
-        { label: 'Courier Service', value: courierServiceName || 'N/A' },
+        { label: 'Courier Name', value: courierServiceName || 'N/A' },
         { label: 'Tracking ID', value: trackingId || 'N/A' },
         { 
           label: 'Tracking Link', 
