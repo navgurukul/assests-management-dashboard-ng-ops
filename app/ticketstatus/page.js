@@ -1,7 +1,7 @@
-import { TicketStatusTab } from "@/features/userprofile/tabs";
+import TicketsTable from "@/features/tickets/TicketsTable";
 
 export default function TicketStatusPage() {
-  return <div className="p-6" >
-    <TicketStatusTab />
+  return <div className="" >
+    <TicketsTable/>
   </div>;
 }
