@@ -499,9 +499,14 @@ export default function MyAssetsTab() {
           })}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <Package className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-500">No assets assigned</p>
+        <div className="flex flex-col items-center justify-center py-20 px-4 mt-6 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl">
+          <div className="bg-white p-4 rounded-full shadow-sm mb-4">
+            <Package className="h-10 w-10 text-gray-400" strokeWidth={1.5} />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No assets assigned</h3>
+          <p className="text-sm text-gray-500 text-center max-w-sm">
+            You currently do not have any assets assigned to you. When assets are allocated, they will automatically appear here.
+          </p>
         </div>
       )}
 

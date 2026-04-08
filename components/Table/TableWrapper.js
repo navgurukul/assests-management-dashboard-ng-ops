@@ -76,8 +76,8 @@ export default function TableWrapper({
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
-    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-sm h-12 border-b-2 border-[var(--border)] whitespace-nowrap ${classNames.th || ""}`,
-    td: `text-[var(--foreground)] text-sm h-16 border-b border-[var(--border)] ${classNames.td || ""}`,
+    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[13px] h-11 border-b-2 border-[var(--border)] whitespace-nowrap ${classNames.th || ""}`,
+    td: `text-[var(--foreground)] text-[13px] h-14 border-b border-[var(--border)] ${classNames.td || ""}`,
     tr: `hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)] data-[hover=true]:bg-[var(--surface-soft)] data-[hover=true]:text-[var(--foreground)] transition-colors ${classNames.tr || ""}`,
   };
 
@@ -86,7 +86,7 @@ export default function TableWrapper({
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-800 ml-4">{title}</h2>
+          <h2 className="text-[19px] font-semibold text-gray-800 ml-4">{title}</h2>
         </div>
       )}
       
