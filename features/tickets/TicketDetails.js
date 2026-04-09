@@ -364,7 +364,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const isAssigneeCurrentUser = !!(loggedInEmail && assigneeEmail && loggedInEmail === assigneeEmail);
 
   const leftSections = getTicketLeftSections(ticket, historyTimeline);
-  const rightSections = getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair);
+  const rightSections = getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair, loggedInUserRole);
 
   const handleCreateAllocation = () => {
     dispatch(setSelectedTicket({ ...ticket, id: ticket?.id || ticketId }));

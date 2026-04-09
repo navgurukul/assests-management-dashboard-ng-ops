@@ -23,7 +23,7 @@ export function getTicketLeftSections(ticket, historyTimeline) {
   ];
 }
 
-export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair) {
+export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair, loggedInUserRole) {
   return [
     {
       title: 'TICKET INFO',
@@ -59,7 +59,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
         { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
       ],
-      headerActions: ticket.ticketType?.toUpperCase() === 'REPAIR' ? [
+      headerActions: (ticket.ticketType?.toUpperCase() === 'REPAIR' && loggedInUserRole !== 'STUDENT') ? [
         { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
         { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
       ] : [],
