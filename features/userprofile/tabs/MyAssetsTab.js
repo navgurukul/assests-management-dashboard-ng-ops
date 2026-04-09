@@ -47,7 +47,8 @@ export default function MyAssetsTab() {
   const { 
     data: userAssets = [], 
     isLoading: isLoadingAssets, 
-    error: assetsError 
+    error: assetsError,
+    refetch: refetchMyAssets
   } = useFetch({
     url: config.endpoints.allocations.myAssets,
     queryKey: ['myAssets']
@@ -154,15 +155,16 @@ export default function MyAssetsTab() {
   };
 
   const handleReturnAsset = (asset) => {
+    if (asset?.consignmentReturnStatus === 'PENDING') {
+      toast.error('The Asset Return is still pending.');
+      return;
+    }
+
     setSelectedAsset(asset);
     setReturnModalOpen(true);
   };
 
   const handleAssetReceived = (asset) => {
-    if (asset.consignmentStatus === 'DELIVERED') {
-      toast.error('Asset has already been delivered.');
-      return;
-    }
     setSelectedAsset(asset);
     setReceivedModalOpen(true);
   };
@@ -189,9 +191,13 @@ export default function MyAssetsTab() {
           havingIssue: formData.deviceConditionOnReceive !== 'WORKING',
         },
       });
+
       toast.success('Asset received confirmation submitted successfully.');
       setReceivedModalOpen(false);
       setSelectedAsset(null);
+      
+      // Refetch assets to update consignmentStatus
+      setTimeout(() => refetchMyAssets(), 0);
     } catch (err) {
       toast.error(err?.message || 'Failed to confirm asset received.');
     }
@@ -243,6 +249,9 @@ export default function MyAssetsTab() {
       setReturnModalOpen(false);
       setSelectedAsset(null);
       formStateRef.current = {};
+
+      // Refetch assets to update consignmentReturnStatus
+      setTimeout(() => refetchMyAssets(), 0);
     } catch (err) {
       toast.error(err?.message || 'Failed to submit return asset request.');
     }
@@ -372,8 +381,23 @@ export default function MyAssetsTab() {
           {assets.map((asset) => {
             const allocation = allocationMap[asset.id];
             const consignmentStatus = asset.consignmentStatus;
+            const consignmentReturnStatus = asset.consignmentReturnStatus;
+            const isReturnAccepted = consignmentReturnStatus === 'ACCEPTED';
+            const isReturnPending = consignmentReturnStatus === 'PENDING';
+            const showConsignmentStatusTile = consignmentStatus === null || consignmentStatus === 'DRAFT';
+            const consignmentStatusTile = consignmentStatus === null
+              ? {
+                  title: 'Consignment is not created',
+                  className: 'bg-rose-50 border-rose-200 text-rose-700',
+                  badgeClassName: 'bg-rose-500',
+                }
+              : {
+                  title: 'Consignment is ready for dispatch',
+                  className: 'bg-amber-50 border-amber-200 text-amber-700',
+                  badgeClassName: 'bg-amber-500',
+                };
             const showAssetReceivedButton = consignmentStatus === 'DISPATCHED';
-            const showReturnAndExtendButtons = consignmentStatus === 'DELIVERED';
+            const showReturnAndExtendButtons = consignmentStatus === 'DELIVERED' && !isReturnAccepted;
             const allocatedDate = allocation?.createdAt 
               ? new Date(allocation.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -399,7 +423,12 @@ export default function MyAssetsTab() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {showAssetReceivedButton ? (
+                    {showConsignmentStatusTile ? (
+                      <div className={`inline-flex w-fit shrink-0 items-center gap-2 rounded-full border px-3 py-1 shadow-sm ${consignmentStatusTile.className}`}>
+                        <span className={`inline-flex h-2 w-2 rounded-full ${consignmentStatusTile.badgeClassName}`}></span>
+                        <p className="whitespace-nowrap text-xs font-semibold leading-4">{consignmentStatusTile.title}</p>
+                      </div>
+                    ) : showAssetReceivedButton ? (
                       <CustomButton
                         text="Asset Received"
                         onClick={() => handleAssetReceived(asset)}
@@ -412,7 +441,7 @@ export default function MyAssetsTab() {
                         <CustomButton
                           text="Return Asset"
                           onClick={() => handleReturnAsset(asset)}
-                          variant="danger"
+                          variant={isReturnPending ? 'disabled' : 'danger'}
                           size="sm"
                         />
                         <CustomButton
