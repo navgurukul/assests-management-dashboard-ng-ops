@@ -16,8 +16,8 @@ import {
   returnAssetValidationSchema,
 } from '@/app/config/formConfigs/returnAssetModalConfig';
 import {
-  extendLeaseFields,
-  extendLeaseValidationSchema,
+  getExtendLeaseFields,
+  getExtendLeaseValidationSchema,
 } from '@/app/config/formConfigs/extendLeaseModalConfig';
 import {
   assetReceivedFields,
@@ -532,11 +532,11 @@ export default function MyAssetsTab() {
         onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); }}
         componentName=""
         actionType="Extend Lease"
-        fields={extendLeaseFields}
+        fields={getExtendLeaseFields()}
         onSubmit={handleExtendSubmit}
         isSubmitting={isPostPending}
-        size="small"
-        validationSchema={extendLeaseValidationSchema}
+        size="medium"
+        validationSchema={getExtendLeaseValidationSchema()}
       />
 
       <FormModal
