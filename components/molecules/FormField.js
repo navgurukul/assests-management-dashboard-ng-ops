@@ -8,6 +8,17 @@ import MultiSelect from '@/components/atoms/MultiSelect';
 import CampusAssetTable from './CampusAssetTable';
 import CustomDatePicker from '@/components/atoms/CustomDatePicker';
 
+const parseDateValue = (value) => {
+  if (!value) return null;
+  return new Date(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value) ? `${value}T00:00:00` : value);
+};
+
+const formatDateValue = (date) => {
+  if (!date) return '';
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzOffset).toISOString().split('T')[0];
+};
+
 export default function FormField({ field, formik, onFieldChange }) {
   const { name, label, type, placeholder, required, options, min, max, disabled, readOnly } = field;
   const hasError = formik.touched[name] && formik.errors[name];
@@ -57,9 +68,9 @@ export default function FormField({ field, formik, onFieldChange }) {
         return (
           <CustomDatePicker
             name={name}
-            selected={formik.values[name] ? new Date(formik.values[name]) : null}
+            selected={parseDateValue(formik.values[name])}
             onChange={(date) => {
-              formik.setFieldValue(name, date ? date.toISOString().split('T')[0] : '');
+              formik.setFieldValue(name, formatDateValue(date));
             }}
             onBlur={() => formik.setFieldTouched(name, true)}
             placeholder={placeholder}

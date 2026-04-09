@@ -91,7 +91,6 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
       itemsGrid: true,
       items: [
         { label: 'Assigned To', value: ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : (ticket.assigneeName || '—') },
-        { label: 'Username', value: ticket.assigneeUser?.username || '—' },
         { label: 'Role', value: ticket.assigneeUser?.role || '—' },
         { label: 'Email', value: ticket.assigneeUser?.email || '—' },
       ],

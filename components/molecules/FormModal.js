@@ -10,6 +10,16 @@ import ActiveFiltersChips from './ActiveFiltersChips';
 import AllocationConsignmentSelector from './AllocationConsignmentSelector';
 import CustomDatePicker from '@/components/atoms/CustomDatePicker';
 
+const parseDateValue = (value) => {
+  if (!value) return null;
+  return new Date(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value) ? `${value}T00:00:00` : value);
+};
+
+const formatDateValue = (date) => {
+  if (!date) return '';
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzOffset).toISOString().split('T')[0];
+};
 
 export default function FormModal({
   isOpen,
@@ -30,8 +40,14 @@ export default function FormModal({
   const [touched, setTouched] = useState({});
   const [filters, setFilters] = useState({});
 
-  // Initialize form data when modal opens or fields change
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  const [prevFields, setPrevFields] = useState(fields);
+
+  // Initialize form data when modal opens or fields change (avoids useEffect cascading renders)
+  if (isOpen !== prevIsOpen || fields !== prevFields) {
+    setPrevIsOpen(isOpen);
+    setPrevFields(fields);
+
     if (isOpen) {
       const initialData = {};
       fields.forEach((field) => {
@@ -58,7 +74,7 @@ export default function FormModal({
       setTouched({});
       setFilters({});
     }
-  }, [isOpen, fields]);
+  }
 
   // Handle input change
   const handleChange = (fieldName, value) => {
@@ -517,14 +533,12 @@ export default function FormModal({
         );
 
       case 'date': {
-        const dateValue = value ? new Date(value) : null;
         return (
           <CustomDatePicker
             name={field.name}
-            selected={dateValue}
+            selected={parseDateValue(value)}
             onChange={(date) => {
-              const formatted = date ? date.toISOString().split('T')[0] : '';
-              handleChange(field.name, formatted);
+              handleChange(field.name, formatDateValue(date));
             }}
             onBlur={() => handleBlur(field.name)}
             placeholder={field.placeholder}

@@ -292,10 +292,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="font-medium">{formatBoolean(asset.charger)}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">BAG</p>
-                  <p className="font-medium">{formatBoolean(asset.bag)}</p>
-                </div>
-                <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SERIAL NUMBER</p>
                   <p className="font-medium break-left">{asset.serialNumber || 'N/A'}</p>
                 </div>
@@ -330,26 +326,26 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Allocation Notes', value: allocationDetails.notes || 'No additional notes provided', className: 'col-span-2' },
       ],
     },
-     {
-      title: 'Timeline',
-      color: 'theme',
-      itemsGrid: true,
-      className: sharedHeightClass,
-      items: [
-        {
-          label: 'Start Date',
-          value: formatDate(allocationDetails.startDate || allocationDetails.createdAt),
-        },
-        {
-          label: 'End Date',
-          value: formatDate(allocationDetails.endDate, 'Still Active'),
-        },
-        {
-          label: 'Expected Return Date',
-          value: formatDate(allocationDetails.expectedReturnDate, 'Not Applicable'),
-        },
-      ],
-    },
+    //  {
+    //   title: 'Timeline',
+    //   color: 'theme',
+    //   itemsGrid: true,
+    //   className: sharedHeightClass,
+    //   items: [
+    //     {
+    //       label: 'Start Date',
+    //       value: formatDate(allocationDetails.startDate || allocationDetails.createdAt),
+    //     },
+    //     {
+    //       label: 'End Date',
+    //       value: formatDate(allocationDetails.endDate, 'Still Active'),
+    //     },
+    //     {
+    //       label: 'Expected Return Date',
+    //       value: formatDate(allocationDetails.expectedReturnDate, 'Not Applicable'),
+    //     },
+    //   ],
+    // },
     {
       title: 'Administrative Information',
       color: 'theme',
@@ -408,7 +404,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
   return (
     <>
       <DetailsPage
-        title={`ALLOCATION #${allocationDetails.id}`}
+        title={`ALLOCATION #${allocationDetails.allocationCode}`}
         subtitle={`Status: ${displayStatus} | Assigned to: ${userDisplayName}`}
         subtitleColor={getStatusColor()}
         leftSections={leftSections}
