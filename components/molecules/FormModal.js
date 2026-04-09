@@ -40,8 +40,14 @@ export default function FormModal({
   const [touched, setTouched] = useState({});
   const [filters, setFilters] = useState({});
 
-  // Initialize form data when modal opens or fields change
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  const [prevFields, setPrevFields] = useState(fields);
+
+  // Initialize form data when modal opens or fields change (avoids useEffect cascading renders)
+  if (isOpen !== prevIsOpen || fields !== prevFields) {
+    setPrevIsOpen(isOpen);
+    setPrevFields(fields);
+
     if (isOpen) {
       const initialData = {};
       fields.forEach((field) => {
@@ -68,7 +74,7 @@ export default function FormModal({
       setTouched({});
       setFilters({});
     }
-  }, [isOpen, fields]);
+  }
 
   // Handle input change
   const handleChange = (fieldName, value) => {
