@@ -58,7 +58,12 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
   const isStudentOrEmployee = userRole === 'STUDENT' || userRole === 'EMPLOYEE';
 
   const filteredMenuItems = menuItems.filter(
-    (item) => (isStudentOrEmployee ? item.studentOnly : !item.studentOnly)
+    (item) => {
+      if (userRole === 'STUDENT' && item.path === '/ticketforapproval') {
+        return false;
+      }
+      return isStudentOrEmployee ? item.studentOnly : !item.studentOnly;
+    }
   );
 
   return (
