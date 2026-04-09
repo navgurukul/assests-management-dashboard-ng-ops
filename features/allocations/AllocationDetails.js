@@ -292,10 +292,6 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="font-medium">{formatBoolean(asset.charger)}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">BAG</p>
-                  <p className="font-medium">{formatBoolean(asset.bag)}</p>
-                </div>
-                <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SERIAL NUMBER</p>
                   <p className="font-medium break-left">{asset.serialNumber || 'N/A'}</p>
                 </div>
