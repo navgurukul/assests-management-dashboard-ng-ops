@@ -382,22 +382,21 @@ export default function MyAssetsTab() {
             const allocation = allocationMap[asset.id];
             const consignmentStatus = asset.consignmentStatus;
             const consignmentReturnStatus = asset.consignmentReturnStatus;
-            const isReturnAccepted = consignmentReturnStatus === 'ACCEPTED';
-            const isReturnPending = consignmentReturnStatus === 'PENDING';
-            const showConsignmentStatusTile = consignmentStatus === null || consignmentStatus === 'DRAFT';
-            const consignmentStatusTile = consignmentStatus === null
+            const consignmentStatusTile = consignmentStatus == null
               ? {
                   title: 'Consignment is not created',
                   className: 'bg-rose-50 border-rose-200 text-rose-700',
                   badgeClassName: 'bg-rose-500',
                 }
-              : {
-                  title: 'Consignment is ready for dispatch',
-                  className: 'bg-amber-50 border-amber-200 text-amber-700',
-                  badgeClassName: 'bg-amber-500',
-                };
+              : consignmentStatus === 'DRAFT'
+                ? {
+                    title: 'Consignment is ready for dispatch',
+                    className: 'bg-amber-50 border-amber-200 text-amber-700',
+                    badgeClassName: 'bg-amber-500',
+                  }
+                : null;
             const showAssetReceivedButton = consignmentStatus === 'DISPATCHED';
-            const showReturnAndExtendButtons = consignmentStatus === 'DELIVERED' && !isReturnAccepted;
+            const showReturnAndExtendButtons = consignmentStatus === 'DELIVERED' && consignmentReturnStatus !== 'ACCEPTED';
             const allocatedDate = allocation?.createdAt 
               ? new Date(allocation.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -423,7 +422,7 @@ export default function MyAssetsTab() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {showConsignmentStatusTile ? (
+                    {consignmentStatusTile ? (
                       <div className={`inline-flex w-fit shrink-0 items-center gap-2 rounded-full border px-3 py-1 shadow-sm ${consignmentStatusTile.className}`}>
                         <span className={`inline-flex h-2 w-2 rounded-full ${consignmentStatusTile.badgeClassName}`}></span>
                         <p className="whitespace-nowrap text-xs font-semibold leading-4">{consignmentStatusTile.title}</p>
@@ -441,7 +440,7 @@ export default function MyAssetsTab() {
                         <CustomButton
                           text="Return Asset"
                           onClick={() => handleReturnAsset(asset)}
-                          variant={isReturnPending ? 'disabled' : 'danger'}
+                          variant={consignmentReturnStatus === 'PENDING' ? 'disabled' : 'danger'}
                           size="sm"
                         />
                         <CustomButton
