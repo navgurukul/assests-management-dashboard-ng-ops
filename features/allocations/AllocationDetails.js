@@ -408,7 +408,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
   return (
     <>
       <DetailsPage
-        title={`ALLOCATION #${allocationDetails.id}`}
+        title={`ALLOCATION #${allocationDetails.allocationCode}`}
         subtitle={`Status: ${displayStatus} | Assigned to: ${userDisplayName}`}
         subtitleColor={getStatusColor()}
         leftSections={leftSections}
