@@ -371,6 +371,9 @@ export default function MyAssetsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {assets.map((asset) => {
             const allocation = allocationMap[asset.id];
+            const consignmentStatus = asset.consignmentStatus;
+            const showAssetReceivedButton = consignmentStatus === 'DISPATCHED';
+            const showReturnAndExtendButtons = consignmentStatus === 'DELIVERED';
             const allocatedDate = allocation?.createdAt 
               ? new Date(allocation.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -396,25 +399,30 @@ export default function MyAssetsTab() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CustomButton
-                      text="Asset Received"
-                      onClick={() => handleAssetReceived(asset)}
-                      variant="success"
-                      size="sm"
-                      className={asset.consignmentStatus === 'DELIVERED' ? 'opacity-50' : ''}
-                    />
-                    <CustomButton
-                      text="Return Asset"
-                      onClick={() => handleReturnAsset(asset)}
-                      variant="danger"
-                      size="sm"
-                    />
-                    <CustomButton
-                      text="Extend Lease"
-                      onClick={() => handleExtendLease(asset)}
-                      variant="primary"
-                      size="sm"
-                    />
+                    {showAssetReceivedButton ? (
+                      <CustomButton
+                        text="Asset Received"
+                        onClick={() => handleAssetReceived(asset)}
+                        variant="success"
+                        size="sm"
+                      />
+                    ) : null}
+                    {showReturnAndExtendButtons ? (
+                      <>
+                        <CustomButton
+                          text="Return Asset"
+                          onClick={() => handleReturnAsset(asset)}
+                          variant="danger"
+                          size="sm"
+                        />
+                        <CustomButton
+                          text="Extend Lease"
+                          onClick={() => handleExtendLease(asset)}
+                          variant="primary"
+                          size="sm"
+                        />
+                      </>
+                    ) : null}
                   </div>
                 </div>
 
