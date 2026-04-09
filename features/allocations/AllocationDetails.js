@@ -330,26 +330,26 @@ export default function AllocationDetails({ allocationId, onBack }) {
         { label: 'Allocation Notes', value: allocationDetails.notes || 'No additional notes provided', className: 'col-span-2' },
       ],
     },
-     {
-      title: 'Timeline',
-      color: 'theme',
-      itemsGrid: true,
-      className: sharedHeightClass,
-      items: [
-        {
-          label: 'Start Date',
-          value: formatDate(allocationDetails.startDate || allocationDetails.createdAt),
-        },
-        {
-          label: 'End Date',
-          value: formatDate(allocationDetails.endDate, 'Still Active'),
-        },
-        {
-          label: 'Expected Return Date',
-          value: formatDate(allocationDetails.expectedReturnDate, 'Not Applicable'),
-        },
-      ],
-    },
+    //  {
+    //   title: 'Timeline',
+    //   color: 'theme',
+    //   itemsGrid: true,
+    //   className: sharedHeightClass,
+    //   items: [
+    //     {
+    //       label: 'Start Date',
+    //       value: formatDate(allocationDetails.startDate || allocationDetails.createdAt),
+    //     },
+    //     {
+    //       label: 'End Date',
+    //       value: formatDate(allocationDetails.endDate, 'Still Active'),
+    //     },
+    //     {
+    //       label: 'Expected Return Date',
+    //       value: formatDate(allocationDetails.expectedReturnDate, 'Not Applicable'),
+    //     },
+    //   ],
+    // },
     {
       title: 'Administrative Information',
       color: 'theme',
