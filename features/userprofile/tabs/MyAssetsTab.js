@@ -512,6 +512,9 @@ export default function MyAssetsTab() {
           <p className="text-sm text-gray-500 text-center max-w-sm">
             You currently do not have any assets assigned to you. When assets are allocated, they will automatically appear here.
           </p>
+          <p className="text-sm text-gray-500 text-center max-w-sm">
+            Please raise a new ticket for asset allocation.
+          </p>
         </div>
       )}
 
