@@ -385,7 +385,7 @@ export default function MyAssetsTab() {
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
               >
                 {/* Header */}
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
                   <div className="flex items-center gap-3">
                     <div className="bg-[var(--surface-soft)] rounded-lg p-2">
                       <Laptop className="w-5 h-5 text-[var(--theme-main)]" />
@@ -395,25 +395,27 @@ export default function MyAssetsTab() {
                       <p className="text-xs text-gray-500">{asset.assetTag}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <CustomButton
                       text="Asset Received"
                       onClick={() => handleAssetReceived(asset)}
                       variant="success"
                       size="sm"
-                      className={asset.consignmentStatus === 'DELIVERED' ? 'opacity-50' : ''}
+                      className={`!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs${asset.consignmentStatus === 'DELIVERED' ? ' opacity-50' : ''}`}
                     />
                     <CustomButton
                       text="Return Asset"
                       onClick={() => handleReturnAsset(asset)}
                       variant="danger"
                       size="sm"
+                      className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
                     />
                     <CustomButton
                       text="Extend Lease"
                       onClick={() => handleExtendLease(asset)}
                       variant="primary"
                       size="sm"
+                      className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
                     />
                   </div>
                 </div>

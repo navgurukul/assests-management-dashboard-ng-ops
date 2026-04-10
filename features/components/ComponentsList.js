@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreVertical } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -45,9 +44,6 @@ export default function ComponentsList() {
   // Search state
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  
-  // Menu state
-  const [openMenuId, setOpenMenuId] = useState(null);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -242,7 +238,7 @@ export default function ComponentsList() {
     }));
   }, [data]);
 
-  const handleViewDetails = React.useCallback((componentId) => {
+  const handleViewDetails = (componentId) => {
     // Find the full component data
     const component = componentsListData.find(comp => comp.id === componentId);
     if (component && component.componentData) {
@@ -250,26 +246,25 @@ export default function ComponentsList() {
       sessionStorage.setItem('currentComponentData', JSON.stringify(component.componentData));
     }
     router.push(`/components/${componentId}`);
-  }, [componentsListData, router]);
+  };
 
   // Handle opening the action modal
-  const handleOpenActionModal = React.useCallback((actionType, component) => {
+  const handleOpenActionModal = (actionType, component) => {
     setCurrentAction(actionType);
     setCurrentComponent(component);
     setIsModalOpen(true);
-    setOpenMenuId(null); // Close the action menu
-  }, []);
+  };
 
   // Handle closing the modal
-  const handleCloseModal = React.useCallback(() => {
+  const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentAction(null);
     setCurrentComponent(null);
     setIsSubmitting(false);
-  }, []);
+  };
 
   // Handle form submission
-  const handleFormSubmit = React.useCallback(async (formData) => {
+  const handleFormSubmit = async (formData) => {
     setIsSubmitting(true);
     let loadingToastId = null;
 
@@ -322,9 +317,9 @@ export default function ComponentsList() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [currentAction, currentComponent, handleCloseModal, queryClient]);
+  };
 
-  const renderCell = React.useCallback((item, columnKey) => {
+  const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
 
     switch (columnKey) {
@@ -344,38 +339,18 @@ export default function ComponentsList() {
       case "condition":
         return <StatusChip value={cellValue} colorFn={getConditionChipColor} />;
       
-      case "actions":
+      case "actions": {
         const menuOptions = getComponentMenuOptions(handleOpenActionModal, item);
 
-        
         return (
-          <div className="relative flex items-center justify-center">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();setOpenMenuId(openMenuId === item.id ? null : item.id);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Actions menu"
-            >
-              <MoreVertical className="h-5 w-5 text-gray-600" />
-            </button>
-            {openMenuId === item.id && (
-              <>
-                <ActionMenu
-                  menuOptions={menuOptions}
-                  onClose={() => {
-                    setOpenMenuId(null);
-                  }}
-                />
-              </>
-            )}
-          </div>
+          <ActionMenu menuOptions={menuOptions} />
         );
+      }
       
       default:
         return <span className="text-gray-700">{cellValue}</span>;
     }
-  }, [openMenuId, handleViewDetails, handleOpenActionModal]);
+  };
 
   const handleCreateClick = () => {
     router.push('/components/create');
@@ -415,7 +390,6 @@ export default function ComponentsList() {
 
       {/* Table */}
       <TableWrapper
-        key={`table-${openMenuId || 'none'}`}
         data={componentsListData}
         columns={visibleColumns}
         title="Components"

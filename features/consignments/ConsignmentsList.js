@@ -763,7 +763,7 @@ export default function ConsignmentsList() {
   }, [getReturnActionIdentifiers, patchMutation, refetchInTransit]);
 
   // Render cell for in-transit table (with actions column)
-  const renderInTransitCellWithActions = React.useCallback((item, columnKey) => {
+  const renderInTransitCellWithActions = (item, columnKey) => {
     if (columnKey === 'actions') {
       const menuOptions = [
         {
@@ -780,29 +780,10 @@ export default function ConsignmentsList() {
         },
       ];
 
-      return (
-        <div className="relative flex items-center justify-center">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenInTransitMenuId(openInTransitMenuId === item.id ? null : item.id);
-            }}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label="Actions menu"
-          >
-            <MoreVertical className="h-5 w-5 text-gray-600" />
-          </button>
-          {openInTransitMenuId === item.id && (
-            <ActionMenu
-              menuOptions={menuOptions}
-              onClose={() => setOpenInTransitMenuId(null)}
-            />
-          )}
-        </div>
-      );
+      return <ActionMenu menuOptions={menuOptions} />;
     }
     return renderInTransitCell(item, columnKey);
-  }, [openInTransitMenuId, handleInTransitAction]);
+  };
 
   // Show loading only on initial load
   const showLoading = isLoading && !data;
@@ -914,7 +895,7 @@ export default function ConsignmentsList() {
       )}
 
       <TableWrapper
-        key={showInTransit ? `transit-${openInTransitMenuId || 'none'}` : `consignments-${openStatusDropdownId || 'none'}`}
+        key={showInTransit ? 'transit' : 'consignments'}
         data={showInTransit ? inTransitTableData : tableData}
         columns={showInTransit ? inTransitColumns : visibleColumns}
         title={showInTransit ? 'In-Transit Returns' : 'Consignments'}

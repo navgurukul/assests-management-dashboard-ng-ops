@@ -36,6 +36,7 @@ export default function TableWrapper({
   isLoading = false,
   margin = "m-5",
   shadow = "shadow-md",
+  emptyContent,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
@@ -82,7 +83,7 @@ export default function TableWrapper({
   };
 
   return (
-    <div className={`bg-[var(--surface)] p-6 rounded-lg ${shadow} ${margin}`}>
+    <div className={`bg-[var(--surface)] p-3 sm:p-6 rounded-lg ${shadow} ${margin}`}>
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
@@ -91,20 +92,21 @@ export default function TableWrapper({
       )}
       
       {/* Search, Filter, Column Selector, and Create Button Section */}
-      <div className="flex items-center justify-between gap-4 mb-4 px-4">
-        {/* Search on the left */}
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 px-2 sm:px-4">
+        {/* Search – full width on mobile */}
+        <div className="w-full sm:flex-1 sm:max-w-md">
           {searchComponent}
         </div>
         
-        {/* Buttons on the right */}
-        <div className="flex items-center gap-3">
+        {/* Buttons – wrap on mobile */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {onShowAll && (
             <CustomButton
               text={showAllButtonText}
               onClick={onShowAll}
               variant="secondary"
               size="md"
+              className="!px-2 !py-0.5 !text-xs sm:!px-3 sm:!py-1.5 sm:!text-sm"
             />
           )}
           {filterComponent}
@@ -116,6 +118,7 @@ export default function TableWrapper({
               onClick={onCreateClick}
               variant="primary"
               size="md"
+              className="!px-2 !py-0.5 !text-xs sm:!px-3 sm:!py-1.5 sm:!text-sm"
             />
           )}
         </div>
@@ -128,8 +131,50 @@ export default function TableWrapper({
         </div>
       )}
       
-      {/* Table Container with Horizontal Scroll */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card List – visible only on xs screens */}
+      <div className="sm:hidden space-y-3 px-1">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <div className="loader"></div>
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          </div>
+        ) : displayData.length === 0 ? (
+          emptyContent ? emptyContent : (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+              <p className="text-base font-semibold text-gray-700 mb-1">No data found</p>
+            </div>
+          )
+        ) : (
+          displayData.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => onRowClick && onRowClick(item)}
+              className={`bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 ${
+                onRowClick ? 'cursor-pointer hover:bg-[var(--surface-soft)]' : ''
+              } transition-colors`}
+            >
+              {columns.map((column) => (
+                <div
+                  key={column.key}
+                  className="flex items-start justify-between gap-2 py-1.5 border-b border-[var(--border)] last:border-b-0"
+                >
+                  <span className="text-[11px] font-semibold text-gray-500 w-2/5 shrink-0 pt-0.5">
+                    {column.label}
+                  </span>
+                  <span className="text-[12px] text-[var(--foreground)] text-right w-3/5 break-words">
+                    {renderCell ? renderCell(item, column.key) : item[column.key]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Table Container – hidden on mobile, visible on sm+ */}
+      <div className="hidden sm:block overflow-x-auto">
         <Table 
           aria-label={ariaLabel}
           classNames={tableClassNames}
@@ -155,9 +200,9 @@ export default function TableWrapper({
                     <p className="text-gray-600">Loading...</p>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-gray-500 text-base font-medium">No data found</p>
+              ) : emptyContent ? emptyContent : (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                  <p className="text-base font-semibold text-gray-700 mb-1">No data found</p>
                 </div>
               )
             }

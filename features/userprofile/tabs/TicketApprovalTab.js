@@ -1,7 +1,7 @@
 'use client';
 
-import { Check, X, MoreVertical } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { Check, X } from 'lucide-react';
+import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import TableWrapper from '@/components/Table/TableWrapper';
 import ActionMenu from '@/components/molecules/ActionMenu';
@@ -19,7 +19,8 @@ import {
   ticketApprovalValidationSchema,
 } from '@/app/config/formConfigs/ticketApprovalModalConfig';
 
-// Define columns configuration
+const INITIAL_MODAL_STATE = { isOpen: false, actionType: null, ticket: null };
+
 const columns = [
   { key: 'ticketNumber', label: 'TICKET NUMBER', align: 'start' },
   { key: 'description', label: 'DESCRIPTION', align: 'start' },
@@ -31,250 +32,150 @@ const columns = [
   { key: 'actions', label: 'ACTIONS', align: 'center' },
 ];
 
+function getRequesterName(ticket) {
+  const requester = ticket.raisedByUser || ticket.requesterUser || ticket.createdByUser;
+  return requester ? `${requester.firstName} ${requester.lastName}` : 'Unknown';
+}
+
+function getTicketId(ticket) {
+  return ticket.id || ticket.ticketId;
+}
+
 export default function TicketApprovalTab() {
   const { user } = useAuth();
-  const [processingTicket, setProcessingTicket] = useState(null);
-  const [openMenuId, setOpenMenuId] = useState(null);
-  
-  // Pagination state
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentAction, setCurrentAction] = useState(null);
-  const [currentTicket, setCurrentTicket] = useState(null);
+  const [modalState, setModalState] = useState(INITIAL_MODAL_STATE);
+  const [processingId, setProcessingId] = useState(null);
+
+  const managerEmail = user?.email;
+  const queryString = new URLSearchParams({ page: currentPage, limit: pageSize }).toString();
+
+  const { data, isLoading, isError, error, refetch } = useFetch({
+    url: `${config.endpoints.tickets.pendingApproval}/${encodeURIComponent(managerEmail ?? '')}?${queryString}`,
+    queryKey: ['pending-approval-tickets', managerEmail, currentPage, pageSize],
+    enabled: !!managerEmail,
+  });
+
+  const tickets = data?.data?.tickets || [];
+  const paginationData = data?.data?.pagination || null;
 
   const { mutateAsync: updateTicket, isPending: isSubmitting } = useMutation({
     mutationFn: ({ endpoint, body }) => apiService.put(endpoint, body),
   });
 
-  const getTicketIdentifier = useCallback((ticket) => ticket?.id || ticket?.ticketId, []);
-  
-  // Build query string with pagination
-  const buildQueryString = () => {
-    const params = new URLSearchParams();
-    params.append('page', currentPage);
-    params.append('limit', pageSize);
-    return params.toString();
+  const openModal = (actionType, ticket) => {
+    setModalState({ isOpen: true, actionType, ticket });
   };
-  
-  // Fetch pending approval tickets using the authenticated user's email
-  const managerEmail = user?.email;
-  const { data, isLoading, isError, error, refetch } = useFetch({
-    url: `${config.endpoints.tickets.pendingApproval}/${encodeURIComponent(managerEmail ?? '')}?${buildQueryString()}`,
-    queryKey: ['pending-approval-tickets', managerEmail, currentPage, pageSize],
-    enabled: !!managerEmail,
-  });
-  
-  // Extract tickets from API response
-  const ticketsToDisplay = data?.data?.tickets || [];
-  const paginationData = data?.data?.pagination || null;
 
-  // Handle opening the action modal
-  const handleOpenActionModal = useCallback((actionType, ticket) => {
-    setCurrentAction(actionType);
-    setCurrentTicket(ticket);
-    setIsModalOpen(true);
-    setOpenMenuId(null); // Close the action menu
-  }, []);
+  const closeModal = () => setModalState(INITIAL_MODAL_STATE);
 
-  // Handle closing the modal
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setCurrentAction(null);
-    setCurrentTicket(null);
-  }, []);
+  const handleSubmit = async (formData) => {
+    const { actionType, ticket } = modalState;
+    const ticketId = getTicketId(ticket);
 
-  // Handle form submission
-  const handleFormSubmit = useCallback(async (formData) => {
-    const ticketIdentifier = getTicketIdentifier(currentTicket);
-
-    if (!ticketIdentifier || !currentAction) {
+    if (!ticketId || !actionType) {
       toast.error('Unable to process ticket. Missing ticket details.');
       return;
     }
 
-    setProcessingTicket(ticketIdentifier);
+    setProcessingId(ticketId);
     let loadingToastId = null;
 
     try {
-      const action = currentAction?.toLowerCase();
-      loadingToastId = toast.loading(`${currentAction} in progress...`);
-
-      const payload = {
-          status: currentAction === 'Approve' ? 'APPROVED' : 'REJECTED',
-          resolutionNotes: formData?.remarks || '',
-      };
+      loadingToastId = toast.loading(`${actionType} in progress...`);
 
       await updateTicket({
-        endpoint: config.endpoints.tickets.update(ticketIdentifier),
-        body: payload,
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: {
+          status: actionType === 'Approve' ? 'APPROVED' : 'REJECTED',
+          resolutionNotes: formData?.remarks || '',
+        },
       });
-      
-      toast.dismiss(loadingToastId);
-      loadingToastId = null;
-      toast.success(`Ticket ${action}d successfully!`);
-      
-      // Refetch the pending approval tickets
-      refetch();
-      
-      handleCloseModal();
-      
-    } catch (error) {
-      if (loadingToastId) {
-        toast.dismiss(loadingToastId);
-      }
-      console.error(`Error ${currentAction}ing ticket:`, error);
-      const errorMessage = error?.message || 'An error occurred. Please try again.';
-      toast.error(errorMessage);
-    } finally {
-      setProcessingTicket(null);
-    }
-  }, [currentAction, currentTicket, getTicketIdentifier, handleCloseModal, refetch, updateTicket]);
 
-  // Handle cell rendering
-  const renderCell = useCallback((ticket, columnKey) => {
+      toast.dismiss(loadingToastId);
+      toast.success(`Ticket ${actionType.toLowerCase()}d successfully!`);
+      refetch();
+      closeModal();
+    } catch (submitError) {
+      if (loadingToastId) toast.dismiss(loadingToastId);
+      console.error(`Error ${actionType}ing ticket:`, submitError);
+      toast.error(submitError?.message || 'An error occurred. Please try again.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const getActionMenuOptions = (ticket) => [
+    {
+      label: 'Approve',
+      icon: Check,
+      iconClassName: 'text-green-600',
+      onClick: () => openModal('Approve', ticket),
+    },
+    {
+      label: 'Reject',
+      icon: X,
+      iconClassName: 'text-red-600',
+      onClick: () => openModal('Reject', ticket),
+    },
+  ];
+
+  const renderCell = (ticket, columnKey) => {
     switch (columnKey) {
       case 'ticketNumber':
         return <span className="font-medium text-[var(--theme-main)]">{ticket.ticketNumber}</span>;
-      
       case 'description':
-        return (
-          <span className="text-gray-900 max-w-xs truncate block">
-            {ticket.description || '-'}
-          </span>
-        );
-      
+        return <span className="text-gray-900 max-w-xs truncate block">{ticket.description || '-'}</span>;
       case 'ticketType':
-        return (
-          <span className="text-gray-700">
-            {ticket.ticketType?.replace('_', ' ')}
-          </span>
-        );
-      
+        return <span className="text-gray-700">{ticket.ticketType?.replace('_', ' ')}</span>;
       case 'priority':
-        return (
-          <StatusChip value={ticket.priority} colorFn={getPriorityChipColor} />
-        );
-      
+        return <StatusChip value={ticket.priority} colorFn={getPriorityChipColor} />;
       case 'status':
-        return (
-          <StatusChip value={ticket.status} />
-        );
-      
+        return <StatusChip value={ticket.status} />;
       case 'requester':
-        return (
-          <span className="text-gray-700">
-            {ticket.raisedByUser 
-              ? `${ticket.raisedByUser.firstName} ${ticket.raisedByUser.lastName}` 
-              : ticket.requesterUser 
-              ? `${ticket.requesterUser.firstName} ${ticket.requesterUser.lastName}` 
-              : ticket.createdByUser
-              ? `${ticket.createdByUser.firstName} ${ticket.createdByUser.lastName}`
-              : 'Unknown'}
-          </span>
-        );
-      
+        return <span className="text-gray-700">{getRequesterName(ticket)}</span>;
       case 'createdAt':
-        return (
-          <span className="text-gray-500">
-            {new Date(ticket.createdAt).toLocaleDateString('en-IN')}
-          </span>
-        );
-      
+        return <span className="text-gray-500">{new Date(ticket.createdAt).toLocaleDateString('en-IN')}</span>;
       case 'actions':
-        const ticketIdentifier = getTicketIdentifier(ticket);
-        const menuOptions = [
-          {
-            label: 'Approve',
-            icon: Check,
-            iconClassName: 'text-green-600',
-            onClick: () => handleOpenActionModal('Approve', ticket)
-          },
-          {
-            label: 'Reject',
-            icon: X,
-            iconClassName: 'text-red-600',
-            onClick: () => handleOpenActionModal('Reject', ticket)
-          }
-        ];
-
         return (
-          <div className="relative flex items-center justify-center">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenMenuId(openMenuId === ticketIdentifier ? null : ticketIdentifier);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Actions menu"
-              disabled={processingTicket === ticketIdentifier}
-            >
-              <MoreVertical className="h-5 w-5 text-gray-600" />
-            </button>
-            {openMenuId === ticketIdentifier && (
-              <ActionMenu
-                menuOptions={menuOptions}
-                onClose={() => setOpenMenuId(null)}
-              />
-            )}
-          </div>
+          <ActionMenu
+            menuOptions={getActionMenuOptions(ticket)}
+            disabled={processingId === getTicketId(ticket)}
+          />
         );
-      
       default:
         return ticket[columnKey];
     }
-  }, [getTicketIdentifier, openMenuId, processingTicket, handleOpenActionModal]);
-
-  // Define form fields based on action
-  const getFormFields = () => {
-    if (!currentAction) return [];
-    return getTicketActionFields(currentAction);
-  };
-  
-  // Handle page change
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
   };
 
-  // Handle page size change
-  const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
+  const handlePageSizeChange = (size) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
-  
-  // Loading state
-  if (isLoading && currentPage === 1) {
-    return <StateHandler loading={true} />;
-  }
-  
-  // Error state
-  if (isError) {
-    return <StateHandler error={error?.message || 'Failed to load pending approval tickets'} />;
-  }
+
+  if (isLoading && currentPage === 1) return <StateHandler loading={true} />;
+  if (isError) return <StateHandler error={error?.message || 'Failed to load pending approval tickets'} />;
 
   return (
     <div>
-      {/* Action Modal */}
       <FormModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        componentName={currentTicket?.ticketNumber || ''}
-        actionType={currentAction || ''}
-        fields={getFormFields()}
-        onSubmit={handleFormSubmit}
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        componentName={modalState.ticket?.ticketNumber || ''}
+        actionType={modalState.actionType || ''}
+        fields={modalState.actionType ? getTicketActionFields(modalState.actionType) : []}
+        onSubmit={handleSubmit}
         size="medium"
         isSubmitting={isSubmitting}
-        componentData={currentTicket}
-        helpText={currentTicket?.description || ''}
+        componentData={modalState.ticket}
+        helpText={modalState.ticket?.description || ''}
         validationSchema={ticketApprovalValidationSchema}
       />
 
-      {/* Table */}
       <TableWrapper
-        key={`table-${openMenuId || 'none'}`}
-        data={ticketsToDisplay}
+        data={tickets}
         columns={columns}
         margin="m-0"
         shadow="shadow-none"
@@ -282,7 +183,7 @@ export default function TicketApprovalTab() {
           <div className="flex items-center gap-2">
             Tickets for Approval
             <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-              Total - {paginationData?.totalCount || ticketsToDisplay.length}
+              Total - {paginationData?.totalCount || tickets.length}
             </span>
           </div>
         }
@@ -291,10 +192,9 @@ export default function TicketApprovalTab() {
         itemsPerPage={pageSize}
         ariaLabel="Tickets for approval table"
         isLoading={isLoading}
-        // Server-side pagination props
         serverPagination={true}
         paginationData={paginationData}
-        onPageChange={handlePageChange}
+        onPageChange={setCurrentPage}
         onPageSizeChange={handlePageSizeChange}
       />
     </div>
