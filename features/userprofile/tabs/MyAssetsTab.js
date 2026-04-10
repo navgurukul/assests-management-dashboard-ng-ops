@@ -396,22 +396,27 @@ export default function MyAssetsTab() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {asset.consignmentStatus === 'DISPATCHED' && (
-                      <CustomButton
-                        text="Asset Received"
-                        onClick={() => handleAssetReceived(asset)}
-                        variant="success"
-                        size="sm"
-                        className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
-                      />
-                    )}
-                    {asset.consignmentStatus === 'DELIVERED' && (
+                    {asset.consignmentReturnStatus === 'ACCEPTED' ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-medium bg-green-50 text-green-700 border border-green-200 cursor-default select-none">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Device is returned and accepted in campus
+                      </span>
+                    ) : (
                       <>
+                        <CustomButton
+                          text="Asset Received"
+                          onClick={() => handleAssetReceived(asset)}
+                          variant="success"
+                          size="sm"
+                          disabled={asset.consignmentStatus !== 'DISPATCHED'}
+                          className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                        />
                         <CustomButton
                           text="Return Asset"
                           onClick={() => handleReturnAsset(asset)}
                           variant="danger"
                           size="sm"
+                          disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus === 'PENDING'}
                           className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
                         />
                         <CustomButton
@@ -419,6 +424,7 @@ export default function MyAssetsTab() {
                           onClick={() => handleExtendLease(asset)}
                           variant="primary"
                           size="sm"
+                          disabled={asset.consignmentStatus !== 'DELIVERED'}
                           className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
                         />
                       </>
