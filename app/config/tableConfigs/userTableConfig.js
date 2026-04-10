@@ -104,7 +104,7 @@ export const defaultVisibleColumns = [
   'name',
   'email',
   'role',
-  'campus',
+  // 'campus',
   'assetTag',
   'assetType',
   'assetBrand',
