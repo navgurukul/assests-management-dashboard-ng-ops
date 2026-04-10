@@ -170,16 +170,16 @@ export default function UsersList() {
       case 'returnDate':
         return <span className="text-gray-600 text-sm">{cellValue}</span>;
 
-      case 'actions':
-        return (
-          <button
-            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Eye className="w-4 h-4" />
-            <span>View</span>
-          </button>
-        );
+      // case 'actions':
+      //   return (
+      //     <button
+      //       className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-sm"
+      //       onClick={(e) => e.stopPropagation()}
+      //     >
+      //       <Eye className="w-4 h-4" />
+      //       <span>View</span>
+      //     </button>
+      //   );
 
       default:
         return <span className="text-gray-700 text-sm">{cellValue ?? 'N/A'}</span>;
