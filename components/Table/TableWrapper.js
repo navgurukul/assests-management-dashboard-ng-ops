@@ -36,6 +36,7 @@ export default function TableWrapper({
   isLoading = false,
   margin = "m-5",
   shadow = "shadow-md",
+  emptyContent,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
@@ -155,9 +156,9 @@ export default function TableWrapper({
                     <p className="text-gray-600">Loading...</p>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-gray-500 text-base font-medium">No data found</p>
+              ) : emptyContent ? emptyContent : (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                  <p className="text-base font-semibold text-gray-700 mb-1">No data found</p>
                 </div>
               )
             }

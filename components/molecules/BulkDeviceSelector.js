@@ -358,13 +358,6 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
             </div>
           )}
 
-          {/* Loading State */}
-          {isLoading && (
-            <div className="text-center py-8">
-              <p className="text-gray-600">Loading assets...</p>
-            </div>
-          )}
-
           {/* Error State */}
           {isError && (
             <div className="text-center py-8">
@@ -373,16 +366,11 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
           )}
 
           {/* TableWrapper with Search, Filters, and Pagination */}
-          {!isLoading && !isError && (
-            filteredAssets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200 mt-4">
-                <p className="text-base font-semibold text-gray-700 mb-1">No Assets Available</p>
-                <p className="text-sm">No assets available in stock, or all available devices have already been assigned to a consignment.</p>
-              </div>
-            ) : (
+          {!isError && (
             <TableWrapper
               data={filteredAssets}
               columns={columns}
+              isLoading={isLoading}
               renderCell={renderCell}
               showPagination={true}
               serverPagination={true}
@@ -394,6 +382,12 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
               }}
               ariaLabel="Asset selection table"
               onRowClick={handleCheckboxChange}
+              emptyContent={
+                <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200 mt-4">
+                  <p className="text-base font-semibold text-gray-700 mb-1">No Assets Available</p>
+                  <p className="text-sm">No assets available in stock, or all available devices have already been assigned to a consignment.</p>
+                </div>
+              }
               searchComponent={
                 <SearchInput
                   value={searchTerm}
@@ -429,7 +423,6 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                 tr: "hover:bg-blue-50 cursor-pointer"
               }}
             />
-            )
           )}
         </div>
 
