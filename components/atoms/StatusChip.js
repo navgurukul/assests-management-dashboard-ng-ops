@@ -10,10 +10,12 @@ export default function StatusChip({ value, colorFn, className = '', icon }) {
 
   const colorClass = colorFn ? colorFn(value) : getStatusChipColor(value);
 
+  const displayLabel = String(value).replace(/_/g, ' ').toUpperCase();
+
   return (
     <span className={`${CHIP_CLASSES} ${colorClass} ${className}`.trim()}>
       {icon && <span className="mr-1 inline-flex items-center">{icon}</span>}
-      {value}
+      {displayLabel}
     </span>
   );
 }

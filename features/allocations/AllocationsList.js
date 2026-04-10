@@ -188,7 +188,6 @@ export default function AllocationsList() {
             Icon={card.Icon}
             valueColor={card.valueColor}
             iconColor={card.iconColor}
-            borderColor={card.borderColor}
           />
         ))}
       </div>

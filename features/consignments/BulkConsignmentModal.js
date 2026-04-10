@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
+import usePatch from '@/app/hooks/query/usePatch';
+import config from '@/app/config/env.config';
+import { toast } from '@/app/utils/toast';
 
 export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
   // Track selected status and feedback text per device in an object:
   // { [assetValue]: { selected: boolean, text: string } }
   const [feedbacks, setFeedbacks] = useState({});
+
+  const queryClient = useQueryClient();
+  const { mutateAsync: patchAssetStatus, isPending: isSubmitting } = usePatch();
 
   const handleClose = () => {
     onClose();
@@ -13,13 +20,18 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
   };
 
   const handleToggleDevice = (assetValue) => {
-    setFeedbacks((prev) => ({
-      ...prev,
-      [assetValue]: {
-        ...prev[assetValue],
-        selected: !prev[assetValue]?.selected,
-      },
-    }));
+    setFeedbacks((prev) => {
+      const isCurrentlySelected = prev[assetValue]?.selected || false;
+      return {
+        ...prev,
+        [assetValue]: {
+          text: !isCurrentlySelected && !prev[assetValue]?.text
+            ? 'Device received in good condition'
+            : prev[assetValue]?.text || '',
+          selected: !isCurrentlySelected,
+        },
+      };
+    });
   };
 
   const handleFeedbackChange = (assetValue, text) => {
@@ -38,11 +50,34 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
       .map(([id, data]) => ({ assetId: id, feedback: data.text || '' }));
   };
 
-  const handleSubmit = () => {
-    const dataToSubmit = getLoggableData();
-    console.log('Submitted Bulk Consignment Feedback:', dataToSubmit);
-    // Implement further action as needed.
-    handleClose();
+  const handleSubmit = async () => {
+    const selectedAssets = getLoggableData();
+    const consignmentId = consignment?.id;
+
+    if (!consignmentId) {
+      toast.error('Consignment ID is missing.');
+      return;
+    }
+
+    const body = {
+      status: 'PENDING',
+      assets: selectedAssets.map((item) => ({
+        assetId: item.assetId,
+        notes: item.feedback,
+      })),
+    };
+
+    try {
+      await patchAssetStatus({
+        endpoint: config.endpoints.consignments.assetsStatus(consignmentId),
+        body,
+      });
+      toast.success('Feedback submitted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['consignment-details', consignmentId] });
+      handleClose();
+    } catch (error) {
+      toast.error(error?.message || 'Failed to submit feedback. Please try again.');
+    }
   };
 
   const isSubmitDisabled = getLoggableData().length === 0;
@@ -165,9 +200,9 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
             onClick={handleClose}
           />
           <CustomButton
-            text="Submit"
+            text={isSubmitting ? 'Submitting...' : 'Submit'}
             variant="primary"
-            disabled={isSubmitDisabled}
+            disabled={isSubmitDisabled || isSubmitting}
             onClick={handleSubmit}
           />
         </div>

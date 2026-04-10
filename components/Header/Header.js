@@ -39,7 +39,7 @@ const Header = ({ onMenuToggle }) => {
   };
 
   return (
-    <header className="w-full border-b border-[var(--border)] h-14 flex items-center justify-between px-4 bg-[var(--background)] z-10 shrink-0">
+    <header className="w-full border-b border-[var(--border)] h-16 flex items-center justify-between px-4 bg-[var(--background)] z-10 shrink-0">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger */}
         <button
@@ -49,7 +49,7 @@ const Header = ({ onMenuToggle }) => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="font-bold text-[var(--foreground)]">Assets Management Dashboard</span>
+        <span className="hidden md:inline font-bold text-[var(--foreground)]">Assets Management Dashboard</span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -68,25 +68,26 @@ const Header = ({ onMenuToggle }) => {
         {isAuthenticated && user && (
           <div className="relative" ref={dropdownRef}>
             <button
-              className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md transition-colors ${
+              className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 transition-colors border border-[var(--border)] ${
                 theme === 'dark' ? 'header-btn-dark' : 'header-btn-light'
               }`}
+              style={{ borderRadius: '50px' }}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <span className="hidden sm:block text-sm font-normal inherit-color">
-                Hi, {user.firstName || user.name}
-              </span>
-
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                   theme === 'dark' ? 'header-icon-bg-dark text-gray-300' : 'header-icon-bg-light text-gray-900'
                 }`}
               >
                 <User className="w-4 h-4" />
               </div>
 
+              <span className="hidden sm:block text-sm font-normal inherit-color">
+                {user.firstName || user.name}
+              </span>
+
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 transition-transform shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 

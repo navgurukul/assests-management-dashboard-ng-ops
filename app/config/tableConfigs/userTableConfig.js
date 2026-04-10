@@ -91,12 +91,12 @@ export const userTableColumns = [
   },
 
   // Actions column - always visible
-  {
-    key: 'actions',
-    label: 'ACTIONS',
-    alwaysVisible: true,
-    description: 'Available actions',
-  },
+  // {
+  //   key: 'actions',
+  //   label: 'ACTIONS',
+  //   alwaysVisible: true,
+  //   description: 'Available actions',
+  // },
 ];
 
 // Default visible columns (shown on first visit or after reset)
@@ -104,7 +104,7 @@ export const defaultVisibleColumns = [
   'name',
   'email',
   'role',
-  'campus',
+  // 'campus',
   'assetTag',
   'assetType',
   'assetBrand',
@@ -112,5 +112,5 @@ export const defaultVisibleColumns = [
   'assetCondition',
   'allocationDate',
   'allocationStatus',
-  'actions',
+  // 'actions',
 ];
