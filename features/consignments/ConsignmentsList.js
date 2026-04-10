@@ -543,6 +543,7 @@ export default function ConsignmentsList() {
       
       const payload = {
         allocationId: formData.allocationId,
+        ticketId: selectedAllocationRecord?.ticket?.id || formData.allocationDetails?.ticket?.id || null,
         assetIds: formData.selectedAssets.map(asset => asset.id || asset.assetId),
         status: 'draft',
         source: sourceCampusName,

@@ -131,6 +131,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
 
       const payload = {
         allocationId: formData.allocationId,
+        ticketId: allocationDetails?.ticket?.id || null,
         assetIds: formData.selectedAssets.map((asset) => asset.id || asset.assetId),
         status: 'draft',
         source: sourceFromDetails,
