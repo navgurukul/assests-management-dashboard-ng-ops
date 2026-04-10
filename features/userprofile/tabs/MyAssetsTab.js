@@ -396,27 +396,33 @@ export default function MyAssetsTab() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <CustomButton
-                      text="Asset Received"
-                      onClick={() => handleAssetReceived(asset)}
-                      variant="success"
-                      size="sm"
-                      className={`!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs${asset.consignmentStatus === 'DELIVERED' ? ' opacity-50' : ''}`}
-                    />
-                    <CustomButton
-                      text="Return Asset"
-                      onClick={() => handleReturnAsset(asset)}
-                      variant="danger"
-                      size="sm"
-                      className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
-                    />
-                    <CustomButton
-                      text="Extend Lease"
-                      onClick={() => handleExtendLease(asset)}
-                      variant="primary"
-                      size="sm"
-                      className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
-                    />
+                    {asset.consignmentStatus === 'DISPATCHED' && (
+                      <CustomButton
+                        text="Asset Received"
+                        onClick={() => handleAssetReceived(asset)}
+                        variant="success"
+                        size="sm"
+                        className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                      />
+                    )}
+                    {asset.consignmentStatus === 'DELIVERED' && (
+                      <>
+                        <CustomButton
+                          text="Return Asset"
+                          onClick={() => handleReturnAsset(asset)}
+                          variant="danger"
+                          size="sm"
+                          className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                        />
+                        <CustomButton
+                          text="Extend Lease"
+                          onClick={() => handleExtendLease(asset)}
+                          variant="primary"
+                          size="sm"
+                          className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
 
