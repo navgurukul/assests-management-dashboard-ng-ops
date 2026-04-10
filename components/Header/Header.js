@@ -39,7 +39,7 @@ const Header = ({ onMenuToggle }) => {
   };
 
   return (
-    <header className="w-full border-b border-[var(--border)] h-14 flex items-center justify-between px-4 bg-[var(--background)] z-10 shrink-0">
+    <header className="w-full border-b border-[var(--border)] h-16 flex items-center justify-between px-4 bg-[var(--background)] z-10 shrink-0">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger */}
         <button
