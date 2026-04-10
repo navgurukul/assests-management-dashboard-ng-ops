@@ -60,7 +60,7 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
     }
 
     const body = {
-      status: 'PENDING',
+      status: 'ACCEPTED',
       assets: selectedAssets.map((item) => ({
         assetId: item.assetId,
         notes: item.feedback,
