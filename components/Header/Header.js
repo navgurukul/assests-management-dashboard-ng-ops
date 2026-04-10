@@ -49,7 +49,7 @@ const Header = ({ onMenuToggle }) => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="font-bold text-[var(--foreground)]">Assets Management Dashboard</span>
+        <span className="hidden md:inline font-bold text-[var(--foreground)]">Assets Management Dashboard</span>
       </div>
 
       <div className="flex items-center gap-3">
