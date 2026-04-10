@@ -73,10 +73,10 @@ export default function DetailsPage({
                     key={itemIndex}
                     className={`flex flex-col gap-0.5 ${isFullWidth && section.itemsGrid ? 'sm:col-span-2' : ''}`}
                   >
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                    <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                       {item.label}
                     </span>
-                    <span className={`text-sm font-medium leading-snug ${textClass}`} title={item.title}>
+                    <span className={`text-xs sm:text-sm font-medium leading-snug ${textClass}`} title={item.title}>
                       {item.value}
                     </span>
                   </div>
@@ -88,13 +88,13 @@ export default function DetailsPage({
           {/* Render table if present */}
           {section.table && (
             <div className={section.items && section.items.length > 0 ? 'mt-5 border-t border-gray-100 pt-4' : ''}>
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
                     {section.table.headers.map((header, idx) => (
                       <th
                         key={idx}
-                        className="text-left py-2 text-[10px] font-bold uppercase tracking-wider text-gray-500"
+                        className="text-left py-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-500"
                       >
                         {header}
                       </th>
@@ -105,7 +105,7 @@ export default function DetailsPage({
                   {section.table.rows.map((row, rowIdx) => (
                     <tr key={rowIdx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
                       {row.map((cell, cellIdx) => (
-                        <td key={cellIdx} className="py-2.5 text-sm text-gray-700">
+                        <td key={cellIdx} className="py-2 sm:py-2.5 text-xs sm:text-sm text-gray-700">
                           {cell}
                         </td>
                       ))}
@@ -150,10 +150,10 @@ export default function DetailsPage({
                   key={idx}
                   className="flex gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0"
                 >
-                  <span className="text-xs text-gray-400 min-w-20 pt-0.5">
+                  <span className="text-[10px] sm:text-xs text-gray-400 min-w-16 sm:min-w-20 pt-0.5">
                     {entry.time}
                   </span>
-                  <span className="text-sm text-gray-700">{entry.text}</span>
+                  <span className="text-xs sm:text-sm text-gray-700">{entry.text}</span>
                 </div>
               ))}
             </div>
@@ -202,9 +202,9 @@ export default function DetailsPage({
       <div className="bg-[var(--surface)] rounded-lg shadow-sm px-4 sm:px-7 py-4 sm:py-5 mb-5 border border-[var(--border)] shrink-0">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 flex-wrap">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
+            <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
             {subtitle && (
-              <p className={`text-sm mt-1 font-medium ${subtitleColor}`}>
+              <p className={`text-xs sm:text-sm mt-1 font-medium ${subtitleColor}`}>
                 {subtitle}
               </p>
             )}
