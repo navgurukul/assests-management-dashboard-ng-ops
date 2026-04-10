@@ -6,6 +6,7 @@ import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import { useQueryClient } from '@tanstack/react-query';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
@@ -31,6 +32,8 @@ export default function MyAssetsTab() {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
   const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
+
+  const queryClient = useQueryClient();
 
   const formStateRef = useRef({});
   const hasToastedRef = useRef(null);
@@ -192,6 +195,8 @@ export default function MyAssetsTab() {
       toast.success('Asset received confirmation submitted successfully.');
       setReceivedModalOpen(false);
       setSelectedAsset(null);
+      queryClient.invalidateQueries({ queryKey: ['myAssets'] });
+      // queryClient.invalidateQueries({ queryKey: ['userMe'] });
     } catch (err) {
       toast.error(err?.message || 'Failed to confirm asset received.');
     }

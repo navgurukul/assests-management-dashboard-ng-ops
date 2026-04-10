@@ -86,7 +86,7 @@ export default function CreateAsset() {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="h-full overflow-y-auto bg-[var(--background)]">
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-4">
@@ -99,14 +99,14 @@ export default function CreateAsset() {
             className="mb-6"
           />
           
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Register New Asset</h1>
-            <p className="text-gray-600">Fill in the details below to register a new asset in your inventory system</p>
+          <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-sm border border-[var(--border)] p-6">
+            <h1 className="text-xl font-bold mb-2">Register New Asset</h1>
+            <p className="text-[var(--muted)]">Fill in the details below to register a new asset in your inventory system</p>
           </div>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+        <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-lg border border-[var(--border)] p-8">
           <GenericForm
             fields={assetFormFields}
             initialValues={assetInitialValues}

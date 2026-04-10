@@ -142,7 +142,7 @@ export const assetFormFields = [
     options: [
       { value: 'IN_STOCK', label: 'In Stock' },
       { value: 'ALLOCATED', label: 'Allocated' },
-      { value: 'REPAIR', label: 'Under Repair' },
+      // { value: 'REPAIR', label: 'Under Repair' },
       { value: 'SCRAP', label: 'Scrap' },
       { value: 'PARTED_OUT', label: 'Parted Out' },
     ],
