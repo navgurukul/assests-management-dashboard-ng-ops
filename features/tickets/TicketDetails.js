@@ -383,7 +383,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         rightGrid={true}
         onBack={onBack}
         headerActions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {assetGroupCounts.length > 0 && (
               <div className="flex items-center gap-2 flex-wrap">
                 {assetGroupCounts.map(([typeName, count]) => (
