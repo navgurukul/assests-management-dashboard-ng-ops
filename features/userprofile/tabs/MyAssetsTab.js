@@ -392,8 +392,8 @@ export default function MyAssetsTab() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="bg-[var(--surface-soft)] rounded-lg p-2">
-                      <Laptop className="w-5 h-5 text-[var(--theme-main)]" />
+                    <div className="bg-(--surface-soft) rounded-lg p-2">
+                      <Laptop className="w-5 h-5 text-(--theme-main)" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{asset.brand} {asset.model}</h3>
@@ -414,7 +414,7 @@ export default function MyAssetsTab() {
                           variant="success"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DISPATCHED'}
-                          className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                          className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
                         />
                         <CustomButton
                           text="Return Asset"
@@ -422,7 +422,7 @@ export default function MyAssetsTab() {
                           variant="danger"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus === 'PENDING'}
-                          className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                          className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
                         />
                         <CustomButton
                           text="Extend Lease"
@@ -430,7 +430,7 @@ export default function MyAssetsTab() {
                           variant="primary"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED'}
-                          className="!px-1.5 !py-0.5 !text-[10px] sm:!px-2 sm:!py-1 sm:!text-xs"
+                          className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
                         />
                       </>
                     )}

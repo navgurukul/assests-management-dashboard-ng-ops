@@ -69,7 +69,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
   return (
     <aside
       className={[
-        'bg-[var(--sidebar-bg)] border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col shrink-0',
+        'bg-(--sidebar-bg) border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col shrink-0',
         // Mobile: fixed drawer overlay
         'fixed inset-y-0 left-0 z-40 w-64',
         isMobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -93,8 +93,8 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold',
                   isCollapsed ? 'md:justify-center' : '',
                   isActive
-                    ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)]'
-                    : 'text-[var(--sidebar-item-fg)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-[var(--sidebar-item-hover-fg)]',
+                    ? 'bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg)'
+                    : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
                 ].join(' ')}
               >
                 <Icon className="w-6 h-6 shrink-0" />
@@ -125,8 +125,8 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold',
                 isCollapsed ? 'md:justify-center' : '',
                 pathname === '/userprofile'
-                  ? 'bg-[var(--sidebar-profile-active-bg)] text-[var(--sidebar-profile-active-fg)]'
-                  : 'text-[var(--sidebar-item-fg)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-[var(--sidebar-item-hover-fg)]',
+                  ? 'bg-(--sidebar-profile-active-bg) text-(--sidebar-profile-active-fg)'
+                  : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
               ].join(' ')}
             >
               <User className="w-6 h-6 shrink-0" />
