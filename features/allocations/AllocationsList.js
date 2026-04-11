@@ -179,7 +179,7 @@ export default function AllocationsList() {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 mb-2">
         {summaryCards.map((card) => (
           <SummaryCard
             key={card.label}

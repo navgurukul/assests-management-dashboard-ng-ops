@@ -83,16 +83,16 @@ export default function TableWrapper({
   };
 
   return (
-    <div className={`bg-(--surface) p-3 sm:p-6 rounded-lg ${shadow} ${margin}`}>
+    <div className={`bg-(--surface) p-3 sm:p-6 rounded-lg ${shadow} ${margin} mt-0`}>
       {/* Title/Heading Section */}
       {title && (
-        <div className="mb-4">
-          <h2 className="text-[19px] font-semibold text-gray-800 ml-4">{title}</h2>
+        <div className="mb-2">
+          <h2 className="text-[32px] font-semibold text-gray-800 ml-4 font-[family-name:var(--font-poppins)]">{title}</h2>
         </div>
       )}
       
       {/* Search, Filter, Column Selector, and Create Button Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 px-2 sm:px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-2 sm:px-4 mb-2">
         {/* Search – full width on mobile */}
         <div className="w-full sm:flex-1 sm:max-w-md">
           {searchComponent}

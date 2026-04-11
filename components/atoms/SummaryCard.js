@@ -25,7 +25,7 @@ export default function SummaryCard({
 
   return (
     <div 
-      className={`${baseClasses} ${clickableClasses}`}
+      className={`${baseClasses} ${clickableClasses} mb-0`}
       style={borderStyle}
       onClick={handleClick}
     >
