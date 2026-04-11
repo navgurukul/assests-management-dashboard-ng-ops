@@ -10,6 +10,8 @@ export default function CustomButton({
   disabled = false,
   className = '',
   type = 'button',
+  // When true, the button automatically bumps up one size on mobile screens
+  responsive = true,
   ...rest
 }) {
   
@@ -26,11 +28,18 @@ export default function CustomButton({
     disabled: 'bg-[#f3f4f6] text-[#9ca3af] cursor-not-allowed border-[#d1d5db] border-2',
   };
 
-  // Size styles
+  // Fixed size styles (no responsive scaling)
   const sizeStyles = {
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-1.5 text-sm',
     lg: 'px-4 py-2 text-base',
+  };
+
+  // Responsive size styles: mobile gets one size bigger, sm: and above uses the specified size
+  const responsiveSizeStyles = {
+    sm: 'px-3 py-1.5 text-sm sm:px-2 sm:py-1 sm:text-xs',
+    md: 'px-4 py-2 text-base sm:px-3 sm:py-1.5 sm:text-sm',
+    lg: 'px-5 py-2.5 text-lg sm:px-4 sm:py-2 sm:text-base',
   };
 
   // Icon size based on button size
@@ -40,13 +49,23 @@ export default function CustomButton({
     lg: 'w-5 h-5',
   };
 
+  // On mobile, icon also bumps up one size when responsive
+  const responsiveIconSizes = {
+    sm: 'w-4 h-4 sm:w-3 sm:h-3',
+    md: 'w-5 h-5 sm:w-4 sm:h-4',
+    lg: 'w-6 h-6 sm:w-5 sm:h-5',
+  };
+
+  const resolvedSizeStyle = responsive ? responsiveSizeStyles[size] : sizeStyles[size];
+  const resolvedIconSize = responsive ? responsiveIconSizes[size] : iconSizes[size];
+
   const buttonClasses = `
     flex items-center gap-1.5 
     rounded-lg font-semibold 
     transition-all duration-200
     shadow-sm hover:shadow-md
     ${disabled ? variantStyles.disabled : variantStyles[variant]}
-    ${sizeStyles[size]}
+    ${resolvedSizeStyle}
     ${className}
   `.trim().replace(/\s+/g, ' ');
 
@@ -58,7 +77,7 @@ export default function CustomButton({
       className={buttonClasses}
       {...rest}
     >
-      {Icon && <Icon className={iconSizes[size]} />}
+      {Icon && <Icon className={resolvedIconSize} />}
       {text}
     </button>
   );
