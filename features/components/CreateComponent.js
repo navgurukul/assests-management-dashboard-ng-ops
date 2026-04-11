@@ -201,7 +201,7 @@ export default function CreateComponent() {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--background)]">
+    <div className="h-full overflow-y-auto bg-background">
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-4">
@@ -214,14 +214,14 @@ export default function CreateComponent() {
             className="mb-6"
           />
           
-          <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-sm border border-[var(--border)] p-6">
+          <div className="bg-(--surface) text-foreground rounded-xl shadow-sm border border-(--border) p-6">
             <h1 className="text-xl font-bold mb-2">Register New Component</h1>
-            <p className="text-[var(--muted)]">Fill in the details below to add a new component to your inventory system</p>
+            <p className="text-(--muted)">Fill in the details below to add a new component to your inventory system</p>
           </div>
         </div>
 
         {/* Form Container */}
-        <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-lg border border-[var(--border)] px-8 pt-6">
+        <div className="bg-(--surface) text-foreground rounded-xl shadow-lg border border-(--border) px-8 pt-6">
           <StepperForm
             steps={componentStepperConfig}
             initialValues={formInitialValues}

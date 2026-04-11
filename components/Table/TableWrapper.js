@@ -83,7 +83,7 @@ export default function TableWrapper({
   };
 
   return (
-    <div className={`bg-[var(--surface)] p-3 sm:p-6 rounded-lg ${shadow} ${margin}`}>
+    <div className={`bg-(--surface) p-3 sm:p-6 rounded-lg ${shadow} ${margin}`}>
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-4">
@@ -106,7 +106,7 @@ export default function TableWrapper({
               onClick={onShowAll}
               variant="secondary"
               size="md"
-              className="!px-2 !py-0.5 !text-xs sm:!px-3 sm:!py-1.5 sm:!text-sm"
+              className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
             />
           )}
           {filterComponent}
@@ -118,7 +118,7 @@ export default function TableWrapper({
               onClick={onCreateClick}
               variant="primary"
               size="md"
-              className="!px-2 !py-0.5 !text-xs sm:!px-3 sm:!py-1.5 sm:!text-sm"
+              className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
             />
           )}
         </div>
@@ -151,19 +151,19 @@ export default function TableWrapper({
             <div
               key={item.id}
               onClick={() => onRowClick && onRowClick(item)}
-              className={`bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 ${
-                onRowClick ? 'cursor-pointer hover:bg-[var(--surface-soft)]' : ''
+              className={`bg-(--surface) border border-(--border) rounded-lg p-3 ${
+                onRowClick ? 'cursor-pointer hover:bg-(--surface-soft)' : ''
               } transition-colors`}
             >
               {columns.map((column) => (
                 <div
                   key={column.key}
-                  className="flex items-start justify-between gap-2 py-1.5 border-b border-[var(--border)] last:border-b-0"
+                  className="flex items-start justify-between gap-2 py-1.5 border-b border-(--border) last:border-b-0"
                 >
                   <span className="text-[11px] font-semibold text-gray-500 w-2/5 shrink-0 pt-0.5">
                     {column.label}
                   </span>
-                  <span className="text-[12px] text-[var(--foreground)] text-right w-3/5 break-words">
+                  <span className="text-[12px] text-foreground text-right w-3/5 wrap-break-word">
                     {renderCell ? renderCell(item, column.key) : item[column.key]}
                   </span>
                 </div>

@@ -227,7 +227,7 @@ function LoginContent() {
   // Show loading state
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-blue-50 via-white to-cyan-50'}`}>
+      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-linear-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-linear-to-br from-blue-50 via-white to-cyan-50'}`}>
         <div className="text-center">
           <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDarkMode ? 'border-blue-600' : 'border-blue-500'} mx-auto`}></div>
           <p className={`mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</p>
@@ -239,7 +239,7 @@ function LoginContent() {
   // If already authenticated, show redirect message
   if (isAuthenticated) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-blue-50 via-white to-cyan-50'}`}>
+      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-linear-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-linear-to-br from-blue-50 via-white to-cyan-50'}`}>
         <div className="text-center">
           <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Redirecting...</p>
         </div>
@@ -248,7 +248,7 @@ function LoginContent() {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-blue-50 via-white to-cyan-50'} overflow-hidden`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-linear-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-linear-to-br from-blue-50 via-white to-cyan-50'} overflow-hidden`}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 opacity-40 z-0">
         <div className={`absolute top-0 left-1/4 w-96 h-96 ${isDarkMode ? 'bg-blue-600' : 'bg-blue-400'} rounded-full mix-blend-screen filter blur-3xl animate-blob opacity-30`}></div>
@@ -257,10 +257,10 @@ function LoginContent() {
       </div>
 
       {/* Navigation */}
-      {/* <nav className={`relative z-20 flex justify-between items-center p-6 px-12 ${isDarkMode ? 'bg-gradient-to-b from-slate-950/80 to-transparent backdrop-blur-xl border-white/5' : 'bg-gradient-to-b from-white/80 to-transparent backdrop-blur-xl'} transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
+      {/* <nav className={`relative z-20 flex justify-between items-center p-6 px-12 ${isDarkMode ? 'bg-linear-to-b from-slate-950/80 to-transparent backdrop-blur-xl border-white/5' : 'bg-linear-to-b from-white/80 to-transparent backdrop-blur-xl'} transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
       
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <div className="w-11 h-11 bg-linear-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
           <Laptop className="w-6 h-6 text-white font-bold" />
         </div>
         <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Asset Tracker</div>
@@ -286,7 +286,7 @@ function LoginContent() {
         {/* Animated Grid Background */}
         <div className={`absolute inset-0 ${isDarkMode ? 'opacity-5' : 'opacity-10'}`}>
           <div 
-            className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-b from-blue-500/20 to-transparent' : 'bg-gradient-to-b from-blue-400/30 to-transparent'}`}
+            className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-b from-blue-500/20 to-transparent' : 'bg-linear-to-b from-blue-400/30 to-transparent'}`}
             style={{
               backgroundImage: isDarkMode 
                 ? 'linear-gradient(90deg, rgba(59,130,246,0.1) 1px, transparent 1px), linear-gradient(rgba(59,130,246,0.1) 1px, transparent 1px)'
@@ -329,7 +329,7 @@ function LoginContent() {
                     </motion.span>
                     <WordListSwap
                       items={deviceItems}
-                      mainClassName="px-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg overflow-hidden inline-flex justify-center items-center font-bold"
+                      mainClassName="px-2 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-lg overflow-hidden inline-flex justify-center items-center font-bold"
                       staggerFrom={"last"}
                       initial={{ y: "100%" }}
                       animate={{ y: 0 }}
@@ -364,8 +364,8 @@ function LoginContent() {
               >
                 <div className="flex justify-center items-stretch gap-4">
                   <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
-                    <div className="relative flex items-center bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full shadow-lg">
+                    <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-cyan-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                    <div className="relative flex items-center bg-linear-to-r from-blue-500 to-cyan-500 rounded-full shadow-lg">
                       <GoogleLogin
                         onSuccess={handleGoogleLoginSuccess}
                         onError={handleGoogleLoginError}
@@ -391,8 +391,8 @@ function LoginContent() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 - Total Assets */}
-            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-gradient-to-br from-blue-900/60 to-blue-800/40 border-blue-500/50 shadow-blue-500/30 hover:shadow-blue-500/50' : 'bg-gradient-to-br from-blue-100 to-blue-50 border-blue-300 shadow-blue-200/50 hover:shadow-blue-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '500ms', animationDelay: '0s'}}>
-              <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-r from-blue-400/0 via-blue-400/10 to-blue-400/0' : 'bg-gradient-to-r from-blue-300/0 via-blue-300/20 to-blue-300/0'} translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700`}></div>
+            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-blue-900/60 to-blue-800/40 border-blue-500/50 shadow-blue-500/30 hover:shadow-blue-500/50' : 'bg-linear-to-br from-blue-100 to-blue-50 border-blue-300 shadow-blue-200/50 hover:shadow-blue-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '500ms', animationDelay: '0s'}}>
+              <div className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-r from-blue-400/0 via-blue-400/10 to-blue-400/0' : 'bg-linear-to-r from-blue-300/0 via-blue-300/20 to-blue-300/0'} -translate-x-full group-hover:translate-x-full transition-transform duration-700`}></div>
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-10 h-10 ${isDarkMode ? 'bg-blue-500/30 border-blue-400/50' : 'bg-blue-200/50 border-blue-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
@@ -406,8 +406,8 @@ function LoginContent() {
             </div>
 
             {/* Card 2 - Active Assignments */}
-            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-gradient-to-br from-purple-900/60 to-purple-800/40 border-purple-500/50 shadow-purple-500/30 hover:shadow-purple-500/50' : 'bg-gradient-to-br from-purple-100 to-purple-50 border-purple-300 shadow-purple-200/50 hover:shadow-purple-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '600ms', animationDelay: '1s'}}>
-              <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-r from-purple-400/0 via-purple-400/10 to-purple-400/0' : 'bg-gradient-to-r from-purple-300/0 via-purple-300/20 to-purple-300/0'} translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700`}></div>
+            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-purple-900/60 to-purple-800/40 border-purple-500/50 shadow-purple-500/30 hover:shadow-purple-500/50' : 'bg-linear-to-br from-purple-100 to-purple-50 border-purple-300 shadow-purple-200/50 hover:shadow-purple-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '600ms', animationDelay: '1s'}}>
+              <div className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-r from-purple-400/0 via-purple-400/10 to-purple-400/0' : 'bg-linear-to-r from-purple-300/0 via-purple-300/20 to-purple-300/0'} -translate-x-full group-hover:translate-x-full transition-transform duration-700`}></div>
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-10 h-10 ${isDarkMode ? 'bg-purple-500/30 border-purple-400/50' : 'bg-purple-200/50 border-purple-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
@@ -421,8 +421,8 @@ function LoginContent() {
             </div>
 
             {/* Card 3 - Pending Requests */}
-            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-gradient-to-br from-cyan-900/60 to-cyan-800/40 border-cyan-500/50 shadow-cyan-500/30 hover:shadow-cyan-500/50' : 'bg-gradient-to-br from-cyan-100 to-cyan-50 border-cyan-300 shadow-cyan-200/50 hover:shadow-cyan-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '700ms', animationDelay: '2s'}}>
-              <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0' : 'bg-gradient-to-r from-cyan-300/0 via-cyan-300/20 to-cyan-300/0'} translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700`}></div>
+            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-cyan-900/60 to-cyan-800/40 border-cyan-500/50 shadow-cyan-500/30 hover:shadow-cyan-500/50' : 'bg-linear-to-br from-cyan-100 to-cyan-50 border-cyan-300 shadow-cyan-200/50 hover:shadow-cyan-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '700ms', animationDelay: '2s'}}>
+              <div className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0' : 'bg-linear-to-r from-cyan-300/0 via-cyan-300/20 to-cyan-300/0'} -translate-x-full group-hover:translate-x-full transition-transform duration-700`}></div>
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-10 h-10 ${isDarkMode ? 'bg-cyan-500/30 border-cyan-400/50' : 'bg-cyan-200/50 border-cyan-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
@@ -439,7 +439,7 @@ function LoginContent() {
       </div>
 
       {/* Stats Section */}
-      <div className={`relative z-10 py-20 px-6 ${isDarkMode ? 'bg-gradient-to-b from-transparent via-slate-950/50 to-transparent border-white/5' : 'bg-gradient-to-b from-transparent via-blue-50/50 to-transparen'}`}>
+      <div className={`relative z-10 py-20 px-6 ${isDarkMode ? 'bg-linear-to-b from-transparent via-slate-950/50 to-transparent border-white/5' : 'bg-linear-to-b from-transparent via-blue-50/50 to-transparen'}`}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -449,7 +449,7 @@ function LoginContent() {
                 style={{transitionDelay: `${stat.delay}ms`}}
               >
                 <div className="inline-block mb-2">
-                  <div className={`text-4xl md:text-5xl font-bold ${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent animate-count`}>
+                  <div className={`text-4xl md:text-5xl font-bold ${isDarkMode ? 'bg-linear-to-r from-blue-400 to-cyan-400' : 'bg-linear-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent animate-count`}>
                     {stat.number}
                   </div>
                 </div>
@@ -473,7 +473,7 @@ function LoginContent() {
           title={
             <>
               <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>Everything You Need to </span>
-              <span className={`${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>Track Assets</span>
+              <span className={`${isDarkMode ? 'bg-linear-to-r from-blue-400 to-cyan-400' : 'bg-linear-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>Track Assets</span>
             </>
           }
           subtitle="Powerful features designed for seamless asset allocation and management"
@@ -496,7 +496,7 @@ function LoginContent() {
 
       {/* CTA Section */}
       <div className={`relative z-10 max-w-5xl mx-auto px-6 py-20 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '1200ms'}}>
-        <div className={`relative overflow-hidden rounded-3xl ${isDarkMode ? 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 border-white/20 shadow-blue-500/30' : 'bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 border-blue-300 shadow-blue-400/40'} p-12 md:p-16 border shadow-2xl`}>
+        <div className={`relative overflow-hidden rounded-3xl ${isDarkMode ? 'bg-linear-to-r from-blue-600 via-cyan-600 to-blue-600 border-white/20 shadow-blue-500/30' : 'bg-linear-to-r from-blue-500 via-cyan-500 to-blue-500 border-blue-300 shadow-blue-400/40'} p-12 md:p-16 border shadow-2xl`}>
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full mix-blend-screen filter blur-3xl animate-blob"></div>
           </div>
@@ -533,7 +533,7 @@ function LoginContent() {
             {/* Brand Column */}
             <div>
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-linear-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
                   <Laptop className="w-5 h-5 text-white" />
                 </div>
                 <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} text-lg`}>Asset Tracker</span>
@@ -643,7 +643,7 @@ export default function LoginPage() {
 
   return (
     <Suspense fallback={
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-blue-50 via-white to-cyan-50'}`}>
+      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-linear-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-linear-to-br from-blue-50 via-white to-cyan-50'}`}>
         <div className="text-center">
           <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDarkMode ? 'border-blue-600' : 'border-blue-500'} mx-auto`}></div>
           <p className={`mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</p>

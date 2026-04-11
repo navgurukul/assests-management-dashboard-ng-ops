@@ -71,30 +71,30 @@ export default function UserProfileDetails() {
 
   return (
     <>
-      <div className="h-full overflow-y-auto bg-[var(--background)] p-4"> 
+      <div className="h-full overflow-y-auto bg-background p-4"> 
         {/* Breadcrumb */}
-        <div className="mb-3 text-xs text-[var(--muted)]">
-          <span className="hover:text-[var(--theme-main)] cursor-pointer">Dashboard</span>
+        <div className="mb-3 text-xs text-(--muted)">
+          <span className="hover:text-(--theme-main) cursor-pointer">Dashboard</span>
           <span className="mx-2">›</span>
-          <span className="font-medium text-[var(--foreground)]">User Profile</span>
+          <span className="font-medium text-foreground">User Profile</span>
         </div>
 
         {/* Header */}
-        <div className="bg-[var(--surface)] rounded-lg shadow-sm p-4 mb-4 border border-[var(--border)]">
+        <div className="bg-(--surface) rounded-lg shadow-sm p-4 mb-4 border border-(--border)">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
               <div className="bg-gray-200 rounded-full flex items-center justify-center w-16 h-16">
                 <User className="w-8 h-8 text-gray-500" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-[var(--foreground)] mb-1">
+                <h1 className="text-xl font-bold text-foreground mb-1">
                   {userData.name}
                 </h1>
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold border border-[var(--theme-light)] bg-[var(--surface-soft)] text-[var(--theme-main)]">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold border border-(--theme-light) bg-(--surface-soft) text-(--theme-main)">
                     {userData.role}
                   </span>
-                  <span className="text-xs text-[var(--muted)]">
+                  <span className="text-xs text-(--muted)">
                     {userData.department}
                   </span>
                 </div>
@@ -104,8 +104,8 @@ export default function UserProfileDetails() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] mb-4">
-          <div className="border-b border-[var(--border)]">
+        <div className="bg-(--surface) rounded-lg shadow-sm border border-(--border) mb-4">
+          <div className="border-b border-(--border)">
             <div className="flex overflow-x-auto">
               {filteredTabs.map((tab) => {
                 const Icon = tab.icon;
@@ -115,8 +115,8 @@ export default function UserProfileDetails() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'border-[var(--theme-main)] text-[var(--theme-main)] bg-[var(--surface-soft)]'
-                        : 'border-transparent text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--border)]'
+                        ? 'border-(--theme-main) text-(--theme-main) bg-(--surface-soft)'
+                        : 'border-transparent text-(--muted) hover:text-foreground hover:border-(--border)'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
