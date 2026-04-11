@@ -201,22 +201,22 @@ export const ScrollTimeline = ({
         className
       )}
     >
-      <div className="text-center py-16 px-4">
+      <div className="text-center py-10 px-4">
         <h2 className={cn(
-          "text-3xl md:text-5xl font-bold mb-4",
+          "text-2xl md:text-4xl font-bold mb-3",
           darkMode ? "text-white" : "text-gray-900"
         )}>
           {title}
         </h2>
         <p className={cn(
-          "text-lg max-w-2xl mx-auto",
+          "text-sm md:text-base max-w-2xl mx-auto",
           darkMode ? "text-gray-400" : "text-gray-600"
         )}>
           {subtitle}
         </p>
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 pb-24">
+      <div className="relative max-w-5xl mx-auto px-4 pb-16">
         <div className="relative mx-auto">
           <div
             className={cn(getConnectorClasses(), "h-full absolute top-0 z-10")}
@@ -287,7 +287,7 @@ export const ScrollTimeline = ({
                     timelineRefs.current[index] = element;
                   }}
                   className={cn(
-                    "relative flex items-center mb-20 py-4",
+                    "relative flex items-center mb-12 py-3",
                     "flex-col lg:flex-row",
                     cardAlignment === "alternating"
                       ? index % 2 === 0
@@ -356,7 +356,7 @@ export const ScrollTimeline = ({
                       "bg-transparent border-0",
                       darkMode ? "text-white" : "text-gray-900"
                     )}>
-                      <CardContent className="p-6">
+                      <CardContent className="p-4 md:p-6">
                         {dateFormat === "badge" ? (
                           <div className="flex items-center mb-4">
                             <div className={cn(
@@ -364,12 +364,13 @@ export const ScrollTimeline = ({
                               darkMode ? "text-cyan-400" : "text-cyan-600"
                             )}>
                               {event.icon || (
-                                <Calendar className="h-8 w-8 mr-2" />
+                                <Calendar style={{ width: 'clamp(1.5rem, 2.5vw, 2.5rem)', height: 'clamp(1.5rem, 2.5vw, 2.5rem)' }} className="mr-2" />
                               )}
                             </div>
                             <span
+                              style={{ fontSize: 'clamp(1rem, 1.8vw, 1.5rem)' }}
                               className={cn(
-                                "text-xl font-bold ml-2",
+                                "font-bold ml-2",
                                 darkMode ? "text-cyan-300" : "text-cyan-600"
                               )}
                             >
@@ -377,28 +378,28 @@ export const ScrollTimeline = ({
                             </span>
                           </div>
                         ) : (
-                          <p className={cn(
-                            "text-lg font-bold mb-2",
+                          <p style={{ fontSize: 'clamp(1rem, 1.8vw, 1.5rem)' }} className={cn(
+                            "font-bold mb-2",
                             darkMode ? "text-cyan-300" : "text-cyan-600"
                           )}>
                             {event.year}
                           </p>
                         )}
-                        <h3 className={cn(
-                          "text-xl font-bold mb-3",
+                        <h3 style={{ fontSize: 'clamp(1.1rem, 2vw, 1.75rem)' }} className={cn(
+                          "font-bold mb-2",
                           darkMode ? "text-white" : "text-gray-900"
                         )}>
                           {event.title}
                         </h3>
                         {event.subtitle && (
-                          <p className={cn(
+                          <p style={{ fontSize: 'clamp(0.85rem, 1.3vw, 1.1rem)' }} className={cn(
                             "font-medium mb-2",
                             darkMode ? "text-gray-400" : "text-gray-600"
                           )}>
                             {event.subtitle}
                           </p>
                         )}
-                        <p className={cn(
+                        <p style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1rem)' }} className={cn(
                           "leading-relaxed",
                           darkMode ? "text-gray-400" : "text-gray-600"
                         )}>

@@ -186,32 +186,32 @@ function LoginContent() {
 
   const features = [
     {
-      icon: <Laptop className="w-12 h-12" />,
+      icon: <Laptop className="w-8 h-8" />,
       title: "Asset Allocation",
       description: "Seamlessly assign laptops, mobiles, and tablets to students and employees with instant tracking"
     },
     {
-      icon: <Users className="w-12 h-12" />,
+      icon: <Users className="w-8 h-8" />,
       title: "User Management",
       description: "Manage student and employee profiles, track their assigned devices, and monitor usage patterns"
     },
     {
-      icon: <Ticket className="w-12 h-12" />,
+      icon: <Ticket className="w-8 h-8" />,
       title: "Request Handling",
       description: "Streamlined system for asset requests, approvals, and returns with automated workflows"
     },
     {
-      icon: <BarChart3 className="w-12 h-12" />,
+      icon: <BarChart3 className="w-8 h-8" />,
       title: "Real-time Analytics",
       description: "Get instant insights on asset distribution, availability, and utilization across your organization"
     },
     {
-      icon: <Settings className="w-12 h-12" />,
+      icon: <Settings className="w-8 h-8" />,
       title: "Device Specifications",
       description: "Track detailed hardware specs including RAM, storage, processor, and maintain service history"
     },
     {
-      icon: <Shield className="w-12 h-12" />,
+      icon: <Shield className="w-8 h-8" />,
       title: "Audit & Tracking",
       description: "Complete audit trail of all asset movements, assignments, and status changes for accountability"
     }
@@ -282,7 +282,7 @@ function LoginContent() {
       </div>
       </nav> */}
 
-      <div className="relative z-10 flex items-start justify-center overflow-hidden">
+      <div className="relative z-10 flex items-start justify-center overflow-hidden w-full">
         {/* Animated Grid Background */}
         <div className={`absolute inset-0 ${isDarkMode ? 'opacity-5' : 'opacity-10'}`}>
           <div 
@@ -296,13 +296,13 @@ function LoginContent() {
           />
         </div>
 
-        <div className="w-[80%] py-28 mx-12 relative z-10">
+        <div className="w-[90%] md:w-[80%] py-12 md:py-28 mx-auto md:mx-12 relative z-10">
           <div className="grid grid-cols-1 items-center">
             {/* Left Content */}
-            <div className={`transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'}`}>
+            <div className={`text-center md:text-left transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'}`}>
               {/* Badge */}
-              <div>
-                <span className={`inline-flex items-center gap-3 px-6 py-4 mb-6 ${isDarkMode ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300' : 'bg-blue-100 border-blue-300 text-blue-700'} border rounded-full text-2xl font-semibold transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="flex justify-center md:justify-start">
+                <span className={`inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-4 mb-4 md:mb-6 ${isDarkMode ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300' : 'bg-blue-100 border-blue-300 text-blue-700'} border rounded-full text-base md:text-2xl font-semibold transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                   <button
                     onClick={toggleTheme}
                     className={`p-1 rounded-full ${isDarkMode ? 'hover:bg-white/10 text-yellow-300' : 'hover:bg-gray-200 text-gray-700'} transition-all duration-300`}
@@ -316,11 +316,11 @@ function LoginContent() {
 
               {/* Heading */}
               <h1 
-                className={`text-8xl md:text-8xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-6 leading-tight transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4 md:mb-6 leading-tight transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: '100ms' }}
               >
                 <LayoutGroup>
-                  <motion.span className="flex flex-wrap items-center gap-3 whitespace-pre" layout={true}>
+                  <motion.span className="flex flex-wrap justify-center md:justify-start items-center gap-2 md:gap-3" layout={true}>
                     <motion.span
                       layout={true}
                       transition={{ type: "spring", damping: 30, stiffness: 400 }}
@@ -351,7 +351,7 @@ function LoginContent() {
 
               {/* Description */}
               <p 
-                className={`w-[75%] text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-8 leading-relaxed transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`w-full md:w-[75%] text-xs md:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-6 md:mb-8 leading-relaxed transition-all duration-1000 transform mx-auto md:mx-0 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: '200ms' }}
               >
                 Complete asset tracking solution for your organization. Seamlessly allocate laptops, mobiles, and tablets to students and employees. Monitor device status, manage assignments, handle requests, and maintain full visibility of all organizational assets in one powerful dashboard.
@@ -359,7 +359,7 @@ function LoginContent() {
 
               {/* CTA Buttons */}
               <div 
-                className={`flex gap-4 flex-wrap transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`flex gap-4 flex-wrap justify-center md:justify-start transition-all duration-1000 transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: '300ms' }}
               >
                 <div className="flex justify-center items-stretch gap-4">
@@ -387,51 +387,69 @@ function LoginContent() {
       </div>
 
       {/* Three Cards Section - Horizontally Aligned */}
-      <div className="relative z-10 pb-10 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="relative z-10 pb-10 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {/* Card 1 - Total Assets */}
-            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-blue-900/60 to-blue-800/40 border-blue-500/50 shadow-blue-500/30 hover:shadow-blue-500/50' : 'bg-linear-to-br from-blue-100 to-blue-50 border-blue-300 shadow-blue-200/50 hover:shadow-blue-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '500ms', animationDelay: '0s'}}>
+            <div
+              className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-blue-900/60 to-blue-800/40 border-blue-500/50 shadow-blue-500/30 hover:shadow-blue-500/50' : 'bg-linear-to-br from-blue-100 to-blue-50 border-blue-300 shadow-blue-200/50 hover:shadow-blue-300/70'} rounded-xl border backdrop-blur-xl shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
+              style={{ padding: 'clamp(0.75rem, 2.5vw, 2rem)', transitionDelay: '500ms', animationDelay: '0s' }}
+            >
               <div className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-r from-blue-400/0 via-blue-400/10 to-blue-400/0' : 'bg-linear-to-r from-blue-300/0 via-blue-300/20 to-blue-300/0'} -translate-x-full group-hover:translate-x-full transition-transform duration-700`}></div>
               <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-10 h-10 ${isDarkMode ? 'bg-blue-500/30 border-blue-400/50' : 'bg-blue-200/50 border-blue-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                    <Laptop className={`w-6 h-6 ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`} />
+                <div className="flex items-center mb-[clamp(0.5rem,1.2vw,1.25rem)]" style={{ gap: 'clamp(0.4rem, 1vw, 0.75rem)', marginBottom: 'clamp(0.5rem, 1.2vw, 1.25rem)' }}>
+                  <div
+                    className={`${isDarkMode ? 'bg-blue-500/30 border-blue-400/50' : 'bg-blue-200/50 border-blue-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}
+                    style={{ width: 'clamp(2rem, 3.5vw, 3.5rem)', height: 'clamp(2rem, 3.5vw, 3.5rem)' }}
+                  >
+                    <Laptop className={`${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`} style={{ width: 'clamp(1rem, 1.8vw, 1.75rem)', height: 'clamp(1rem, 1.8vw, 1.75rem)' }} />
                   </div>
-                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold`}>Total Assets</span>
+                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold`} style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.1rem)' }}>Total Assets</span>
                 </div>
-                <div className={`text-5xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2 group-hover:scale-110 transition-transform duration-300`}>842</div>
-                <div className={`${isDarkMode ? 'text-blue-300' : 'text-blue-600'} text-sm`}>Laptops, Mobiles & Tablets</div>
+                <div className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:scale-110 transition-transform duration-300`} style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', marginBottom: 'clamp(0.2rem, 0.5vw, 0.5rem)' }}>842</div>
+                <div className={`${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`} style={{ fontSize: 'clamp(0.7rem, 1vw, 0.9rem)' }}>Laptops, Mobiles & Tablets</div>
               </div>
             </div>
 
             {/* Card 2 - Active Assignments */}
-            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-purple-900/60 to-purple-800/40 border-purple-500/50 shadow-purple-500/30 hover:shadow-purple-500/50' : 'bg-linear-to-br from-purple-100 to-purple-50 border-purple-300 shadow-purple-200/50 hover:shadow-purple-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '600ms', animationDelay: '1s'}}>
+            <div
+              className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-purple-900/60 to-purple-800/40 border-purple-500/50 shadow-purple-500/30 hover:shadow-purple-500/50' : 'bg-linear-to-br from-purple-100 to-purple-50 border-purple-300 shadow-purple-200/50 hover:shadow-purple-300/70'} rounded-xl border backdrop-blur-xl shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
+              style={{ padding: 'clamp(0.75rem, 2.5vw, 2rem)', transitionDelay: '600ms', animationDelay: '1s' }}
+            >
               <div className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-r from-purple-400/0 via-purple-400/10 to-purple-400/0' : 'bg-linear-to-r from-purple-300/0 via-purple-300/20 to-purple-300/0'} -translate-x-full group-hover:translate-x-full transition-transform duration-700`}></div>
               <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-10 h-10 ${isDarkMode ? 'bg-purple-500/30 border-purple-400/50' : 'bg-purple-200/50 border-purple-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                    <Users className={`w-6 h-6 ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`} />
+                <div className="flex items-center" style={{ gap: 'clamp(0.4rem, 1vw, 0.75rem)', marginBottom: 'clamp(0.5rem, 1.2vw, 1.25rem)' }}>
+                  <div
+                    className={`${isDarkMode ? 'bg-purple-500/30 border-purple-400/50' : 'bg-purple-200/50 border-purple-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}
+                    style={{ width: 'clamp(2rem, 3.5vw, 3.5rem)', height: 'clamp(2rem, 3.5vw, 3.5rem)' }}
+                  >
+                    <Users className={`${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`} style={{ width: 'clamp(1rem, 1.8vw, 1.75rem)', height: 'clamp(1rem, 1.8vw, 1.75rem)' }} />
                   </div>
-                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold`}>Active Assignments</span>
+                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold`} style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.1rem)' }}>Active Assignments</span>
                 </div>
-                <div className={`text-5xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2 group-hover:scale-110 transition-transform duration-300`}>567</div>
-                <div className={`${isDarkMode ? 'text-purple-300' : 'text-purple-600'} text-sm`}>To students & employees</div>
+                <div className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:scale-110 transition-transform duration-300`} style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', marginBottom: 'clamp(0.2rem, 0.5vw, 0.5rem)' }}>567</div>
+                <div className={`${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`} style={{ fontSize: 'clamp(0.7rem, 1vw, 0.9rem)' }}>To students & employees</div>
               </div>
             </div>
 
             {/* Card 3 - Pending Requests */}
-            <div className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-cyan-900/60 to-cyan-800/40 border-cyan-500/50 shadow-cyan-500/30 hover:shadow-cyan-500/50' : 'bg-linear-to-br from-cyan-100 to-cyan-50 border-cyan-300 shadow-cyan-200/50 hover:shadow-cyan-300/70'} rounded-2xl border backdrop-blur-xl p-8 shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '700ms', animationDelay: '2s'}}>
+            <div
+              className={`group relative overflow-hidden ${isDarkMode ? 'bg-linear-to-br from-cyan-900/60 to-cyan-800/40 border-cyan-500/50 shadow-cyan-500/30 hover:shadow-cyan-500/50' : 'bg-linear-to-br from-cyan-100 to-cyan-50 border-cyan-300 shadow-cyan-200/50 hover:shadow-cyan-300/70'} rounded-xl border backdrop-blur-xl shadow-2xl animate-float transition-all duration-500 transform hover:scale-105 hover:-rotate-1 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
+              style={{ padding: 'clamp(0.75rem, 2.5vw, 2rem)', transitionDelay: '700ms', animationDelay: '2s' }}
+            >
               <div className={`absolute inset-0 ${isDarkMode ? 'bg-linear-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0' : 'bg-linear-to-r from-cyan-300/0 via-cyan-300/20 to-cyan-300/0'} -translate-x-full group-hover:translate-x-full transition-transform duration-700`}></div>
               <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-10 h-10 ${isDarkMode ? 'bg-cyan-500/30 border-cyan-400/50' : 'bg-cyan-200/50 border-cyan-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                    <Ticket className={`w-6 h-6 ${isDarkMode ? 'text-cyan-300' : 'text-cyan-600'}`} />
+                <div className="flex items-center" style={{ gap: 'clamp(0.4rem, 1vw, 0.75rem)', marginBottom: 'clamp(0.5rem, 1.2vw, 1.25rem)' }}>
+                  <div
+                    className={`${isDarkMode ? 'bg-cyan-500/30 border-cyan-400/50' : 'bg-cyan-200/50 border-cyan-400'} rounded-lg flex items-center justify-center border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}
+                    style={{ width: 'clamp(2rem, 3.5vw, 3.5rem)', height: 'clamp(2rem, 3.5vw, 3.5rem)' }}
+                  >
+                    <Ticket className={`${isDarkMode ? 'text-cyan-300' : 'text-cyan-600'}`} style={{ width: 'clamp(1rem, 1.8vw, 1.75rem)', height: 'clamp(1rem, 1.8vw, 1.75rem)' }} />
                   </div>
-                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold`}>Pending Requests</span>
+                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold`} style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.1rem)' }}>Pending Requests</span>
                 </div>
-                <div className={`text-5xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2 group-hover:scale-110 transition-transform duration-300`}>18</div>
-                <div className={`${isDarkMode ? 'text-cyan-300' : 'text-cyan-600'} text-sm`}>Awaiting approval</div>
+                <div className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:scale-110 transition-transform duration-300`} style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', marginBottom: 'clamp(0.2rem, 0.5vw, 0.5rem)' }}>18</div>
+                <div className={`${isDarkMode ? 'text-cyan-300' : 'text-cyan-600'}`} style={{ fontSize: 'clamp(0.7rem, 1vw, 0.9rem)' }}>Awaiting approval</div>
               </div>
             </div>
           </div>
@@ -439,21 +457,21 @@ function LoginContent() {
       </div>
 
       {/* Stats Section */}
-      <div className={`relative z-10 py-20 px-6 ${isDarkMode ? 'bg-linear-to-b from-transparent via-slate-950/50 to-transparent border-white/5' : 'bg-linear-to-b from-transparent via-blue-50/50 to-transparen'}`}>
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className={`relative z-10 py-12 md:py-20 px-4 md:px-6 ${isDarkMode ? 'bg-linear-to-b from-transparent via-slate-950/50 to-transparent border-white/5' : 'bg-linear-to-b from-transparent via-blue-50/50 to-transparen'}`}>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map((stat, index) => (
               <div
                 key={index}
                 className={`text-center transition-all duration-1000 transform ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
                 style={{transitionDelay: `${stat.delay}ms`}}
               >
-                <div className="inline-block mb-2">
-                  <div className={`text-4xl md:text-5xl font-bold ${isDarkMode ? 'bg-linear-to-r from-blue-400 to-cyan-400' : 'bg-linear-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent animate-count`}>
+                <div className="inline-block mb-1">
+                  <div className={`font-bold ${isDarkMode ? 'bg-linear-to-r from-blue-400 to-cyan-400' : 'bg-linear-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent animate-count`} style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)' }}>
                     {stat.number}
                   </div>
                 </div>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{stat.label}</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1rem)' }}>{stat.label}</p>
               </div>
             ))}
           </div>
@@ -495,16 +513,16 @@ function LoginContent() {
       </div>
 
       {/* CTA Section */}
-      <div className={`relative z-10 max-w-5xl mx-auto px-6 py-20 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '1200ms'}}>
-        <div className={`relative overflow-hidden rounded-3xl ${isDarkMode ? 'bg-linear-to-r from-blue-600 via-cyan-600 to-blue-600 border-white/20 shadow-blue-500/30' : 'bg-linear-to-r from-blue-500 via-cyan-500 to-blue-500 border-blue-300 shadow-blue-400/40'} p-12 md:p-16 border shadow-2xl`}>
+      <div className={`relative z-10 max-w-5xl mx-auto px-4 md:px-6 py-12 md:py-20 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{transitionDelay: '1200ms'}}>
+        <div className={`relative overflow-hidden rounded-3xl ${isDarkMode ? 'bg-linear-to-r from-blue-600 via-cyan-600 to-blue-600 border-white/20 shadow-blue-500/30' : 'bg-linear-to-r from-blue-500 via-cyan-500 to-blue-500 border-blue-300 shadow-blue-400/40'} p-6 md:p-16 border shadow-2xl`}>
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full mix-blend-screen filter blur-3xl animate-blob"></div>
           </div>
 
           <div className="relative z-10 text-center">
-            <Zap className="w-16 h-16 text-yellow-300 mx-auto mb-6 animate-pulse" />
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Take Control of Your Assets?</h2>
-            <p className="text-lg text-white/90 mb-10 max-w-2xl mx-auto">Start tracking and managing all your organizational devices efficiently. Sign in to get started!</p>
+            <Zap className="w-10 md:w-16 h-10 md:h-16 text-yellow-300 mx-auto mb-4 md:mb-6 animate-pulse" />
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 md:mb-6">Ready to Take Control of Your Assets?</h2>
+            <p className="text-sm md:text-lg text-white/90 mb-6 md:mb-10 max-w-2xl mx-auto">Start tracking and managing all your organizational devices efficiently. Sign in to get started!</p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <div className="flex justify-center">
@@ -527,52 +545,53 @@ function LoginContent() {
       </div>
 
       {/* Footer - Fixed Vertical Order */}
-      <footer className={`relative z-10 ${isDarkMode ? 'border-white/10 bg-slate-950' : 'border-gray-200 bg-white'} border-t py-16 px-6`}>
+      <footer className={`relative z-10 ${isDarkMode ? 'border-white/10 bg-slate-950' : 'border-gray-200 bg-white'} border-t py-10 md:py-16 px-4 md:px-6`}>
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            {/* Brand Column */}
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-linear-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                  <Laptop className="w-5 h-5 text-white" />
-                </div>
-                <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} text-lg`}>Asset Tracker</span>
+          {/* Brand - full width on mobile */}
+          <div className="mb-8 text-center md:text-left">
+            <div className="flex items-center gap-2 mb-3 justify-center md:justify-start">
+              <div className="w-8 h-8 bg-linear-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
+                <Laptop className="w-5 h-5 text-white" />
               </div>
-              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm leading-relaxed`}>Enterprise asset management solutions for modern organizations</p>
+              <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} text-lg`}>Asset Tracker</span>
             </div>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm leading-relaxed max-w-xs mx-auto md:mx-0`}>Enterprise asset management solutions for modern organizations</p>
+          </div>
 
+          {/* Links - 3 columns on mobile */}
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-8">
             {/* Product Column */}
             <div>
-              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-lg mb-6`}>Product</h3>
-              <ul className="space-y-3">
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Features</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Pricing</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Security</a></li>
+              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-sm md:text-lg mb-3 md:mb-6`}>Product</h3>
+              <ul className="space-y-2 md:space-y-3">
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Features</a></li>
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Pricing</a></li>
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Security</a></li>
               </ul>
             </div>
 
             {/* Company Column */}
             <div>
-              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-lg mb-6`}>Company</h3>
-              <ul className="space-y-3">
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>About</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Blog</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Careers</a></li>
+              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-sm md:text-lg mb-3 md:mb-6`}>Company</h3>
+              <ul className="space-y-2 md:space-y-3">
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>About</a></li>
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Blog</a></li>
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Careers</a></li>
               </ul>
             </div>
 
             {/* Legal Column */}
             <div>
-              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-lg mb-6`}>Legal</h3>
-              <ul className="space-y-3">
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Privacy</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Terms</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition duration-300`}>Contact</a></li>
+              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-sm md:text-lg mb-3 md:mb-6`}>Legal</h3>
+              <ul className="space-y-2 md:space-y-3">
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Privacy</a></li>
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Terms</a></li>
+                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Contact</a></li>
               </ul>
             </div>
           </div>
 
-          <div className={`${isDarkMode ? 'border-white/10 text-gray-500' : 'border-gray-200 text-gray-600'} border-t mt-12 pt-8 text-center text-sm`}>
+          <div className={`${isDarkMode ? 'border-white/10 text-gray-500' : 'border-gray-200 text-gray-600'} border-t mt-8 md:mt-12 pt-6 md:pt-8 text-center text-xs md:text-sm`}>
             <p>&copy; 2026 AssetHub. All rights reserved.</p>
           </div>
         </div>
