@@ -87,7 +87,7 @@ export default function TableWrapper({
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-2">
-          <h2 className="text-[32px] font-semibold text-gray-800 ml-4 font-[family-name:var(--font-poppins)]">{title}</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-[32px] font-semibold text-gray-800 ml-4 font-[family-name:var(--font-poppins)]">{title}</h2>
         </div>
       )}
       
