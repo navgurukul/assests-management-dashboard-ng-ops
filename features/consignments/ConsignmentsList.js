@@ -895,6 +895,7 @@ export default function ConsignmentsList() {
         </div>
       )}
 
+      <div className="mt-6">
       <TableWrapper
         key={showInTransit ? 'transit' : 'consignments'}
         data={showInTransit ? inTransitTableData : tableData}
@@ -969,6 +970,7 @@ export default function ConsignmentsList() {
         onPageChange={showInTransit ? setInTransitPage : handlePageChange}
         onPageSizeChange={showInTransit ? (size) => { setInTransitPageSize(size); setInTransitPage(1); } : handlePageSizeChange}
       />
+      </div>
       
       {/* Accept Return Modal */}
       <FormModal

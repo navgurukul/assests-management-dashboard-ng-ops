@@ -208,6 +208,7 @@ export default function UsersList() {
 
   return (
     <div className="space-y-6">
+      <div className="mt-6">
       <TableWrapper
         data={usersListData}
         columns={visibleColumns}
@@ -260,6 +261,7 @@ export default function UsersList() {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      </div>
     </div>
   );
 }

@@ -389,6 +389,7 @@ export default function ComponentsList() {
       />
 
       {/* Table */}
+      <div className="mt-6">
       <TableWrapper
         data={componentsListData}
         columns={visibleColumns}
@@ -447,6 +448,7 @@ export default function ComponentsList() {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      </div>
     </div>
   );
 }
