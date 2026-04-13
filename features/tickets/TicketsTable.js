@@ -80,17 +80,22 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
     // Add search parameter first
     if (debouncedSearch) params.append('search', debouncedSearch);
 
+    const isAssignedFalse = filters?.isAssigned === 'false';
+
     if (isShowAllMode) {
       params.append('page', currentPage);
       params.append('limit', pageSize);
-    } else if (assigneeEmail) {
+    } else if (assigneeEmail && !isAssignedFalse) {
       params.append('assigneeEmail', assigneeEmail);
     }
 
     // Add filters
     if (filters?.campus) params.append('campusId', filters.campus);
     if (filters?.status) params.append('status', statusApiMap[filters.status] || filters.status);
-    if (filters?.assignee) params.append('assigneeId', filters.assignee);
+    if (filters?.assignee && !isAssignedFalse) params.append('assigneeId', filters.assignee);
+    if (filters?.isAssigned !== undefined && filters?.isAssigned !== null && filters?.isAssigned !== '') {
+      params.append('isAssigned', filters.isAssigned);
+    }
     
     return params.toString();
   };
@@ -166,6 +171,12 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
     { value: 'ESCALATED', label: 'Escaleted' },
   ];
 
+  // isAssigned filter options
+  const isAssignedOptions = [
+    { value: 'true', label: 'Assigned' },
+    { value: 'false', label: 'Unassigned' },
+  ];
+
   // Get label for a filter value
   const getFilterLabel = (filterKey, value) => {
     if (filterKey === 'campus') {
@@ -176,6 +187,9 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
       const status = filterStatusOptions.find(opt => opt.value === value);
       return status ? status.label : value;
     }
+    if (filterKey === 'isAssigned') {
+      return value === 'true' ? 'Assigned' : 'Unassigned';
+    }
     return value;
   };
 
@@ -184,7 +198,8 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
     const categoryNames = {
       campus: 'Campus',
       status: 'Status',
-      assignee: 'Assigned To'
+      assignee: 'Assigned To',
+      isAssigned: 'Unassigned Ticket',
     };
     return categoryNames[filterKey] || filterKey;
   };
@@ -341,6 +356,7 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
           onFilterChange={handleFilterChange}
           campusOptions={campusOptions}
           statusOptions={filterStatusOptions}
+          isAssignedOptions={isAssignedOptions}
           selectedFilters={filters}
         />
       }
