@@ -264,6 +264,7 @@ export default function AssetsList() {
   return (
     <div className="space-y-6">
       {/* Table */}
+      <div className="mt-6">
       <TableWrapper
         data={assetsListData}
         columns={visibleColumns}
@@ -321,6 +322,7 @@ export default function AssetsList() {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      </div>
     </div>
   );
 }
