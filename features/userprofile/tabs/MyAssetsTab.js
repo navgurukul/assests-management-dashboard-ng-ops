@@ -245,6 +245,7 @@ export default function MyAssetsTab() {
       });
 
       toast.success('Return asset request created successfully.');
+      queryClient.invalidateQueries({ queryKey: ['myAssets'] });
       setReturnModalOpen(false);
       setSelectedAsset(null);
       formStateRef.current = {};
@@ -421,7 +422,7 @@ export default function MyAssetsTab() {
                           onClick={() => handleReturnAsset(asset)}
                           variant="danger"
                           size="sm"
-                          disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus === 'PENDING'}
+                          disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
                           className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
                         />
                         <CustomButton
@@ -429,7 +430,7 @@ export default function MyAssetsTab() {
                           onClick={() => handleExtendLease(asset)}
                           variant="primary"
                           size="sm"
-                          disabled={asset.consignmentStatus !== 'DELIVERED'}
+                          disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
                           className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
                         />
                       </>
