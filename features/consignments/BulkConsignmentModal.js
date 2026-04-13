@@ -111,9 +111,13 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
             const assetValue = assetObj?.id || assetLabel;
 
             // Safe fallback for device specifications
-            const processor = specObj?.processor || 'Unknown Processor';
-            const ram = specObj?.ram || 'Unknown RAM';
-            const storage = specObj?.storage || 'Unknown Storage';
+            const processor = assetObj?.processor || specObj?.processor || 'Unknown Processor';
+            const ram = assetObj?.ramSizeGB
+              ? `${assetObj.ramSizeGB} GB`
+              : specObj?.ram || 'Unknown RAM';
+            const storage = assetObj?.storageSizeGB
+              ? `${assetObj.storageSizeGB} GB`
+              : specObj?.storage || 'Unknown Storage';
             
             let type = assetObj?.assetType || assetObj?.type || 'Device';
             if (typeof type === 'object') {
