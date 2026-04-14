@@ -678,6 +678,7 @@ export default function FormModal({
             dataPath={field.dataPath}
             formatLabel={field.formatLabel}
             selectedItem={field.selectedItem}
+            staticItems={field.staticItems || null}
           />
         );
 
@@ -700,9 +701,6 @@ export default function FormModal({
         
         {!helpText && componentName && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
-              Component Name
-            </h4>
             <p className="text-lg font-semibold text-gray-900">
               {componentName}
             </p>
@@ -763,6 +761,46 @@ export default function FormModal({
               return null;
             }
             
+            // Generic rowWith pairing — render this field + its paired field side by side
+            if (field.rowWith) {
+              const pairedField = fields.find(f => f.name === field.rowWith);
+              if (pairedField) {
+                return (
+                  <div key={`row-${field.name}`} className="grid grid-cols-2 gap-4">
+                    <div>
+                      {field.type !== 'api-autocomplete' && (
+                        <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-1">
+                          {field.label}
+                          {field.required && <span className="text-red-500 ml-1">*</span>}
+                        </label>
+                      )}
+                      {renderField(field)}
+                      {touched[field.name] && errors[field.name] && (
+                        <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
+                      )}
+                    </div>
+                    <div>
+                      {pairedField.type !== 'api-autocomplete' && (
+                        <label htmlFor={pairedField.name} className="block text-sm font-medium text-gray-700 mb-1">
+                          {pairedField.label}
+                          {pairedField.required && <span className="text-red-500 ml-1">*</span>}
+                        </label>
+                      )}
+                      {renderField(pairedField)}
+                      {touched[pairedField.name] && errors[pairedField.name] && (
+                        <p className="mt-1 text-sm text-red-600">{errors[pairedField.name]}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+            }
+
+            // Skip fields that are already rendered as part of a rowWith pair
+            if (field.pairedWith) {
+              return null;
+            }
+
             // Check if source and destination fields should be on the same row
             const sourceFieldIndex = fields.findIndex(f => f.name === 'source');
             const destinationField = fields.find(f => f.name === 'destination');

@@ -24,6 +24,12 @@ export function getTicketLeftSections(ticket, historyTimeline) {
 }
 
 export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair, loggedInUserRole) {
+  const assetSpecifications = [
+    ticket.asset?.processor && `Processor: ${ticket.asset.processor}`,
+    (ticket.asset?.ram || ticket.asset?.ramSizeGB) && `RAM: ${ticket.asset?.ram || ticket.asset?.ramSizeGB}`,
+    (ticket.asset?.storage || ticket.asset?.storageSizeGB) && `Storage: ${ticket.asset?.storage || ticket.asset?.storageSizeGB}`,
+  ].filter(Boolean).join(' | ') || '—';
+
   return [
     {
       title: 'TICKET INFO',
@@ -58,6 +64,11 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         { label: 'Campus', value: ticket.asset?.campus?.name || '—' },
         // { label: 'Campus Code', value: ticket.asset?.campus?.code || '—' },
         { label: 'Campus State', value: ticket.asset?.campus?.state || '—' },
+        {
+          label: 'Specifications',
+          value: assetSpecifications,
+          className: 'col-span-2',
+        },
       ],
       headerActions: (ticket.ticketType?.toUpperCase() === 'REPAIR' && loggedInUserRole !== 'STUDENT') ? [
         { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
