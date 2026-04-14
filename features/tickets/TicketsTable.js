@@ -83,10 +83,12 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
 
     const isAssignedFalse = filters?.isAssigned === 'false';
 
-    if (isShowAllMode) {
-      params.append('page', currentPage);
-      params.append('limit', pageSize);
-    } else if (assigneeEmail && !isAssignedFalse) {
+    // Always add pagination params
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
+
+    // Add assigneeEmail only in my-tickets mode (not in show-all or unassigned filter)
+    if (!isShowAllMode && assigneeEmail && !isAssignedFalse) {
       params.append('assigneeEmail', assigneeEmail);
     }
 
@@ -336,7 +338,7 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
       title="Tickets"
       renderCell={renderCell}
       itemsPerPage={pageSize}
-      showPagination={isShowAllMode && hasServerPagination}
+      showPagination={hasServerPagination}
       ariaLabel="Tickets table"
       onRowClick={handleRowClick}
       showCreateButton={true}
@@ -384,7 +386,7 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
       // Loading state
       isLoading={isLoading}
       // Server-side pagination props
-      serverPagination={isShowAllMode && hasServerPagination}
+      serverPagination={hasServerPagination}
       paginationData={data?.data?.pagination}
       onPageChange={handlePageChange}
       onPageSizeChange={handlePageSizeChange}
