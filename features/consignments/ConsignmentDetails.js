@@ -7,6 +7,7 @@ import PdfPreviewModal from '@/components/molecules/PdfPreviewModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import BulkConsignmentModal from './BulkConsignmentModal';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
+import StatusChip from '@/components/atoms/StatusChip';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
   const [showPdfModal, setShowPdfModal] = useState(false);
@@ -164,7 +165,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       color: 'theme',
       className: sharedHeightClass,
       items: [
-        { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
+        { label: 'Status', value: <StatusChip value={displayStatus} /> },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
         { label: 'Total Assets', value: String(totalAssets) },
       ],
