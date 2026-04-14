@@ -700,9 +700,6 @@ export default function FormModal({
         
         {!helpText && componentName && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
-              Component Name
-            </h4>
             <p className="text-lg font-semibold text-gray-900">
               {componentName}
             </p>
