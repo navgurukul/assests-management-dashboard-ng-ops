@@ -408,7 +408,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   onClick={handleUpdateClick}
                   disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
                 />
-                {ticket.status === 'APPROVED' && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
+                {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
                    isAssigneeCurrentUser ? (
                     <CustomButton
                       text="Create Allocation"
