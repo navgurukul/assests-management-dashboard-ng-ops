@@ -65,6 +65,9 @@ export default function CampusInchargeTab() {
     return campusInchargeModalFields.map((field) => {
       const valueMap = {
         campus: selectedItem.campusName,
+        address: selectedItem.address,
+        state: selectedItem.state,
+        pincode: selectedItem.pincode,
         itCoordinatorName: selectedItem.itCoordinator?.name,
         itCoordinatorEmail: selectedItem.itCoordinator?.email,
         itCoordinatorPhone: selectedItem.itCoordinator?.phone,
@@ -82,6 +85,9 @@ export default function CampusInchargeTab() {
   const handleCreateSubmit = async (formData) => {
     const payload = {
       campusName: formData.campus,
+      address: formData.address,
+      state: formData.state,
+      pincode: formData.pincode,
       itCoordinator: {
         name: formData.itCoordinatorName,
         email: formData.itCoordinatorEmail,
@@ -159,6 +165,9 @@ export default function CampusInchargeTab() {
     const id = selectedItem?.id;
     const payload = {
       campusName: formData.campus,
+      address: formData.address,
+      state: formData.state,
+      pincode: formData.pincode,
       itCoordinator: {
         name: formData.itCoordinatorName,
         email: formData.itCoordinatorEmail,

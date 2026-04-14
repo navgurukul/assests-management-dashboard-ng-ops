@@ -10,7 +10,7 @@ function useFetch({
     contentType,
 }){
     // If url is relative, prepend API base URL
-    const fullUrl = url.startsWith('http') ? url : config.getApiUrl(url);
+    const fullUrl = url ? (url.startsWith('http') ? url : config.getApiUrl(url)) : null;
     
     return useQuery({
         queryKey,

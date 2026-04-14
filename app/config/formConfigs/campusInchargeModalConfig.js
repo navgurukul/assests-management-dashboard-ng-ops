@@ -11,6 +11,69 @@ export const campusInchargeModalFields = [
     placeholder: 'e.g. PUNE',
     required: true,
   },
+  {
+    name: 'address',
+    label: 'Address',
+    type: 'text',
+    placeholder: 'e.g. 123 Main Street, City',
+    required: true,
+  },
+  {
+    name: 'state',
+    label: 'State',
+    type: 'api-autocomplete',
+    rowWith: 'pincode',
+    placeholder: 'Search state...',
+    required: true,
+    labelKey: 'label',
+    valueKey: 'value',
+    staticItems: [
+      { value: 'Andhra Pradesh', label: 'Andhra Pradesh' },
+      { value: 'Arunachal Pradesh', label: 'Arunachal Pradesh' },
+      { value: 'Assam', label: 'Assam' },
+      { value: 'Bihar', label: 'Bihar' },
+      { value: 'Chhattisgarh', label: 'Chhattisgarh' },
+      { value: 'Goa', label: 'Goa' },
+      { value: 'Gujarat', label: 'Gujarat' },
+      { value: 'Haryana', label: 'Haryana' },
+      { value: 'Himachal Pradesh', label: 'Himachal Pradesh' },
+      { value: 'Jharkhand', label: 'Jharkhand' },
+      { value: 'Karnataka', label: 'Karnataka' },
+      { value: 'Kerala', label: 'Kerala' },
+      { value: 'Madhya Pradesh', label: 'Madhya Pradesh' },
+      { value: 'Maharashtra', label: 'Maharashtra' },
+      { value: 'Manipur', label: 'Manipur' },
+      { value: 'Meghalaya', label: 'Meghalaya' },
+      { value: 'Mizoram', label: 'Mizoram' },
+      { value: 'Nagaland', label: 'Nagaland' },
+      { value: 'Odisha', label: 'Odisha' },
+      { value: 'Punjab', label: 'Punjab' },
+      { value: 'Rajasthan', label: 'Rajasthan' },
+      { value: 'Sikkim', label: 'Sikkim' },
+      { value: 'Tamil Nadu', label: 'Tamil Nadu' },
+      { value: 'Telangana', label: 'Telangana' },
+      { value: 'Tripura', label: 'Tripura' },
+      { value: 'Uttar Pradesh', label: 'Uttar Pradesh' },
+      { value: 'Uttarakhand', label: 'Uttarakhand' },
+      { value: 'West Bengal', label: 'West Bengal' },
+      { value: 'Andaman and Nicobar Islands', label: 'Andaman and Nicobar Islands' },
+      { value: 'Chandigarh', label: 'Chandigarh' },
+      { value: 'Dadra and Nagar Haveli and Daman and Diu', label: 'Dadra & Nagar Haveli and Daman & Diu' },
+      { value: 'Delhi', label: 'Delhi' },
+      { value: 'Jammu and Kashmir', label: 'Jammu and Kashmir' },
+      { value: 'Ladakh', label: 'Ladakh' },
+      { value: 'Lakshadweep', label: 'Lakshadweep' },
+      { value: 'Puducherry', label: 'Puducherry' },
+    ],
+  },
+  {
+    name: 'pincode',
+    label: 'Pincode',
+    type: 'text',
+    placeholder: 'e.g. 411001',
+    required: true,
+    pairedWith: 'state',
+  },
 
   // IT Coordinator
   {
@@ -104,6 +167,14 @@ export const campusInchargeValidationSchema = Yup.object().shape({
     .required('Campus name is required')
     .min(2, 'Campus name must be at least 2 characters'),
 
+  address: Yup.string().required('Address is required'),
+
+  state: Yup.string().required('State is required'),
+
+  pincode: Yup.string()
+    .required('Pincode is required')
+    .matches(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
+
   itCoordinatorName: nameSchema('IT Coordinator Name'),
   itCoordinatorEmail: emailSchema('IT Coordinator Email'),
   itCoordinatorPhone: phoneSchema('IT Coordinator Phone'),
@@ -121,6 +192,9 @@ export const campusInchargeValidationSchema = Yup.object().shape({
 
 export const campusInchargeInitialValues = {
   campus: '',
+  address: '',
+  state: '',
+  pincode: '',
   itCoordinatorName: '',
   itCoordinatorEmail: '',
   itCoordinatorPhone: '',
