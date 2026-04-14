@@ -7,6 +7,7 @@ import SearchInput from '@/components/molecules/SearchInput';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
+import { decryptData } from '@/app/utils/storageUtils';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import GenericCellRenderer from '@/components/Table/GenericCellRenderer';
@@ -57,7 +58,7 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
     try {
       const authRaw = localStorage.getItem('__AUTH__');
       if (authRaw) {
-        const authData = JSON.parse(authRaw);
+        const authData = decryptData(authRaw);
         const email = authData?.email || authData?.user?.email || '';
         setAssigneeEmail(email);
       }

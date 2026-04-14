@@ -13,6 +13,7 @@ import GenericForm from '@/components/molecules/GenericForm';
 import StateHandler from '@/components/atoms/StateHandler';
 import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
+import { decryptData } from '@/app/utils/storageUtils';
 import AssigneeSelector from './AssigneeSelector';
 import { getTicketLeftSections, getTicketRightSections } from './ticketSections';
 import config from '@/app/config/env.config';
@@ -39,7 +40,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
     const loggedInEmail = React.useMemo(() => {
     try {
-      const auth = JSON.parse(localStorage.getItem('__AUTH__') || '{}');
+      const auth = decryptData(localStorage.getItem('__AUTH__')) || {};
       return auth?.user?.email || null;
     } catch {
       return null;

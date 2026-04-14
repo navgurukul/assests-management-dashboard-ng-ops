@@ -1,4 +1,5 @@
 import { AUTH_KEY } from '@/app/utils/authConstants';
+import { decryptData } from '@/app/utils/storageUtils';
 
 /**
  * Get authentication token from localStorage
@@ -12,7 +13,7 @@ export const getAuthToken = () => {
     
     const authData = localStorage.getItem(AUTH_KEY);
     if (authData) {
-      const parsed = JSON.parse(authData);
+      const parsed = decryptData(authData);
       return parsed?.token || null;
     }
     return null;
@@ -34,7 +35,7 @@ export const getUserData = () => {
     
     const authData = localStorage.getItem(AUTH_KEY);
     if (authData) {
-      const parsed = JSON.parse(authData);
+      const parsed = decryptData(authData);
       return parsed?.user || null;
     }
     return null;
@@ -56,7 +57,7 @@ export const isAuthenticated = () => {
     
     const authData = localStorage.getItem(AUTH_KEY);
     if (authData) {
-      const parsed = JSON.parse(authData);
+      const parsed = decryptData(authData);
       return parsed?.isAuthenticated || false;
     }
     return false;

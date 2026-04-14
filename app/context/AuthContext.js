@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { setUserRole } from '@/app/store/slices/appSlice';
 import { jwtDecode } from 'jwt-decode';
 import { isTokenExpired, clearAuthData } from '@/app/utils/authUtils';
+import { encryptData, decryptData } from '@/app/utils/storageUtils';
 import { AUTH_KEY as _AUTH_KEY } from '@/app/utils/authConstants';
 
 const AuthContext = createContext({});
@@ -28,16 +29,20 @@ export function AuthProvider({ children }) {
       try {
         const storedAuth = localStorage.getItem(AUTH_KEY);
         if (storedAuth) {
-          const parsedAuth = JSON.parse(storedAuth);
+          const parsedAuth = decryptData(storedAuth);
           
           // Decode Token
           if (parsedAuth?.token) {
             try {
               const decodedToken = jwtDecode(parsedAuth.token);
-              // console.log("Decoded Token Data:===>>>", decodedToken);
               // Map/Extract role and dispatch to Redux (Assume 'Student' if not present for placeholder)
               const role = decodedToken?.role;
               dispatch(setUserRole(role));
+
+              if (process.env.NEXT_PUBLIC_ENV === 'development') {
+                console.log('[Auth] Token:', parsedAuth.token);
+                console.log('[Auth] User Email:', parsedAuth?.user?.email);
+              }
             } catch (err) {
               console.error("Invalid token format:", err);
             }
@@ -74,7 +79,7 @@ export function AuthProvider({ children }) {
   const saveAuthState = useCallback((data) => {
     try {
       if (data) {
-        localStorage.setItem(AUTH_KEY, JSON.stringify(data));
+        localStorage.setItem(AUTH_KEY, encryptData(data));
         // Also save to cookie for middleware access
         document.cookie = `${AUTH_KEY}=${data.token || 'authenticated'}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
         
