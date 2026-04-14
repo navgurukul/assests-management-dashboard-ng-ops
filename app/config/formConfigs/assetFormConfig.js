@@ -12,6 +12,7 @@ export const assetFormFields = [
     labelKey: 'name',
     valueKey: 'id',
     required: true,
+    filterCategory: 'DEVICE',
     companionField: 'assetTypeName',
     companionKey: 'name',
     onFieldChange: 'onAssetTypeChange',
@@ -217,9 +218,6 @@ export const assetValidationSchema = Yup.object().shape({
   model: Yup.string()
     .required('Model is required')
     .min(2, 'Model must be at least 2 characters'),
-  specLabel: Yup.string()
-    .required('Specification label is required')
-    .min(2, 'Specification must be at least 2 characters'),
   assetTypeName: Yup.string(),
   processor: Yup.string().when('assetTypeName', {
     is: (val) => ['Laptop', 'Desktop', 'Server', 'CPU'].includes(val),
@@ -276,7 +274,6 @@ export const assetInitialValues = {
   assetTypeName: '',
   brand: '',
   model: '',
-  specLabel: '',
   processor: '',
   ramSizeGB: '',
   storageSizeGB: '',
