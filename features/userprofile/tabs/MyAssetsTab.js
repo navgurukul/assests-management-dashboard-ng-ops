@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
+import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
@@ -12,6 +13,7 @@ import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
+import { downloadNOC } from '../utils/downloadNOC';
 import {
   getReturnAssetFields,
   returnAssetValidationSchema,
@@ -29,6 +31,7 @@ export default function MyAssetsTab() {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [receivedModalOpen, setReceivedModalOpen] = useState(false);
+  const [nocModalOpen, setNocModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
   const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
@@ -369,9 +372,22 @@ export default function MyAssetsTab() {
     );
   }
 
+  const allAssetsAccepted =
+    assets.length > 0 && assets.every((asset) => asset.consignmentReturnStatus === 'ACCEPTED');
+
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-4">My Assets</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold text-gray-900">My Assets</h1>
+        <CustomButton
+          text="Download NOC"
+          onClick={() => setNocModalOpen(true)}
+          variant="primary"
+          size="sm"
+          disabled={false}
+          icon={Download}
+        />
+      </div>
       
       {assets && assets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -574,6 +590,33 @@ export default function MyAssetsTab() {
         validationSchema={returnAssetValidationSchema}
         onFormDataChange={handleReturnFormChange}
       />
+
+      {/* NOC Modal */}
+      <Modal
+        isOpen={nocModalOpen}
+        onClose={() => setNocModalOpen(false)}
+        title="No Objection Certificate (NOC)"
+        size="medium"
+      >
+        <div className="flex flex-col items-center text-center gap-5 py-4">
+          <div className="bg-green-100 rounded-full p-4">
+            <CheckCircle2 className="w-10 h-10 text-green-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">NOC Granted</h2>
+            <p className="text-sm text-gray-500">
+              All your devices have been successfully submitted and accepted by the campus.
+            </p>
+          </div>
+          <CustomButton
+            text="Download NOC"
+            onClick={downloadNOC}
+            variant="success"
+            size="md"
+            icon={Download}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }
