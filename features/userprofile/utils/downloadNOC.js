@@ -1,4 +1,4 @@
-export async function downloadNOC() {
+export async function downloadNOC(userData = {}) {
   const html2pdf = (await import('html2pdf.js')).default;
 
   const generatedOn = new Date().toLocaleDateString('en-US', {
@@ -6,6 +6,13 @@ export async function downloadNOC() {
     month: 'long',
     day: 'numeric',
   });
+
+  const userName = userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'N/A';
+  const userEmail = userData.email || 'N/A';
+  const userPhone = userData.phone || 'N/A';
+  const userRole = userData.role || 'N/A';
+  const userDepartment = userData.department || 'N/A';
+  const userLocation = userData.location || 'N/A';
 
   const element = document.createElement('div');
   element.innerHTML = `
@@ -16,6 +23,35 @@ export async function downloadNOC() {
       <p style="text-align: center; font-size: 13px; color: #555; margin-bottom: 32px;">(NOC)</p>
 
       <hr style="border: none; border-top: 2px solid #16a34a; margin-bottom: 28px;" />
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+        <tbody>
+          <tr>
+            <td style="padding: 6px 12px 6px 0; font-weight: 600; color: #374151; width: 36%;">Name</td>
+            <td style="padding: 6px 0; color: #111;">${userName}</td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 6px 12px 6px 0; font-weight: 600; color: #374151;">Email</td>
+            <td style="padding: 6px 0; color: #111;">${userEmail}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 12px 6px 0; font-weight: 600; color: #374151;">Phone</td>
+            <td style="padding: 6px 0; color: #111;">${userPhone}</td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 6px 12px 6px 0; font-weight: 600; color: #374151;">Role</td>
+            <td style="padding: 6px 0; color: #111;">${userRole}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 12px 6px 0; font-weight: 600; color: #374151;">Department</td>
+            <td style="padding: 6px 0; color: #111;">${userDepartment}</td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 6px 12px 6px 0; font-weight: 600; color: #374151;">Location</td>
+            <td style="padding: 6px 0; color: #111;">${userLocation}</td>
+          </tr>
+        </tbody>
+      </table>
 
       <p style="font-size: 14px; line-height: 1.8; margin-bottom: 20px;">
         This is to certify that all assigned devices have been successfully submitted

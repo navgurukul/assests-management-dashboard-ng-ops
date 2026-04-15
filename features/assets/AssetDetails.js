@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
+import StateHandler from '@/components/atoms/StateHandler';
+import MovementTimeline from '@/components/molecules/MovementTimeline';
 import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
 
-export default function AssetDetails({ assetId, assetData, onBack }) {
+export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack }) {
   const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,15 +57,16 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
     },
   ];
 
-  // If no asset data is passed, show error
-  if (!assetData) {
+  // If no asset data is available, show loading/error state
+  if (isLoading || isError || !assetData) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 font-medium">Asset data not available</p>
-          <p className="text-gray-600 mt-2">Please navigate from the assets list</p>
-        </div>
-      </div>
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading asset details..."
+        errorMessage="Failed to load asset details"
+      />
     );
   }
 
@@ -158,6 +161,11 @@ export default function AssetDetails({ assetId, assetData, onBack }) {
       items: [
         { label: 'Notes', value: assetDetails.notes || 'No notes available' },
       ],
+    },
+    {
+      title: 'MOVEMENT HISTORY',
+      color: 'theme',
+      content: <MovementTimeline movements={assetDetails.assetMovements || []} />,
     },
   ];
 
