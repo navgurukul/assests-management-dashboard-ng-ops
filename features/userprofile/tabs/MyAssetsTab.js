@@ -27,7 +27,7 @@ import {
   assetReceivedValidationSchema,
 } from '@/app/config/formConfigs/assetReceivedModalConfig';
 
-export default function MyAssetsTab() {
+export default function MyAssetsTab({ userData = {} }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [receivedModalOpen, setReceivedModalOpen] = useState(false);
@@ -610,7 +610,7 @@ export default function MyAssetsTab() {
           </div>
           <CustomButton
             text="Download NOC"
-            onClick={downloadNOC}
+            onClick={() => downloadNOC(userData)}
             variant="success"
             size="md"
             icon={Download}
