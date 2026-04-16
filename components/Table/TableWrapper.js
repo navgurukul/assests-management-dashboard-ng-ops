@@ -73,11 +73,11 @@ export default function TableWrapper({
   const displayData = showPagination ? paginatedData : data;
   const tableClassNames = {
     ...classNames,
-    wrapper: `shadow-none border-none ${classNames.wrapper || ""}`,
+    wrapper: `shadow-none border-none max-h-[58vh] overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
-    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[13px] h-11 border-b-2 border-[var(--border)] whitespace-nowrap ${classNames.th || ""}`,
+    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[13px] h-16 border-b-2 border-[var(--border)] whitespace-nowrap sticky top-0 z-10 ${classNames.th || ""}`,
     td: `text-[var(--foreground)] text-[13px] h-14 border-b border-[var(--border)] ${classNames.td || ""}`,
     tr: `hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)] data-[hover=true]:bg-[var(--surface-soft)] data-[hover=true]:text-[var(--foreground)] transition-colors ${classNames.tr || ""}`,
   };
@@ -178,6 +178,7 @@ export default function TableWrapper({
         <Table 
           aria-label={ariaLabel}
           classNames={tableClassNames}
+          isHeaderSticky
         >
           <TableHeader>
             {columns.map((column) => (
