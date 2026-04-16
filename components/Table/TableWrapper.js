@@ -78,8 +78,8 @@ export default function TableWrapper({
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
-    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[13px] h-14 border-b-2 border-[var(--border)] whitespace-nowrap sticky top-0 z-10 ${classNames.th || ""}`,
-    td: `text-[var(--foreground)] text-[13px] h-14 border-b border-[var(--border)] ${classNames.td || ""}`,
+    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] h-14 border-b-2 border-[var(--border)] whitespace-nowrap sticky top-0 z-10 ${classNames.th || ""}`,
+    td: `text-[var(--foreground)] text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] h-14 border-b border-[var(--border)] ${classNames.td || ""}`,
     tr: `hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)] data-[hover=true]:bg-[var(--surface-soft)] data-[hover=true]:text-[var(--foreground)] transition-colors ${classNames.tr || ""}`,
   };
 
@@ -145,7 +145,7 @@ export default function TableWrapper({
         ) : displayData.length === 0 ? (
           emptyContent ? emptyContent : (
             <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-              <p className="text-base font-semibold text-gray-700 mb-1">No data found</p>
+              <p className="text-sm sm:text-base font-semibold text-gray-700 mb-1">No data found</p>
             </div>
           )
         ) : (
@@ -162,10 +162,10 @@ export default function TableWrapper({
                   key={column.key}
                   className="flex items-start justify-between gap-2 py-1.5 border-b border-(--border) last:border-b-0"
                 >
-                  <span className="text-[11px] font-semibold text-gray-500 w-2/5 shrink-0 pt-0.5">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-gray-500 w-2/5 shrink-0 pt-0.5">
                     {column.label}
                   </span>
-                  <span className="text-[12px] text-foreground text-right w-3/5 wrap-break-word">
+                  <span className="text-[11px] sm:text-[12px] text-foreground text-right w-3/5 wrap-break-word">
                     {renderCell ? renderCell(item, column.key) : item[column.key]}
                   </span>
                 </div>
@@ -205,7 +205,7 @@ export default function TableWrapper({
                 </div>
               ) : emptyContent ? emptyContent : (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                  <p className="text-base font-semibold text-gray-700 mb-1">No data found</p>
+                  <p className="text-sm sm:text-base font-semibold text-gray-700 mb-1">No data found</p>
                 </div>
               )
             }
