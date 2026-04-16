@@ -9,17 +9,9 @@ export const campusInchargeModalFields = [
   {
     name: 'campus',
     label: 'Campus',
-    type: 'api-autocomplete',
-    placeholder: 'Search campus...',
+    type: 'text',
+    placeholder: 'Enter campus name',
     required: true,
-    apiUrl: baseUrl + '/campuses',
-    queryKey: ['campuses'],
-    labelKey: 'campusName',
-    valueKey: 'campusName',
-    companionFields: [
-      { field: 'address', key: 'address' },
-      { field: 'state', key: 'state' },
-    ],
   },
   {
     name: 'address',
@@ -32,7 +24,7 @@ export const campusInchargeModalFields = [
     name: 'state',
     label: 'State',
     type: 'api-autocomplete',
-    rowWith: 'pincode',
+    rowWith: 'campusCode',
     placeholder: 'Search state...',
     required: true,
     labelKey: 'label',
@@ -75,6 +67,14 @@ export const campusInchargeModalFields = [
       { value: 'Lakshadweep', label: 'Lakshadweep' },
       { value: 'Puducherry', label: 'Puducherry' },
     ],
+  },
+  {
+    name: 'campusCode',
+    label: 'Campus Code',
+    type: 'text',
+    placeholder: 'e.g. BLR or PUN',
+    required: true,
+    pairedWith: true,
   },
   {
     name: 'itCoordinatorName',
@@ -171,9 +171,7 @@ export const campusInchargeValidationSchema = Yup.object().shape({
 
   state: Yup.string().required('State is required'),
 
-  pincode: Yup.string()
-    .required('Pincode is required')
-    .matches(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
+  campusCode: Yup.string().required('Campus Code is required'),
 
   itCoordinatorName: nameSchema('IT Coordinator Name'),
   itCoordinatorEmail: emailSchema('IT Coordinator Email'),
@@ -194,7 +192,7 @@ export const campusInchargeInitialValues = {
   campus: '',
   address: '',
   state: '',
-  pincode: '',
+  campusCode: '',
   itCoordinatorName: '',
   itCoordinatorEmail: '',
   itCoordinatorPhone: '',
