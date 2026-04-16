@@ -9,6 +9,7 @@ import TicketsTable from './TicketsTable';
 export default function TicketsList() {
   // Filter state
   const [filters, setFilters] = useState({});
+  const [showCards, setShowCards] = useState(false);
 
   // Fetch consolidated data by campus
   const { data: consolidatedData } = useFetch({
@@ -43,23 +44,30 @@ export default function TicketsList() {
   return (
     <div className="space-y-2">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 p-4 mb-2">
-        {summaryCards.map((card) => (
-          <SummaryCard
-            key={card.label}
-            label={card.label}
-            value={card.value}
-            Icon={card.Icon}
-            valueColor={card.valueColor}
-            iconColor={card.iconColor}
-            clickable={true}
-            onClick={() => handleCardClick(card.status)}
-            isActive={card.status === null ? !filters.status : filters.status === card.status}
-          />
-        ))}
-      </div>
+      {showCards && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 px-4 pt-4 mb-2">
+          {summaryCards.map((card) => (
+            <SummaryCard
+              key={card.label}
+              label={card.label}
+              value={card.value}
+              Icon={card.Icon}
+              valueColor={card.valueColor}
+              iconColor={card.iconColor}
+              clickable={true}
+              onClick={() => handleCardClick(card.status)}
+              isActive={card.status === null ? !filters.status : filters.status === card.status}
+            />
+          ))}
+        </div>
+      )}
 
-      <TicketsTable filters={filters} onFilterChange={setFilters} />
+      <TicketsTable
+        filters={filters}
+        onFilterChange={setFilters}
+        showCards={showCards}
+        onToggleCards={() => setShowCards((prev) => !prev)}
+      />
     </div>
   );
 }

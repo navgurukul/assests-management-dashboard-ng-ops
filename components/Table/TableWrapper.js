@@ -25,6 +25,7 @@ export default function TableWrapper({
   columnSelectorComponent, // New prop for column selector
   activeFiltersComponent, // New prop for filter chips
   searchComponent, // New prop for search bar
+  toggleCardsComponent, // New prop for toggle summary cards button
   onShowAll, // New prop for Show All button handler
   showAllButtonText = "Show All",
   // Server-side pagination props
@@ -77,13 +78,13 @@ export default function TableWrapper({
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
-    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[13px] h-16 border-b-2 border-[var(--border)] whitespace-nowrap sticky top-0 z-10 ${classNames.th || ""}`,
+    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[13px] h-14 border-b-2 border-[var(--border)] whitespace-nowrap sticky top-0 z-10 ${classNames.th || ""}`,
     td: `text-[var(--foreground)] text-[13px] h-14 border-b border-[var(--border)] ${classNames.td || ""}`,
     tr: `hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)] data-[hover=true]:bg-[var(--surface-soft)] data-[hover=true]:text-[var(--foreground)] transition-colors ${classNames.tr || ""}`,
   };
 
   return (
-    <div className={`bg-(--surface) p-3 sm:p-6 rounded-lg ${shadow} ${margin} mt-0`}>
+    <div className={`bg-(--surface) p-3 sm:p-6 rounded-lg ${shadow} ${margin}`}>
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-2">
@@ -100,6 +101,7 @@ export default function TableWrapper({
         
         {/* Buttons – wrap on mobile */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {toggleCardsComponent}
           {onShowAll && (
             <CustomButton
               text={showAllButtonText}

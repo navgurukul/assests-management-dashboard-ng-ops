@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { LayoutDashboard } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SearchInput from '@/components/molecules/SearchInput';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -18,7 +19,7 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/ticketTableConfig';
 
-export default function TicketsTable({ filters = {}, onFilterChange }) {
+export default function TicketsTable({ filters = {}, onFilterChange, showCards, onToggleCards }) {
   const router = useRouter();
   
   // Pagination state
@@ -331,8 +332,23 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
     router.push(`/tickets/${ticket.id}`);
   };
 
+  const toggleCardsButton = onToggleCards ? (
+    <div className="relative group">
+      <button
+        onClick={onToggleCards}
+        className="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+      >
+        <LayoutDashboard size={15} />
+      </button>
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded bg-gray-800 text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+        {showCards ? 'Hide Summary' : 'Show Summary'}
+      </span>
+    </div>
+  ) : null;
+
   return (
     <TableWrapper
+      margin='m-4'
       data={ticketsData}
       columns={visibleColumns}
       title="Tickets"
@@ -345,6 +361,7 @@ export default function TicketsTable({ filters = {}, onFilterChange }) {
       onCreateClick={handleCreateClick}
       onShowAll={handleShowAll}
       showAllButtonText={showAllButtonText}
+      toggleCardsComponent={toggleCardsButton}
       // Search component
       searchComponent={
         <SearchInput
