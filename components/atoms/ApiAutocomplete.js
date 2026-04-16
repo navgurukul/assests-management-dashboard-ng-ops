@@ -91,8 +91,8 @@ export default function ApiAutocomplete({
   const handleSelectionChange = (selectedKey) => {
     onChange({ target: { name, value: selectedKey } });
     if (onItemSelect) {
-      const selectedItem = allItems.find((item) => String(item[valueKey]) === String(selectedKey));
-      if (selectedItem) onItemSelect(selectedItem);
+      const matchedItem = allItems.find((item) => String(item[valueKey]) === String(selectedKey));
+      if (matchedItem) onItemSelect(matchedItem);
     }
   };
 

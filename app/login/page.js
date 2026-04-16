@@ -34,7 +34,7 @@ function LoginContent() {
   // Role-based landing pages
   const rolesLandingPages = {
     ADMIN: '/dashboard',
-    STUDENT: '/myassets',
+    STUDENT: '/userprofile',
     EMPLOYEE: '/myassets',
   };
 
@@ -72,7 +72,7 @@ function LoginContent() {
     // ALWAYS redirect STUDENT and EMPLOYEE to /myassets instantly
     if (primaryRole === 'STUDENT' || primaryRole === 'EMPLOYEE') {
       sessionStorage.removeItem('redirectAfterLogin'); // clear any stuck redirects
-      router.push('/myassets');
+      router.push('/userprofile');
       return;
     }
 

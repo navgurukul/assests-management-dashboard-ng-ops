@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
+
 // ─── Field definitions ─────────────────────────────────────────────────────
 
 export const campusInchargeModalFields = [
@@ -8,7 +10,7 @@ export const campusInchargeModalFields = [
     name: 'campus',
     label: 'Campus',
     type: 'text',
-    placeholder: 'e.g. PUNE',
+    placeholder: 'Enter campus name',
     required: true,
   },
   {
@@ -22,7 +24,7 @@ export const campusInchargeModalFields = [
     name: 'state',
     label: 'State',
     type: 'api-autocomplete',
-    rowWith: 'pincode',
+    rowWith: 'campusCode',
     placeholder: 'Search state...',
     required: true,
     labelKey: 'label',
@@ -67,15 +69,13 @@ export const campusInchargeModalFields = [
     ],
   },
   {
-    name: 'pincode',
-    label: 'Pincode',
+    name: 'campusCode',
+    label: 'Campus Code',
     type: 'text',
-    placeholder: 'e.g. 411001',
+    placeholder: 'e.g. BLR or PUN',
     required: true,
-    pairedWith: 'state',
+    pairedWith: true,
   },
-
-  // IT Coordinator
   {
     name: 'itCoordinatorName',
     label: 'IT Coordinator Name',
@@ -171,9 +171,7 @@ export const campusInchargeValidationSchema = Yup.object().shape({
 
   state: Yup.string().required('State is required'),
 
-  pincode: Yup.string()
-    .required('Pincode is required')
-    .matches(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
+  campusCode: Yup.string().required('Campus Code is required'),
 
   itCoordinatorName: nameSchema('IT Coordinator Name'),
   itCoordinatorEmail: emailSchema('IT Coordinator Email'),
@@ -194,7 +192,7 @@ export const campusInchargeInitialValues = {
   campus: '',
   address: '',
   state: '',
-  pincode: '',
+  campusCode: '',
   itCoordinatorName: '',
   itCoordinatorEmail: '',
   itCoordinatorPhone: '',

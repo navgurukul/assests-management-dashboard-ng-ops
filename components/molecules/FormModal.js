@@ -664,6 +664,13 @@ export default function FormModal({
             queryKey={field.queryKey}
             value={value}
             onChange={(event) => handleChange(field.name, event.target.value)}
+            onItemSelect={
+              field.companionFields
+                ? (item) => field.companionFields.forEach(({ field: targetField, key }) => handleChange(targetField, item[key] || ''))
+                : field.companionField
+                ? (item) => handleChange(field.companionField, item[field.companionKey] || '')
+                : null
+            }
             onBlur={() => handleBlur(field.name)}
             isInvalid={!!error}
             errorMessage={error || ''}
