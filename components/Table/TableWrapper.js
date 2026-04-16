@@ -84,7 +84,7 @@ export default function TableWrapper({
   };
 
   return (
-    <div className={`bg-(--surface) p-3 sm:p-6 rounded-lg ${shadow} ${margin}`}>
+    <div className={`bg-(--surface) p-3 pb-0 sm:p-6 sm:pb-0 rounded-lg ${shadow} ${margin}`}>
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-2">
