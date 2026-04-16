@@ -199,7 +199,13 @@ export default function FormField({ field, formik, onFieldChange }) {
                 onFieldChange(selectedValue, formik);
               }
             }}
-            onItemSelect={field.companionField ? (item) => formik.setFieldValue(field.companionField, item[field.companionKey] || '') : null}
+            onItemSelect={
+              field.companionFields
+                ? (item) => field.companionFields.forEach(({ field: targetField, key }) => formik.setFieldValue(targetField, item[key] || ''))
+                : field.companionField
+                ? (item) => formik.setFieldValue(field.companionField, item[field.companionKey] || '')
+                : null
+            }
             onBlur={() => formik.setFieldTouched(name, true)}
             isInvalid={hasError}
             errorMessage={hasError ? formik.errors[name] : ''}
