@@ -74,7 +74,7 @@ export default function TableWrapper({
   const displayData = showPagination ? paginatedData : data;
   const tableClassNames = {
     ...classNames,
-    wrapper: `shadow-none border-none max-h-[58vh] overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
+    wrapper: `shadow-none border-none max-h-[60vh] overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
