@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Calendar, Building } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -17,6 +17,7 @@ import { useTheme } from '@/app/context/ThemeContext';
 export default function UserProfileTab() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMandatoryFill, setIsMandatoryFill] = useState(false);
   const { isDark } = useTheme();
 
   // Fetch user data using React Query
@@ -72,6 +73,7 @@ export default function UserProfileTab() {
       
       toast.dismiss(loadingToastId);
       toast.success('Profile updated successfully');
+      setIsMandatoryFill(false);
       setIsEditModalOpen(false);
       
       // Refetch user data without page reload
@@ -82,6 +84,24 @@ export default function UserProfileTab() {
       toast.error(error?.message || 'Failed to update profile');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Auto-open modal when phone, department, or location is missing
+  useEffect(() => {
+    if (!isLoadingUserData && rawUserData) {
+      const isMissingInfo = !rawUserData.phone || !rawUserData.location;
+      if (isMissingInfo) {
+        setIsMandatoryFill(true);
+        setIsEditModalOpen(true);
+      }
+    }
+  }, [rawUserData, isLoadingUserData]);
+
+  // Prevent closing the modal when it was auto-opened due to missing info
+  const handleModalClose = () => {
+    if (!isMandatoryFill) {
+      setIsEditModalOpen(false);
     }
   };
 
@@ -99,7 +119,7 @@ export default function UserProfileTab() {
     <div>
       <FormModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={handleModalClose}
         componentName=""
         actionType="Edit User Details"
         fields={editProfileFields}
