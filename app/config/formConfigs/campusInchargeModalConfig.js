@@ -16,6 +16,10 @@ export const campusInchargeModalFields = [
     queryKey: ['campuses'],
     labelKey: 'campusName',
     valueKey: 'campusName',
+    companionFields: [
+      { field: 'address', key: 'address' },
+      { field: 'state', key: 'state' },
+    ],
   },
   {
     name: 'address',
