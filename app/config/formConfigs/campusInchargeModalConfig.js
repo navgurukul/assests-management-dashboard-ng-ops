@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
+
 // ─── Field definitions ─────────────────────────────────────────────────────
 
 export const campusInchargeModalFields = [
@@ -7,9 +9,13 @@ export const campusInchargeModalFields = [
   {
     name: 'campus',
     label: 'Campus',
-    type: 'text',
-    placeholder: 'e.g. PUNE',
+    type: 'api-autocomplete',
+    placeholder: 'Search campus...',
     required: true,
+    apiUrl: baseUrl + '/campuses',
+    queryKey: ['campuses'],
+    labelKey: 'campusName',
+    valueKey: 'campusName',
   },
   {
     name: 'address',
@@ -66,16 +72,6 @@ export const campusInchargeModalFields = [
       { value: 'Puducherry', label: 'Puducherry' },
     ],
   },
-  {
-    name: 'pincode',
-    label: 'Pincode',
-    type: 'text',
-    placeholder: 'e.g. 411001',
-    required: true,
-    pairedWith: 'state',
-  },
-
-  // IT Coordinator
   {
     name: 'itCoordinatorName',
     label: 'IT Coordinator Name',
