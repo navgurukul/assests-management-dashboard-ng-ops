@@ -35,35 +35,36 @@ export default function CustomButton({
     lg: 'px-4 py-2 text-base',
   };
 
-  // Responsive size styles: mobile gets one size bigger, sm: and above uses the specified size
+  // Responsive size styles: gradually scales across breakpoints (mobile → sm → md → lg)
   const responsiveSizeStyles = {
-    sm: 'px-3 py-1.5 text-sm sm:px-2 sm:py-1 sm:text-xs',
-    md: 'px-4 py-2 text-base sm:px-3 sm:py-1.5 sm:text-sm',
-    lg: 'px-5 py-2.5 text-lg sm:px-4 sm:py-2 sm:text-base',
+    sm: 'px-2 py-0.5 text-xs sm:px-2 sm:py-1 sm:text-xs md:px-2 md:py-1 md:text-xs',
+    md: 'px-2.5 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm md:px-4 md:py-2 md:text-sm lg:px-4 lg:py-2 lg:text-base',
+    lg: 'px-3 py-1.5 text-sm sm:px-4 sm:py-2 sm:text-base md:px-5 md:py-2.5 md:text-base lg:px-5 lg:py-2.5 lg:text-lg',
   };
 
-  // Icon size based on button size
+  // Fixed icon sizes
   const iconSizes = {
     sm: 'w-3 h-3',
     md: 'w-4 h-4',
     lg: 'w-5 h-5',
   };
 
-  // On mobile, icon also bumps up one size when responsive
+  // Responsive icon sizes: scale alongside button across breakpoints
   const responsiveIconSizes = {
-    sm: 'w-4 h-4 sm:w-3 sm:h-3',
-    md: 'w-5 h-5 sm:w-4 sm:h-4',
-    lg: 'w-6 h-6 sm:w-5 sm:h-5',
+    sm: 'w-3 h-3 sm:w-3 sm:h-3 md:w-3 md:h-3',
+    md: 'w-3 h-3 sm:w-4 sm:h-4 md:w-4 md:h-4 lg:w-5 lg:h-5',
+    lg: 'w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6',
   };
 
   const resolvedSizeStyle = responsive ? responsiveSizeStyles[size] : sizeStyles[size];
   const resolvedIconSize = responsive ? responsiveIconSizes[size] : iconSizes[size];
 
   const buttonClasses = `
-    flex items-center gap-1.5 
+    flex items-center gap-1 sm:gap-1.5
     rounded-lg font-semibold 
     transition-all duration-200
     shadow-sm hover:shadow-md
+    whitespace-nowrap
     ${disabled ? variantStyles.disabled : variantStyles[variant]}
     ${resolvedSizeStyle}
     ${className}
