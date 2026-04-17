@@ -336,7 +336,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     <div className="relative group">
       <button
         onClick={onToggleCards}
-        className="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-md border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
       >
         <LayoutDashboard size={15} />
       </button>
