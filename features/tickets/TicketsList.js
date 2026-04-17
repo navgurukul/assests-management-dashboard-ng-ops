@@ -9,7 +9,7 @@ import TicketsTable from './TicketsTable';
 export default function TicketsList() {
   // Filter state
   const [filters, setFilters] = useState({});
-  const [showCards, setShowCards] = useState(false);
+  const [showCards, setShowCards] = useState(true);
 
   // Fetch consolidated data by campus
   const { data: consolidatedData } = useFetch({
