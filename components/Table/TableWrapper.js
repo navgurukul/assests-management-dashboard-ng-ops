@@ -100,11 +100,11 @@ export default function TableWrapper({
           {onShowAll && (
             <CustomButton
               text={showAllButtonText}
+              icon={null}
               onClick={onShowAll}
               variant="secondary"
-              size="sm"
-              // Reduced button padding & text
-              className="px-2! py-0.5! text-[10px]! sm:px-2.5! sm:py-1! sm:text-[11px]!"
+              size="md"
+              className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
             />
           )}
           {filterComponent}
@@ -115,8 +115,8 @@ export default function TableWrapper({
               icon={Plus}
               onClick={onCreateClick}
               variant="primary"
-              size="sm"
-              className="px-2! py-0.5! text-[10px]! sm:px-2.5! sm:py-1! sm:text-[11px]!"
+              size="md"
+              className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
             />
           )}
         </div>
