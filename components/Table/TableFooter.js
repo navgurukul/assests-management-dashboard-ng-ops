@@ -7,9 +7,8 @@ export default function TableFooter({
   onPageChange,
   showPagination = true 
 }) {
-  if (!showPagination || totalPages <= 1) {
-    return null;
-  }
+  // Always render the pagination bar, but disable controls if only one page or showPagination is false
+  const isDisabled = !showPagination || totalPages <= 1;
 
   return (
     <div className="flex justify-center items-center py-4">

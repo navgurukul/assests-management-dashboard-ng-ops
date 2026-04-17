@@ -42,11 +42,15 @@ export default function TableWrapper({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
 
-  // Calculate client-side pagination (when serverPagination is false)
-  const totalPages = serverPagination 
-    ? (paginationData?.totalPages || 1)
-    : Math.ceil(data.length / pageSize);
-  
+  // Memoize totalPages calculation
+  const totalPages = useMemo(() => {
+    if (serverPagination) {
+      return paginationData?.totalPages || 1;
+    }
+    return Math.ceil(data.length / pageSize) || 1;
+  }, [serverPagination, paginationData, data.length, pageSize]);
+
+  // Memoize paginatedData calculation
   const paginatedData = useMemo(() => {
     if (serverPagination) return data; // Data is already paginated from server
     const startIndex = (currentPage - 1) * pageSize;
@@ -88,7 +92,7 @@ export default function TableWrapper({
       {/* Title/Heading Section */}
       {title && (
         <div className="mb-2">
-          <h2 className="text-2xl sm:text-3xl md:text-[32px] font-semibold text-gray-800 ml-4 font-[family-name:var(--font-poppins)]">{title}</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-[32px] font-semibold text-gray-800 ml-4 font-(family-name:--font-poppins)">{title}</h2>
         </div>
       )}
       
@@ -176,8 +180,8 @@ export default function TableWrapper({
       </div>
 
       {/* Table Container – hidden on mobile, visible on sm+ */}
-      <div className="hidden sm:block overflow-x-auto">
-        <Table 
+      <div className="hidden sm:block overflow-x-auto min-h-[60vh] relative">
+        <Table
           aria-label={ariaLabel}
           classNames={tableClassNames}
           isHeaderSticky
@@ -228,25 +232,19 @@ export default function TableWrapper({
       </div>
 
       {/* Use new Pagination component for server-side pagination, or TableFooter for client-side */}
-      {serverPagination && showPagination ? (
+      <div className="w-full bg-white z-20 sticky bottom-0 left-0">
+        {/* Always use custom Pagination for consistent style */}
         <Pagination
-          currentPage={paginationData?.page || 1}
-          totalPages={paginationData?.totalPages || 1}
-          totalCount={paginationData?.totalCount || 0}
-          pageSize={paginationData?.limit || pageSize}
+          currentPage={serverPagination ? (paginationData?.page || 1) : currentPage}
+          totalPages={serverPagination ? (paginationData?.totalPages || 1) : totalPages}
+          totalCount={serverPagination ? (paginationData?.totalCount || 0) : data.length}
+          pageSize={serverPagination ? (paginationData?.limit || pageSize) : pageSize}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
           showPageSizeSelector={true}
           showPageInfo={true}
         />
-      ) : (
-        <TableFooter
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          showPagination={showPagination}
-        />
-      )}
+      </div>
     </div>
   );
 }
