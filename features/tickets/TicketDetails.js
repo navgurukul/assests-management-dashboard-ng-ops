@@ -406,6 +406,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   text="Update Ticket"
                   variant="secondary"
                   size="md"
+                  className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
                   onClick={handleUpdateClick}
                   disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
                 />
@@ -415,6 +416,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                       text="Create Allocation"
                       variant="primary"
                       size="md"
+                      className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
                       onClick={handleCreateAllocation}
                     />
                   ) : (
@@ -427,7 +429,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                     text="Ticket is not approved"
                     variant="warning"
                     size="md"
-                    className="border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
+                    className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm! border-orange-500 text-orange-500 bg-orange-50 hover:bg-orange-100 cursor-default"
                     onClick={() => {}}
                     title="Please contact your manager"
                   />
