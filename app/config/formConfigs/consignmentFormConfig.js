@@ -136,13 +136,17 @@ export const getAcceptReturnFields = (campusOptions = []) => [
     required: true,
     options: campusOptions,
   },
-  {
-    name: 'comment',
-    label: 'Comment',
-    type: 'textarea',
-    placeholder: 'Enter any comments...',
-    rows: 3,
-    required: false,
+    {
+    name: 'condition',
+    label: 'Asset Condition',
+    type: 'select',
+    placeholder: 'Select asset condition',
+    required: true,
+    options: [
+      { value: 'received_good', label: 'Received in Good Condition' },
+      { value: 'minor_issues', label: 'Minor Issues' },
+      { value: 'not_working', label: 'Not Working' },
+    ],
   },
 ];
 

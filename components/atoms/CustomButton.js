@@ -56,6 +56,8 @@ export default function CustomButton({
     lg: 'w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6',
   };
 
+  // Default padding/text size classes
+  const defaultBtnClasses = 'px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!';
   const resolvedSizeStyle = responsive ? responsiveSizeStyles[size] : sizeStyles[size];
   const resolvedIconSize = responsive ? responsiveIconSizes[size] : iconSizes[size];
 
@@ -66,6 +68,7 @@ export default function CustomButton({
     shadow-sm hover:shadow-md
     whitespace-nowrap
     ${disabled ? variantStyles.disabled : variantStyles[variant]}
+    ${defaultBtnClasses}
     ${resolvedSizeStyle}
     ${className}
   `.trim().replace(/\s+/g, ' ');

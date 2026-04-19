@@ -693,10 +693,14 @@ export default function ConsignmentsList() {
         throw new Error('Please select a storage location');
       }
 
+       if (!formData?.condition) {
+        throw new Error('Please select an asset condition');
+      }
+
       const payload = {
         status: 'ACCEPTED',
         storedLocationId: formData.storedIn,
-        notes: formData.comment || '',
+        notes: formData.condition || '',
       };
 
       await patchMutation({

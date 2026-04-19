@@ -431,24 +431,21 @@ export default function MyAssetsTab({ userData = {} }) {
                           variant="success"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DISPATCHED'}
-                          className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
-                        />
+                           />
                         <CustomButton
                           text="Return Asset"
                           onClick={() => handleReturnAsset(asset)}
                           variant="danger"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
-                          className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
-                        />
+                          />
                         <CustomButton
                           text="Extend Lease"
                           onClick={() => handleExtendLease(asset)}
                           variant="primary"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
-                          className="px-1.5! py-0.5! text-[10px]! sm:px-2! sm:py-1! sm:text-xs!"
-                        />
+                         />
                       </>
                     )}
                   </div>
