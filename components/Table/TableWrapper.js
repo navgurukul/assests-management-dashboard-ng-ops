@@ -104,7 +104,7 @@ export default function TableWrapper({
               onClick={onShowAll}
               variant="secondary"
               size="md"
-              className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
+              className=""
             />
           )}
           {filterComponent}
@@ -116,7 +116,7 @@ export default function TableWrapper({
               onClick={onCreateClick}
               variant="primary"
               size="md"
-              className="px-2! py-0.5! text-xs! sm:px-3! sm:py-1.5! sm:text-sm!"
+              className=""
             />
           )}
         </div>
