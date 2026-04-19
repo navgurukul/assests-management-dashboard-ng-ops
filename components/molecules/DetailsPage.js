@@ -186,31 +186,42 @@ export default function DetailsPage({
 
   return (
     <div className="h-full flex flex-col bg-[var(--background)] p-3 sm:p-5">
-      {/* Back Button */}
-      {onBack && (
-        <div className="mb-4 shrink-0">
-          <CustomButton
-            text="Back"
-            icon={ArrowLeft}
-            onClick={onBack}
-            variant="secondary"
-            size="sm"
-          />
-        </div>
-      )}
       {/* Header */}
-      <div className="bg-[var(--surface)] rounded-lg shadow-sm px-4 sm:px-7 py-4 sm:py-5 mb-5 border border-[var(--border)] shrink-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 flex-wrap">
-          <div>
-            <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
+      <div className="bg-[var(--surface)] rounded-lg shadow-sm px-4 sm:px-6 py-4 mb-5 border border-[var(--border)] shrink-0">
+        <div className="flex items-center gap-4">
+          {/* Back Button */}
+          {onBack && (
+            <div className="shrink-0">
+              <CustomButton
+                text="Back"
+                icon={ArrowLeft}
+                onClick={onBack}
+                variant="secondary"
+                size="sm"
+              />
+            </div>
+          )}
+
+          {/* Divider */}
+          {onBack && (
+            <div className="h-8 w-px bg-[var(--border)] shrink-0" />
+          )}
+
+          {/* Title & Subtitle */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight truncate">
+              {title}
+            </h1>
             {subtitle && (
-              <p className={`text-xs sm:text-sm mt-1 font-medium ${subtitleColor}`}>
+              <p className={`text-xs sm:text-sm mt-0.5 font-medium ${subtitleColor} truncate`}>
                 {subtitle}
               </p>
             )}
           </div>
+
+          {/* Header Actions */}
           {headerActions && (
-            <div className="flex gap-2 items-center shrink-0 flex-wrap">
+            <div className="flex gap-2 items-center shrink-0 flex-wrap justify-end">
               {headerActions}
             </div>
           )}
