@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Autocomplete,
   AutocompleteItem
@@ -65,6 +65,14 @@ export default function ApiAutocomplete({
     const label = formatLabel ? formatLabel(item) : item[labelKey];
     return label;
   };
+
+  useEffect(() => {
+    if (!value || allItems.length === 0 || inputValue !== '') return;
+    const matchedItem = allItems.find((item) => String(item[valueKey]) === String(value));
+    if (matchedItem) {
+      setInputValue(String(getItemLabel(matchedItem) ?? ''));
+    }
+  }, [value, allItems, valueKey]);
 
   // Client-side filtering based on typed input
   const safeItems = inputValue

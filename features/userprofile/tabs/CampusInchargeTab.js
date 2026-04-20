@@ -56,6 +56,7 @@ export default function CampusInchargeTab() {
     const records = apiResponse?.data ?? [];
     return records.map((item) => ({
       ...item,
+      campusObject: item.campus,
       campus: item.campusName,
     }));
   }, [apiResponse]);
@@ -65,9 +66,9 @@ export default function CampusInchargeTab() {
     return campusInchargeModalFields.map((field) => {
       const valueMap = {
         campus: selectedItem.campusName,
-        address: selectedItem.address,
-        state: selectedItem.state,
-        campusCode: selectedItem.campusCode,
+        address: selectedItem?.campusObject?.address,
+        state: selectedItem?.campusObject?.state,
+        campusCode: selectedItem?.campusObject?.campusCode,
         capacity: selectedItem.capacity,
         school: selectedItem.school,
         itCoordinatorName: selectedItem.itCoordinator?.name,
