@@ -73,11 +73,6 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
   // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
-
-    const statusApiMap = {
-      RAISED: 'CLOSED',
-      ESCALATED: 'REJECTED',
-    };
     
     // Add search parameter first
     if (debouncedSearch) params.append('search', debouncedSearch);
@@ -95,7 +90,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
 
     // Add filters
     if (filters?.campus) params.append('campusId', filters.campus);
-    if (filters?.status) params.append('status', statusApiMap[filters.status] || filters.status);
+    if (filters?.status) params.append('status', filters.status);
     if (filters?.assignee && !isAssignedFalse) params.append('assigneeId', filters.assignee);
     if (filters?.isAssigned !== undefined && filters?.isAssigned !== null && filters?.isAssigned !== '') {
       params.append('isAssigned', filters.isAssigned);
