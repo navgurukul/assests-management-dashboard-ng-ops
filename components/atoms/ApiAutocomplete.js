@@ -1,41 +1,12 @@
 'use client';
 
-import React from 'react';
+import { useState } from 'react';
 import {
   Autocomplete,
   AutocompleteItem
 } from "@heroui/autocomplete";
 import { useApiAutocomplete } from '@/app/hooks/useApiAutocomplete';
 
-/**
- * ApiAutocomplete Component
- * 
- * A reusable autocomplete component that fetches data from an API endpoint
- * and displays it in a searchable dropdown format.
- * 
- * @param {object} props - Component props
- * @param {string} props.name - Field name for form handling
- * @param {string} props.label - Label text displayed above the input
- * @param {string} props.placeholder - Placeholder text for the input
- * @param {string} props.apiUrl - Base API URL to fetch data from
- * @param {array|null} props.queryKey - Custom React Query cache key
- * @param {any} props.value - Current selected value
- * @param {function} props.onChange - Callback when selection changes
- * @param {function} props.onBlur - Callback when field loses focus
- * @param {boolean} props.isInvalid - Whether the field has validation errors
- * @param {string} props.errorMessage - Error message to display
- * @param {boolean} props.isRequired - Whether the field is required
- * @param {boolean} props.isDisabled - Whether the field is disabled
- * @param {string} props.labelKey - Key in data object to use as display label
- * @param {string} props.valueKey - Key in data object to use as value
- * @param {object|null} props.dependsOn - Dependency config { field, paramKey }
- * @param {any} props.dependentValue - Value from dependent field
- * @param {object|null} props.additionalParams - Additional query parameters
- * @param {string|null} props.filterCategory - Category to filter items by
- * @param {string|null} props.dataPath - Path to nested data in response
- * @param {function|null} props.formatLabel - Custom function to format item labels
- * @param {object|null} props.selectedItem - Pre-selected item to include
- */
 export default function ApiAutocomplete({
   name,
   label,
@@ -81,25 +52,39 @@ export default function ApiAutocomplete({
     filterFn,
   });
 
+  const [inputValue, setInputValue] = useState('');
+
   // Ensure items is always an array to prevent iteration errors
   const allItems = Array.isArray(items) ? items : [];
-  const safeItems = excludeValue
+  const baseItems = excludeValue
     ? allItems.filter((item) => item[valueKey] !== excludeValue)
     : allItems;
-
-  // Handle selection change event
-  const handleSelectionChange = (selectedKey) => {
-    onChange({ target: { name, value: selectedKey } });
-    if (onItemSelect) {
-      const matchedItem = allItems.find((item) => String(item[valueKey]) === String(selectedKey));
-      if (matchedItem) onItemSelect(matchedItem);
-    }
-  };
 
   // Format label for display
   const getItemLabel = (item) => {
     const label = formatLabel ? formatLabel(item) : item[labelKey];
     return label;
+  };
+
+  // Client-side filtering based on typed input
+  const safeItems = inputValue
+    ? baseItems.filter((item) =>
+        String(getItemLabel(item) ?? '').toLowerCase().includes(inputValue.toLowerCase())
+      )
+    : baseItems;
+
+  // Handle selection change event
+  const handleSelectionChange = (selectedKey) => {
+    onChange({ target: { name, value: selectedKey } });
+    const matchedItem = allItems.find((item) => String(item[valueKey]) === String(selectedKey));
+    if (matchedItem) {
+      setInputValue(String(getItemLabel(matchedItem) ?? ''));
+      if (onItemSelect) onItemSelect(matchedItem);
+    }
+  };
+
+  const handleInputChange = (val) => {
+    setInputValue(val);
   };
 
   return (
@@ -127,6 +112,8 @@ export default function ApiAutocomplete({
           errorMessage={errorMessage}
           items={safeItems}
           selectedKey={value || null}
+          inputValue={inputValue}
+          onInputChange={handleInputChange}
           onSelectionChange={handleSelectionChange}
           onBlur={onBlur}
           isLoading={isLoading}
@@ -153,7 +140,7 @@ export default function ApiAutocomplete({
           }}
         >
           {(item) => (
-            <AutocompleteItem key={item[valueKey]}>
+            <AutocompleteItem key={item[valueKey]} textValue={String(getItemLabel(item) ?? '')}>
               {getItemLabel(item)}
             </AutocompleteItem>
           )}

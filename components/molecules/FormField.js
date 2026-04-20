@@ -201,7 +201,8 @@ export default function FormField({ field, formik, onFieldChange }) {
             }}
             onItemSelect={
               field.companionFields
-                ? (item) => field.companionFields.forEach(({ field: targetField, key }) => formik.setFieldValue(targetField, item[key] || ''))
+                ? (item) => field.companionFields.forEach(({ field: targetField, key, compute }) =>
+                    formik.setFieldValue(targetField, compute ? compute(item) : (item[key] || '')))
                 : field.companionField
                 ? (item) => formik.setFieldValue(field.companionField, item[field.companionKey] || '')
                 : null
