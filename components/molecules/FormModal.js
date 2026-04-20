@@ -566,6 +566,23 @@ export default function FormModal({
           />
         );
 
+      case 'number':
+        return (
+          <input
+            type="number"
+            id={field.name}
+            name={field.name}
+            value={value}
+            onChange={(e) => handleChange(field.name, e.target.value)}
+            onBlur={() => handleBlur(field.name)}
+            placeholder={field.placeholder}
+            min={field.min}
+            max={field.max}
+            className={baseInputClasses}
+            disabled={field.disabled || isSubmitting}
+          />
+        );
+
       case 'file':
         return (
           <div className="space-y-2">

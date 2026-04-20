@@ -68,6 +68,8 @@ export default function CampusInchargeTab() {
         address: selectedItem.address,
         state: selectedItem.state,
         campusCode: selectedItem.campusCode,
+        capacity: selectedItem.capacity,
+        school: selectedItem.school,
         itCoordinatorName: selectedItem.itCoordinator?.name,
         itCoordinatorEmail: selectedItem.itCoordinator?.email,
         itCoordinatorPhone: selectedItem.itCoordinator?.phone,
@@ -111,6 +113,8 @@ export default function CampusInchargeTab() {
       campusCode: formData.campusCode,
       address: formData.address,
       state: formData.state,
+      capacity: Number(formData.capacity),
+      school: formData.school,
       itCoordinator: {
         name: formData.itCoordinatorName,
         email: formData.itCoordinatorEmail,
@@ -191,6 +195,8 @@ export default function CampusInchargeTab() {
       campusCode: formData.campusCode,
       address: formData.address,
       state: formData.state,
+      capacity: Number(formData.capacity),
+      school: formData.school,
       itCoordinator: {
         name: formData.itCoordinatorName,
         email: formData.itCoordinatorEmail,
