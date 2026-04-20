@@ -78,7 +78,12 @@ export default function CampusInchargeTab() {
         itLeadEmail: selectedItem.itLead?.email,
         itLeadPhone: selectedItem.itLead?.phone,
       };
-      return { ...field, defaultValue: valueMap[field.name] ?? '' };
+      // Disable Campus, Address, and State fields in edit mode
+      let disabled = false;
+      if (["campus", "address", "state", "campusCode"].includes(field.name)) {
+        disabled = true;
+      }
+      return { ...field, defaultValue: valueMap[field.name] ?? '', disabled };
     });
   }, [selectedItem]);
 

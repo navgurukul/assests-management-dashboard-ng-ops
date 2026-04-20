@@ -77,13 +77,6 @@ export const campusInchargeModalFields = [
     pairedWith: true,
   },
   {
-    name: 'itCoordinatorName',
-    label: 'IT Coordinator Name',
-    type: 'text',
-    placeholder: 'Full name',
-    required: true,
-  },
-  {
     name: 'itCoordinatorEmail',
     label: 'IT Coordinator Email',
     type: 'email',
@@ -91,21 +84,23 @@ export const campusInchargeModalFields = [
     required: true,
   },
   {
+    name: 'itCoordinatorName',
+    label: 'IT Coordinator Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+    rowWith: 'itCoordinatorPhone',
+  },
+  {
     name: 'itCoordinatorPhone',
     label: 'IT Coordinator Phone',
     type: 'text',
     placeholder: '+91 XXXXX XXXXX',
     required: true,
+    pairedWith: true,
   },
 
   // Operation
-  {
-    name: 'operationName',
-    label: 'Operation Name',
-    type: 'text',
-    placeholder: 'Full name',
-    required: true,
-  },
   {
     name: 'operationEmail',
     label: 'Operation Email',
@@ -114,21 +109,23 @@ export const campusInchargeModalFields = [
     required: true,
   },
   {
+    name: 'operationName',
+    label: 'Operation Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+    rowWith: 'operationPhone',
+  },
+  {
     name: 'operationPhone',
     label: 'Operation Phone',
     type: 'text',
     placeholder: '+91 XXXXX XXXXX',
     required: true,
+    pairedWith: true,
   },
 
   // IT Lead
-  {
-    name: 'itLeadName',
-    label: 'IT Lead Name',
-    type: 'text',
-    placeholder: 'Full name',
-    required: true,
-  },
   {
     name: 'itLeadEmail',
     label: 'IT Lead Email',
@@ -137,11 +134,20 @@ export const campusInchargeModalFields = [
     required: true,
   },
   {
+    name: 'itLeadName',
+    label: 'IT Lead Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+    rowWith: 'itLeadPhone',
+  },
+  {
     name: 'itLeadPhone',
     label: 'IT Lead Phone',
     type: 'text',
     placeholder: '+91 XXXXX XXXXX',
     required: true,
+    pairedWith: true,
   },
 ];
 
