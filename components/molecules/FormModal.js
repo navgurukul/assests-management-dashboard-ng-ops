@@ -666,7 +666,8 @@ export default function FormModal({
             onChange={(event) => handleChange(field.name, event.target.value)}
             onItemSelect={
               field.companionFields
-                ? (item) => field.companionFields.forEach(({ field: targetField, key }) => handleChange(targetField, item[key] || ''))
+                ? (item) => field.companionFields.forEach(({ field: targetField, key, compute }) =>
+                    handleChange(targetField, compute ? compute(item) : (item[key] || '')))
                 : field.companionField
                 ? (item) => handleChange(field.companionField, item[field.companionKey] || '')
                 : null

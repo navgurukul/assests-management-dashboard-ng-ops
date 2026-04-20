@@ -78,12 +78,30 @@ export default function CampusInchargeTab() {
         itLeadEmail: selectedItem.itLead?.email,
         itLeadPhone: selectedItem.itLead?.phone,
       };
+
+      const emailSelectedItemMap = {
+        itCoordinatorEmail: selectedItem.itCoordinator?.email
+          ? { email: selectedItem.itCoordinator.email }
+          : null,
+        operationEmail: selectedItem.operation?.email
+          ? { email: selectedItem.operation.email }
+          : null,
+        itLeadEmail: selectedItem.itLead?.email
+          ? { email: selectedItem.itLead.email }
+          : null,
+      };
+
       // Disable Campus, Address, and State fields in edit mode
       let disabled = false;
       if (["campus", "address", "state", "campusCode"].includes(field.name)) {
         disabled = true;
       }
-      return { ...field, defaultValue: valueMap[field.name] ?? '', disabled };
+
+      const extraProps = emailSelectedItemMap[field.name]
+        ? { selectedItem: emailSelectedItemMap[field.name] }
+        : {};
+
+      return { ...field, defaultValue: valueMap[field.name] ?? '', disabled, ...extraProps };
     });
   }, [selectedItem]);
 

@@ -79,9 +79,24 @@ export const campusInchargeModalFields = [
   {
     name: 'itCoordinatorEmail',
     label: 'IT Coordinator Email',
-    type: 'email',
-    placeholder: 'email@example.com',
+    type: 'api-autocomplete',
+    placeholder: 'Search by email...',
     required: true,
+    apiUrl: `${baseUrl}/users`,
+    queryKey: ['users-for-campus-incharge'],
+    labelKey: 'email',
+    valueKey: 'email',
+    formatLabel: (item) => {
+      const name = [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '';
+      return name ? `${item.email} — ${name}` : item.email;
+    },
+    companionFields: [
+      {
+        field: 'itCoordinatorName',
+        compute: (item) => [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '',
+      },
+      { field: 'itCoordinatorPhone', key: 'phone' },
+    ],
   },
   {
     name: 'itCoordinatorName',
@@ -100,13 +115,27 @@ export const campusInchargeModalFields = [
     pairedWith: true,
   },
 
-  // Operation
   {
     name: 'operationEmail',
     label: 'Operation Email',
-    type: 'email',
-    placeholder: 'email@example.com',
+    type: 'api-autocomplete',
+    placeholder: 'Search by email...',
     required: true,
+    apiUrl: `${baseUrl}/users`,
+    queryKey: ['users-for-campus-incharge'],
+    labelKey: 'email',
+    valueKey: 'email',
+    formatLabel: (item) => {
+      const name = [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '';
+      return name ? `${item.email} — ${name}` : item.email;
+    },
+    companionFields: [
+      {
+        field: 'operationName',
+        compute: (item) => [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '',
+      },
+      { field: 'operationPhone', key: 'phone' },
+    ],
   },
   {
     name: 'operationName',
@@ -129,9 +158,24 @@ export const campusInchargeModalFields = [
   {
     name: 'itLeadEmail',
     label: 'IT Lead Email',
-    type: 'email',
-    placeholder: 'email@example.com',
+    type: 'api-autocomplete',
+    placeholder: 'Search by email...',
     required: true,
+    apiUrl: `${baseUrl}/users`,
+    queryKey: ['users-for-campus-incharge'],
+    labelKey: 'email',
+    valueKey: 'email',
+    formatLabel: (item) => {
+      const name = [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '';
+      return name ? `${item.email} — ${name}` : item.email;
+    },
+    companionFields: [
+      {
+        field: 'itLeadName',
+        compute: (item) => [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '',
+      },
+      { field: 'itLeadPhone', key: 'phone' },
+    ],
   },
   {
     name: 'itLeadName',
