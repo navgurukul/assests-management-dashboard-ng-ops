@@ -77,6 +77,31 @@ export const campusInchargeModalFields = [
     pairedWith: true,
   },
   {
+    name: 'capacity',
+    label: 'Capacity',
+    type: 'number',
+    placeholder: 'Enter capacity (1 - 99999)',
+    required: true,
+    min: 1,
+    max: 99999,
+    rowWith: 'school',
+  },
+  {
+    name: 'school',
+    label: 'School',
+    type: 'select',
+    placeholder: 'Select a school',
+    required: true,
+    pairedWith: true,
+    options: [
+      { value: 'School of Programming', label: 'School of Programming' },
+      { value: 'School Of Business', label: 'School Of Business' },
+      { value: 'School of Finance', label: 'School of Finance' },
+      { value: 'School of Second Chance', label: 'School of Second Chance' },
+      { value: 'School of Data analytics', label: 'School of Data analytics' },
+    ],
+  },
+  {
     name: 'itCoordinatorEmail',
     label: 'IT Coordinator Email',
     type: 'api-autocomplete',
@@ -223,6 +248,14 @@ export const campusInchargeValidationSchema = Yup.object().shape({
 
   campusCode: Yup.string().required('Campus Code is required'),
 
+  capacity: Yup.number()
+    .typeError('Capacity must be a number')
+    .required('Capacity is required')
+    .min(1, 'Capacity must be at least 1')
+    .max(99999, 'Capacity must be at most 99999'),
+
+  school: Yup.string().required('School is required'),
+
   itCoordinatorName: nameSchema('IT Coordinator Name'),
   itCoordinatorEmail: emailSchema('IT Coordinator Email'),
   itCoordinatorPhone: phoneSchema('IT Coordinator Phone'),
@@ -243,6 +276,8 @@ export const campusInchargeInitialValues = {
   address: '',
   state: '',
   campusCode: '',
+  capacity: '',
+  school: '',
   itCoordinatorName: '',
   itCoordinatorEmail: '',
   itCoordinatorPhone: '',
