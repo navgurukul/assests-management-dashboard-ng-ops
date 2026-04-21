@@ -18,6 +18,8 @@ import {
   Users,
   Building2,
   TicketCheck,
+  PanelLeftOpen,
+  PanelLeftClose,
 } from 'lucide-react';
 import { menuItems } from '@/dummyJson/dummyJson';
 
@@ -77,31 +79,75 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
         'md:static md:inset-auto md:z-auto md:translate-x-0',
         isCollapsed ? 'md:w-24' : 'md:w-64',
       ].join(' ')}
-      onClick={() => setIsCollapsed(!isCollapsed)}
     >
       <nav className="p-4 flex-1">
-        <ul className="space-y-1" onClick={(e) => e.stopPropagation()}>
-          {filteredMenuItems.map((item) => {
+        {isCollapsed && (
+          <div className="hidden md:flex justify-center mb-3">
+            <button
+              onClick={() => setIsCollapsed(false)}
+              className="p-2 rounded-lg text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg) transition-colors"
+              aria-label="Open sidebar"
+            >
+              <PanelLeftOpen className="w-6 h-6" />
+            </button>
+          </div>
+        )}
+        <ul className="space-y-1">
+          {filteredMenuItems.map((item, index) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.path;
 
             const linkContent = (
-              <Link
-                href={item.path}
-                onClick={onMobileClose}
-                className={[
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold',
-                  isCollapsed ? 'md:justify-center' : '',
-                  isActive
-                    ? 'bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg)'
-                    : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
-                ].join(' ')}
-              >
-                <Icon className="w-6 h-6 shrink-0" />
-                {/* Always show text on mobile; hide on desktop when collapsed */}
-                <span className={isCollapsed ? 'md:hidden' : ''}>{item.name}</span>
-              </Link>
+              <div className={!isCollapsed && index === 0 ? 'hidden md:flex items-center gap-2' : ''}>
+                <Link
+                  href={item.path}
+                  onClick={onMobileClose}
+                  className={[
+                    'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold flex-1',
+                    isCollapsed ? 'md:justify-center' : '',
+                    isActive
+                      ? 'bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg)'
+                      : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
+                  ].join(' ')}
+                >
+                  <Icon className="w-6 h-6 shrink-0" />
+                  {/* Always show text on mobile; hide on desktop when collapsed */}
+                  <span className={isCollapsed ? 'md:hidden' : ''}>{item.name}</span>
+                </Link>
+                {!isCollapsed && index === 0 && (
+                  <button
+                    onClick={() => setIsCollapsed(true)}
+                    className="hidden md:block p-2 rounded-lg text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg) transition-colors shrink-0"
+                    aria-label="Close sidebar"
+                  >
+                    <PanelLeftClose className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             );
+
+            /* Show first item without wrapper div on mobile when expanded */
+            if (!isCollapsed && index === 0) {
+              return (
+                <li key={item.name}>
+                  {/* Mobile: just the link, Desktop: link + close button */}
+                  <Link
+                    href={item.path}
+                    onClick={onMobileClose}
+                    className={[
+                      'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-semibold md:hidden',
+                      isActive
+                        ? 'bg-(--sidebar-item-active-bg) text-(--sidebar-item-active-fg)'
+                        : 'text-(--sidebar-item-fg) hover:bg-(--sidebar-item-hover-bg) hover:text-(--sidebar-item-hover-fg)',
+                    ].join(' ')}
+                  >
+                    <Icon className="w-6 h-6 shrink-0" />
+                    <span>{item.name}</span>
+                  </Link>
+                  {linkContent}
+                </li>
+              );
+            }
 
             return (
               <li key={item.name}>
@@ -116,7 +162,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
 
       {/* User Profile at Bottom */}
       {userRole !== 'Student' && (
-        <div className="p-4 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
+        <div className="p-4 border-t border-gray-200">
           <TooltipWrapper show={isCollapsed} content="User Profile">
             <Link
               href="/userprofile"
