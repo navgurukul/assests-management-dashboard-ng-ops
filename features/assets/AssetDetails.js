@@ -30,6 +30,9 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         toast.success('Asset marked as scrap successfully.');
       }
       setModalAction(null);
+      if (refetch) {
+        refetch(); // Refresh asset details after status update
+      }
     } catch (error) {
       toast.error(error?.message || 'Failed to update asset status. Please try again.');
     } finally {
@@ -189,7 +192,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Source Type', value: formatSourceType(assetDetails.sourceType) || 'N/A' },
-        { label: 'Owned By', value: assetDetails.ownedBy || 'N/A' },
+        { label: 'Owned By', value: assetDetails.ownedBy?.toUpperCase() || 'N/A' },
         { label: 'Source By', value: assetDetails.sourceBy || 'N/A' },
         { label: 'Purchase Date', value: assetDetails.purchaseDate ? new Date(assetDetails.purchaseDate).toLocaleDateString() : 'N/A' },
         { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost.toLocaleString()}` : 'N/A' },
@@ -235,9 +238,15 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         headerActions={
           <>
             <CustomButton
-              text="Moved to Repair"
+              text={assetDetails.status === 'REPAIR' ? 'Move to in Stock' : 'Moved to Repair'}
               variant="warning"
-              onClick={() => setModalAction('REPAIR')}
+              onClick={() => {
+                if (assetDetails.status === 'REPAIR') {
+                  console.log('Moving asset back to In Stock...');
+              }else {
+                setModalAction('REPAIR');
+              }
+            }}
             />
             <CustomButton
               text="Mark as Scrap"
