@@ -10,7 +10,7 @@ export default function AssetDetailsPage() {
   const params = useParams();
   const assetId = params.id;
 
-  const { data, isLoading, isError, error } = useFetch({
+  const { data, isLoading, isError, error, refetch } = useFetch({
     url: config.endpoints.assets.details(assetId),
     queryKey: ['asset', assetId],
     enabled: !!assetId,
@@ -24,6 +24,7 @@ export default function AssetDetailsPage() {
       isError={isError}
       error={error}
       onBack={() => router.back()}
+      refetch={refetch}
     />
   );
 }
