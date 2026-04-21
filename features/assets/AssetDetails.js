@@ -30,6 +30,9 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         toast.success('Asset marked as scrap successfully.');
       }
       setModalAction(null);
+      if (refetch) {
+        refetch(); // Refresh asset details after status update
+      }
     } catch (error) {
       toast.error(error?.message || 'Failed to update asset status. Please try again.');
     } finally {
@@ -235,9 +238,15 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         headerActions={
           <>
             <CustomButton
-              text="Moved to Repair"
+              text={assetDetails.status === 'REPAIR' ? 'Move to in Stock' : 'Moved to Repair'}
               variant="warning"
-              onClick={() => setModalAction('REPAIR')}
+              onClick={() => {
+                if (assetDetails.status === 'REPAIR') {
+                  console.log('Moving asset back to In Stock...');
+              }else {
+                setModalAction('REPAIR');
+              }
+            }}
             />
             <CustomButton
               text="Mark as Scrap"
