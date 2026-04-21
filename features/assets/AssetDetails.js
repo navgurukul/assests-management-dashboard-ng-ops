@@ -189,7 +189,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Source Type', value: formatSourceType(assetDetails.sourceType) || 'N/A' },
-        { label: 'Owned By', value: assetDetails.ownedBy || 'N/A' },
+        { label: 'Owned By', value: assetDetails.ownedBy?.toUpperCase() || 'N/A' },
         { label: 'Source By', value: assetDetails.sourceBy || 'N/A' },
         { label: 'Purchase Date', value: assetDetails.purchaseDate ? new Date(assetDetails.purchaseDate).toLocaleDateString() : 'N/A' },
         { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost.toLocaleString()}` : 'N/A' },
