@@ -67,7 +67,7 @@ export default function TableWrapper({
 
   const tableClassNames = {
     ...classNames,
-    wrapper: `shadow-none border-none max-h-[60vh] overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
+    wrapper: `shadow-none border-none max-h-[62vh] overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
@@ -173,7 +173,7 @@ export default function TableWrapper({
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden sm:block overflow-x-auto min-h-[60vh] relative">
+      <div className="hidden sm:block overflow-x-auto min-h-[62vh] relative">
         <Table aria-label={ariaLabel} classNames={tableClassNames} isHeaderSticky>
           <TableHeader>
             {columns.map((column) => (
