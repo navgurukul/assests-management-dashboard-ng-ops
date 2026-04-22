@@ -70,7 +70,7 @@ export default function CampusInchargeTab() {
         state: selectedItem?.campusObject?.state,
         campusCode: selectedItem?.campusObject?.campusCode,
         capacity: selectedItem.capacity,
-        school: selectedItem.school,
+        school: Array.isArray(selectedItem.school) ? selectedItem.school : selectedItem.school ? [selectedItem.school] : [],
         itCoordinatorName: selectedItem.itCoordinator?.name,
         itCoordinatorEmail: selectedItem.itCoordinator?.email,
         itCoordinatorPhone: selectedItem.itCoordinator?.phone,
