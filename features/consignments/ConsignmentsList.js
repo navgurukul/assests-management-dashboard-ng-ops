@@ -777,6 +777,11 @@ export default function ConsignmentsList() {
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = (item, columnKey) => {
     if (columnKey === 'actions') {
+      const itemStatus = (item.status || '').toUpperCase();
+
+      if (itemStatus === 'ACCEPTED' || itemStatus === 'REJECTED') {
+        return <StatusChip value={item.status} />;
+      }
       const menuOptions = [
         {
           label: 'Accepted',
