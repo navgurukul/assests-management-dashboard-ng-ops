@@ -89,8 +89,8 @@ export const campusInchargeModalFields = [
   {
     name: 'school',
     label: 'School',
-    type: 'select',
-    placeholder: 'Select a school',
+    type: 'multi-select',
+    placeholder: 'Select school',
     required: true,
     pairedWith: true,
     options: [
@@ -254,7 +254,7 @@ export const campusInchargeValidationSchema = Yup.object().shape({
     .min(1, 'Capacity must be at least 1')
     .max(99999, 'Capacity must be at most 99999'),
 
-  school: Yup.string().required('School is required'),
+  school: Yup.array().of(Yup.string()).min(1, 'At least one school is required').required('School is required'),
 
   itCoordinatorName: nameSchema('IT Coordinator Name'),
   itCoordinatorEmail: emailSchema('IT Coordinator Email'),
@@ -277,7 +277,7 @@ export const campusInchargeInitialValues = {
   state: '',
   campusCode: '',
   capacity: '',
-  school: '',
+  school: [],
   itCoordinatorName: '',
   itCoordinatorEmail: '',
   itCoordinatorPhone: '',
