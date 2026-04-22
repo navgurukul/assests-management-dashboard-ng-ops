@@ -444,6 +444,13 @@ export default function ConsignmentsList() {
     }
     router.push(`/consignments/${item.id}`);
   };
+
+  const handleReturnRowClick = (item) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('currentReturnData', JSON.stringify(item));
+    }
+    router.push(`/consignments/returns/${item.id}`);
+  };
   
   // ============================================
   // MODAL HANDLERS
@@ -906,7 +913,7 @@ export default function ConsignmentsList() {
         columns={showInTransit ? inTransitColumns : visibleColumns}
         title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
         renderCell={showInTransit ? renderInTransitCellWithActions : renderCell}
-        onRowClick={showInTransit ? undefined : handleRowClick}
+        onRowClick={showInTransit ? handleReturnRowClick : handleRowClick}
         itemsPerPage={showInTransit ? inTransitPageSize : pageSize}
         showPagination={true}
         ariaLabel={showInTransit ? 'In-transit returns table' : 'Consignments table'}
