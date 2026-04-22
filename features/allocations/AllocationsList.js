@@ -203,8 +203,8 @@ export default function AllocationsList() {
         showPagination={true}
         ariaLabel="Allocations table"
         onRowClick={handleRowClick}
-        showCreateButton={true}
-        onCreateClick={handleCreateClick}
+        // showCreateButton={true}
+        // onCreateClick={handleCreateClick}
         // Search component
         searchComponent={
           <SearchInput
