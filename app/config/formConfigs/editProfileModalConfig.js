@@ -39,6 +39,22 @@ export const getEditProfileFields = (defaultValues = {}) => [
     required: false,
     defaultValue: defaultValues.campusId || '',
   },
+  {
+    name: 'school',
+    label: 'School',
+    type: 'select',
+    placeholder: 'Select school',
+    required: false,
+    hint: 'Only for students',
+    options: [
+      { value: 'School of Programming', label: 'School of Programming' },
+      { value: 'School of Business', label: 'School of Business' },
+      { value: 'School of Finance', label: 'School of Finance' },
+      { value: 'School of Second Chance', label: 'School of Second Chance' },
+      { value: 'School of Data Analytics', label: 'School of Data Analytics' },
+    ],
+    defaultValue: defaultValues.school || '',
+  },
 ];
 
 // ─── Yup Validation Schema ─────────────────────────────────────────────────
@@ -54,6 +70,7 @@ export const editProfileValidationSchema = Yup.object().shape({
     .nullable()
     .min(2, 'Location must be at least 2 characters'),
   campusId: Yup.string().nullable(),
+  school: Yup.string().nullable(),
 });
 
 // ─── Initial values ────────────────────────────────────────────────────────
@@ -62,4 +79,5 @@ export const editProfileInitialValues = {
   phone: '',
   location: '',
   campusId: '',
+  school: '',
 };

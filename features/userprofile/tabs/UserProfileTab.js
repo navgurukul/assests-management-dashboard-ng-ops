@@ -109,6 +109,7 @@ export default function UserProfileTab() {
     phone: userData.phone,
     location: userData.location,
     campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
+    school: rawUserData?.school || '',
   });
 
   if (isLoadingUserData && !rawUserData) {

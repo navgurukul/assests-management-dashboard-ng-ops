@@ -610,7 +610,8 @@ export default function FormModal({
 
       case 'select':
         return (
-          <select
+          <>
+            <select
             id={field.name}
             name={field.name}
             value={value}
@@ -628,6 +629,10 @@ export default function FormModal({
               </option>
             ))}
           </select>
+          {field.hint && (
+            <p className="text-xs text-gray-500">{field.hint}</p>
+          )}
+          </>
         );
 
       case 'multi-select':
