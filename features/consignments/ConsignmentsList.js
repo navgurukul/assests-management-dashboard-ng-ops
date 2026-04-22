@@ -444,6 +444,13 @@ export default function ConsignmentsList() {
     }
     router.push(`/consignments/${item.id}`);
   };
+
+  const handleReturnRowClick = (item) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('currentReturnData', JSON.stringify(item));
+    }
+    router.push(`/consignments/return/${item.id}`);
+  };
   
   // ============================================
   // MODAL HANDLERS
@@ -770,6 +777,11 @@ export default function ConsignmentsList() {
   // Render cell for in-transit table (with actions column)
   const renderInTransitCellWithActions = (item, columnKey) => {
     if (columnKey === 'actions') {
+      const itemStatus = (item.status || '').toUpperCase();
+
+      if (itemStatus === 'ACCEPTED' || itemStatus === 'REJECTED') {
+        return <StatusChip value={item.status} />;
+      }
       const menuOptions = [
         {
           label: 'Accepted',
@@ -906,7 +918,7 @@ export default function ConsignmentsList() {
         columns={showInTransit ? inTransitColumns : visibleColumns}
         title={showInTransit ? 'In-Transit Returns' : 'Consignments'}
         renderCell={showInTransit ? renderInTransitCellWithActions : renderCell}
-        onRowClick={showInTransit ? undefined : handleRowClick}
+        onRowClick={showInTransit ? handleReturnRowClick : handleRowClick}
         itemsPerPage={showInTransit ? inTransitPageSize : pageSize}
         showPagination={true}
         ariaLabel={showInTransit ? 'In-transit returns table' : 'Consignments table'}
