@@ -449,7 +449,7 @@ export default function ConsignmentsList() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('currentReturnData', JSON.stringify(item));
     }
-    router.push(`/consignments/returns/${item.id}`);
+    router.push(`/consignments/return/${item.id}`);
   };
   
   // ============================================
