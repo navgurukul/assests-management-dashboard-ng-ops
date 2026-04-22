@@ -9,6 +9,7 @@ import FilterDropdown from './FilterDropdown';
 import ActiveFiltersChips from './ActiveFiltersChips';
 import AllocationConsignmentSelector from './AllocationConsignmentSelector';
 import CustomDatePicker from '@/components/atoms/CustomDatePicker';
+import MultiSelect from '@/components/atoms/MultiSelect';
 
 const parseDateValue = (value) => {
   if (!value) return null;
@@ -67,7 +68,9 @@ export default function FormModal({
 
         initialData[field.name] = field.type === 'checkbox'
           ? (field.defaultValue ?? false)
-          : (field.defaultValue || '');
+          : field.type === 'multi-select'
+            ? (field.defaultValue || [])
+            : (field.defaultValue || '');
       });
       setFormData(initialData);
       setErrors({});
@@ -375,7 +378,9 @@ export default function FormModal({
 
   // Render input field based on type
   const renderField = (field) => {
-    const value = formData[field.name] || '';
+    const value = field.type === 'multi-select'
+      ? (formData[field.name] || [])
+      : (formData[field.name] || '');
     const error = touched[field.name] && errors[field.name];
 
     const baseInputClasses = `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
@@ -625,6 +630,23 @@ export default function FormModal({
           </select>
         );
 
+      case 'multi-select':
+        return (
+          <MultiSelect
+            name={field.name}
+            label={field.label}
+            placeholder={field.placeholder}
+            options={field.options || []}
+            value={Array.isArray(value) ? value : []}
+            onChange={(e) => handleChange(field.name, e.target.value)}
+            onBlur={() => handleBlur(field.name)}
+            isInvalid={!!error}
+            errorMessage={error || ''}
+            isRequired={field.required}
+            isDisabled={field.disabled || isSubmitting}
+          />
+        );
+
       case 'textarea':
         return (
           <textarea
@@ -805,14 +827,14 @@ export default function FormModal({
                       )}
                     </div>
                     <div>
-                      {pairedField.type !== 'api-autocomplete' && (
+                      {pairedField.type !== 'api-autocomplete' && pairedField.type !== 'multi-select' && (
                         <label htmlFor={pairedField.name} className="block text-sm font-medium text-gray-700 mb-1">
                           {pairedField.label}
                           {pairedField.required && <span className="text-red-500 ml-1">*</span>}
                         </label>
                       )}
                       {renderField(pairedField)}
-                      {touched[pairedField.name] && errors[pairedField.name] && (
+                      {pairedField.type !== 'multi-select' && touched[pairedField.name] && errors[pairedField.name] && (
                         <p className="mt-1 text-sm text-red-600">{errors[pairedField.name]}</p>
                       )}
                     </div>
@@ -888,7 +910,7 @@ export default function FormModal({
             // Regular field rendering
             return (
               <div key={field.name}>
-                {field.type !== 'api-autocomplete' && field.type !== 'filter-toggle' && field.type !== 'filter-group' && field.type !== 'allocation-consignment-selector' && field.type !== 'checkbox' && (
+                {field.type !== 'api-autocomplete' && field.type !== 'filter-toggle' && field.type !== 'filter-group' && field.type !== 'allocation-consignment-selector' && field.type !== 'checkbox' && field.type !== 'multi-select' && (
                   <label
                     htmlFor={field.name}
                     className="block text-sm font-medium text-gray-700 mb-1"
@@ -901,7 +923,7 @@ export default function FormModal({
                 )}
                 {renderField(field)}
                 {/* Show errors for all field types */}
-                {touched[field.name] && errors[field.name] && (
+                {field.type !== 'multi-select' && touched[field.name] && errors[field.name] && (
                   <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
                 )}
               </div>
