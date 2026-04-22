@@ -10,7 +10,7 @@ import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
 
-export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack }) {
+export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
   const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
 
