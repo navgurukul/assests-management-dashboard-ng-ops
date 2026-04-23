@@ -26,12 +26,22 @@ export default function CreateAsset() {
     try {
       // Coerce string fields the API expects as numbers; strip internal form-only fields
       const { assetTypeName, ...rest } = values;
-      const payload = {
+      const rawPayload = {
         ...rest,
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
         cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
       };
+
+      // Build dynamic payload — only include fields that have actual values
+      const payload = Object.fromEntries(
+        Object.entries(rawPayload).filter(([, fieldValue]) => {
+          if (fieldValue === '' || fieldValue === undefined || fieldValue === null) return false;
+          return true;
+        })
+      );
+
+      console.log('Create Asset Payload:', payload);
 
       // Make API call to create asset
       const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
@@ -82,6 +92,9 @@ export default function CreateAsset() {
       formik.setFieldValue('ramSizeGB', '');
       formik.setFieldValue('storageSizeGB', '');
       formik.setFieldValue('charger', false);
+    },
+    onCampusChange: (value, formik) => {
+      formik.setFieldValue('currentLocationId', '');
     },
   };
 
