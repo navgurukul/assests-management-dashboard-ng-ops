@@ -185,6 +185,7 @@ export const assetFormFields = [
     type: 'date',
     placeholder: 'Select purchase date',
     required: true,
+    showIf: { field: 'sourceType', value: ['PURCHASED', 'PERSONAL'] },
   },
   {
     name: 'cost',
