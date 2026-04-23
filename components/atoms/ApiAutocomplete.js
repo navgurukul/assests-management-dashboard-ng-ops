@@ -6,6 +6,7 @@ import {
   AutocompleteItem
 } from "@heroui/autocomplete";
 import { useApiAutocomplete } from '@/app/hooks/useApiAutocomplete';
+import { X } from 'lucide-react';
 
 export default function ApiAutocomplete({
   name,
@@ -95,6 +96,12 @@ export default function ApiAutocomplete({
     setInputValue(val);
   };
 
+  const handleClear = () => {
+    setInputValue('');
+    onChange({ target: { name, value: '' } });
+    if (onItemSelect) onItemSelect(null);
+  };
+
   return (
     <div className="w-full">
       {/* Label */}
@@ -105,7 +112,7 @@ export default function ApiAutocomplete({
 
       {/* Autocomplete Wrapper */}
       <div
-        className={`api-autocomplete-wrapper border rounded-lg transition-colors ${
+        className={`api-autocomplete-wrapper relative border rounded-lg transition-colors ${
           isInvalid 
             ? 'border-red-500 focus-within:border-red-600' 
             : 'border-gray-300 focus-within:border-blue-500'
@@ -153,6 +160,17 @@ export default function ApiAutocomplete({
             </AutocompleteItem>
           )}
         </Autocomplete>
+
+        {value && !isDisabled && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-10 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label="Clear selection"
+          >
+            <X size={14} />
+          </button>
+        )}
       </div>
     </div>
   );
