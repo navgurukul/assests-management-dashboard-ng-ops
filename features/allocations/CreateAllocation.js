@@ -149,6 +149,11 @@ export default function CreateAllocation() {
       // Clear assetId when assetType changes
       formik.setFieldValue('assetId', '');
     },
+    clearSourceCampusDependents: (value, formik) => {
+      formik.setFieldValue('destinationCampus', '');
+      formik.setFieldValue('destinationCampusName', '');
+      formik.setFieldValue('campusAssets', []);
+    },
   };
 
   return (
