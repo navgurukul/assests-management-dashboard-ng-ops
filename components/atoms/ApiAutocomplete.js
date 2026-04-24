@@ -68,7 +68,11 @@ export default function ApiAutocomplete({
   };
 
   useEffect(() => {
-    if (!value || allItems.length === 0 || inputValue !== '') return;
+    if (!value) {
+      setInputValue('');
+      return;
+    }
+    if (allItems.length === 0 || inputValue !== '') return;
     const matchedItem = allItems.find((item) => String(item[valueKey]) === String(value));
     if (matchedItem) {
       setInputValue(String(getItemLabel(matchedItem) ?? ''));
