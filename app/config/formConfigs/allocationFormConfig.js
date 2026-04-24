@@ -105,7 +105,7 @@ export const allocationFormFields = [
     valueKey: 'id',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
-    onFieldChange: 'clearSourceCampusDependants',
+    onFieldChange: 'clearSourceCampusSelections',
     companionField: 'sourceCampusName',
     companionKey: 'campusName',
   },

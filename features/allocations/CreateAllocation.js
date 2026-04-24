@@ -152,6 +152,7 @@ export default function CreateAllocation() {
     clearSourceCampusDependents: (value, formik) => {
       formik.setFieldValue('destinationCampus', '');
       formik.setFieldValue('destinationCampusName', '');
+      formik.setFieldValue('assetType', '');
       formik.setFieldValue('campusAssets', []);
     },
   };
