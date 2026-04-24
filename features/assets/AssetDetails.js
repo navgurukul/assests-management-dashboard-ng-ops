@@ -250,6 +250,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
             />
             <CustomButton
               text="Mark as Scrap"
+              disabled={assetDetails?.ownedBy === 'lnw'}
               variant="danger"
               onClick={() => setModalAction('SCRAP')}
             />
