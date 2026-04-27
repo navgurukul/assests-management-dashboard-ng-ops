@@ -64,9 +64,6 @@ export default function CreateAsset() {
         })
       );
 
-      console.log('Asset Type:', assetTypeName);
-      console.log('Clean Payload:', payload);
-
       // Make API call to create asset
       const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
         method: 'POST',
