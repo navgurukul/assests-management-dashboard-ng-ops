@@ -2,7 +2,7 @@ import AssetsList from '@/features/assets/AssetsList';
 
 export default function AssetsPage() {
   return (
-    <div className="overflow-y-auto h-full">
+     <div className="h-full flex flex-col overflow-hidden">
       <AssetsList />
     </div>
   );

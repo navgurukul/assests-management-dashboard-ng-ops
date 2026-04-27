@@ -5,7 +5,7 @@ import AllocationsList from '@/features/allocations/AllocationsList';
 
 export default function AllocationsPage() {
   return (
-    <div className="overflow-y-auto h-full">
+    <div className="h-full flex flex-col overflow-hidden">
       <AllocationsList />
     </div>
   );
