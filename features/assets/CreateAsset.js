@@ -26,6 +26,16 @@ export default function CreateAsset() {
     try {
       // Coerce string fields the API expects as numbers; strip internal form-only fields
       const { assetTypeName, ...rest } = values;
+      
+      // Define which fields are relevant for each asset type
+      const assetTypeFieldMap = {
+        processor: ["Laptop", "Desktop", "Server", "CPU", "Tablet", "Smartphone"],
+        ramSizeGB: ["Laptop", "Desktop", "Server", "RAM", "Tablet", "Smartphone"],
+        storageSizeGB: ["Laptop", "Desktop", "Server", "SSD", "HDD", "External Hard Drive", "USB Flash Drive", "Tablet", "Smartphone"],
+        charger: ["Laptop", "Tablet", "Smartphone"],
+      };
+
+      // Build raw payload with type coercion
       const rawPayload = {
         ...rest,
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
@@ -33,7 +43,20 @@ export default function CreateAsset() {
         cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
       };
 
-      // Build dynamic payload — only include fields that have actual values
+      // Remove fields not relevant to the selected asset type
+      Object.keys(assetTypeFieldMap).forEach((field) => {
+        const allowedTypes = assetTypeFieldMap[field];
+        if (!allowedTypes.includes(assetTypeName)) {
+          delete rawPayload[field];
+        }
+      });
+
+      // Remove purchaseDate if sourceType is DONATED (since it's not applicable)
+      if (values.sourceType === "DONATED") {
+        delete rawPayload.purchaseDate;
+      }
+
+      // Remove empty values
       const payload = Object.fromEntries(
         Object.entries(rawPayload).filter(([, fieldValue]) => {
           if (fieldValue === '' || fieldValue === undefined || fieldValue === null) return false;
@@ -41,7 +64,8 @@ export default function CreateAsset() {
         })
       );
 
-      console.log('Create Asset Payload:', payload);
+      console.log('Asset Type:', assetTypeName);
+      console.log('Clean Payload:', payload);
 
       // Make API call to create asset
       const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {

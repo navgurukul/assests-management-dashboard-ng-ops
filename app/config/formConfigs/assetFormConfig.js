@@ -241,14 +241,27 @@ export const assetValidationSchema = Yup.object().shape({
     .min(2, "Brand must be at least 2 characters"),
   model: Yup.string()
     .required("Model is required")
-    .min(2, "Model must be at least 2 characters"),
+    .min(2, "Model must be at least 2 characters")
+    .matches(
+      /^[a-zA-Z0-9\s\-]+$/,
+      "Only letters, numbers, spaces, hyphens allowed"
+    )
+    .test("contains-letter", "Model must contain at least one letter (e.g., 'Latitude 5400')", function (value) {
+      if (!value) return true;
+      return /[a-zA-Z]/.test(value);
+    }),
   assetTypeName: Yup.string(),
   processor: Yup.string().when("assetTypeName", {
     is: (val) => ["Laptop", "Desktop", "Server", "CPU"].includes(val),
     then: (schema) =>
       schema
         .required("Processor is required")
-        .min(2, "Processor must be at least 2 characters"),
+        .min(2, "Processor must be at least 2 characters")
+        .max(15, "Max 15 characters allowed")
+        .test("valid-processor", "Processor must contain letters (e.g., 'i5-12400', 'Ryzen 5 5600')", function (value) {
+          if (!value) return true;
+          return /[a-zA-Z]/.test(value);
+        }),
     otherwise: (schema) => schema.notRequired().min(0),
   }),
   ramSizeGB: Yup.string()
@@ -283,7 +296,15 @@ export const assetValidationSchema = Yup.object().shape({
     }),
   serialNumber: Yup.string()
     .required("Serial number is required")
-    .min(2, "Serial number must be at least 2 characters"),
+    .min(2, "Serial number must be at least 2 characters")
+    .matches(
+      /^[a-zA-Z0-9\-]+$/,
+      "Only letters, numbers, hyphens allowed"
+    )
+    .test("contains-letter", "Serial number must contain at least one letter (e.g., 'SN-12345')", function (value) {
+      if (!value) return true;
+      return /[a-zA-Z]/.test(value);
+    }),
   campusId: Yup.string().required("Campus is required"),
   currentLocationId: Yup.string().required("Current location is required"),
   status: Yup.string()
@@ -306,7 +327,16 @@ export const assetValidationSchema = Yup.object().shape({
     .when("sourceType", {
       is: "DONATED",
       then: (schema) => schema.notRequired(),
-      otherwise: (schema) => schema.required("Purchase date is required"),
+      otherwise: (schema) => schema
+        .required("Purchase date is required")
+        .test("not-future-date", "Purchase date cannot be in the future", function (value) {
+          if (!value) return true;
+          const selectedDate = new Date(value);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          selectedDate.setHours(0, 0, 0, 0);
+          return selectedDate <= today;
+        }),
     }),
   cost: Yup.number()
     .nullable()
