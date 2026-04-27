@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download, ArrowRightLeft } from 'lucide-react';
+import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download, ArrowRightLeft, ExternalLink } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -434,7 +434,7 @@ export default function MyAssetsTab({ userData = {} }) {
                           disabled={asset.consignmentStatus !== 'DISPATCHED'}
                            />
                         <CustomButton
-                          text="Return Asset"
+                          text="Return"
                           onClick={() => handleReturnAsset(asset)}
                           variant="danger"
                           size="sm"
@@ -447,6 +447,17 @@ export default function MyAssetsTab({ userData = {} }) {
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
                          />
+                         {asset.consignment?.trackingLink && (
+                          <a
+                            href={asset.consignment.trackingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-(--theme-main) hover:underline"
+                            title="Track Device"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
                       </>
                     )}
                   </div>
