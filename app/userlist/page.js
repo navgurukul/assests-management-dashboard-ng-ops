@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function UserListPage() {
   return (
-    <div className="overflow-y-auto h-full">
+    <div className="h-full flex flex-col overflow-hidden">
       <UsersList />
     </div>
   );
