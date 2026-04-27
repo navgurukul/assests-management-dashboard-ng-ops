@@ -42,10 +42,10 @@ export default function TicketsList() {
   ];
 
   return (
-    <div className="space-y-2">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Summary Cards */}
       {showCards && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 px-4 pt-4 mb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 px-4 pt-4 mb-2 shrink-0">
           {summaryCards.map((card) => (
             <SummaryCard
               key={card.label}
@@ -62,12 +62,14 @@ export default function TicketsList() {
         </div>
       )}
 
-      <TicketsTable
+      <div className='flex-1 min-h-0 flex flex-col' >
+        <TicketsTable
         filters={filters}
         onFilterChange={setFilters}
         showCards={showCards}
         onToggleCards={() => setShowCards((prev) => !prev)}
       />
+      </div>
     </div>
   );
 }
