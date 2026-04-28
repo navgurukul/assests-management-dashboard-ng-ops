@@ -12,9 +12,8 @@ import '@/components/atoms/Loader.css';
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isLoggingOutRef } = useAuth();
   const userRole = useSelector(selectUserRole);
-  const [isReady, setIsReady] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Define public routes (no authentication required)
@@ -23,31 +22,25 @@ export default function ClientLayout({ children }) {
   // Check if current path is public
   const isPublicPath = publicPaths.some((path) => pathname === path);
 
+  // Derived readiness — no need for state
+  const isReady = !loading && (
+    (isAuthenticated && isPublicPath) ||
+    (isAuthenticated && !isPublicPath) ||
+    (!isAuthenticated && isPublicPath)
+  );
+
+  // Handle redirects for unauthenticated users on protected pages
   useEffect(() => {
-    // Wait for auth state to load
-    if (loading) {
-      return;
-    }
+    if (loading) return;
 
-    // Case 1: User is authenticated and trying to access login page
-    // Redirect to dashboard
-    if (isAuthenticated && isPublicPath) {
-      setIsReady(true);
-      return;
-    }
-
-    // Case 2: User is NOT authenticated and trying to access protected page
-    // Redirect to login
     if (!isAuthenticated && !isPublicPath) {
-      // Store current path for redirect after login
-      sessionStorage.setItem('redirectAfterLogin', pathname);
+      if (!isLoggingOutRef?.current) {
+        sessionStorage.setItem('redirectAfterLogin', pathname);
+      }
+      isLoggingOutRef.current = false;
       router.replace('/login');
-      return;
     }
-
-    // Case 3: User is on correct page (authenticated on protected, or not authenticated on public)
-    setIsReady(true);
-  }, [isAuthenticated, loading, pathname, isPublicPath, router, userRole]);
+  }, [isAuthenticated, loading, pathname, isPublicPath, router, userRole, isLoggingOutRef]);
 
   // Show loading state while checking authentication
   if (loading) {
