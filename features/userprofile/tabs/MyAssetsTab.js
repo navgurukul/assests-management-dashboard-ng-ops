@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download, ArrowRightLeft, ExternalLink } from 'lucide-react';
+import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download, ArrowRightLeft, ExternalLink, ChevronRight, ChevronDown, Briefcase, User } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -33,6 +33,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const [receivedModalOpen, setReceivedModalOpen] = useState(false);
   const [nocModalOpen, setNocModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [expandedTimelines, setExpandedTimelines] = useState({});
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
   const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
 
@@ -71,7 +72,9 @@ export default function MyAssetsTab({ userData = {} }) {
     enabled: !!coordinatorCampusId,
   });
 
-  const campusesData = campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
+  const campusesData = useMemo(() => {
+    return campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
+  }, [campusesResponse]);
 
   const coordinatorEmail = useMemo(() => {
     if (!coordinatorResponse) return '';
@@ -111,7 +114,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
   const assetMovements = userAssets?.data?.assetMovements || userAssets?.assetMovements || [];
 
-  const allocationMap = useMemo(() => {
+  const allocationMap = (() => {
     const map = {};
     allocations.forEach((allocation) => {
       allocation.assetIds?.forEach((assetId) => {
@@ -120,6 +123,7 @@ export default function MyAssetsTab({ userData = {} }) {
           createdAt: allocation.createdAt,
           allocationType: allocation.allocationType,
           allocationReason: allocation.allocationReason,
+          allocationCode: allocation.allocationCode,
           sourceName: allocation.sourceName,
           destinationName: allocation.destinationName,
           userAddress: allocation.userAddress,
@@ -127,9 +131,9 @@ export default function MyAssetsTab({ userData = {} }) {
       });
     });
     return map;
-  }, [allocations]);
+  })();
 
-  const computedReturnFields = useMemo(() => {
+  const computedReturnFields = (() => {
     const fields = getReturnAssetFields(
       selectedAsset, 
       allocationMap[selectedAsset?.id]?.sourceName,
@@ -152,7 +156,7 @@ export default function MyAssetsTab({ userData = {} }) {
 
       return newField;
     });
-  }, [selectedAsset, allocationMap, coordinatorUpdateTick, campusesData, localFormState]);
+  })();
 
   const handleExtendLease = (asset) => {
     setSelectedAsset(asset);
@@ -376,6 +380,60 @@ export default function MyAssetsTab({ userData = {} }) {
   const allAssetsAccepted =
     assets.length > 0 && assets.every((asset) => asset.consignmentReturnStatus === 'ACCEPTED');
 
+  const movementStyleConfig = {
+    ALLOCATION: { label: 'Allocation', textColor: 'text-(--theme-main)', bg: '' },
+    'RETURN ACCEPTED': { label: 'Return Accepted', textColor: 'text-green-700', bg: 'bg-green-50' },
+    RETURN_REQUESTED: { label: 'Return Requested', textColor: 'text-amber-700', bg: 'bg-amber-50' },
+  };
+
+  // Build cards for returned assets that only exist in movements (not in assets array)
+  const activeAssetTags = new Set(assets.map((assetItem) => assetItem.assetTag));
+  const returnedAssetMap = {};
+  assetMovements.forEach((movement) => {
+    const tag = movement.newAssetTag || movement.assetTag;
+    if (!tag || activeAssetTags.has(tag)) return;
+    if (!returnedAssetMap[tag]) {
+      returnedAssetMap[tag] = { assetTag: tag, movements: [] };
+    }
+    returnedAssetMap[tag].movements.push(movement);
+    // Also capture the previous tag movements under the same group
+    if (movement.previousAssetTag && movement.previousAssetTag !== tag && !activeAssetTags.has(movement.previousAssetTag)) {
+      if (!returnedAssetMap[movement.previousAssetTag]) {
+        returnedAssetMap[movement.previousAssetTag] = { assetTag: movement.previousAssetTag, movements: [] };
+      }
+      returnedAssetMap[movement.previousAssetTag].movements.push(movement);
+    }
+  });
+  const returnedAssets = Object.values(returnedAssetMap);
+
+  // Check if every device's latest movement is "RETURN ACCEPTED"
+  const allDevicesReturned = (() => {
+    if (assetMovements.length === 0) return false;
+    const latestByTag = {};
+    assetMovements.forEach((movement) => {
+      const tag = movement.newAssetTag || movement.assetTag;
+      if (!tag) return;
+      const movedAt = new Date(movement.movedAt).getTime();
+      if (!latestByTag[tag] || movedAt > latestByTag[tag].time) {
+        latestByTag[tag] = { time: movedAt, type: movement.movementType };
+      }
+    });
+    const latestEntries = Object.values(latestByTag);
+    return latestEntries.length > 0 && latestEntries.every((entry) => entry.type === 'RETURN ACCEPTED');
+  })();
+
+  const formatMovementDate = (isoDate) => {
+    if (!isoDate) return 'N/A';
+    return new Date(isoDate).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -385,13 +443,14 @@ export default function MyAssetsTab({ userData = {} }) {
           onClick={() => setNocModalOpen(true)}
           variant="primary"
           size="sm"
-          disabled={false}
+          disabled={!allDevicesReturned}
           icon={Download}
         />
       </div>
       
-      {assets && assets.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {(assets.length > 0 || returnedAssets.length > 0) ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Active asset cards */}
           {assets.map((asset) => {
             const allocation = allocationMap[asset.id];
             const allocatedDate = allocation?.createdAt 
@@ -403,26 +462,31 @@ export default function MyAssetsTab({ userData = {} }) {
               : 'N/A';
 
             return (
-              <div 
-                key={asset.id} 
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              <div
+                key={asset.id}
+                className="bg-(--surface) border border-(--border) rounded-lg p-4 shadow-sm flex flex-col"
               >
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-(--surface-soft) rounded-lg p-2">
-                      <Laptop className="w-5 h-5 text-(--theme-main)" />
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-lg  flex items-center justify-center shrink-0">
+                      <Laptop className="w-4 h-4 text-(--theme-main)" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{asset.brand} {asset.model}</h3>
-                      <p className="text-xs text-gray-500">{asset.assetTag}</p>
+                      <h3 className="text-sm font-semibold text-(--foreground) leading-tight">{asset.assetTag}</h3>
+                      <p className="text-xs text-(--muted)">
+                        {asset.brand ? `${asset.brand} ${asset.model} · ` : ''}{asset.campus?.campusName || 'N/A'} Campus
+                      </p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700 tracking-wide">
+                      {asset.status}
+                    </span>
                     {asset.consignmentReturnStatus === 'ACCEPTED' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-medium bg-green-50 text-green-700 border border-green-200 cursor-default select-none">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 text-green-700 border border-green-200 cursor-default select-none">
                         <CheckCircle2 className="w-3 h-3" />
-                        Device is returned and accepted in campus
+                        Returned & accepted
                       </span>
                     ) : (
                       <>
@@ -432,22 +496,22 @@ export default function MyAssetsTab({ userData = {} }) {
                           variant="success"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DISPATCHED'}
-                           />
+                        />
                         <CustomButton
                           text="Return"
                           onClick={() => handleReturnAsset(asset)}
                           variant="danger"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
-                          />
+                        />
                         <CustomButton
                           text="Extend Lease"
                           onClick={() => handleExtendLease(asset)}
                           variant="primary"
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
-                         />
-                         {asset.consignment?.trackingLink && (
+                        />
+                        {asset.consignment?.trackingLink && (
                           <a
                             href={asset.consignment.trackingLink}
                             target="_blank"
@@ -463,93 +527,240 @@ export default function MyAssetsTab({ userData = {} }) {
                   </div>
                 </div>
 
-                {/* Specs */}
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Cpu className="w-4 h-4 text-gray-400" />
-                    <div>
-                      <p className="text-xs text-gray-500">Processor</p>
-                      <p className="font-medium text-gray-900">{asset.processor || 'N/A'}</p>
-                    </div>
+                {/* Info Grid — uniform boxes */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Serial No.</p>
+                    <p className="text-xs font-medium text-(--foreground) truncate" title={asset.serialNumber}>{asset.serialNumber || 'N/A'}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <HardDrive className="w-4 h-4 text-gray-400" />
-                    <div>
-                      <p className="text-xs text-gray-500">RAM / Storage</p>
-                      <p className="font-medium text-gray-900">
-                        {asset.ramSizeGB ? `${asset.ramSizeGB}GB` : 'N/A'} / {asset.storageSizeGB ? `${asset.storageSizeGB}GB` : 'N/A'}
-                      </p>
-                    </div>
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Condition</p>
+                    <p className="text-xs font-medium text-(--foreground)">{asset.condition || 'N/A'}</p>
                   </div>
-                </div>
-
-                {/* Additional Info */}
-                <div className="border-t border-gray-100 pt-3">
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                    {/* Col 1 */}
-                    <div className="flex flex-col gap-y-2">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Status</span>
-                        <span className="text-xs font-medium text-gray-900">{asset.status}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Condition</span>
-                        <span className="text-xs font-medium text-gray-900">{asset.condition}</span>
-                      </div>
-                      {allocation?.sourceName && (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-gray-500">Source</span>
-                          <span className="text-xs font-medium text-gray-900">{allocation.sourceName}</span>
-                        </div>
-                      )}
-                    </div>
-                    {/* Col 2 */}
-                    <div className="flex flex-col gap-y-2">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Serial Number</span>
-                        <span className="text-xs font-medium text-gray-900">{asset.serialNumber}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Allocated Date</span>
-                        <span className="text-xs font-medium text-gray-900">{allocatedDate}</span>
-                      </div>
-                      {allocation?.destinationName && (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-gray-500">Destination</span>
-                          <span className="text-xs font-medium text-gray-900">{allocation.destinationName}</span>
-                        </div>
-                      )}
-                    </div>
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Storage</p>
+                    <p className="text-xs font-medium text-(--foreground)">{asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A'}</p>
                   </div>
-
-                  {/* Accessories */}
-                  <div className="flex items-center gap-3 pt-2 mt-2 border-t border-gray-100">
-                    <span className="text-xs text-gray-500">Accessories:</span>
-                    <div className="flex items-center gap-2">
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Source</p>
+                    <p className="text-xs font-medium text-(--foreground)">{asset.sourceType ? asset.sourceType.charAt(0) + asset.sourceType.slice(1).toLowerCase() : 'N/A'}</p>
+                  </div>
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Allocated</p>
+                    <p className="text-xs font-medium text-(--foreground)">{allocatedDate}</p>
+                  </div>
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Accessories</p>
+                    <div className="flex items-center gap-1.5">
                       {asset.charger && (
-                        <span className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Charger
+                        <span className="flex items-center gap-0.5 text-[11px] text-green-700">
+                          <CheckCircle2 className="w-3 h-3" /> Charger
                         </span>
                       )}
                       {asset.bag && (
-                        <span className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Bag
+                        <span className="flex items-center gap-0.5 text-[11px] text-green-700">
+                          <CheckCircle2 className="w-3 h-3" /> Bag
                         </span>
                       )}
                       {!asset.charger && !asset.bag && (
-                        <span className="text-xs text-gray-400">None</span>
+                        <span className="text-[11px] text-gray-400">None</span>
                       )}
                     </div>
                   </div>
+                  {allocation && (
+                    <>
+                      <div className=" rounded-lg px-2.5 py-2 col-span-2">
+                        <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Allocation Code</p>
+                        <p className="text-xs font-medium text-(--foreground) font-mono truncate" title={allocation.allocationCode}>{allocation.allocationCode || 'N/A'}</p>
+                      </div> 
+                    </>
+                  )}
+                  {asset.ownedBy && (
+                    <div className=" rounded-lg px-2.5 py-2">
+                      <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Owned By</p>
+                      <p className="text-xs font-medium text-(--foreground)">{asset.ownedBy.toUpperCase()}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notes */}
+                {asset.notes && (
+                  <div className="mt-2  rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Notes</p>
+                    <p className="text-xs text-(--muted) line-clamp-2" title={asset.notes}>{asset.notes}</p>
+                  </div>
+                )}
+
+                {/* Per-Asset Movement Timeline */}
+                <div className="mt-auto">
+                {(() => {
+                  const assetMovementsFiltered = assetMovements.filter((movement) => {
+                    const movementTag = movement.newAssetTag || movement.assetTag;
+                    const previousTag = movement.previousAssetTag;
+                    return (
+                      movement.assetId === asset.id ||
+                      movementTag === asset.assetTag ||
+                      previousTag === asset.assetTag
+                    );
+                  });
+
+                  if (assetMovementsFiltered.length === 0) return null;
+
+                  const isTimelineExpanded = !!expandedTimelines[asset.id];
+
+                  return (
+                    <div className="mt-2 pt-2 border-t border-(--border)">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedTimelines((prev) => ({ ...prev, [asset.id]: !prev[asset.id] }))}
+                        className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-(--foreground) transition-colors cursor-pointer"
+                      >
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isTimelineExpanded ? '' : '-rotate-90'}`} />
+                        Movement History ({assetMovementsFiltered.length})
+                      </button>
+                      {isTimelineExpanded && (
+                      <div className="flex items-stretch gap-0 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
+                        {assetMovementsFiltered.map((movement, movementIndex) => {
+                          const movementStyle = movementStyleConfig[movement.movementType] || movementStyleConfig.ALLOCATION;
+                          const formattedReason = movement.allocationReason
+                            ? movement.allocationReason.charAt(0) + movement.allocationReason.slice(1).toLowerCase()
+                            : null;
+
+                          return (
+                            <div key={movement.id} className="flex items-stretch gap-0 shrink-0">
+                              <div
+                                className="relative w-40 h-full bg-(--surface) border border-(--border) rounded-lg px-2.5 py-1.5 cursor-default hover:shadow-md transition-shadow"
+                              >
+                                <span className={`text-[10px] font-semibold uppercase tracking-wide ${movementStyle.textColor}`}>
+                                  {movementStyle.label}
+                                </span> 
+                                {!formattedReason && movement.notes && (
+                                  <p className="text-[11px] text-(--muted) mt-0.5 truncate max-w-[132px]">{movement.notes}</p>
+                                )}
+                                <p className="text-[11px] text-(--theme-light) mt-0.5">{formatMovementDate(movement.movedAt)}</p>
+                              </div>
+                              {movementIndex < assetMovementsFiltered.length - 1 && (
+                                <div className="text-(--border) shrink-0 flex items-center px-0.5">
+                                  <ChevronRight className="w-4 h-4" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      )}
+                    </div>
+                  );
+                })()}
+                </div>
+              </div>
+            );
+          })}
+          {/* Returned asset cards (only in movements, not in active assets) */}
+          {returnedAssets.map((returnedAsset) => {
+            const sortedMovements = [...returnedAsset.movements].sort(
+              (first, second) => new Date(second.movedAt) - new Date(first.movedAt)
+            );
+            const latestMovement = sortedMovements[0];
+            const latestType = latestMovement?.movementType || '';
+            const isAccepted = latestType === 'RETURN ACCEPTED';
+
+            return (
+              <div
+                key={returnedAsset.assetTag}
+                className="bg-(--surface) border border-(--border) rounded-lg p-4 shadow-sm opacity-80 flex flex-col"
+              >
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                      <Laptop className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-(--foreground) leading-tight">{returnedAsset.assetTag}</h3>
+                      <p className="text-xs text-(--muted)">Previously assigned asset</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {isAccepted ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Returned & Accepted
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        <ArrowRightLeft className="w-3 h-3" />
+                        Return In Progress
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Returned message */}
+                <div className={`rounded-lg px-3 py-2 mb-3 ${isAccepted ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>
+                  <p className={`text-xs ${isAccepted ? 'text-green-700' : 'text-amber-700'}`}>
+                    {isAccepted
+                      ? 'This asset has been returned and accepted by the campus. No further action is needed.'
+                      : 'A return request has been raised for this asset. It is currently being processed.'}
+                  </p>
+                </div>
+
+                {/* Movement Timeline */}
+                <div className="mt-auto">
+                {sortedMovements.length > 0 && (() => {
+                  const isTimelineExpanded = !!expandedTimelines[returnedAsset.assetTag];
+
+                  return (
+                  <div className="pt-2 border-t border-(--border)">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedTimelines((prev) => ({ ...prev, [returnedAsset.assetTag]: !prev[returnedAsset.assetTag] }))}
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-(--foreground) transition-colors cursor-pointer"
+                    >
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isTimelineExpanded ? '' : '-rotate-90'}`} />
+                      Movement History ({sortedMovements.length})
+                    </button>
+                    {isTimelineExpanded && (
+                    <div className="flex items-stretch gap-0 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
+                      {sortedMovements.map((movement, movementIndex) => {
+                        const movementStyle = movementStyleConfig[movement.movementType] || movementStyleConfig.ALLOCATION;
+                        const formattedReason = movement.allocationReason
+                          ? movement.allocationReason.charAt(0) + movement.allocationReason.slice(1).toLowerCase()
+                          : null;
+
+                        return (
+                          <div key={movement.id} className="flex items-stretch gap-0 shrink-0">
+                            <div
+                              className="relative w-40 h-full bg-(--surface) border border-(--border) rounded-lg px-2.5 py-1.5 cursor-default hover:shadow-md transition-shadow"
+                            >
+                              <span className={`text-[10px] font-semibold uppercase tracking-wide ${movementStyle.textColor}`}>
+                                {movementStyle.label}
+                              </span>
+                              {!formattedReason && movement.notes && (
+                                <p className="text-[11px] text-(--muted) mt-0.5 truncate max-w-[132px]">{movement.notes}</p>
+                              )}
+                              <p className="text-[11px] text-(--theme-light) mt-0.5">{formatMovementDate(movement.movedAt)}</p>
+                            </div>
+                            {movementIndex < sortedMovements.length - 1 && (
+                              <div className="text-(--border) shrink-0 flex items-center px-0.5">
+                                <ChevronRight className="w-4 h-4" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    )}
+                  </div>
+                  );
+                })()}
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 px-4 mt-6 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-20 px-4 mt-6 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg">
           <div className="bg-white p-4 rounded-full shadow-sm mb-4">
             <Package className="h-10 w-10 text-gray-400" strokeWidth={1.5} />
           </div>
@@ -560,100 +771,6 @@ export default function MyAssetsTab({ userData = {} }) {
           <p className="text-sm text-gray-500 text-center max-w-sm">
             Please raise a new ticket for asset allocation.
           </p>
-        </div>
-      )}
-
-      {/* Asset Movements Section */}
-      {assetMovements.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <ArrowRightLeft className="w-5 h-5 text-(--theme-main)" />
-            Asset Movements
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {assetMovements.map((movement) => {
-              const movedDate = movement.movedAt
-                ? new Date(movement.movedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : 'N/A';
-
-              const movedByName = movement.movedBy
-                ? `${movement.movedBy.firstName || ''} ${movement.movedBy.lastName || ''}`.trim()
-                : '—';
-
-              return (
-                <div
-                  key={movement.id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-(--surface-soft) rounded-lg p-2">
-                        <ArrowRightLeft className="w-5 h-5 text-(--theme-main)" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{movement.newAssetTag}</h3>
-                        <p className="text-xs text-gray-500">Movement ID: {movement.id.slice(0, 8)}...</p>
-                      </div>
-                    </div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
-                      {movement.movementType}
-                    </span>
-                  </div>
-
-                  {/* Details */}
-                  <div className="border-t border-gray-100 pt-3">
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Allocation Reason</span>
-                        <span className="text-xs font-medium text-gray-900">{movement.allocationReason || 'N/A'}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Moved At</span>
-                        <span className="text-xs font-medium text-gray-900">{movedDate}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Requested By</span>
-                        <span className="text-xs font-medium text-gray-900 truncate" title={movement.personRaisingRequest}>
-                          {movement.personRaisingRequest || 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500">Moved By</span>
-                        <span className="text-xs font-medium text-gray-900">{movedByName}</span>
-                      </div>
-                      {movement.previousAssetTag !== movement.newAssetTag && (
-                        <div className="flex flex-col gap-0.5 col-span-2">
-                          <span className="text-xs text-gray-500">Tag Changed</span>
-                          <span className="text-xs font-medium text-gray-900">
-                            <span className="line-through text-gray-400">{movement.previousAssetTag}</span>
-                            {' → '}
-                            {movement.newAssetTag}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Notes */}
-                    {movement.notes && (
-                      <div className="mt-2 pt-2 border-t border-gray-100">
-                        <span className="text-xs text-gray-500">Notes</span>
-                        <p className="text-xs text-gray-700 mt-0.5 line-clamp-2" title={movement.notes}>
-                          {movement.notes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
 
