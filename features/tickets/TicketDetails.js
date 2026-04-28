@@ -467,7 +467,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
           </>
         )}
 
-        <GenericForm
+       <GenericForm
           fields={updateFormFieldsModified}
           initialValues={updateInitialValues}
           validationSchema={ticketUpdateValidationSchema}
@@ -480,7 +480,9 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
             { label: isSubmitting ? 'Processing...' : 'Update Ticket', variant: 'primary', onClick: (values) => handleUpdateSubmit(values), disabled: isSubmitting || (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) },
             ...(ticket.ticketType?.toLowerCase() === 'repair' ? [
               { label: isSubmitting ? 'Processing...' : 'Resolved', variant: 'success', onClick: handleResolvedClick, disabled: isSubmitting },
-              { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
+              ...(loggedInUserRole !== 'ADMIN' && loggedInUserRole !== 'IT_LEAD' ? [
+                { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
+              ] : []),
             ] : []),
           ]}
         />
