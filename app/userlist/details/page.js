@@ -1,35 +1,44 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import useFetch from '@/app/hooks/query/useFetch';
 import UserDetails from '@/features/userlist/UserDetails';
+import StateHandler from '@/components/atoms/StateHandler';
 
 export default function UserDetailsPage() {
   const router = useRouter();
-  const [userData, setUserData] = useState(null);
+  const searchParams = useSearchParams();
+  const userId = searchParams.get('userId');
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedData = sessionStorage.getItem('currentUserData');
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          setUserData(parsedData);
-          sessionStorage.removeItem('currentUserData');
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-        }
-      }
-    }
-  }, []);
+  const { data, isLoading, isError, error } = useFetch({
+    url: `/users/${userId}/assets`,
+    queryKey: ['userAssets', userId],
+    enabled: !!userId,
+  });
+
+  const apiData = data?.data;
+
+  if (!userId) {
+    return <p>No user ID provided.</p>;
+  }
 
   return (
     <div className="overflow-y-auto h-full">
-      <UserDetails
-        userId={userData?.id}
-        userData={userData}
-        onBack={() => router.back()}
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        loadingMessage="Loading user details..."
+        errorMessage="Error loading user details"
       />
+      {!isLoading && !isError && apiData && (
+        <UserDetails
+          userId={userId}
+          userData={apiData.user}
+          allocations={apiData.allocations}
+          onBack={() => router.back()}
+        />
+      )}
     </div>
   );
 }
