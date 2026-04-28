@@ -7,6 +7,9 @@ export const ROLE_OPTIONS = [
   { value: 'EMPLOYEE', label: 'Employee' },
   { value: 'RESIDENTIAL_TEAM', label: 'Residential Team' },
   { value: 'STUDENT', label: 'Student' },
+  { value: 'IT_COORDINATOR', label: 'IT Coordinator' },
+  { value: 'OPERATION', label: 'Operation' },
+  { value: 'IT_LEAD', label: 'IT Lead' },
 ];
 
 // ─── Field definitions ─────────────────────────────────────────────────────

@@ -59,6 +59,16 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         return 'text-green-600';
       case 'MENTOR':
         return 'text-purple-600';
+      case 'EMPLOYEE':
+        return 'text-cyan-600';
+      case 'RESIDENTIAL_TEAM':
+        return 'text-orange-600';
+      case 'IT_COORDINATOR':
+        return 'text-indigo-600';
+      case 'OPERATION':
+        return 'text-pink-600';
+      case 'IT_LEAD':
+        return 'text-emerald-600';
       default:
         return 'text-gray-900';
     }
