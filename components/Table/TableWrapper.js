@@ -67,7 +67,7 @@ export default function TableWrapper({
 
   const tableClassNames = {
     ...classNames,
-    wrapper: `shadow-none border-none max-h-[62vh] overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
+    wrapper: `shadow-none border-none h-full overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
@@ -79,11 +79,11 @@ export default function TableWrapper({
   };
 
   return (
-    <div className={`bg-(--surface) p-3 pb-0 sm:p-6 sm:pb-0 rounded-lg ${shadow} ${margin}`}>
+    <div className={`bg-(--surface) p-3 pb-0 sm:p-6 sm:pb-0 rounded-lg ${shadow} ${margin} flex-1 min-h-0 flex flex-col overflow-hidden`}>
 
       {/* Title – reduced from 2xl/3xl/[32px] → xl/2xl/[28px] */}
       {title && (
-        <div className="mb-2">
+        <div className="mb-2 shrink-0">
           <h2 className="text-xl sm:text-2xl md:text-[26px] font-semibold text-gray-800 ml-4 font-(family-name:--font-poppins)">
             {title}
           </h2>
@@ -91,7 +91,7 @@ export default function TableWrapper({
       )}
 
       {/* Search, Filter, Column Selector, and Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-2 sm:px-4 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-2 sm:px-4 mb-2 shrink-0">
         <div className="w-full sm:flex-1 sm:max-w-md">
           {searchComponent}
         </div>
@@ -124,11 +124,11 @@ export default function TableWrapper({
 
       {/* Active Filters */}
       {activeFiltersComponent && (
-        <div className="mb-4">{activeFiltersComponent}</div>
+        <div className="mb-4 shrink-0">{activeFiltersComponent}</div>
       )}
 
       {/* Mobile Card List */}
-      <div className="sm:hidden space-y-3 px-1">
+      <div className="sm:hidden flex-1 min-h-[200px] overflow-y-auto space-y-3 px-1">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-4">
@@ -173,7 +173,7 @@ export default function TableWrapper({
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden sm:block overflow-x-auto min-h-[62vh] relative">
+      <div className="hidden sm:flex sm:flex-col flex-1 min-h-[200px] overflow-auto relative">
         <Table aria-label={ariaLabel} classNames={tableClassNames} isHeaderSticky>
           <TableHeader>
             {columns.map((column) => (
@@ -221,7 +221,7 @@ export default function TableWrapper({
       </div>
 
       {/* Pagination – reduced via className overrides passed down */}
-      <div className="w-full bg-white z-20 sticky bottom-0 left-0">
+      <div className="w-full bg-white z-20 shrink-0">
         <Pagination
           currentPage={serverPagination ? (paginationData?.page || 1) : currentPage}
           totalPages={serverPagination ? (paginationData?.totalPages || 1) : totalPages}

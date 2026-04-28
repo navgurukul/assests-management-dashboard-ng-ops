@@ -893,7 +893,7 @@ export default function ConsignmentsList() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col overflow-hidden">
       {showErrorBanner && !showInTransit && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
           <div className="flex">
@@ -911,7 +911,7 @@ export default function ConsignmentsList() {
         </div>
       )}
 
-      <div className="mt-6">
+      <div className="flex-1 min-h-0 flex flex-col">
       <TableWrapper
         key={showInTransit ? 'transit' : 'consignments'}
         data={showInTransit ? inTransitTableData : tableData}

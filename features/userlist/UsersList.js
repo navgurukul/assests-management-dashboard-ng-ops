@@ -207,8 +207,8 @@ export default function UsersList() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="mt-6">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col">
       <TableWrapper
         data={usersListData}
         columns={visibleColumns}

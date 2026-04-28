@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download } from 'lucide-react';
+import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download, ArrowRightLeft, ExternalLink } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -106,9 +106,10 @@ export default function MyAssetsTab({ userData = {} }) {
     }
   }, [coordinatorEmail, coordinatorCampusId, isCoordinatorError]);
 
-  // Extract assets and build allocationMap early so handlers can access it
+  // Extract assets, allocations and assetMovements early so handlers can access them
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
   const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
+  const assetMovements = userAssets?.data?.assetMovements || userAssets?.assetMovements || [];
 
   const allocationMap = useMemo(() => {
     const map = {};
@@ -433,7 +434,7 @@ export default function MyAssetsTab({ userData = {} }) {
                           disabled={asset.consignmentStatus !== 'DISPATCHED'}
                            />
                         <CustomButton
-                          text="Return Asset"
+                          text="Return"
                           onClick={() => handleReturnAsset(asset)}
                           variant="danger"
                           size="sm"
@@ -446,6 +447,17 @@ export default function MyAssetsTab({ userData = {} }) {
                           size="sm"
                           disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
                          />
+                         {asset.consignment?.trackingLink && (
+                          <a
+                            href={asset.consignment.trackingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-(--theme-main) hover:underline"
+                            title="Track Device"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
                       </>
                     )}
                   </div>
@@ -548,6 +560,100 @@ export default function MyAssetsTab({ userData = {} }) {
           <p className="text-sm text-gray-500 text-center max-w-sm">
             Please raise a new ticket for asset allocation.
           </p>
+        </div>
+      )}
+
+      {/* Asset Movements Section */}
+      {assetMovements.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <ArrowRightLeft className="w-5 h-5 text-(--theme-main)" />
+            Asset Movements
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {assetMovements.map((movement) => {
+              const movedDate = movement.movedAt
+                ? new Date(movement.movedAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : 'N/A';
+
+              const movedByName = movement.movedBy
+                ? `${movement.movedBy.firstName || ''} ${movement.movedBy.lastName || ''}`.trim()
+                : '—';
+
+              return (
+                <div
+                  key={movement.id}
+                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-(--surface-soft) rounded-lg p-2">
+                        <ArrowRightLeft className="w-5 h-5 text-(--theme-main)" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{movement.newAssetTag}</h3>
+                        <p className="text-xs text-gray-500">Movement ID: {movement.id.slice(0, 8)}...</p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                      {movement.movementType}
+                    </span>
+                  </div>
+
+                  {/* Details */}
+                  <div className="border-t border-gray-100 pt-3">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Allocation Reason</span>
+                        <span className="text-xs font-medium text-gray-900">{movement.allocationReason || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Moved At</span>
+                        <span className="text-xs font-medium text-gray-900">{movedDate}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Requested By</span>
+                        <span className="text-xs font-medium text-gray-900 truncate" title={movement.personRaisingRequest}>
+                          {movement.personRaisingRequest || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500">Moved By</span>
+                        <span className="text-xs font-medium text-gray-900">{movedByName}</span>
+                      </div>
+                      {movement.previousAssetTag !== movement.newAssetTag && (
+                        <div className="flex flex-col gap-0.5 col-span-2">
+                          <span className="text-xs text-gray-500">Tag Changed</span>
+                          <span className="text-xs font-medium text-gray-900">
+                            <span className="line-through text-gray-400">{movement.previousAssetTag}</span>
+                            {' → '}
+                            {movement.newAssetTag}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Notes */}
+                    {movement.notes && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <span className="text-xs text-gray-500">Notes</span>
+                        <p className="text-xs text-gray-700 mt-0.5 line-clamp-2" title={movement.notes}>
+                          {movement.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

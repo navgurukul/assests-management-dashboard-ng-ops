@@ -177,9 +177,9 @@ export default function AllocationsList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 px-4 shrink-0">
         {summaryCards.map((card) => (
           <SummaryCard
             key={card.label}
@@ -193,7 +193,8 @@ export default function AllocationsList() {
       </div>
 
       {/* Table */}
-      <TableWrapper
+      <div className='flex-1 min-h-0 flex flex-col' >
+        <TableWrapper
         margin='m-5'
         data={allocationsListData}
         columns={visibleColumns}
@@ -232,6 +233,7 @@ export default function AllocationsList() {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />
+      </div>
     </div>
   );
 }
