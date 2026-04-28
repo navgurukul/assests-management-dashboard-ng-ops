@@ -9,6 +9,8 @@ import post from '@/app/api/post/post';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
 import { formatSnakeCaseToTitle } from '@/app/utils/dataTransformers';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 import {
   changeRoleFields,
   changeRoleValidationSchema,
@@ -18,6 +20,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
   const queryClient = useQueryClient();
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [roleChanging, setRoleChanging] = useState(false);
+  const currentUserRole = useAppSelector(selectUserRole);
 
   const handleChangeRole = async (formData) => {
     setRoleChanging(true);
@@ -235,12 +238,14 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         showTimeline={false}
         onBack={onBack}
         headerActions={
-          <CustomButton
-            text="Change Role"
-            onClick={() => setRoleModalOpen(true)}
-            variant="primary"
-            size="sm"
-          />
+          currentUserRole === 'ADMIN' && (
+            <CustomButton
+              text="Change Role"
+              onClick={() => setRoleModalOpen(true)}
+              variant="primary"
+              size="sm"
+            />
+          )
         }
       />
 
