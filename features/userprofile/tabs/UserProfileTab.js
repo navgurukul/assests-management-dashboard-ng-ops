@@ -122,7 +122,7 @@ export default function UserProfileTab() {
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         componentName=""
-        actionType="Edit User Details"
+        actionType="User Details"
         fields={editProfileFields}
         onSubmit={handleEditSubmit}
         size="medium"
