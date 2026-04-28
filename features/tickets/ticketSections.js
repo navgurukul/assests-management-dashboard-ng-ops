@@ -37,7 +37,6 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
       span: 2,
       itemsGrid: true,
       items: [
-        { label: 'Ticket ID', value: ticket.ticketNumber || '—' },
         { label: 'Ticket Type', value: ticket.ticketType || '—' },
         { label: 'Priority', value: ticket.priority || '—' },
         { label: 'Status', value: ticket.status || '—' },
@@ -82,7 +81,6 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
       items: [
         { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
         { label: 'Campus Code', value: ticket.campus?.code || '—' },
-        { label: 'Campus ID', value: ticket.campus?.id || ticket.campusId || '—' },
         { label: 'Campus Name', value: ticket.campus?.name || '—' },
       ],
     },

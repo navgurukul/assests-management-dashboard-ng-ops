@@ -220,7 +220,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         { label: 'Source', value: sourceName },
         { label: 'Destination', value: destinationName },
         { label: 'Courier Name', value: courierServiceName || 'N/A' },
-        { label: 'Tracking ID', value: trackingId || 'N/A' },
         { 
           label: 'Tracking Link', 
           value: trackingLink ? (
@@ -273,7 +272,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       itemsGrid: true,
       className: sharedHeightClass,
       items: [
-        { label: 'Consignment ID', value: consignment.consignmentCode || consignment.code || 'N/A' },
         { label: 'Created By', value: resolveUserDisplay(consignment.createdBy) },
         { label: 'Created At', value: consignment.createdAt ? new Date(consignment.createdAt).toLocaleString() : 'N/A' },
         { label: 'Updated At', value: consignment.updatedAt ? new Date(consignment.updatedAt).toLocaleString() : 'N/A' },
