@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -13,6 +14,7 @@ import {
 } from '@/app/config/formConfigs/changeRoleModalConfig';
 
 export default function UserDetails({ userId, userData, allocations = [], onBack }) {
+  const queryClient = useQueryClient();
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [roleChanging, setRoleChanging] = useState(false);
 
@@ -26,6 +28,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
       });
       toast.success('Role updated successfully');
       setRoleModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['userAssets', userId] });
     } catch (err) {
       toast.error(err?.message || 'Failed to update role');
     } finally {
