@@ -66,6 +66,11 @@ export const formatSourceType = (sourceType) => {
   return sourceTypeMap[sourceType] || sourceType || 'N/A';
 };
 
+export const formatSnakeCaseToTitle = (text) => {
+  if (!text) return 'N/A';
+  return text.replace(/_/g, ' ').toUpperCase();
+};
+
 
 export const formatAllocationReason = (reason) => {
   const reasonMap = {
