@@ -9,16 +9,40 @@ import MovementTimeline from '@/components/molecules/MovementTimeline';
 import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
+import usePut from '@/app/hooks/query/usePut';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
-  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
+  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutateAsync: moveToStock, isPending: isMovingToStock } = usePut({
+    onSuccess: () => {
+      toast.success('Asset moved to In Stock successfully.');
+      setModalAction(null);
+      if (refetch) {
+        refetch();
+      }
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to move asset to In Stock. Please try again.');
+    },
+  });
 
   const handleStatusUpdate = async (formData) => {
     const id = assetId || assetData?.id;
     setIsSubmitting(true);
     try {
-      if (modalAction === 'REPAIR') {
+      if (modalAction === 'IN_STOCK') {
+        await moveToStock({
+          endpoint: config.endpoints.assets.update(id),
+          body: {
+            status: 'IN_STOCK',
+            condition: 'WORKING',
+            notes: formData.description,
+          },
+        });
+        return;
+      } else if (modalAction === 'REPAIR') {
         await apiService.post(config.endpoints.assets.repair(id), {
           reasonForRepair: formData.description,
         });
@@ -57,6 +81,16 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       type: 'textarea',
       required: true,
       placeholder: 'Describe why this asset is being scrapped...',
+    },
+  ];
+
+  const inStockFields = [
+    {
+      name: 'description',
+      label: 'Notes',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Add any notes about moving this asset back to stock...',
     },
   ];
 
@@ -217,12 +251,14 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         isOpen={modalAction !== null}
         onClose={() => setModalAction(null)}
         componentName={assetDetails.assetTag}
-        actionType={modalAction === 'REPAIR' ? 'Put in Repair' : 'Scrap this Device'}
-        fields={modalAction === 'REPAIR' ? repairFields : scrapFields}
+        actionType={modalAction === 'IN_STOCK' ? 'Move to In Stock' : modalAction === 'REPAIR' ? 'Put in Repair' : 'Scrap this Device'}
+        fields={modalAction === 'IN_STOCK' ? inStockFields : modalAction === 'REPAIR' ? repairFields : scrapFields}
         onSubmit={handleStatusUpdate}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || isMovingToStock}
         helpText={
-          modalAction === 'REPAIR'
+          modalAction === 'IN_STOCK'
+            ? 'Add notes for moving this asset back to In Stock. The status and condition will be updated.'
+            : modalAction === 'REPAIR'
             ? 'Provide details about the issue. The asset status will be updated to Under Repair.'
             : 'Provide a reason for scrapping. This will mark the asset as no longer in service.'
         }
@@ -242,7 +278,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               variant="warning"
               onClick={() => {
                 if (assetDetails.status === 'REPAIR') {
-                  console.log('Moving asset back to In Stock...');
+                  setModalAction('IN_STOCK');
               }else {
                 setModalAction('REPAIR');
               }
