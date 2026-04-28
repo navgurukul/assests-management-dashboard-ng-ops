@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Package, Laptop, HardDrive, Cpu, Calendar, CheckCircle2, XCircle, Download, ArrowRightLeft, ExternalLink, ChevronRight, ChevronDown, Briefcase, User } from 'lucide-react';
+import { Package, Laptop, CheckCircle2, XCircle, Download, ArrowRightLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import ActionMenu from '@/components/molecules/ActionMenu';
 import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -14,6 +15,7 @@ import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import { downloadNOC } from '../utils/downloadNOC';
+import { getAssetMenuOptions } from '@/dummyJson/dummyJson';
 import {
   getReturnAssetFields,
   returnAssetValidationSchema,
@@ -434,6 +436,8 @@ export default function MyAssetsTab({ userData = {} }) {
     });
   };
 
+  const assetMenuHandlers = { handleAssetReceived, handleReturnAsset, handleExtendLease };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -489,40 +493,7 @@ export default function MyAssetsTab({ userData = {} }) {
                         Returned & accepted
                       </span>
                     ) : (
-                      <>
-                        <CustomButton
-                          text="Asset Received"
-                          onClick={() => handleAssetReceived(asset)}
-                          variant="success"
-                          size="sm"
-                          disabled={asset.consignmentStatus !== 'DISPATCHED'}
-                        />
-                        <CustomButton
-                          text="Return"
-                          onClick={() => handleReturnAsset(asset)}
-                          variant="danger"
-                          size="sm"
-                          disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
-                        />
-                        <CustomButton
-                          text="Extend Lease"
-                          onClick={() => handleExtendLease(asset)}
-                          variant="primary"
-                          size="sm"
-                          disabled={asset.consignmentStatus !== 'DELIVERED' || asset.consignmentReturnStatus !== null}
-                        />
-                        {asset.consignment?.trackingLink && (
-                          <a
-                            href={asset.consignment.trackingLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-medium text-(--theme-main) hover:underline"
-                            title="Track Device"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        )}
-                      </>
+                      <ActionMenu menuOptions={getAssetMenuOptions(asset, assetMenuHandlers)} />
                     )}
                   </div>
                 </div>

@@ -1,3 +1,5 @@
+import { CheckCircle2, ArrowRightLeft, Calendar, ExternalLink } from 'lucide-react';
+
 export const menuItems = [
   { name: 'Dashboard', icon: 'LayoutDashboard', path: '/dashboard', studentOnly: false },
   { name: 'Tickets', icon: 'Ticket', path: '/tickets', studentOnly: false },
@@ -1128,3 +1130,44 @@ export const allocationSummaryCardsConfig = [
     borderColor: 'border-purple-200' 
   },
 ];
+
+export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAsset, handleExtendLease }) => {
+  const options = [];
+
+  if (asset.consignmentStatus === 'DISPATCHED') {
+    options.push({
+      label: 'Asset Received',
+      icon: CheckCircle2,
+      iconClassName: 'text-green-600',
+      onClick: () => handleAssetReceived(asset),
+    });
+  }
+
+  if (asset.consignmentStatus === 'DELIVERED' && asset.consignmentReturnStatus === null) {
+    options.push(
+      {
+        label: 'Return',
+        icon: ArrowRightLeft,
+        iconClassName: 'text-red-500',
+        onClick: () => handleReturnAsset(asset),
+      },
+      {
+        label: 'Extend Lease',
+        icon: Calendar,
+        iconClassName: 'text-blue-600',
+        onClick: () => handleExtendLease(asset),
+      }
+    );
+  }
+
+  if (asset.consignment?.trackingLink) {
+    options.push({
+      label: 'Track Device',
+      icon: ExternalLink,
+      iconClassName: 'text-blue-600',
+      onClick: () => window.open(asset.consignment.trackingLink, '_blank', 'noopener,noreferrer'),
+    });
+  }
+
+  return options;
+};
