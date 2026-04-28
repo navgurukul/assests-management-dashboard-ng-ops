@@ -8,6 +8,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import post from '@/app/api/post/post';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
+import { formatSnakeCaseToTitle } from '@/app/utils/dataTransformers';
 import {
   changeRoleFields,
   changeRoleValidationSchema,
@@ -48,9 +49,8 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
   }
 
   const formatRole = (role) => {
-    if (!role) return 'N/A';
-    return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-  };
+    return formatSnakeCaseToTitle(role);
+  }
 
   const getRoleColor = (role) => {
     switch (role) {
