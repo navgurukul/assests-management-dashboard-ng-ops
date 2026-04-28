@@ -200,10 +200,10 @@ export default function UsersList() {
   }
 
   const handleRowClick = (user) => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('currentUserData', JSON.stringify(user.userData));
+    const userId = user.userData?.id;
+    if (userId) {
+      router.push(`/userlist/details?userId=${userId}`);
     }
-    router.push('/userlist/details');
   };
 
   return (
