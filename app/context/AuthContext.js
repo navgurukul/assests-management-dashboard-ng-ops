@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { setUserRole } from '@/app/store/slices/appSlice';
@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
   });
   const router = useRouter();
   const dispatch = useDispatch();
+  const loggingOutRef = useRef(false);
 
   // Load auth state from localStorage on mount
   useEffect(() => {
@@ -132,8 +133,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    saveAuthState(null);
+    loggingOutRef.current = true;
     sessionStorage.removeItem('redirectAfterLogin');
+    saveAuthState(null);
     router.push('/login');
   };
 
@@ -170,6 +172,7 @@ export function AuthProvider({ children }) {
     user: authState.data?.user || null,
     token: authState.data?.token || null,
     isAuthenticated: authState.data?.isAuthenticated || false,
+    isLoggingOutRef: loggingOutRef,
     login,
     logout,
     updateUserData,
