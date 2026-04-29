@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LayoutDashboard } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SearchInput from '@/components/molecules/SearchInput';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -19,7 +18,7 @@ import {
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/ticketTableConfig';
 
-export default function TicketsTable({ filters = {}, onFilterChange, showCards, onToggleCards }) {
+export default function TicketsTable({ filters = {}, onFilterChange, showCards, onToggleCards, summaryCardsComponent }) {
   const router = useRouter();
   
   // Pagination state
@@ -167,7 +166,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     { value: 'IN_PROGRESS', label: 'In Progress' },
     { value: 'RESOLVED', label: 'Resolved' },
     { value: 'RAISED', label: 'Raised' },
-    { value: 'ESCALATED', label: 'Escalated' },
+    { value: 'ESCALATED', label: 'Escaleted' },
   ];
 
   // isAssigned filter options
@@ -327,19 +326,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     router.push(`/tickets/${ticket.id}`);
   };
 
-  const toggleCardsButton = onToggleCards ? (
-    <div className="relative group">
-      <button
-        onClick={onToggleCards}
-        className="w-8 h-8 flex items-center justify-center rounded-md border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
-      >
-        <LayoutDashboard size={15} />
-      </button>
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded bg-gray-800 text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-        {showCards ? 'Hide Summary' : 'Show Summary'}
-      </span>
-    </div>
-  ) : null;
+
 
   return (
     <TableWrapper
@@ -356,13 +343,16 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
       onCreateClick={handleCreateClick}
       onShowAll={handleShowAll}
       showAllButtonText={showAllButtonText}
-      toggleCardsComponent={toggleCardsButton}
+      showDashboardToggle={true}
+      showCards={showCards}
+      onToggleCards={onToggleCards}
+      summaryCardsComponent={summaryCardsComponent}
       // Search component
       searchComponent={
         <SearchInput
           value={searchInput}
           onChange={setSearchInput}
-          placeholder="Search by ticket number, description, or resolution notes..."
+          placeholder="Search tickets..."
         />
       }
       // Filter component
