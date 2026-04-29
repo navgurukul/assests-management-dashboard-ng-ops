@@ -9,7 +9,7 @@ import TicketsTable from './TicketsTable';
 export default function TicketsList() {
   // Filter state
   const [filters, setFilters] = useState({});
-  const [showCards, setShowCards] = useState(true);
+  const [showCards, setShowCards] = useState(false);
 
   // Fetch consolidated data by campus
   const { data: consolidatedData } = useFetch({
@@ -43,31 +43,29 @@ export default function TicketsList() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Summary Cards */}
-      {showCards && (
-        <div className="bg-[var(--surface)] grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 px-10 pt-6 shrink-0">
-          {summaryCards.map((card) => (
-            <SummaryCard
-              key={card.label}
-              label={card.label}
-              value={card.value}
-              Icon={card.Icon}
-              valueColor={card.valueColor}
-              iconColor={card.iconColor}
-              clickable={true}
-              onClick={() => handleCardClick(card.status)}
-              isActive={card.status === null ? !filters.status : filters.status === card.status}
-            />
-          ))}
-        </div>
-      )}
-
       <div className='flex-1 min-h-0 flex flex-col' >
         <TicketsTable
         filters={filters}
         onFilterChange={setFilters}
         showCards={showCards}
         onToggleCards={() => setShowCards((prev) => !prev)}
+        summaryCardsComponent={showCards ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+            {summaryCards.map((card) => (
+              <SummaryCard
+                key={card.label}
+                label={card.label}
+                value={card.value}
+                Icon={card.Icon}
+                valueColor={card.valueColor}
+                iconColor={card.iconColor}
+                clickable={true}
+                onClick={() => handleCardClick(card.status)}
+                isActive={card.status === null ? !filters.status : filters.status === card.status}
+              />
+            ))}
+          </div>
+        ) : null}
       />
       </div>
     </div>

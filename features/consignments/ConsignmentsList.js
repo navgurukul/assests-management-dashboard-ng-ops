@@ -936,7 +936,7 @@ export default function ConsignmentsList() {
             <SearchInput
               value={searchInput}
               onChange={setSearchInput}
-              placeholder="Search consignments..."
+              placeholder="Search by consignment code or tracking number..."
             />
           )
         }
