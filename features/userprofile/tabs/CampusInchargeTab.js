@@ -166,6 +166,8 @@ export default function CampusInchargeTab() {
     switch (columnKey) {
       case 'campus':
         return <span className="font-bold text-gray-900 uppercase">{item.campus}</span>;
+      case 'campusManager':
+        return renderPersonDetails(item.campusManager);
       case 'itCoordinator':
         return renderPersonDetails(item.itCoordinator);
       case 'operation':
@@ -176,7 +178,7 @@ export default function CampusInchargeTab() {
         return (
           <div className="flex justify-center gap-3">
             <button
-              className="p-2 text-[var(--theme-main)] hover:bg-[var(--surface-soft)] rounded-lg transition-all duration-150 hover:scale-110"
+              className="p-2 text-(--theme-main) hover:bg-(--surface-soft) rounded-lg transition-all duration-150 hover:scale-110"
               title="Edit"
               onClick={(e) => {
                 e.stopPropagation();
