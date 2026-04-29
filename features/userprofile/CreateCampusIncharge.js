@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
@@ -13,10 +13,28 @@ import {
 } from '@/app/config/formConfigs/campusInchargeModalConfig';
 import { toast } from '@/app/utils/toast';
 import usePost from '@/app/hooks/query/usePost';
+import useFetch from '@/app/hooks/query/useFetch';
+import { form } from '@nextui-org/react';
 
 export default function CreateCampusIncharge() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: schoolsResponse } = useFetch({
+    url: config.endpoints.schools.list,
+    queryKey: ['schools'],
+  });
+
+  const formFields = useMemo(() => {
+    const schoolOptions = (schoolsResponse?.data?.schools || []).map((school) => ({
+      value: school.id,
+      label: school.name,
+    }));
+
+    return campusInchargeModalFields.map((field) =>
+      field.name === 'schoolIds' ? { ...field, options: schoolOptions } : field
+    );
+  }, [schoolsResponse]);
 
   const { mutateAsync: createCampusIncharge } = usePost({
     onSuccess: () => {
@@ -95,7 +113,7 @@ export default function CreateCampusIncharge() {
         </div>
         <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-lg border border-[var(--border)] p-8">
           <GenericForm
-            fields={campusInchargeModalFields}
+            fields={formFields}
             initialValues={campusInchargeInitialValues}
             validationSchema={campusInchargeValidationSchema}
             onSubmit={handleFormSubmit}

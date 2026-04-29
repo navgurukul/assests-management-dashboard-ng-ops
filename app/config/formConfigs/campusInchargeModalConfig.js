@@ -92,13 +92,7 @@ export const campusInchargeModalFields = [
     placeholder: 'Select school',
     required: true,
     pairedWith: true,
-    options: [
-      { value: 'School of Programming', label: 'School of Programming' },
-      { value: 'School Of Business', label: 'School Of Business' },
-      { value: 'School of Finance', label: 'School of Finance' },
-      { value: 'School of Second Chance', label: 'School of Second Chance' },
-      { value: 'School of Data analytics', label: 'School of Data analytics' },
-    ],
+    options: [],
   },
   // Campus Manager
   {
