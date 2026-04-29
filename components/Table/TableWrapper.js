@@ -35,7 +35,7 @@ export default function TableWrapper({
   onPageSizeChange,
   // Loading state
   isLoading = false,
-  margin = "m-5",
+  margin = "m-0",
   shadow = "shadow-md",
   emptyContent,
 }) {
@@ -79,7 +79,7 @@ export default function TableWrapper({
   };
 
   return (
-    <div className={`bg-(--surface) p-3 pb-0 sm:p-6 sm:pb-0 rounded-lg ${shadow} ${margin} flex-1 min-h-0 flex flex-col overflow-hidden`}>
+    <div className={`bg-(--surface) p-3 pb-0 sm:p-6 sm:pb-0 ${shadow} ${margin} flex-1 min-h-0 flex flex-col overflow-hidden`}>
 
       {/* Title – reduced from 2xl/3xl/[32px] → xl/2xl/[28px] */}
       {title && (
