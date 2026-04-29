@@ -125,7 +125,6 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
       color: 'blue',
       itemsGrid: true,
       items: [
-        { label: 'Allocation ID', value: allocation.id || 'N/A', className: 'col-span-2' },
         { label: 'Allocation Code', value: allocation.allocationCode || 'N/A' },
         { label: 'Allocation Type', value: allocation.allocationType || 'N/A' },
         { label: 'Status', value: allocation.status || 'N/A' },
@@ -209,7 +208,6 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
       title: 'System Information',
       itemsGrid: true,
       items: [
-        { label: 'User ID', value: userData.id || 'N/A', className: 'col-span-2' },
         {
           label: 'Created At',
           value: userData.createdAt

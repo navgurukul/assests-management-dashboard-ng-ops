@@ -236,7 +236,6 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       title: 'System Information',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
-        { label: 'Asset ID', value: assetDetails.id || 'N/A' },
         { label: 'Asset Type Category', value: assetDetails.assetType?.category || 'N/A' },
         { label: 'Campus Code', value: assetDetails.campus?.code || 'N/A' },
         { label: 'Created At', value: assetDetails.createdAt ? new Date(assetDetails.createdAt).toLocaleString() : 'N/A' },
