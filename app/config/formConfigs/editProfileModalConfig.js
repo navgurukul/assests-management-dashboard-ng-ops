@@ -1,3 +1,4 @@
+import { input } from '@nextui-org/react';
 import * as Yup from 'yup';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -15,10 +16,12 @@ export const getEditProfileFields = (defaultValues = {}) => [
     name: 'phone',
     label: 'Phone',
     type: 'text',
-    placeholder: 'Enter phone number',
+    placeholder: 'Enter 10-digit phone number',
     required: false,
     defaultValue: defaultValues.phone || '',
     maxLength: 10,
+    inputMode: 'numeric',
+    allowOnlyDigits: true,
   },
   {
     name: 'location',
@@ -58,8 +61,8 @@ export const editProfileValidationSchema = Yup.object().shape({
   phone: Yup.string()
     .nullable()
     .matches(
-      /^[0-9+\s\-()?]{7,20}$/,
-      'Enter a valid phone number (7-20 digits, may include +, -, spaces)'
+      /^[0-9]{10}$/,
+      'Phone number must be exactly 10 digits'
     ),
   location: Yup.string()
     .nullable()
