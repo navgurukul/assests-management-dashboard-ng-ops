@@ -18,6 +18,7 @@ export const getEditProfileFields = (defaultValues = {}) => [
     placeholder: 'Enter phone number',
     required: false,
     defaultValue: defaultValues.phone || '',
+    maxLength: 10,
   },
   {
     name: 'location',
