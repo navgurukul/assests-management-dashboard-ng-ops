@@ -562,12 +562,23 @@ export default function FormModal({
             id={field.name}
             name={field.name}
             value={value}
-            onChange={(e) => handleChange(field.name, e.target.value)}
+            onChange={(e) => {
+              let inputValue = e.target.value;
+              if (field.allowOnlyDigits) {
+                inputValue = inputValue.replace(/[^0-9]/g, '');
+              }
+              if (field.maxLength) {
+                inputValue = inputValue.slice(0, field.maxLength);
+              }
+              handleChange(field.name, inputValue);
+            }}
             onBlur={() => handleBlur(field.name)}
             placeholder={field.placeholder}
             className={baseInputClasses}
             disabled={field.disabled || isSubmitting}
             readOnly={field.readOnly}
+            maxLength={field.maxLength}
+            inputMode={field.inputMode}
           />
         );
 
