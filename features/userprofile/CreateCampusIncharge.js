@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
+import StateHandler from '@/components/atoms/StateHandler';
 import config from '@/app/config/env.config';
 import {
   campusInchargeModalFields,
@@ -13,11 +14,14 @@ import {
 } from '@/app/config/formConfigs/campusInchargeModalConfig';
 import { toast } from '@/app/utils/toast';
 import usePost from '@/app/hooks/query/usePost';
+import usePatch from '@/app/hooks/query/usePatch';
 import useFetch from '@/app/hooks/query/useFetch';
-import { form } from '@nextui-org/react';
 
 export default function CreateCampusIncharge() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('id');
+  const isEditMode = Boolean(editId);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: schoolsResponse } = useFetch({
@@ -25,16 +29,83 @@ export default function CreateCampusIncharge() {
     queryKey: ['schools'],
   });
 
+  const { data: campusListResponse, isLoading: isDetailLoading, isError: isDetailError, error: detailError } = useFetch({
+    url: config.endpoints.campusIncharge.list,
+    queryKey: ['campus-incharge'],
+    enabled: isEditMode,
+  });
+
+  const campusDetail = useMemo(() => {
+    if (!isEditMode || !campusListResponse?.data) return null;
+    const records = campusListResponse.data;
+    return records.find((item) => item.id === editId) || null;
+  }, [campusListResponse, editId, isEditMode]);
+
+  const editInitialValues = useMemo(() => {
+    if (!campusDetail) return null;
+    return {
+      campus: campusDetail.campusName || '',
+      address: campusDetail.campus?.address || '',
+      state: campusDetail.campus?.state || '',
+      campusCode: campusDetail.campus?.campusCode || '',
+      capacity: campusDetail.capacity || '',
+      schoolIds: Array.isArray(campusDetail.schoolIds) ? campusDetail.schoolIds : campusDetail.schoolIds ? [campusDetail.schoolIds] : [],
+      campusManagerName: campusDetail.campusManager?.name || '',
+      campusManagerEmail: campusDetail.campusManager?.email || '',
+      campusManagerPhone: campusDetail.campusManager?.phone || '',
+      itCoordinatorName: campusDetail.itCoordinator?.name || '',
+      itCoordinatorEmail: campusDetail.itCoordinator?.email || '',
+      itCoordinatorPhone: campusDetail.itCoordinator?.phone || '',
+      operationName: campusDetail.operation?.name || '',
+      operationEmail: campusDetail.operation?.email || '',
+      operationPhone: campusDetail.operation?.phone || '',
+      itLeadName: campusDetail.itLead?.name || '',
+      itLeadEmail: campusDetail.itLead?.email || '',
+      itLeadPhone: campusDetail.itLead?.phone || '',
+    };
+  }, [campusDetail]);
+
   const formFields = useMemo(() => {
     const schoolOptions = (schoolsResponse?.data?.schools || []).map((school) => ({
       value: school.id,
       label: school.name,
     }));
 
-    return campusInchargeModalFields.map((field) =>
-      field.name === 'schoolIds' ? { ...field, options: schoolOptions } : field
-    );
-  }, [schoolsResponse]);
+    return campusInchargeModalFields.map((field) => {
+      let updatedField = field;
+
+      if (field.name === 'schoolIds') {
+        updatedField = { ...updatedField, options: schoolOptions };
+      }
+
+      if (isEditMode && ['campus', 'address', 'state', 'campusCode'].includes(field.name)) {
+        updatedField = { ...updatedField, disabled: true };
+      }
+
+      if (isEditMode && campusDetail) {
+        const emailSelectedItemMap = {
+          campusManagerEmail: campusDetail.campusManager?.email
+            ? { email: campusDetail.campusManager.email }
+            : null,
+          itCoordinatorEmail: campusDetail.itCoordinator?.email
+            ? { email: campusDetail.itCoordinator.email }
+            : null,
+          operationEmail: campusDetail.operation?.email
+            ? { email: campusDetail.operation.email }
+            : null,
+          itLeadEmail: campusDetail.itLead?.email
+            ? { email: campusDetail.itLead.email }
+            : null,
+        };
+
+        if (emailSelectedItemMap[field.name]) {
+          updatedField = { ...updatedField, selectedItem: emailSelectedItemMap[field.name] };
+        }
+      }
+
+      return updatedField;
+    });
+  }, [schoolsResponse, isEditMode, campusDetail]);
 
   const { mutateAsync: createCampusIncharge } = usePost({
     onSuccess: () => {
@@ -43,6 +114,16 @@ export default function CreateCampusIncharge() {
     },
     onError: (error) => {
       toast.error(error?.message || 'Failed to create Campus Incharge');
+    },
+  });
+
+  const { mutateAsync: updateCampusIncharge } = usePatch({
+    onSuccess: () => {
+      toast.success('Campus Incharge updated successfully');
+      router.push('/userprofile');
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to update Campus Incharge');
     },
   });
 
@@ -77,12 +158,20 @@ export default function CreateCampusIncharge() {
           phone: formData.itLeadPhone,
         },
       };
-      await createCampusIncharge({
-        endpoint: config.endpoints.campusIncharge.create,
-        body: payload,
-      });
+
+      if (isEditMode) {
+        await updateCampusIncharge({
+          endpoint: config.endpoints.campusIncharge.update(editId),
+          body: payload,
+        });
+      } else {
+        await createCampusIncharge({
+          endpoint: config.endpoints.campusIncharge.create,
+          body: payload,
+        });
+      }
     } catch (error) {
-      console.error('Error creating campus incharge:', error);
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} campus incharge:`, error);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,6 +180,10 @@ export default function CreateCampusIncharge() {
   const handleCancel = () => {
     router.push('/userprofile');
   };
+
+  if (isEditMode && (isDetailLoading || isDetailError)) {
+    return <StateHandler isLoading={isDetailLoading} isError={isDetailError} error={detailError} />;
+  }
 
   return (
     <div className="h-full overflow-y-auto bg-[var(--background)]">
@@ -105,20 +198,22 @@ export default function CreateCampusIncharge() {
             className="mb-6"
           />
           <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-sm border border-[var(--border)] p-6">
-            <h1 className="text-xl font-bold mb-2">Campus Details</h1>
+            <h1 className="text-xl font-bold mb-2">
+              {isEditMode ? 'Edit Campus Details' : 'Campus Details'}
+            </h1>
             <p className="text-[var(--muted)]">
-              Fill in the details below
+              {isEditMode ? 'Update the campus details below' : 'Fill in the details below'}
             </p>
           </div>
         </div>
         <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-lg border border-[var(--border)] p-8">
           <GenericForm
             fields={formFields}
-            initialValues={campusInchargeInitialValues}
+            initialValues={isEditMode && editInitialValues ? editInitialValues : campusInchargeInitialValues}
             validationSchema={campusInchargeValidationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
-            submitButtonText="Create Campus Incharge"
+            submitButtonText={isEditMode ? 'Update Campus Incharge' : 'Create Campus Incharge'}
             isSubmitting={isSubmitting}
           />
         </div>

@@ -991,6 +991,7 @@ export const campusInchargeData = [
 
 export const campusInchargeColumns = [
   { key: 'campus', label: 'CAMPUS', align: 'start' },
+  { key: 'campusManager', label: 'CAMPUS MANAGER', align: 'start' },
   { key: 'itCoordinator', label: 'IT COORDINATOR', align: 'start' },
   { key: 'operation', label: 'OPERATION', align: 'start' },
   { key: 'itLead', label: 'IT LEAD', align: 'start' },

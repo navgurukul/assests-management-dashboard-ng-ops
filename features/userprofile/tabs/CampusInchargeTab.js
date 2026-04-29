@@ -1,29 +1,29 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react';
+// import { useQueryClient } from '@tanstack/react-query';
+import { Edit, Mail, Phone } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
-import FormModal from '@/components/molecules/FormModal';
+// import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
 // import usePost from '@/app/hooks/query/usePost';
-import usePatch from '@/app/hooks/query/usePatch';
+// import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
-import { toast } from '@/app/utils/toast';
+// import { toast } from '@/app/utils/toast';
 import { campusInchargeColumns } from '@/dummyJson/dummyJson';
-import {
-  campusInchargeModalFields,
-  campusInchargeValidationSchema,
-} from '@/app/config/formConfigs/campusInchargeModalConfig';
+// import {
+//   campusInchargeModalFields,
+//   campusInchargeValidationSchema,
+// } from '@/app/config/formConfigs/campusInchargeModalConfig';
 
 
 export default function CampusInchargeTab() {
   // const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const queryClient = useQueryClient();
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [selectedItem, setSelectedItem] = useState(null);
+  // const queryClient = useQueryClient();
   const router = useRouter();
 
   const { data: apiResponse, isLoading, isError, error } = useFetch({
@@ -42,17 +42,17 @@ export default function CampusInchargeTab() {
   //   },
   // });
 
-  const { mutateAsync: updateCampusIncharge, isPending: isEditSubmitting } = usePatch({
-    onSuccess: () => {
-      toast.success('Campus Incharge updated successfully');
-      queryClient.invalidateQueries({ queryKey: ['campus-incharge'] });
-      setIsEditModalOpen(false);
-      setSelectedItem(null);
-    },
-    onError: (err) => {
-      toast.error(err?.message || 'Failed to update Campus Incharge');
-    },
-  });
+  // const { mutateAsync: updateCampusIncharge, isPending: isEditSubmitting } = usePatch({
+  //   onSuccess: () => {
+  //     toast.success('Campus Incharge updated successfully');
+  //     queryClient.invalidateQueries({ queryKey: ['campus-incharge'] });
+  //     setIsEditModalOpen(false);
+  //     setSelectedItem(null);
+  //   },
+  //   onError: (err) => {
+  //     toast.error(err?.message || 'Failed to update Campus Incharge');
+  //   },
+  // });
 
   const campusInchargeData = useMemo(() => {
     const records = apiResponse?.data ?? [];
@@ -63,58 +63,58 @@ export default function CampusInchargeTab() {
     }));
   }, [apiResponse]);
 
-  const editFields = useMemo(() => {
-    if (!selectedItem) return campusInchargeModalFields;
-    return campusInchargeModalFields.map((field) => {
-      const valueMap = {
-        campus: selectedItem.campusName,
-        address: selectedItem?.campusObject?.address,
-        state: selectedItem?.campusObject?.state,
-        campusCode: selectedItem?.campusObject?.campusCode,
-        capacity: selectedItem.capacity,
-        schoolIds: Array.isArray(selectedItem.schoolIds) ? selectedItem.schoolIds : selectedItem.schoolIds ? [selectedItem.schoolIds] : [],
-        campusManagerName: selectedItem.campusManager?.name,
-        campusManagerEmail: selectedItem.campusManager?.email,
-        campusManagerPhone: selectedItem.campusManager?.phone,
-        itCoordinatorName: selectedItem.itCoordinator?.name,
-        itCoordinatorEmail: selectedItem.itCoordinator?.email,
-        itCoordinatorPhone: selectedItem.itCoordinator?.phone,
-        operationName: selectedItem.operation?.name,
-        operationEmail: selectedItem.operation?.email,
-        operationPhone: selectedItem.operation?.phone,
-        itLeadName: selectedItem.itLead?.name,
-        itLeadEmail: selectedItem.itLead?.email,
-        itLeadPhone: selectedItem.itLead?.phone,
-      };
-
-      const emailSelectedItemMap = {
-        campusManagerEmail: selectedItem.campusManager?.email
-          ? { email: selectedItem.campusManager.email }
-          : null,
-        itCoordinatorEmail: selectedItem.itCoordinator?.email
-          ? { email: selectedItem.itCoordinator.email }
-          : null,
-        operationEmail: selectedItem.operation?.email
-          ? { email: selectedItem.operation.email }
-          : null,
-        itLeadEmail: selectedItem.itLead?.email
-          ? { email: selectedItem.itLead.email }
-          : null,
-      };
-
-      // Disable Campus, Address, and State fields in edit mode
-      let disabled = false;
-      if (["campus", "address", "state", "campusCode"].includes(field.name)) {
-        disabled = true;
-      }
-
-      const extraProps = emailSelectedItemMap[field.name]
-        ? { selectedItem: emailSelectedItemMap[field.name] }
-        : {};
-
-      return { ...field, defaultValue: valueMap[field.name] ?? '', disabled, ...extraProps };
-    });
-  }, [selectedItem]);
+  // const editFields = useMemo(() => {
+  //   if (!selectedItem) return campusInchargeModalFields;
+  //   return campusInchargeModalFields.map((field) => {
+  //     const valueMap = {
+  //       campus: selectedItem.campusName,
+  //       address: selectedItem?.campusObject?.address,
+  //       state: selectedItem?.campusObject?.state,
+  //       campusCode: selectedItem?.campusObject?.campusCode,
+  //       capacity: selectedItem.capacity,
+  //       schoolIds: Array.isArray(selectedItem.schoolIds) ? selectedItem.schoolIds : selectedItem.schoolIds ? [selectedItem.schoolIds] : [],
+  //       campusManagerName: selectedItem.campusManager?.name,
+  //       campusManagerEmail: selectedItem.campusManager?.email,
+  //       campusManagerPhone: selectedItem.campusManager?.phone,
+  //       itCoordinatorName: selectedItem.itCoordinator?.name,
+  //       itCoordinatorEmail: selectedItem.itCoordinator?.email,
+  //       itCoordinatorPhone: selectedItem.itCoordinator?.phone,
+  //       operationName: selectedItem.operation?.name,
+  //       operationEmail: selectedItem.operation?.email,
+  //       operationPhone: selectedItem.operation?.phone,
+  //       itLeadName: selectedItem.itLead?.name,
+  //       itLeadEmail: selectedItem.itLead?.email,
+  //       itLeadPhone: selectedItem.itLead?.phone,
+  //     };
+  //
+  //     const emailSelectedItemMap = {
+  //       campusManagerEmail: selectedItem.campusManager?.email
+  //         ? { email: selectedItem.campusManager.email }
+  //         : null,
+  //       itCoordinatorEmail: selectedItem.itCoordinator?.email
+  //         ? { email: selectedItem.itCoordinator.email }
+  //         : null,
+  //       operationEmail: selectedItem.operation?.email
+  //         ? { email: selectedItem.operation.email }
+  //         : null,
+  //       itLeadEmail: selectedItem.itLead?.email
+  //         ? { email: selectedItem.itLead.email }
+  //         : null,
+  //     };
+  //
+  //     // Disable Campus, Address, and State fields in edit mode
+  //     let disabled = false;
+  //     if (["campus", "address", "state", "campusCode"].includes(field.name)) {
+  //       disabled = true;
+  //     }
+  //
+  //     const extraProps = emailSelectedItemMap[field.name]
+  //       ? { selectedItem: emailSelectedItemMap[field.name] }
+  //       : {};
+  //
+  //     return { ...field, defaultValue: valueMap[field.name] ?? '', disabled, ...extraProps };
+  //   });
+  // }, [selectedItem]);
 
   // const handleCreateSubmit = async (formData) => {
   //   const payload = {
@@ -166,6 +166,8 @@ export default function CampusInchargeTab() {
     switch (columnKey) {
       case 'campus':
         return <span className="font-bold text-gray-900 uppercase">{item.campus}</span>;
+      case 'campusManager':
+        return renderPersonDetails(item.campusManager);
       case 'itCoordinator':
         return renderPersonDetails(item.itCoordinator);
       case 'operation':
@@ -176,7 +178,7 @@ export default function CampusInchargeTab() {
         return (
           <div className="flex justify-center gap-3">
             <button
-              className="p-2 text-[var(--theme-main)] hover:bg-[var(--surface-soft)] rounded-lg transition-all duration-150 hover:scale-110"
+              className="p-2 text-(--theme-main) hover:bg-(--surface-soft) rounded-lg transition-all duration-150 hover:scale-110"
               title="Edit"
               onClick={(e) => {
                 e.stopPropagation();
@@ -193,45 +195,44 @@ export default function CampusInchargeTab() {
   };
 
   const handleEditClick = (item) => {
-    setSelectedItem(item);
-    setIsEditModalOpen(true);
+    router.push(`/userprofile/create-campus?id=${item.id}`);
   };
 
-  const handleEditSubmit = async (formData) => {
-    const id = selectedItem?.id;
-    const payload = {
-      campusName: formData.campus,
-      campusCode: formData.campusCode,
-      address: formData.address,
-      state: formData.state,
-      capacity: Number(formData.capacity),
-      schoolIds: formData.schoolIds,
-      campusManager: {
-        name: formData.campusManagerName,
-        email: formData.campusManagerEmail,
-        phone: formData.campusManagerPhone,
-      },
-      itCoordinator: {
-        name: formData.itCoordinatorName,
-        email: formData.itCoordinatorEmail,
-        phone: formData.itCoordinatorPhone,
-      },
-      operation: {
-        name: formData.operationName,
-        email: formData.operationEmail,
-        phone: formData.operationPhone,
-      },
-      itLead: {
-        name: formData.itLeadName,
-        email: formData.itLeadEmail,
-        phone: formData.itLeadPhone,
-      },
-    };
-    await updateCampusIncharge({
-      endpoint: config.endpoints.campusIncharge.update(id),
-      body: payload,
-    });
-  };
+  // const handleEditSubmit = async (formData) => {
+  //   const id = selectedItem?.id;
+  //   const payload = {
+  //     campusName: formData.campus,
+  //     campusCode: formData.campusCode,
+  //     address: formData.address,
+  //     state: formData.state,
+  //     capacity: Number(formData.capacity),
+  //     schoolIds: formData.schoolIds,
+  //     campusManager: {
+  //       name: formData.campusManagerName,
+  //       email: formData.campusManagerEmail,
+  //       phone: formData.campusManagerPhone,
+  //     },
+  //     itCoordinator: {
+  //       name: formData.itCoordinatorName,
+  //       email: formData.itCoordinatorEmail,
+  //       phone: formData.itCoordinatorPhone,
+  //     },
+  //     operation: {
+  //       name: formData.operationName,
+  //       email: formData.operationEmail,
+  //       phone: formData.operationPhone,
+  //     },
+  //     itLead: {
+  //       name: formData.itLeadName,
+  //       email: formData.itLeadEmail,
+  //       phone: formData.itLeadPhone,
+  //     },
+  //   };
+  //   await updateCampusIncharge({
+  //     endpoint: config.endpoints.campusIncharge.update(id),
+  //     body: payload,
+  //   });
+  // };
 
   const handleCreateClick = () => {
     router.push('/userprofile/create-campus');
@@ -268,7 +269,7 @@ export default function CampusInchargeTab() {
         validationSchema={campusInchargeValidationSchema}
       /> */}
 
-      <FormModal
+      {/* <FormModal
         isOpen={isEditModalOpen}
         onClose={() => { setIsEditModalOpen(false); setSelectedItem(null); }}
         componentName="Campus Incharge"
@@ -278,7 +279,7 @@ export default function CampusInchargeTab() {
         isSubmitting={isEditSubmitting}
         size="large"
         validationSchema={campusInchargeValidationSchema}
-      />
+      /> */}
     </div>
   );
 }
