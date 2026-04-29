@@ -5,7 +5,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard
 // ─── Field definitions ─────────────────────────────────────────────────────
 
 export const campusInchargeModalFields = [
-  // Campus
+  // Campus | Campus Code
   {
     name: 'campus',
     label: 'Campus',
@@ -13,6 +13,14 @@ export const campusInchargeModalFields = [
     placeholder: 'Enter campus name',
     required: true,
   },
+  {
+    name: 'campusCode',
+    label: 'Campus Code',
+    type: 'text',
+    placeholder: 'e.g. BLR or PUN',
+    required: true,
+  },
+  // Address | State
   {
     name: 'address',
     label: 'Address',
@@ -24,7 +32,6 @@ export const campusInchargeModalFields = [
     name: 'state',
     label: 'State',
     type: 'api-autocomplete',
-    rowWith: 'campusCode',
     placeholder: 'Search state...',
     required: true,
     labelKey: 'label',
@@ -69,14 +76,6 @@ export const campusInchargeModalFields = [
     ],
   },
   {
-    name: 'campusCode',
-    label: 'Campus Code',
-    type: 'text',
-    placeholder: 'e.g. BLR or PUN',
-    required: true,
-    pairedWith: true,
-  },
-  {
     name: 'capacity',
     label: 'Capacity',
     type: 'number',
@@ -87,7 +86,7 @@ export const campusInchargeModalFields = [
     rowWith: 'school',
   },
   {
-    name: 'school',
+    name: 'schoolIds',
     label: 'School',
     type: 'multi-select',
     placeholder: 'Select school',
@@ -101,12 +100,52 @@ export const campusInchargeModalFields = [
       { value: 'School of Data analytics', label: 'School of Data analytics' },
     ],
   },
+  // Campus Manager
+  {
+    name: 'campusManagerEmail',
+    label: 'Campus Manager Email',
+    type: 'api-autocomplete',
+    placeholder: 'Search by email...',
+    required: true,
+    fullWidth: true,
+    apiUrl: `${baseUrl}/users`,
+    queryKey: ['users-for-campus-incharge'],
+    labelKey: 'email',
+    valueKey: 'email',
+    formatLabel: (item) => {
+      const name = [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '';
+      return name ? `${item.email} — ${name}` : item.email;
+    },
+    companionFields: [
+      {
+        field: 'campusManagerName',
+        compute: (item) => [item.firstName, item.lastName].filter(Boolean).join(' ') || item.username || '',
+      },
+      { field: 'campusManagerPhone', key: 'phone' },
+    ],
+  },
+  {
+    name: 'campusManagerName',
+    label: 'Campus Manager Name',
+    type: 'text',
+    placeholder: 'Full name',
+    required: true,
+  },
+  {
+    name: 'campusManagerPhone',
+    label: 'Campus Manager Phone',
+    type: 'text',
+    placeholder: '+91 XXXXX XXXXX',
+    required: true,
+  },
+  // IT Coordinator
   {
     name: 'itCoordinatorEmail',
     label: 'IT Coordinator Email',
     type: 'api-autocomplete',
     placeholder: 'Search by email...',
     required: true,
+    fullWidth: true,
     apiUrl: `${baseUrl}/users`,
     queryKey: ['users-for-campus-incharge'],
     labelKey: 'email',
@@ -146,6 +185,7 @@ export const campusInchargeModalFields = [
     type: 'api-autocomplete',
     placeholder: 'Search by email...',
     required: true,
+    fullWidth: true,
     apiUrl: `${baseUrl}/users`,
     queryKey: ['users-for-campus-incharge'],
     labelKey: 'email',
@@ -186,6 +226,7 @@ export const campusInchargeModalFields = [
     type: 'api-autocomplete',
     placeholder: 'Search by email...',
     required: true,
+    fullWidth: true,
     apiUrl: `${baseUrl}/users`,
     queryKey: ['users-for-campus-incharge'],
     labelKey: 'email',
@@ -254,7 +295,11 @@ export const campusInchargeValidationSchema = Yup.object().shape({
     .min(1, 'Capacity must be at least 1')
     .max(99999, 'Capacity must be at most 99999'),
 
-  school: Yup.array().of(Yup.string()).min(1, 'At least one school is required').required('School is required'),
+  schoolIds: Yup.array().of(Yup.string()).min(1, 'At least one school is required').required('School is required'),
+
+  campusManagerName: nameSchema('Campus Manager Name'),
+  campusManagerEmail: emailSchema('Campus Manager Email'),
+  campusManagerPhone: phoneSchema('Campus Manager Phone'),
 
   itCoordinatorName: nameSchema('IT Coordinator Name'),
   itCoordinatorEmail: emailSchema('IT Coordinator Email'),
@@ -277,7 +322,10 @@ export const campusInchargeInitialValues = {
   state: '',
   campusCode: '',
   capacity: '',
-  school: [],
+  schoolIds: [],
+  campusManagerName: '',
+  campusManagerEmail: '',
+  campusManagerPhone: '',
   itCoordinatorName: '',
   itCoordinatorEmail: '',
   itCoordinatorPhone: '',
