@@ -176,26 +176,26 @@ export default function AllocationsList() {
     );
   }
 
-  return (
+ return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Summary Cards */}
-      <div className="bg-[var(--surface)] grid grid-cols-1 md:grid-cols-4 gap-4 pt-6 px-10 shrink-0">
-        {summaryCards.map((card) => (
-          <SummaryCard
-            key={card.label}
-            label={card.label}
-            value={card.value}
-            Icon={card.Icon}
-            valueColor={card.valueColor}
-            iconColor={card.iconColor}
-          />
-        ))}
-      </div>
-
       {/* Table */}
       <div className='flex-1 min-h-0 flex flex-col' >
         <TableWrapper
         margin='m-0'
+        summaryCardsComponent={
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {summaryCards.map((card) => (
+              <SummaryCard
+                key={card.label}
+                label={card.label}
+                value={card.value}
+                Icon={card.Icon}
+                valueColor={card.valueColor}
+                iconColor={card.iconColor}
+              />
+            ))}
+          </div>
+        }
         data={allocationsListData}
         columns={visibleColumns}
         title="Allocations"
