@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
-import { Plus } from "lucide-react";
+import { Plus, LayoutDashboard } from "lucide-react";
 import "@/components/atoms/Loader.css";
 import TableFooter from "./TableFooter";
 import Pagination from "@/components/atoms/Pagination";
@@ -26,6 +26,10 @@ export default function TableWrapper({
   activeFiltersComponent,
   searchComponent,
   toggleCardsComponent,
+  summaryCardsComponent,
+  showDashboardToggle = false,
+  showCards = false,
+  onToggleCards,
   onShowAll,
   showAllButtonText = "Show All",
   // Server-side pagination props
@@ -67,7 +71,7 @@ export default function TableWrapper({
 
   const tableClassNames = {
     ...classNames,
-    wrapper: `shadow-none border-none h-full overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
+    wrapper: `shadow-none px-0 h-full overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
     thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
@@ -81,21 +85,39 @@ export default function TableWrapper({
   return (
     <div className={`bg-(--surface) p-3 pb-0 sm:p-6 sm:pb-0 ${shadow} ${margin} flex-1 min-h-0 flex flex-col overflow-hidden`}>
 
-      {/* Title – reduced from 2xl/3xl/[32px] → xl/2xl/[28px] */}
+      {/* Title */}
       {title && (
         <div className="mb-2 shrink-0">
-          <h2 className="text-xl sm:text-2xl md:text-[26px] font-semibold text-gray-800 ml-4 font-(family-name:--font-poppins)">
+          <h2 className="text-xl sm:text-2xl md:text-[26px] font-semibold text-gray-800 font-(family-name:--font-poppins)">
             {title}
           </h2>
         </div>
       )}
 
+      {/* Summary Cards */}
+      {summaryCardsComponent && (
+        <div className="shrink-0">{summaryCardsComponent}</div>
+      )}
+
       {/* Search, Filter, Column Selector, and Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-2 sm:px-4 mb-2 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 my-4 sm:px-0 shrink-0">
         <div className="w-full sm:flex-1 sm:max-w-md">
           {searchComponent}
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {showDashboardToggle && onToggleCards && (
+            <div className="relative group">
+              <CustomButton
+                icon={LayoutDashboard}
+                onClick={onToggleCards}
+                variant="secondary"
+                size="md"
+              />
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded bg-gray-800 text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                {showCards ? 'Hide Summary' : 'Show Summary'}
+              </span>
+            </div>
+          )}
           {toggleCardsComponent}
           {onShowAll && (
             <CustomButton
@@ -124,7 +146,7 @@ export default function TableWrapper({
 
       {/* Active Filters */}
       {activeFiltersComponent && (
-        <div className="mb-4 shrink-0">{activeFiltersComponent}</div>
+        <div className="shrink-0">{activeFiltersComponent}</div>
       )}
 
       {/* Mobile Card List */}
