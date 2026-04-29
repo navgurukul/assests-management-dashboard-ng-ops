@@ -45,7 +45,7 @@ export default function TicketsList() {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Summary Cards */}
       {showCards && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 px-4 pt-4 mb-2 shrink-0">
+        <div className="bg-[var(--surface)] grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 px-10 pt-6 shrink-0">
           {summaryCards.map((card) => (
             <SummaryCard
               key={card.label}

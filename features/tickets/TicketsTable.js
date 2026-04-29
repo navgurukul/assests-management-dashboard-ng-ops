@@ -343,7 +343,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
 
   return (
     <TableWrapper
-      margin='m-4'
+      margin='m-0'
       data={ticketsData}
       columns={visibleColumns}
       title="Tickets"
