@@ -211,7 +211,7 @@ export default function AllocationsList() {
           <SearchInput
             value={searchInput}
             onChange={setSearchInput}
-            placeholder="Search allocations..."
+            placeholder="Search by allocation type, reason, or notes..."
           />
         }
         // Column selector component
