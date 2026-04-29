@@ -88,7 +88,7 @@ export default function ClientLayout({ children }) {
           />
 
           {/* Page Content */}
-          <main className="flex-1 overflow-hidden bg-[var(--background)]">
+          <main className="flex-1 overflow-hidden bg-[var(--surface)]">
             {children}
           </main>
         </div>
