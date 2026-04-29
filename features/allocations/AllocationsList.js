@@ -179,7 +179,7 @@ export default function AllocationsList() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 px-4 shrink-0">
+      <div className="bg-[var(--surface)] grid grid-cols-1 md:grid-cols-4 gap-4 pt-6 px-10 shrink-0">
         {summaryCards.map((card) => (
           <SummaryCard
             key={card.label}
@@ -195,7 +195,7 @@ export default function AllocationsList() {
       {/* Table */}
       <div className='flex-1 min-h-0 flex flex-col' >
         <TableWrapper
-        margin='m-5'
+        margin='m-0'
         data={allocationsListData}
         columns={visibleColumns}
         title="Allocations"
