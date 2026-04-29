@@ -166,7 +166,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     { value: 'IN_PROGRESS', label: 'In Progress' },
     { value: 'RESOLVED', label: 'Resolved' },
     { value: 'RAISED', label: 'Raised' },
-    { value: 'ESCALATED', label: 'Escaleted' },
+    { value: 'ESCALATED', label: 'Escalated' },
   ];
 
   // isAssigned filter options
@@ -352,7 +352,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
         <SearchInput
           value={searchInput}
           onChange={setSearchInput}
-          placeholder="Search tickets..."
+          placeholder="Search by ticket number, description, or resolution notes..."
         />
       }
       // Filter component
