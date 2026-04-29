@@ -89,6 +89,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
   const leftSections = [
     {
       title: 'Quick Info',
+      color: 'theme',
       items: [
         {
           label: 'Role',
@@ -109,6 +110,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
     },
     {
       title: 'Contact',
+      color: 'theme',
       items: [
         { label: 'Email', value: userData.email || 'N/A' },
         { label: 'Phone', value: userData.phone || 'N/A' },
@@ -168,6 +170,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
   const rightSections = [
     {
       title: 'Personal Information',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'First Name', value: userData.firstName || 'N/A' },
@@ -179,6 +182,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
     },
     {
       title: 'Role & Access',
+      color: 'theme',
       itemsGrid: true,
       items: [
         {
@@ -198,6 +202,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
     },
     {
       title: 'Campus & Location',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Campus', value: userData.campusId || userData.campus?.name || 'N/A' },
@@ -206,6 +211,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
     },
     {
       title: 'System Information',
+      color: 'theme',
       itemsGrid: true,
       items: [
         {

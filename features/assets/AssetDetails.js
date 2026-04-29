@@ -177,6 +177,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   const leftSections = [
     {
       title: 'Quick Info',
+      color: 'theme',
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Condition', value: formatCondition(assetDetails.condition), className: `font-semibold ${getConditionColor()}` },
@@ -187,14 +188,15 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
     },
     {
       title: 'Accessories',
+      color: 'theme',
       itemsGrid: true,
       items: [
         { label: 'Charger', value: assetDetails.charger ? 'Yes' : 'No', className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
-        { label: 'Bag', value: assetDetails.bag ? 'Yes' : 'No', className: assetDetails.bag ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
       ],
     },
     {
       title: 'Notes & Additional Information',
+      color: 'theme',
       items: [
         { label: 'Notes', value: assetDetails.notes || 'No notes available' },
       ],
@@ -210,6 +212,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   const rightSections = [
     {
       title: 'Device Information',
+      color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Brand', value: assetDetails.brand || 'N/A' },
@@ -223,6 +226,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
     },
     {
       title: 'Purchase Info',
+      color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Source Type', value: formatSourceType(assetDetails.sourceType) || 'N/A' },
@@ -234,6 +238,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
     },
     {
       title: 'System Information',
+      color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
         { label: 'Asset Type Category', value: assetDetails.assetType?.category || 'N/A' },
