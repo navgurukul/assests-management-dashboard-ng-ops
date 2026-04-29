@@ -362,7 +362,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
         <SearchInput
           value={searchInput}
           onChange={setSearchInput}
-          placeholder="Search tickets..."
+          placeholder="Search by ticket number, description, or resolution notes..."
         />
       }
       // Filter component
