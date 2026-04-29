@@ -277,7 +277,7 @@ export default function AssetsList() {
           <SearchInput
             value={searchInput}
             onChange={setSearchInput}
-            placeholder="Search assets..."
+            placeholder="Search by tag, brand, model, or serial number..."
           />
         }
         // Filter component
