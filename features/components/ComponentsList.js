@@ -406,7 +406,7 @@ export default function ComponentsList() {
           <SearchInput
             value={searchInput}
             onChange={setSearchInput}
-            placeholder="Search components..."
+            placeholder="Search by tag, brand, model, or serial number..."
           />
         }
         // Filter component
