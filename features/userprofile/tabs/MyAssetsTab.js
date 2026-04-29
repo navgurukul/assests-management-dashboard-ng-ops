@@ -424,6 +424,8 @@ export default function MyAssetsTab({ userData = {} }) {
     return latestEntries.length > 0 && latestEntries.every((entry) => entry.type === 'RETURN ACCEPTED');
   })();
 
+  const canDownloadNOC = (assets.length === 0 && assetMovements.length > 0) || allDevicesReturned;
+
   const formatMovementDate = (isoDate) => {
     if (!isoDate) return 'N/A';
     return new Date(isoDate).toLocaleString('en-IN', {
@@ -447,7 +449,7 @@ export default function MyAssetsTab({ userData = {} }) {
           onClick={() => setNocModalOpen(true)}
           variant="primary"
           size="sm"
-          disabled={!allDevicesReturned}
+          disabled={!canDownloadNOC}
           icon={Download}
         />
       </div>

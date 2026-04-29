@@ -86,7 +86,8 @@ export default function GenericForm({
                     className={
                       field.type === 'textarea' || 
                       field.type === 'campus-asset-table' || 
-                      field.type === 'radio'
+                      field.type === 'radio' ||
+                      field.fullWidth
                         ? 'md:col-span-2' 
                         : ''
                     }

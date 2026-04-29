@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Building2, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react';
 import TableWrapper from '@/components/Table/TableWrapper';
 import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
-import usePost from '@/app/hooks/query/usePost';
+// import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
@@ -19,26 +20,27 @@ import {
 
 
 export default function CampusInchargeTab() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: apiResponse, isLoading, isError, error } = useFetch({
     url: config.endpoints.campusIncharge.list,
     queryKey: ['campus-incharge'],
   });
 
-  const { mutateAsync: createCampusIncharge, isPending: isSubmitting } = usePost({
-    onSuccess: () => {
-      toast.success('Campus Incharge created successfully');
-      queryClient.invalidateQueries({ queryKey: ['campus-incharge'] });
-      setIsCreateModalOpen(false);
-    },
-    onError: (err) => {
-      toast.error(err?.message || 'Failed to create Campus Incharge');
-    },
-  });
+  // const { mutateAsync: createCampusIncharge, isPending: isSubmitting } = usePost({
+  //   onSuccess: () => {
+  //     toast.success('Campus Incharge created successfully');
+  //     queryClient.invalidateQueries({ queryKey: ['campus-incharge'] });
+  //     setIsCreateModalOpen(false);
+  //   },
+  //   onError: (err) => {
+  //     toast.error(err?.message || 'Failed to create Campus Incharge');
+  //   },
+  // });
 
   const { mutateAsync: updateCampusIncharge, isPending: isEditSubmitting } = usePatch({
     onSuccess: () => {
@@ -70,7 +72,10 @@ export default function CampusInchargeTab() {
         state: selectedItem?.campusObject?.state,
         campusCode: selectedItem?.campusObject?.campusCode,
         capacity: selectedItem.capacity,
-        school: Array.isArray(selectedItem.school) ? selectedItem.school : selectedItem.school ? [selectedItem.school] : [],
+        schoolIds: Array.isArray(selectedItem.schoolIds) ? selectedItem.schoolIds : selectedItem.schoolIds ? [selectedItem.schoolIds] : [],
+        campusManagerName: selectedItem.campusManager?.name,
+        campusManagerEmail: selectedItem.campusManager?.email,
+        campusManagerPhone: selectedItem.campusManager?.phone,
         itCoordinatorName: selectedItem.itCoordinator?.name,
         itCoordinatorEmail: selectedItem.itCoordinator?.email,
         itCoordinatorPhone: selectedItem.itCoordinator?.phone,
@@ -83,6 +88,9 @@ export default function CampusInchargeTab() {
       };
 
       const emailSelectedItemMap = {
+        campusManagerEmail: selectedItem.campusManager?.email
+          ? { email: selectedItem.campusManager.email }
+          : null,
         itCoordinatorEmail: selectedItem.itCoordinator?.email
           ? { email: selectedItem.itCoordinator.email }
           : null,
@@ -108,35 +116,35 @@ export default function CampusInchargeTab() {
     });
   }, [selectedItem]);
 
-  const handleCreateSubmit = async (formData) => {
-    const payload = {
-      campusName: formData.campus,
-      campusCode: formData.campusCode,
-      address: formData.address,
-      state: formData.state,
-      capacity: Number(formData.capacity),
-      school: formData.school,
-      itCoordinator: {
-        name: formData.itCoordinatorName,
-        email: formData.itCoordinatorEmail,
-        phone: formData.itCoordinatorPhone,
-      },
-      operation: {
-        name: formData.operationName,
-        email: formData.operationEmail,
-        phone: formData.operationPhone,
-      },
-      itLead: {
-        name: formData.itLeadName,
-        email: formData.itLeadEmail,
-        phone: formData.itLeadPhone,
-      },
-    };
-    await createCampusIncharge({
-      endpoint: config.endpoints.campusIncharge.create,
-      body: payload,
-    });
-  };
+  // const handleCreateSubmit = async (formData) => {
+  //   const payload = {
+  //     campusName: formData.campus,
+  //     campusCode: formData.campusCode,
+  //     address: formData.address,
+  //     state: formData.state,
+  //     capacity: Number(formData.capacity),
+  //     school: formData.school,
+  //     itCoordinator: {
+  //       name: formData.itCoordinatorName,
+  //       email: formData.itCoordinatorEmail,
+  //       phone: formData.itCoordinatorPhone,
+  //     },
+  //     operation: {
+  //       name: formData.operationName,
+  //       email: formData.operationEmail,
+  //       phone: formData.operationPhone,
+  //     },
+  //     itLead: {
+  //       name: formData.itLeadName,
+  //       email: formData.itLeadEmail,
+  //       phone: formData.itLeadPhone,
+  //     },
+  //   };
+  //   await createCampusIncharge({
+  //     endpoint: config.endpoints.campusIncharge.create,
+  //     body: payload,
+  //   });
+  // };
 
   // Render person details (Name, Email, Phone)
   const renderPersonDetails = (person) => (
@@ -197,7 +205,12 @@ export default function CampusInchargeTab() {
       address: formData.address,
       state: formData.state,
       capacity: Number(formData.capacity),
-      school: formData.school,
+      schoolIds: formData.schoolIds,
+      campusManager: {
+        name: formData.campusManagerName,
+        email: formData.campusManagerEmail,
+        phone: formData.campusManagerPhone,
+      },
       itCoordinator: {
         name: formData.itCoordinatorName,
         email: formData.itCoordinatorEmail,
@@ -221,7 +234,7 @@ export default function CampusInchargeTab() {
   };
 
   const handleCreateClick = () => {
-    setIsCreateModalOpen(true);
+    router.push('/userprofile/create-campus');
   };
 
   if (isLoading || isError) {
@@ -243,7 +256,7 @@ export default function CampusInchargeTab() {
         shadow="shadow-none"
       />
 
-      <FormModal
+      {/* <FormModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         componentName="Campus Incharge"
@@ -253,7 +266,7 @@ export default function CampusInchargeTab() {
         isSubmitting={isSubmitting}
         size="large"
         validationSchema={campusInchargeValidationSchema}
-      />
+      /> */}
 
       <FormModal
         isOpen={isEditModalOpen}
