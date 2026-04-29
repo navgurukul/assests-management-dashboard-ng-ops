@@ -167,7 +167,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     { value: 'IN_PROGRESS', label: 'In Progress' },
     { value: 'RESOLVED', label: 'Resolved' },
     { value: 'RAISED', label: 'Raised' },
-    { value: 'ESCALATED', label: 'Escaleted' },
+    { value: 'ESCALATED', label: 'Escalated' },
   ];
 
   // isAssigned filter options
