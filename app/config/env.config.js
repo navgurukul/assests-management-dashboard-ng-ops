@@ -114,6 +114,9 @@ const config = {
       details: (id) => `/users/${id}`,
       changeRole: (id) => `/users/${id}/role`,
     },
+    schools: {
+      list: '/schools',
+    }
   },
   
   // Helper function to get full API URL
