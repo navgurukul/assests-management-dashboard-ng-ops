@@ -103,7 +103,8 @@ export const campusInchargeModalFields = [
     required: true,
     fullWidth: true,
     apiUrl: `${baseUrl}/users`,
-    queryKey: ['users-for-campus-incharge'],
+    queryKey: ['users-for-campus-manager'],
+    additionalParams: {role: 'MANAGER', page: 1, limit: 1000},
     labelKey: 'email',
     valueKey: 'email',
     formatLabel: (item) => {
@@ -141,7 +142,8 @@ export const campusInchargeModalFields = [
     required: true,
     fullWidth: true,
     apiUrl: `${baseUrl}/users`,
-    queryKey: ['users-for-campus-incharge'],
+    queryKey: ['users-for-it-coordinator'],
+    additionalParams: {role: 'IT_COORDINATOR', page: 1, limit: 1000},
     labelKey: 'email',
     valueKey: 'email',
     formatLabel: (item) => {
@@ -181,7 +183,8 @@ export const campusInchargeModalFields = [
     required: true,
     fullWidth: true,
     apiUrl: `${baseUrl}/users`,
-    queryKey: ['users-for-campus-incharge'],
+    queryKey: ['users-for-operation'],
+    additionalParams: {role: 'OPERATION', page: 1, limit: 1000},
     labelKey: 'email',
     valueKey: 'email',
     formatLabel: (item) => {
@@ -222,7 +225,8 @@ export const campusInchargeModalFields = [
     required: true,
     fullWidth: true,
     apiUrl: `${baseUrl}/users`,
-    queryKey: ['users-for-campus-incharge'],
+    queryKey: ['users-for-it-lead'],
+    additionalParams: {role: 'IT_LEAD', page: 1, limit: 1000},
     labelKey: 'email',
     valueKey: 'email',
     formatLabel: (item) => {
