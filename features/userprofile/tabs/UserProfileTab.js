@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Mail, Phone, MapPin, Calendar, Building } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -19,6 +19,12 @@ export default function UserProfileTab() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMandatoryFill, setIsMandatoryFill] = useState(false);
   const { isDark } = useTheme();
+
+  const { data: schoolsResponse } = useFetch({
+    url: config.endpoints.schools.list,
+    queryKey: ['schools'],
+  });
+
 
   // Fetch user data using React Query
   const { 
@@ -105,12 +111,23 @@ export default function UserProfileTab() {
     }
   };
 
-  const editProfileFields = getEditProfileFields({
-    phone: userData.phone,
-    location: userData.location,
-    campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
-    school: rawUserData?.school || '',
-  });
+  const editProfileFields = useMemo(() => {
+    const schoolOptions = (schoolsResponse?.data?.schools || []).map((school) => ({
+      value: school.id,
+      label: school.name,
+    }));
+
+    const fields = getEditProfileFields({
+      phone: userData.phone,
+      location: userData.location,
+      campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
+      schoolId: rawUserData?.schoolId || '',
+    });
+
+    return fields.map((field) =>
+      field.name === 'schoolId' ? { ...field, options: schoolOptions } : field
+    );
+  }, [schoolsResponse, userData.phone, userData.location, rawUserData]);
 
   if (isLoadingUserData && !rawUserData) {
     return <div className="p-4 text-center">Loading...</div>;
