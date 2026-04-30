@@ -803,7 +803,7 @@ export default function MyAssetsTab({ userData = {} }) {
           </div>
           <CustomButton
             text="Download NOC"
-            onClick={() => downloadNOC(userData)}
+            onClick={() => downloadNOC(userData, assetMovements)}
             variant="success"
             size="md"
             icon={Download}
