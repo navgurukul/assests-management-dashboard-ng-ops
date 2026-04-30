@@ -57,9 +57,42 @@ export const assetFormFields = [
   {
     name: "processor",
     label: "Processor",
-    type: "text",
-    placeholder: "Enter processor (e.g., i5, i7, Ryzen 5)",
+    type: "select",
+    placeholder: "Select processor",
     required: false,
+    options: [
+      // Intel
+      { label: "Intel Core i3", value: "Intel Core i3" },
+      { label: "Intel Core i5", value: "Intel Core i5" },
+      { label: "Intel Core i7", value: "Intel Core i7" },
+      { label: "Intel Core i9", value: "Intel Core i9" },
+      { label: "Intel Pentium", value: "Intel Pentium" },
+      { label: "Intel Celeron", value: "Intel Celeron" },
+      { label: "Intel Xeon", value: "Intel Xeon" },
+      { label: "Intel Atom", value: "Intel Atom" },
+      // AMD
+      { label: "AMD Ryzen 3", value: "AMD Ryzen 3" },
+      { label: "AMD Ryzen 5", value: "AMD Ryzen 5" },
+      { label: "AMD Ryzen 7", value: "AMD Ryzen 7" },
+      { label: "AMD Ryzen 9", value: "AMD Ryzen 9" },
+      { label: "AMD Athlon", value: "AMD Athlon" },
+      { label: "AMD FX", value: "AMD FX" },
+      { label: "AMD EPYC", value: "AMD EPYC" },
+      { label: "AMD Threadripper", value: "AMD Threadripper" },
+      // Apple
+      { label: "Apple M1", value: "Apple M1" },
+      { label: "Apple M2", value: "Apple M2" },
+      { label: "Apple M3", value: "Apple M3" },
+      // ARM
+      { label: "ARM Cortex-A", value: "ARM Cortex-A" },
+      { label: "ARM Cortex-M", value: "ARM Cortex-M" },
+      { label: "ARM Cortex-R", value: "ARM Cortex-R" },
+      // Qualcomm
+      { label: "Qualcomm Snapdragon 8cx", value: "Qualcomm Snapdragon 8cx" },
+      { label: "Qualcomm Snapdragon 888", value: "Qualcomm Snapdragon 888" },
+      // Others
+      { label: "Other", value: "Other" },
+    ],
     showIf: {
       field: "assetTypeName",
       value: ["Laptop", "Desktop", "Tablet", "Smartphone", "Server", "CPU"],
