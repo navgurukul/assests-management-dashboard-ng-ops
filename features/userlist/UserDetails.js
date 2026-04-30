@@ -201,11 +201,10 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
       ],
     },
     {
-      title: 'Campus & Location',
+      title: 'Location',
       color: 'theme',
       itemsGrid: true,
       items: [
-        { label: 'Campus', value: userData.campusId || userData.campus?.name || 'N/A' },
         { label: 'Location', value: userData.location || 'N/A' },
       ],
     },
