@@ -88,6 +88,15 @@ export const returnAssetFields = [
     hint: 'Accepted formats: JPG, PNG, PDF',
     showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
+   {
+      name: 'trackingId',
+      label: 'Tracking ID',
+      type: 'text',
+      required: true,
+      maxLength: 30,
+      placeholder: 'Enter tracking ID (max 30 characters)',
+      showWhen: () => true,
+    },
   {
     name: 'managerEmail',
     label: 'Manager Email',
@@ -144,6 +153,7 @@ export const returnAssetValidationSchema = Yup.object().shape({
     then: (schema) => schema
       .required('IT Coordinator email is required')
       .email('Enter a valid email address'),
+    trackingId: '',
     otherwise: (schema) => schema.nullable(),
   }),
   exactAddress: Yup.string().when('returnMode', {
@@ -170,6 +180,9 @@ export const returnAssetValidationSchema = Yup.object().shape({
     .transform((curr, orig) => (orig === '' ? null : curr))
     .required('Expected delivery date is required')
     .min(new Date(new Date().setHours(0,0,0,0)), 'Delivery date must be today or in the future'),
+  trackingId: Yup.string()
+    .max(30, 'Tracking ID must be at most 30 characters')
+    .required('Tracking ID is required'),
 });
 
 // ─── Initial values ────────────────────────────────────────────────────────
@@ -185,4 +198,5 @@ export const returnAssetInitialValues = {
   vendorReceipt: null,
   managerEmail: '',
   expectedDeliveryDate: '',
+  trackingId: '',
 };
