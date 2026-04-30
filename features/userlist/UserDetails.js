@@ -103,7 +103,6 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
             ? 'font-semibold text-green-600'
             : 'font-semibold text-red-600',
         },
-        { label: 'Campus', value: userData.campusId || userData.campus?.name || 'N/A' },
         { label: 'Department', value: userData.department || 'N/A' },
         { label: 'Location', value: userData.location || 'N/A' },
       ],
@@ -133,7 +132,6 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         { label: 'Reason', value: allocation.allocationReason || 'N/A' },
         { label: 'Device Selection', value: allocation.deviceSelectionMode || 'N/A' },
         { label: 'Is Temporary', value: allocation.isTemporary ? 'Yes' : 'No' },
-        { label: 'Source Campus', value: allocation.sourceCampusId || 'N/A' },
         { label: 'Destination Campus', value: allocation.destinationCampusId || 'N/A' },
         { label: 'Requested By', value: allocation.requestRaisedBy || 'N/A' },
         { label: 'User Address', value: allocation.userAddress || 'N/A' },
@@ -201,7 +199,7 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
       ],
     },
     {
-      title: 'Location',
+      title: 'Campus & Location',
       color: 'theme',
       itemsGrid: true,
       items: [
