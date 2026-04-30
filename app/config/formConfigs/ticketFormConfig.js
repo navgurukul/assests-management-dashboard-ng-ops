@@ -95,7 +95,7 @@ export const ticketValidationSchema = Yup.object().shape({
   description: Yup.string()
     .required('Description is required')
     .min(25, 'Description must be at least 25 characters')
-    .max(500, 'Description must not exceed 500 characters'),
+    .max(250, 'Description must not exceed 250 characters'),
   address: Yup.string().max(200, 'Address must not exceed 200 characters'),
   managerEmail: Yup.string()
     .required('Manager email is required')

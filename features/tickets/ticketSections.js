@@ -79,7 +79,6 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
       color: 'theme',
       itemsGrid: true,
       items: [
-        { label: 'Campus', value: ticket.campus?.name || ticket.campusId || '—' },
         { label: 'Campus Code', value: ticket.campus?.code || '—' },
         { label: 'Campus Name', value: ticket.campus?.name || '—' },
       ],
