@@ -38,6 +38,7 @@ export default function CreateAsset() {
       // Build raw payload with type coercion
       const rawPayload = {
         ...rest,
+        status: 'IN_STOCK', // Always set to IN_STOCK for new assets
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
         cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,

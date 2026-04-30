@@ -1,13 +1,13 @@
 import { Truck } from 'lucide-react';
 
 export const inTransitColumns = [
-  { key: 'consignmentCode', label: 'Consignment'      },
-  { key: 'assetTag',        label: 'Asset Tag'         },
-  { key: 'model',           label: 'Laptop Model'      },
-  { key: 'userName',        label: 'Returned By'       },
-  { key: 'trackingId',      label: 'Tracking ID'       },
-  { key: 'estimatedArrival',label: 'Est. Arrival Date' },
-  { key: 'actions',         label: 'Action'            },
+  { key: 'consignmentCode', label: 'CONSIGNMENT'       },
+  { key: 'assetTag',        label: 'ASSET TAG'         },
+  { key: 'model',           label: 'LAPTOP MODEL'      },
+  { key: 'userName',        label: 'RETURNED BY'       },
+  { key: 'trackingId',      label: 'TRACKING ID'       },
+  { key: 'estimatedArrival',label: 'EST. ARRIVAL DATE' },
+  { key: 'actions',         label: 'ACTION'            },
 ];
 
 export function renderInTransitCell(item, columnKey) {
