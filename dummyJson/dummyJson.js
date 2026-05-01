@@ -196,6 +196,31 @@ export const ticketDetailsData = {
     resolutionNotes: 'Pending coordinator review',
   },
 };
+
+// Manager List Dummy Data
+export const managerListData = [
+  {
+    id: 1,
+    name: 'Alok Kumar',
+    email: 'alok.kumar@navgurukul.org',
+    role: 'Facility Manager',
+    status: 'Active',
+  },
+  {
+    id: 2,
+    name: 'Rishabh Sharma',
+    email: 'rishabh.sharma@navgurukul.org',
+    role: 'IT Administrator',
+    status: 'Active',
+  },
+  {
+    id: 3,
+    name: 'Pooja Singh',
+    email: 'pooja.singh@navgurukul.org',
+    role: 'Campus Head',
+    status: 'Inactive',
+  }
+];
  
  
  
