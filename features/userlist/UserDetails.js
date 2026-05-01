@@ -238,16 +238,16 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         rightSections={rightSections}
         showTimeline={false}
         onBack={onBack}
-        // headerActions={
-        //   currentUserRole === 'ADMIN' && (
-        //     <CustomButton
-        //       text="Change Role 1"
-        //       onClick={() => setRoleModalOpen(true)}
-        //       variant="primary"
-        //       size="sm"
-        //     />
-        //   )
-        // }
+        headerActions={
+          currentUserRole === 'ADMIN' && (
+            <CustomButton
+              text="Change Role"
+              onClick={() => setRoleModalOpen(true)}
+              variant="primary"
+              size="sm"
+            />
+          )
+        }
       />
 
       <FormModal
