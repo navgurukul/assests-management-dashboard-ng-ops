@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Eye } from 'lucide-react';
+import { Eye, Users, ArrowLeftCircle } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import { useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
+import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import {
@@ -42,6 +43,13 @@ export default function UsersList() {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
+  // Show All Users State
+  const [showAllUsers, setShowAllUsers] = useState(false);
+  const [allUsersSearch, setAllUsersSearch] = useState('');
+  const [debouncedAllUsersSearch, setDebouncedAllUsersSearch] = useState('');
+  const [allUsersPage, setAllUsersPage] = useState(1);
+  const [allUsersPageSize, setAllUsersPageSize] = useState(20);
+
   // Column visibility
   const {
     visibleColumns,
@@ -62,6 +70,14 @@ export default function UsersList() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAllUsersSearch(allUsersSearch);
+      setAllUsersPage(1);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [allUsersSearch]);
+
   // Build query string
   const buildQueryString = () => {
     const params = new URLSearchParams();
@@ -76,6 +92,12 @@ export default function UsersList() {
   const { data, isLoading, isError, error } = useFetch({
     url: `/allocations/user-assets-details?${buildQueryString()}`,
     queryKey: ['userAssetsDetails', currentPage, pageSize, filters, debouncedSearch],
+  });
+
+  const { data: allUsersResponse, isLoading: isAllUsersLoading, isError: isAllUsersError, error: allUsersError } = useFetch({
+    url: `/users?page=${allUsersPage}&limit=${allUsersPageSize}${debouncedAllUsersSearch ? `&search=${debouncedAllUsersSearch}` : ''}`,
+    queryKey: ['allUsers', allUsersPage, allUsersPageSize, debouncedAllUsersSearch],
+    enabled: showAllUsers,
   });
 
   // Pagination handlers
@@ -96,6 +118,49 @@ export default function UsersList() {
   const getCategoryName = (filterKey) => {
     const names = { role: 'Role' };
     return names[filterKey] || filterKey;
+  };
+
+  const allUsersColumnsConfig = [
+    { key: 'name', label: 'NAME', alwaysVisible: true },
+    { key: 'email', label: 'EMAIL', alwaysVisible: true },
+    { key: 'username', label: 'USERNAME' },
+    { key: 'role', label: 'ROLE' },
+    { key: 'department', label: 'DEPARTMENT' },
+    { key: 'status', label: 'STATUS' },
+    { key: 'createdAt', label: 'CREATED AT' },
+  ];
+
+  const allUsersListData = React.useMemo(() => {
+    const users = allUsersResponse?.data;
+    if (!Array.isArray(users)) return [];
+    return users.map((user) => ({
+      id: user.id,
+      name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'N/A',
+      email: user.email || 'N/A',
+      username: user.username || 'N/A',
+      role: formatRole(user.role),
+      department: user.department || 'N/A',
+      status: user.isActive ? 'Active' : 'Inactive',
+      createdAt: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+      userData: user,
+    }));
+  }, [allUsersResponse]);
+
+  const renderAllUsersCell = (item, columnKey) => {
+    const cellValue = item[columnKey];
+    switch (columnKey) {
+      case 'name':
+        return <span className="font-semibold text-gray-900">{cellValue}</span>;
+      case 'email':
+      case 'username':
+        return <span className="text-blue-600 text-sm">{cellValue}</span>;
+      case 'role':
+        return <StatusChip value={cellValue} colorFn={() => 'bg-purple-100 text-purple-800'} />;
+      case 'status':
+        return <StatusChip value={cellValue} colorFn={(v) => v === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} />;
+      default:
+        return <span className="text-gray-700 text-sm">{cellValue ?? 'N/A'}</span>;
+    }
   };
 
   // Transform allocation data into table rows
@@ -187,12 +252,12 @@ export default function UsersList() {
   };
 
   // Handle loading and error states
-  if (isError) {
+  if (isError || (showAllUsers && isAllUsersError)) {
     return (
       <StateHandler
         isLoading={false}
-        isError={isError}
-        error={error}
+        isError={true}
+        error={showAllUsers ? allUsersError : error}
         loadingMessage="Loading users..."
         errorMessage="Error loading users"
       />
@@ -210,56 +275,79 @@ export default function UsersList() {
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-1 min-h-0 flex flex-col">
       <TableWrapper
-        data={usersListData}
-        columns={visibleColumns}
-        title="User List - Assets Allocations"
-        renderCell={renderCell}
-        itemsPerPage={pageSize}
+        data={showAllUsers ? allUsersListData : usersListData}
+        columns={showAllUsers ? allUsersColumnsConfig : visibleColumns}
+        title={showAllUsers ? "All Users List" : "User List - Assets Allocations"}
+        renderCell={showAllUsers ? renderAllUsersCell : renderCell}
+        itemsPerPage={showAllUsers ? allUsersPageSize : pageSize}
         showPagination={true}
-        ariaLabel="User list table"
+        ariaLabel={showAllUsers ? "All users table" : "User list table"}
         onRowClick={handleRowClick}
         // Search
         searchComponent={
-          <SearchInput
-            value={searchInput}
-            onChange={setSearchInput}
-            placeholder="Search by name, email..."
-          />
+          showAllUsers ? (
+            <SearchInput
+              value={allUsersSearch}
+              onChange={setAllUsersSearch}
+              placeholder="Search by email, username, firstName, lastName, and department..."
+            />
+          ) : (
+            <SearchInput
+              value={searchInput}
+              onChange={setSearchInput}
+              placeholder="Search by name, email..."
+            />
+          )
         }
         // Filters
         filterComponent={
-          <FilterDropdown
-            onFilterChange={handleFilterChange}
-            selectedFilters={filters}
-          />
+          <>
+            <CustomButton
+              text={showAllUsers ? 'Back to Allocations' : 'Show all user'}
+              icon={showAllUsers ? ArrowLeftCircle : Users}
+              onClick={() => setShowAllUsers(!showAllUsers)}
+              variant={showAllUsers ? 'secondary' : 'warning'}
+              size="md"
+            />
+            {!showAllUsers && (
+              <FilterDropdown
+                onFilterChange={handleFilterChange}
+                selectedFilters={filters}
+              />
+            )}
+          </>
         }
         // Column selector
         columnSelectorComponent={
-          <ColumnSelector
-            allColumns={allColumns}
-            visibleColumnKeys={visibleColumnKeys}
-            alwaysVisibleColumns={alwaysVisibleColumns}
-            onToggleColumn={toggleColumn}
-            onShowAll={showAllColumns}
-            onResetToDefault={resetToDefault}
-          />
+          !showAllUsers && (
+            <ColumnSelector
+              allColumns={allColumns}
+              visibleColumnKeys={visibleColumnKeys}
+              alwaysVisibleColumns={alwaysVisibleColumns}
+              onToggleColumn={toggleColumn}
+              onShowAll={showAllColumns}
+              onResetToDefault={resetToDefault}
+            />
+          )
         }
         // Active filter chips
         activeFiltersComponent={
-          <ActiveFiltersChips
-            filters={filters}
-            onRemoveFilter={handleRemoveFilter}
-            getCategoryName={getCategoryName}
-            getFilterLabel={getFilterLabel}
-          />
+          !showAllUsers && (
+            <ActiveFiltersChips
+              filters={filters}
+              onRemoveFilter={handleRemoveFilter}
+              getCategoryName={getCategoryName}
+              getFilterLabel={getFilterLabel}
+            />
+          )
         }
         // Loading state
-        isLoading={isLoading}
-        // Server-side pagination
+        isLoading={showAllUsers ? isAllUsersLoading : isLoading}
+        // Pagination
         serverPagination={true}
-        paginationData={data?.data?.pagination}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+        paginationData={showAllUsers ? allUsersResponse?.pagination : data?.data?.pagination}
+        onPageChange={showAllUsers ? setAllUsersPage : handlePageChange}
+        onPageSizeChange={showAllUsers ? (size) => { setAllUsersPageSize(size); setAllUsersPage(1); } : handlePageSizeChange}
       />
       </div>
     </div>
