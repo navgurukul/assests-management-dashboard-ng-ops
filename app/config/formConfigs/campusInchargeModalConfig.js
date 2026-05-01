@@ -104,7 +104,7 @@ export const campusInchargeModalFields = [
     fullWidth: true,
     apiUrl: `${baseUrl}/users`,
     queryKey: ['users-for-campus-manager'],
-    additionalParams: {role: 'MANAGER', page: 1, limit: 1000},
+    additionalParams: {role: 'EMPLOYEE', page: 1, limit: 1000},
     labelKey: 'email',
     valueKey: 'email',
     formatLabel: (item) => {
