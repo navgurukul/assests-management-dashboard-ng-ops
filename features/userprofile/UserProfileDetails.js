@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Package, Ticket, Building2 } from 'lucide-react';
-import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab } from './tabs';
+import { User, Package, Ticket, Building2, Users } from 'lucide-react';
+import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab, ManagerListTab } from './tabs';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useAppSelector } from '@/app/store/hooks';
@@ -14,6 +14,7 @@ const tabs = [
   { id: 'ticketstatus', label: 'My Ticket Status', icon: Ticket, Component: TicketStatusTab },
   { id: 'ticketforapproval', label: 'Ticket for Approval', icon: Ticket, Component: TicketApprovalTab },
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
+  { id: 'managerlist', label: 'Manager List', icon: Users, Component: ManagerListTab },
 ];
 
 export default function UserProfileDetails() {
@@ -61,7 +62,7 @@ export default function UserProfileDetails() {
 
   const filteredTabs = tabs.filter(tab => {
     if ((currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && 
-        (tab.id === 'ticketforapproval' || tab.id === 'campusincharge' || tab.id === 'myassets' || tab.id === 'ticketstatus')) {
+        (tab.id === 'ticketforapproval' || tab.id === 'campusincharge' || tab.id === 'managerlist' || tab.id === 'myassets' || tab.id === 'ticketstatus')) {
       return false;
     }
     return true;
