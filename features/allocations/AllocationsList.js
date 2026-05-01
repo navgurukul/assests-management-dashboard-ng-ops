@@ -38,6 +38,9 @@ export default function AllocationsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
+  // Dashboard toggle state
+  const [showCards, setShowCards] = useState(false);
+  
   // Search state
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -182,8 +185,11 @@ export default function AllocationsList() {
       <div className='flex-1 min-h-0 flex flex-col' >
         <TableWrapper
         margin='m-0'
-        summaryCardsComponent={
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        showDashboardToggle={true}
+        showCards={showCards}
+        onToggleCards={() => setShowCards((prev) => !prev)}
+        summaryCardsComponent={showCards ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {summaryCards.map((card) => (
               <SummaryCard
                 key={card.label}
@@ -195,7 +201,7 @@ export default function AllocationsList() {
               />
             ))}
           </div>
-        }
+        ) : null}
         data={allocationsListData}
         columns={visibleColumns}
         title="Allocations"
