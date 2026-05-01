@@ -186,7 +186,7 @@ export default function CreateCampusIncharge() {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--background)]">
+    <div className="h-full overflow-y-auto bg-background">
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-4">
           <CustomButton
@@ -197,16 +197,16 @@ export default function CreateCampusIncharge() {
             size="sm"
             className="mb-6"
           />
-          <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-sm border border-[var(--border)] p-6">
+          <div className="bg-(--surface) text-foreground rounded-xl shadow-sm border border-(--border) p-6">
             <h1 className="text-xl font-bold mb-2">
               {isEditMode ? 'Edit Campus Details' : 'Campus Details'}
             </h1>
-            <p className="text-[var(--muted)]">
+            <p className="text-(--muted)">
               {isEditMode ? 'Update the campus details below' : 'Fill in the details below'}
             </p>
           </div>
         </div>
-        <div className="bg-[var(--surface)] text-[var(--foreground)] rounded-xl shadow-lg border border-[var(--border)] p-8">
+        <div className="bg-(--surface) text-foreground rounded-xl shadow-lg border border-(--border) p-8">
           <GenericForm
             fields={formFields}
             initialValues={isEditMode && editInitialValues ? editInitialValues : campusInchargeInitialValues}

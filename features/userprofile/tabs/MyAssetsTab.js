@@ -479,7 +479,7 @@ export default function MyAssetsTab({ userData = {} }) {
                       <Laptop className="w-4 h-4 text-(--theme-main)" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-(--foreground) leading-tight">{asset.assetTag}</h3>
+                      <h3 className="text-sm font-semibold text-foreground leading-tight">{asset.assetTag}</h3>
                       <p className="text-xs text-(--muted)">
                         {asset.brand ? `${asset.brand} ${asset.model} · ` : ''}{asset.campus?.campusName || 'N/A'} Campus
                       </p>
@@ -504,23 +504,23 @@ export default function MyAssetsTab({ userData = {} }) {
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Serial No.</p>
-                    <p className="text-xs font-medium text-(--foreground) truncate" title={asset.serialNumber}>{asset.serialNumber || 'N/A'}</p>
+                    <p className="text-xs font-medium text-foreground truncate" title={asset.serialNumber}>{asset.serialNumber || 'N/A'}</p>
                   </div>
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Condition</p>
-                    <p className="text-xs font-medium text-(--foreground)">{asset.condition || 'N/A'}</p>
+                    <p className="text-xs font-medium text-foreground">{asset.condition || 'N/A'}</p>
                   </div>
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Storage</p>
-                    <p className="text-xs font-medium text-(--foreground)">{asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A'}</p>
+                    <p className="text-xs font-medium text-foreground">{asset.storageSizeGB ? `${asset.storageSizeGB} GB` : 'N/A'}</p>
                   </div>
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Source</p>
-                    <p className="text-xs font-medium text-(--foreground)">{asset.sourceType ? asset.sourceType.charAt(0) + asset.sourceType.slice(1).toLowerCase() : 'N/A'}</p>
+                    <p className="text-xs font-medium text-foreground">{asset.sourceType ? asset.sourceType.charAt(0) + asset.sourceType.slice(1).toLowerCase() : 'N/A'}</p>
                   </div>
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Allocated</p>
-                    <p className="text-xs font-medium text-(--foreground)">{allocatedDate}</p>
+                    <p className="text-xs font-medium text-foreground">{allocatedDate}</p>
                   </div>
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Accessories</p>
@@ -544,14 +544,14 @@ export default function MyAssetsTab({ userData = {} }) {
                     <>
                       <div className=" rounded-lg px-2.5 py-2 col-span-2">
                         <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Allocation Code</p>
-                        <p className="text-xs font-medium text-(--foreground) font-mono truncate" title={allocation.allocationCode}>{allocation.allocationCode || 'N/A'}</p>
+                        <p className="text-xs font-medium text-foreground font-mono truncate" title={allocation.allocationCode}>{allocation.allocationCode || 'N/A'}</p>
                       </div> 
                     </>
                   )}
                   {asset.ownedBy && (
                     <div className=" rounded-lg px-2.5 py-2">
                       <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Owned By</p>
-                      <p className="text-xs font-medium text-(--foreground)">{asset.ownedBy.toUpperCase()}</p>
+                      <p className="text-xs font-medium text-foreground">{asset.ownedBy.toUpperCase()}</p>
                     </div>
                   )}
                 </div>
@@ -586,7 +586,7 @@ export default function MyAssetsTab({ userData = {} }) {
                       <button
                         type="button"
                         onClick={() => setExpandedTimelines((prev) => ({ ...prev, [asset.id]: !prev[asset.id] }))}
-                        className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-(--foreground) transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-foreground transition-colors cursor-pointer"
                       >
                         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isTimelineExpanded ? '' : '-rotate-90'}`} />
                         Movement History ({assetMovementsFiltered.length})
@@ -650,7 +650,7 @@ export default function MyAssetsTab({ userData = {} }) {
                       <Laptop className="w-4 h-4 text-gray-400" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-(--foreground) leading-tight">{returnedAsset.assetTag}</h3>
+                      <h3 className="text-sm font-semibold text-foreground leading-tight">{returnedAsset.assetTag}</h3>
                       <p className="text-xs text-(--muted)">Previously assigned asset</p>
                     </div>
                   </div>
@@ -688,7 +688,7 @@ export default function MyAssetsTab({ userData = {} }) {
                     <button
                       type="button"
                       onClick={() => setExpandedTimelines((prev) => ({ ...prev, [returnedAsset.assetTag]: !prev[returnedAsset.assetTag] }))}
-                      className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-(--foreground) transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-foreground transition-colors cursor-pointer"
                     >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isTimelineExpanded ? '' : '-rotate-90'}`} />
                       Movement History ({sortedMovements.length})
