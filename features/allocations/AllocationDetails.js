@@ -357,14 +357,12 @@ export default function AllocationDetails({ allocationId, onBack }) {
           label: 'Created By',
           value:
             allocationDetails.administrationInformation?.createdBy?.email ||
-            allocationDetails.createdByUserId ||
             'N/A',
         },
         {
           label: 'Verified By',
           value:
             allocationDetails.administrationInformation?.verifiedBy?.email ||
-            allocationDetails.verifiedByUserId ||
             'Not Yet Verified',
         },
         {

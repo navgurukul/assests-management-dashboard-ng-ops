@@ -193,6 +193,7 @@ export const assetFormFields = [
     type: "select",
     placeholder: "Select asset status",
     required: true,
+    disabled: true, // Disabled for new assets - always IN_STOCK
     options: [
       { value: "IN_STOCK", label: "In Stock" },
       { value: "ALLOCATED", label: "Allocated" },
