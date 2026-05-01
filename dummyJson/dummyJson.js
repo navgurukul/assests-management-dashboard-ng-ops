@@ -1134,8 +1134,10 @@ export const allocationSummaryCardsConfig = [
 
 export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAsset, handleExtendLease }) => {
   const options = [];
+  const status = asset.consignmentStatus || asset.consignment?.status || asset.status;
+  const returnStatus = asset.consignmentReturnStatus || asset.consignment?.returnStatus;
 
-  if (asset.consignmentStatus === 'DISPATCHED') {
+  if (status === 'DISPATCHED') {
     options.push({
       label: 'Asset Received',
       icon: CheckCircle2,
@@ -1144,7 +1146,10 @@ export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAs
     });
   }
 
-  if (asset.consignmentStatus === 'DELIVERED' && asset.consignmentReturnStatus === null) {
+  // If the asset is known to be dispatched, it shouldn't show return options.
+  // Otherwise, if it's already delivered or we don't have explicit dispatch status, we show them.
+  //  if (status === 'DELIVERED' && !returnStatus) {
+  if (status !== 'DISPATCHED' && !returnStatus) {
     options.push(
       {
         label: 'Return',
