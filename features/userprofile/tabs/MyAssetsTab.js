@@ -109,7 +109,14 @@ export default function MyAssetsTab({ userData = {} }) {
         hasToastedRef.current = coordinatorCampusId;
       }
     }
-  }, [coordinatorEmail, coordinatorCampusId, isCoordinatorError]);
+  }, [coordinatorEmail, isCoordinatorError, coordinatorCampusId]);
+
+  // Fetch campuses when return modal opens
+  useEffect(() => {
+    if (returnModalOpen) {
+      fetchCampuses();
+    }
+  }, [returnModalOpen]);
 
   // Extract assets, allocations and assetMovements early so handlers can access them
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
