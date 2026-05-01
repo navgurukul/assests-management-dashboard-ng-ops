@@ -42,7 +42,7 @@ export default function ActionMenu({ menuOptions = [], disabled = false, classNa
       {open && (
         <div
           onClick={stopEventBubbling}
-          className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl ${className}`}
+          className={`absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-xl ${className}`}
           style={{ zIndex: 9999, minHeight: '50px' }}
         >
           <div className="py-1">
