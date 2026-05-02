@@ -115,69 +115,6 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         { label: 'Phone', value: userData.phone || 'N/A' },
       ],
     },
-  ];
-
-  // ─── Right column (70%) ────────────────────────────────────────────────────
-
-  const allocationSections = allocations.map((allocation, index) => {
-    const asset = allocation.assets?.[0];
-    return {
-      title: `Allocation ${index + 1} — ${allocation.allocationCode || 'N/A'}`,
-      color: 'blue',
-      itemsGrid: true,
-      items: [
-        { label: 'Allocation Code', value: allocation.allocationCode || 'N/A' },
-        { label: 'Allocation Type', value: allocation.allocationType || 'N/A' },
-        { label: 'Status', value: allocation.status || 'N/A' },
-        { label: 'Reason', value: allocation.allocationReason || 'N/A' },
-        { label: 'Device Selection', value: allocation.deviceSelectionMode || 'N/A' },
-        { label: 'Is Temporary', value: allocation.isTemporary ? 'Yes' : 'No' },
-        { label: 'Destination Campus', value: allocation.destinationCampusId || 'N/A' },
-        { label: 'Requested By', value: allocation.requestRaisedBy || 'N/A' },
-        { label: 'User Address', value: allocation.userAddress || 'N/A' },
-        { label: 'Notes', value: allocation.notes || 'N/A' },
-        {
-          label: 'Expected Return',
-          value: allocation.expectedReturnDate
-            ? new Date(allocation.expectedReturnDate).toLocaleDateString()
-            : 'N/A',
-        },
-        {
-          label: 'Allocated On',
-          value: allocation.createdAt
-            ? new Date(allocation.createdAt).toLocaleString()
-            : 'N/A',
-        },
-        // Asset details
-        ...(asset
-          ? [
-              { label: 'Asset Tag', value: asset.assetTag || 'N/A' },
-              { label: 'Asset Type', value: asset.assetTypeName || 'N/A' },
-              { label: 'Brand', value: asset.brand || 'N/A' },
-              { label: 'Model', value: asset.model || 'N/A' },
-              { label: 'Serial Number', value: asset.serialNumber || 'N/A' },
-              { label: 'Asset Status', value: asset.status || 'N/A' },
-              { label: 'Condition', value: asset.condition || 'N/A' },
-              { label: 'Campus', value: asset.campusName || 'N/A' },
-            ]
-          : []),
-      ],
-    };
-  });
-
-  const rightSections = [
-    {
-      title: 'Personal Information',
-      color: 'theme',
-      itemsGrid: true,
-      items: [
-        { label: 'First Name', value: userData.firstName || 'N/A' },
-        { label: 'Last Name', value: userData.lastName || 'N/A' },
-        { label: 'Username', value: userData.username || 'N/A' },
-        { label: 'Email', value: userData.email || 'N/A' },
-        { label: 'Phone', value: userData.phone || 'N/A' },
-      ],
-    },
     {
       title: 'Role & Access',
       color: 'theme',
@@ -223,6 +160,68 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
             ? new Date(userData.updatedAt).toLocaleString()
             : 'N/A',
         },
+      ],
+    },
+  ];
+
+  // ─── Right column (70%) ────────────────────────────────────────────────────
+
+  const allocationSections = allocations.map((allocation, index) => {
+    const asset = allocation.assets?.[0];
+    return {
+      title: `Asset details`,
+      color: 'blue',
+      gridClass: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4',
+      items: [
+        // Asset details
+        ...(asset
+          ? [
+              { isSubheading: true, label: 'Asset Information' },
+              { label: 'Asset Tag', value: asset.assetTag || 'N/A' },
+              { label: 'Asset Type', value: asset.assetTypeName || 'N/A' },
+              { label: 'Brand', value: asset.brand || 'N/A' },
+              { label: 'Model', value: asset.model || 'N/A' },
+              { label: 'Serial Number', value: asset.serialNumber || 'N/A' },
+              { label: 'Asset Status', value: asset.status || 'N/A' },
+              { label: 'Condition', value: asset.condition || 'N/A' },
+              { label: 'Campus', value: asset.campusName || 'N/A' },
+            ]
+          : []),
+        { isSubheading: true, label: 'Allocation Information' },
+        { label: 'Allocation Code', value: allocation.allocationCode || 'N/A' },
+        { label: 'Allocation Type', value: allocation.allocationType || 'N/A' },
+        { label: 'Status', value: allocation.status || 'N/A' },
+        { label: 'Destination Campus', value: allocation.destinationCampusId || 'N/A' },
+        { label: 'Requested By', value: allocation.requestRaisedBy || 'N/A' },
+        { label: 'User Address', value: allocation.userAddress || 'N/A' },
+        { label: 'Notes', value: allocation.notes || 'N/A' },
+        {
+          label: 'Expected Return',
+          value: allocation.expectedReturnDate
+            ? new Date(allocation.expectedReturnDate).toLocaleDateString()
+            : 'N/A',
+        },
+        {
+          label: 'Allocated On',
+          value: allocation.createdAt
+            ? new Date(allocation.createdAt).toLocaleString()
+            : 'N/A',
+        },
+      ],
+    };
+  });
+
+  const rightSections = [
+    {
+      title: 'Personal Information',
+      color: 'theme',
+      itemsGrid: true,
+      items: [
+        { label: 'First Name', value: userData.firstName || 'N/A' },
+        { label: 'Last Name', value: userData.lastName || 'N/A' },
+        { label: 'Username', value: userData.username || 'N/A' },
+        { label: 'Email', value: userData.email || 'N/A' },
+        { label: 'Phone', value: userData.phone || 'N/A' },
       ],
     },
     ...allocationSections,

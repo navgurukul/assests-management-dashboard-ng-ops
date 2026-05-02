@@ -60,8 +60,15 @@ export default function DetailsPage({
         <div className="p-4 sm:p-5 flex-1 overflow-y-auto">
           {/* Render items if present */}
           {section.items && section.items.length > 0 && (
-            <div className={section.itemsGrid ? 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4' : 'space-y-4'}>
+            <div className={section.gridClass || (section.itemsGrid ? 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4' : 'space-y-4')}>
               {section.items.map((item, itemIndex) => {
+                if (item.isSubheading) {
+                  return (
+                    <div key={itemIndex} className="col-span-1 sm:col-span-2 lg:col-span-4 mt-2 border-b border-gray-200 pb-2 mb-1">
+                      <h3 className="text-sm font-bold text-gray-700">{item.label}</h3>
+                    </div>
+                  );
+                }
                 const isFullWidth =
                   item.span === 2 ||
                   item.className?.includes('col-span-2') ||
@@ -71,7 +78,7 @@ export default function DetailsPage({
                 return (
                   <div
                     key={itemIndex}
-                    className={`flex flex-col gap-0.5 ${isFullWidth && section.itemsGrid ? 'sm:col-span-2' : ''}`}
+                    className={`flex flex-col gap-0.5 ${isFullWidth && (section.itemsGrid || section.gridClass) ? 'sm:col-span-2' : ''}`}
                   >
                     <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                       {item.label}
