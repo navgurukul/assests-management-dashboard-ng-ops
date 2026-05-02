@@ -89,17 +89,6 @@ export const readyToDispatchFields = [
     required: true,
   },
   {
-    name: 'trackingLink',
-    label: 'Tracking Link',
-    type: 'select',
-    placeholder: 'Select tracking link',
-    options: courierProviders.map(courier => ({
-      value: courier.trackingUrlPattern.replace('{trackingId}', ''),
-      label: courier.name,
-    })),
-    required: false,
-  },
-  {
     name: 'estimatedDeliveryDate',
     label: 'Estimated Delivery Date',
     type: 'date',

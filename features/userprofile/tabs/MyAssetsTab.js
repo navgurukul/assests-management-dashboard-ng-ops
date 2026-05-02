@@ -62,10 +62,10 @@ export default function MyAssetsTab({ userData = {} }) {
     queryKey: ['myAssets']
   });
 
-  const { data: campusesResponse, refetch: fetchCampuses } = useFetch({
+  const { data: campusesResponse } = useFetch({
     url: '/campuses',
     queryKey: ['campuses'],
-    enabled: false,
+    enabled: returnModalOpen,
   });
 
   const { data: coordinatorResponse, error: coordinatorError, failureCount } = useFetch({
@@ -109,7 +109,7 @@ export default function MyAssetsTab({ userData = {} }) {
         hasToastedRef.current = coordinatorCampusId;
       }
     }
-  }, [coordinatorEmail, coordinatorCampusId, isCoordinatorError]);
+  }, [coordinatorEmail, isCoordinatorError, coordinatorCampusId]);
 
   // Extract assets, allocations and assetMovements early so handlers can access them
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
@@ -300,7 +300,6 @@ export default function MyAssetsTab({ userData = {} }) {
       switch (name) {
         case 'returnMode':
           if (isOtherOrVisit) {
-            setTimeout(() => fetchCampuses(), 0);
             setTimeout(() => setCoordinatorCampusId(null), 0);
             nextData = {
               ...updatedData,

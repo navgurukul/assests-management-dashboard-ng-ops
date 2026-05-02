@@ -580,8 +580,22 @@ export default function ConsignmentsList() {
     setIsDispatchModalOpen(true);
   };
   
-  // Handle dispatch form data change to auto-populate tracking link
+  // Handle dispatch form data change to auto-populate tracking link based on courier selection
   const handleDispatchFormDataChange = (formData, field) => {
+    // If courier service was just changed, auto-populate the tracking link
+    if (field.name === 'courierServiceId' && formData.courierServiceId) {
+      const selectedCourier = courierProviders.find(
+        (courier) => courier.id === formData.courierServiceId
+      );
+      
+      if (selectedCourier) {
+        return {
+          ...formData,
+          trackingLink: selectedCourier.trackingUrlPattern.replace('{trackingId}', ''),
+        };
+      }
+    }
+    
     return formData;
   };
   

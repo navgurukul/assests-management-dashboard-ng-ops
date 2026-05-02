@@ -22,6 +22,7 @@ export const returnAssetFields = [
     label: 'Return Mode',
     type: 'radio',
     required: true,
+    defaultValue: 'VISIT_CAMPUS',
     options: [
       { label: 'Returning physically by visiting campus', value: 'VISIT_CAMPUS' },
       { label: 'Return to sourced campus', value: 'SOURCED_CAMPUS' },
@@ -95,7 +96,7 @@ export const returnAssetFields = [
       required: true,
       maxLength: 30,
       placeholder: 'Enter tracking ID (max 30 characters)',
-      showWhen: () => true,
+      showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
     },
   {
     name: 'managerEmail',
@@ -180,16 +181,22 @@ export const returnAssetValidationSchema = Yup.object().shape({
     .transform((curr, orig) => (orig === '' ? null : curr))
     .required('Expected delivery date is required')
     .min(new Date(new Date().setHours(0,0,0,0)), 'Delivery date must be today or in the future'),
-  trackingId: Yup.string()
-    .max(30, 'Tracking ID must be at most 30 characters')
-    .required('Tracking ID is required'),
+  trackingId: Yup.string().when('returnMode', {
+    is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+    then: (schema) => schema
+      .required('Tracking ID is required')
+      .max(30, 'Tracking ID must be at most 30 characters'),
+    otherwise: (schema) => schema
+      .nullable()
+      .max(30, 'Tracking ID must be at most 30 characters'),
+  }),
 });
 
 // ─── Initial values ────────────────────────────────────────────────────────
 
 export const returnAssetInitialValues = {
   assetId: '',
-  returnMode: 'SOURCED_CAMPUS',
+  returnMode: 'VISIT_CAMPUS',
   assetSource: '',
   destinationCampusId: '',
   campusItCoordinator: '',
