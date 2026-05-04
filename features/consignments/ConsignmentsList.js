@@ -276,11 +276,17 @@ export default function ConsignmentsList() {
     }
   }, [campusOptions]);
   
-  // Status filter options - Only draft, dispatched, and delivered are supported
+  // Status filter options
   const statusOptions = [
-    { value: 'draft', label: 'Draft' },
-    { value: 'dispatched', label: 'Dispatched' },
-    { value: 'delivered', label: 'Delivered' },
+    { value: 'DRAFT', label: 'Draft' },
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'DISPATCHED', label: 'Dispatched' },
+    { value: 'SHIPPED', label: 'Shipped' },
+    { value: 'IN_TRANSIT', label: 'In Transit' },
+    { value: 'DELIVERED', label: 'Delivered' },
+    { value: 'RECEIVED', label: 'Received' },
+    { value: 'LOST', label: 'Lost' },
+    { value: 'DAMAGED', label: 'Damaged' },
   ];
   
   // Get category name for filter key
