@@ -225,6 +225,9 @@ export default function FormField({ field, formik, onFieldChange }) {
             selectedItem={field.selectedItem}
             excludeValue={field.excludeField ? formik.values[field.excludeField] : null}
             staticItems={field.staticItems}
+            enableSearch={field.enableSearch || false}
+            enablePagination={field.enablePagination || false}
+            pageLimit={field.pageLimit || 10}
           />
         );
 

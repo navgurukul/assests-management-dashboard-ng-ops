@@ -9,6 +9,11 @@ export default function UserDetailsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
+  const listView = searchParams.get('view') || 'allocations';
+
+  const handleBack = () => {
+    router.push(`/userlist?view=${listView}`);
+  };
 
   const { data, isLoading, isError, error } = useFetch({
     url: `/users/${userId}/assets`,
@@ -36,7 +41,7 @@ export default function UserDetailsPage() {
           userId={userId}
           userData={apiData.user}
           allocations={apiData.allocations}
-          onBack={() => router.back()}
+          onBack={handleBack}
         />
       )}
     </div>

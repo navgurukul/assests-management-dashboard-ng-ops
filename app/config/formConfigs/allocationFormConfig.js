@@ -68,6 +68,9 @@ export const allocationFormFields = [
     filterFn: (item) => item.isConsignmentCreated !== true,
     emptyContent: 'No available assets. They may be out of stock or already assigned to a consignment.',
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
+    enableSearch: true,
+    enablePagination: true,
+    pageLimit: 10,
   },
   {
     name: 'userEmail',
@@ -77,14 +80,6 @@ export const allocationFormFields = [
     required: false,
     showIf: { field: 'allocationType', value: 'REMOTE' },
   },
-  // {
-  //   name: 'phoneNumber',
-  //   label: 'Phone Number',
-  //   type: 'text',
-  //   placeholder: 'Enter phone number',
-  //   required: false,
-  //   showIf: { field: 'allocationType', value: 'REMOTE' },
-  // },
   {
     name: 'userAddress',
     label: 'User Address',

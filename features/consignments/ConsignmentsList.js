@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ExternalLink, Eye, ChevronDown, Package, Truck, ArrowLeftCircle, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
 import ActionMenu from '@/components/molecules/ActionMenu';
 import { inTransitColumns, renderInTransitCell } from '@/features/consignments/InTransitReturns';
@@ -39,6 +39,7 @@ const actionOptions = ['View', 'Details', 'Update Status'];
 
 export default function ConsignmentsList() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,7 +69,8 @@ export default function ConsignmentsList() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // In-transit returns modal state
-  const [showInTransit, setShowInTransit] = useState(false);
+  const initialShowInTransit = searchParams?.get('view') === 'in-transit';
+  const [showInTransit, setShowInTransit] = useState(initialShowInTransit);
   const [inTransitSearch, setInTransitSearch] = useState('');
   const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState('');
   const [inTransitPage, setInTransitPage] = useState(1);
@@ -451,6 +453,13 @@ export default function ConsignmentsList() {
       sessionStorage.setItem('currentReturnData', JSON.stringify(item));
     }
     router.push(`/consignments/return/${item.id}`);
+  };
+
+  const handleToggleInTransit = () => {
+    const nextShowInTransit = !showInTransit;
+    setShowInTransit(nextShowInTransit);
+    const nextView = nextShowInTransit ? 'in-transit' : 'consignments';
+    router.replace(`/consignments?view=${nextView}`);
   };
   
   // ============================================
@@ -960,7 +969,7 @@ export default function ConsignmentsList() {
           <CustomButton
               text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
               icon={ArrowLeftCircle}
-              onClick={() => setShowInTransit(!showInTransit)}
+              onClick={handleToggleInTransit}
               variant={showInTransit ? 'secondary' : 'warning'}
               size="md"
             />

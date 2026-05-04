@@ -130,13 +130,13 @@ function useMenuPosition(isOpen, menuRef) {
   }, [isOpen, menuRef]);
 }
 
-function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, isAssignedOptions }) {
+function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, isAssignedOptions, statusLabel }) {
   return [
     { key: 'campus',        label: 'Campus',         items: campusOptions },
     { key: 'componentType', label: 'Component Type',  items: componentTypeOptions },
     { key: 'source',        label: 'Source',          items: sourceOptions },
     { key: 'condition',     label: 'Condition',       items: conditionOptions },
-    { key: 'status',        label: 'Status',          items: statusOptions },
+    { key: 'status',        label: statusLabel,       items: statusOptions },
     { key: 'type',          label: 'Asset Type',      items: assetTypeOptions },
     { key: 'isAssigned',    label: 'Unassigned Ticket', items: isAssignedOptions },
   ].filter((opt) => opt.items.length > 0);
@@ -153,6 +153,7 @@ export default function FilterDropdown({
   sourceOptions = [],
   conditionOptions = [],
   isAssignedOptions = [],
+  statusLabel = 'Status',
   selectedFilters = {},
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -162,7 +163,16 @@ export default function FilterDropdown({
   const menuRef = useRef(null);
 
   useMenuPosition(isOpen, menuRef);
-  const filterOptions = useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, isAssignedOptions });
+  const filterOptions = useFilterOptions({
+    campusOptions,
+    componentTypeOptions,
+    sourceOptions,
+    conditionOptions,
+    statusOptions,
+    assetTypeOptions,
+    isAssignedOptions,
+    statusLabel,
+  });
 
   useClickOutside(dropdownRef, () => {
     setIsOpen(false);

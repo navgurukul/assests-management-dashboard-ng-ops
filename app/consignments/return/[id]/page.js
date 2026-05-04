@@ -9,6 +9,10 @@ export default function ReturnDetailsPage() {
   const params = useParams();
   const returnId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
+  const handleBack = () => {
+    router.push('/consignments?view=in-transit');
+  };
+
   const returnData = useMemo(() => {
     if (typeof window === 'undefined') return null;
     const stored = sessionStorage.getItem('currentReturnData');
@@ -28,7 +32,7 @@ export default function ReturnDetailsPage() {
       isLoading={false}
       isError={!returnData}
       error={!returnData ? { message: 'Return data not found. Please go back and try again.' } : null}
-      onBack={() => router.back()}
+      onBack={handleBack}
     />
   );
 }
