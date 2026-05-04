@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 export default function ActiveFiltersChips({ 
   filters = {},
   onRemoveFilter,
+  onClearAll,
   getCategoryName,
   getFilterLabel 
 }) {
@@ -33,6 +34,14 @@ export default function ActiveFiltersChips({
             </button>
           </div>
         ))}
+         {onClearAll && (
+          <button
+            onClick={onClearAll}
+            className="text-xs px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md font-medium transition-colors border border-red-200"
+          >
+            Clear All
+          </button>
+        )}
       </div>
     </div>
   );
