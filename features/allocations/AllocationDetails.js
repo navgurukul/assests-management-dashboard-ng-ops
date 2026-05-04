@@ -7,6 +7,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import FormModal from '@/components/molecules/FormModal';
 import StateHandler from '@/components/atoms/StateHandler';
 import useFetch from '@/app/hooks/query/useFetch';
+import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
 import post from '@/app/api/post/post';
 import { toast } from '@/app/utils/toast';
@@ -14,6 +15,7 @@ import { createConsignmentFields } from '@/app/config/formConfigs/consignmentFor
 
 export default function AllocationDetails({ allocationId, onBack }) {
   const router = useRouter();
+  const { mutateAsync: updateTicket } = usePut();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
@@ -143,6 +145,15 @@ export default function AllocationDetails({ allocationId, onBack }) {
         method: 'POST',
         data: payload,
       });
+
+      if (allocationDetails?.ticket?.id) {
+        await updateTicket({
+          endpoint: config.endpoints.tickets.update(allocationDetails.ticket.id),
+          body: {
+            status: 'CONSIGNEMENT_CREATED',
+          },
+        });
+      }
 
       toast.dismiss(loadingToastId);
       toast.success('Consignment created successfully');

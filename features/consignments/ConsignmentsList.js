@@ -16,6 +16,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePatch from '@/app/hooks/query/usePatch';
+import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
@@ -200,6 +201,7 @@ export default function ConsignmentsList() {
   });
 
   const { mutateAsync: patchMutation } = usePatch();
+  const { mutateAsync: updateTicket } = usePut();
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -639,6 +641,15 @@ export default function ConsignmentsList() {
           `/consignments/${currentConsignment.id}/dispatch`,
         body: payload,
       });
+
+      if (currentConsignment?.ticketId) {
+        await updateTicket({
+          endpoint: config.endpoints.tickets.update(currentConsignment.ticketId),
+          body: {
+            status: 'CONSIGNEMENT_DISPATCHED',
+          },
+        });
+      }
       
       toast.dismiss(loadingToastId);
       toast.success('Consignment dispatched successfully!');

@@ -31,8 +31,11 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   ];
 
   const filterConditionOptions = [
-    { value: 'WORKING', label: 'Working' },
-    { value: 'MINOR_ISSUES', label: 'Minor Issues' },
+    { value: 'NEW', label: 'New' },
+    { value: 'LIKE_NEW', label: 'Like New' },
+    { value: 'GOOD', label: 'Good' },
+    { value: 'FAIR', label: 'Fair' },
+    { value: 'POOR', label: 'Poor' },
     { value: 'NOT_WORKING', label: 'Not Working' },
   ];
 

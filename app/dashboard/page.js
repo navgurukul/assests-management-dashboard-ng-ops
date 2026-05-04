@@ -3,8 +3,7 @@
 import React from 'react';
 import DashboardCard from '@/components/atoms/DashboardCard';
 import PieChart from '@/components/molecules/PieChart';
-import StackedColumnChart from '@/components/molecules/StackedColumnChart';
-import { dashboardCards } from '@/dummyJson/dummyJson';
+import StackedColumnChart from '@/components/molecules/StackedColumnChart'; 
 import AssetsTable from '@/components/Table/Table';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
@@ -56,6 +55,18 @@ export default function DashboardPage() {
   const apiData = response?.data ?? [];
   const stackedChartData = transformToStackedChartData(apiData);
   const pieChartData = transformToPieChartData(apiData);
+
+  const totalAssets = apiData.reduce((sum, item) => sum + (item.grand_total ?? 0), 0);
+  const totalInStock = apiData.reduce((sum, item) => sum + (item.LIS ?? 0), 0);
+  const totalNeedsRepair = apiData.reduce((sum, item) => sum + (item.LR ?? 0), 0);
+  const totalNonWorking = apiData.reduce((sum, item) => sum + (item.LNW ?? 0), 0);
+
+  const dashboardCards = [
+    { id: 1, count: totalAssets,     label: 'Total Assets',  icon: 'Package',      bgColor: 'bg-teal-100',  iconColor: 'text-teal-600'  },
+    { id: 2, count: totalInStock,    label: 'In Stock',       icon: 'Archive',      bgColor: 'bg-blue-100',  iconColor: 'text-blue-600'  },
+    { id: 3, count: totalNeedsRepair,label: 'Needs Repair',   icon: 'Settings',     bgColor: 'bg-slate-100', iconColor: 'text-slate-600' },
+    { id: 4, count: totalNonWorking, label: 'Non-Working',    icon: 'XCircle',      bgColor: 'bg-red-100',   iconColor: 'text-red-600'   },
+  ];
 
   return (
     <div className="p-6 overflow-y-auto h-full bg-[linear-gradient(135deg,var(--background)_0%,var(--surface-soft)_100%)]">

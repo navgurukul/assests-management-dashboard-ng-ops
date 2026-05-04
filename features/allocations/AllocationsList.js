@@ -17,9 +17,13 @@ import SummaryCard from '@/components/atoms/SummaryCard';
 import StateHandler from '@/components/atoms/StateHandler';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
+import FilterDropdown from '@/components/molecules/FilterDropdown';
+import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 import {
   ALLOCATION_TABLE_ID,
   allocationTableColumns,
@@ -41,6 +45,9 @@ export default function AllocationsList() {
   // Dashboard toggle state
   const [showCards, setShowCards] = useState(false);
   
+  // Filter state (persisted)
+  const [filters, setFilters] = usePersistentFilters('allocations-filters', {});
+
   // Search state
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -66,22 +73,30 @@ export default function AllocationsList() {
     return () => clearTimeout(timer);
   }, [searchInput]);
   
-  // Build query string with pagination and search
+  // Status filter options for allocations
+  const allocationStatusOptions = [
+    { value: 'ALLOCATED', label: 'Allocated' },
+    { value: 'ALLOCATION_COMPLETED', label: 'Allocation Completed' },
+  ];
+
+  // Build query string with pagination, filters, and search
   const buildQueryString = () => {
     const params = new URLSearchParams();
-    
-    // Add search parameter first
+
     if (debouncedSearch) params.append('search', debouncedSearch);
-    
+
     params.append('page', currentPage);
     params.append('limit', pageSize);
+
+    if (filters.status) params.append('status', filters.status);
+
     return params.toString();
   };
   
   // Fetch allocations data from API with pagination and search
   const { data, isLoading, isError, error } = useFetch({
     url: `/allocations?${buildQueryString()}`,
-    queryKey: ['allocations', currentPage, pageSize, debouncedSearch],
+    queryKey: ['allocations', currentPage, pageSize, filters, debouncedSearch],
   });
 
   // Fetch allocation counts from API
@@ -113,7 +128,37 @@ export default function AllocationsList() {
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
     setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
+  };
+
+  // Handle filter change
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  // Uses custom hook for handling filter removal and clearing
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    setFilters,
+    setCurrentPage
+  );
+
+  // Get label for a filter value
+  const getFilterLabel = (filterKey, value) => {
+    if (filterKey === 'status') {
+      const statusOption = allocationStatusOptions.find((opt) => opt.value === value);
+      return statusOption ? statusOption.label : value;
+    }
+    return value;
+  };
+
+  // Get category name for display
+  const getCategoryName = (filterKey) => {
+    const categoryNames = {
+      status: 'Status',
+    };
+    return categoryNames[filterKey] || filterKey;
   };
 
   // Transform API data to match table structure
@@ -218,6 +263,24 @@ export default function AllocationsList() {
             value={searchInput}
             onChange={setSearchInput}
             placeholder="Search by allocation type, reason, or notes..."
+          />
+        }
+        // Filter component
+        filterComponent={
+          <FilterDropdown
+            onFilterChange={handleFilterChange}
+            statusOptions={allocationStatusOptions}
+            selectedFilters={filters}
+          />
+        }
+        // Active filters chips component
+        activeFiltersComponent={
+          <ActiveFiltersChips
+            filters={filters}
+            onRemoveFilter={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
+            getCategoryName={getCategoryName}
+            getFilterLabel={getFilterLabel}
           />
         }
         // Column selector component
