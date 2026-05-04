@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, Users, ArrowLeftCircle } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
 import StateHandler from '@/components/atoms/StateHandler';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -34,6 +34,7 @@ const formatRole = (role) => {
 
 export default function UsersList() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,7 +48,8 @@ export default function UsersList() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Show All Users State
-  const [showAllUsers, setShowAllUsers] = useState(false);
+  const initialShowAllUsers = searchParams?.get('view') === 'all-users';
+  const [showAllUsers, setShowAllUsers] = useState(initialShowAllUsers);
   const [allUsersSearch, setAllUsersSearch] = useState('');
   const [debouncedAllUsersSearch, setDebouncedAllUsersSearch] = useState('');
   const [allUsersPage, setAllUsersPage] = useState(1);
@@ -278,8 +280,16 @@ export default function UsersList() {
   const handleRowClick = (user) => {
     const userId = user.userData?.id;
     if (userId) {
-      router.push(`/userlist/details?userId=${userId}`);
+      const viewParam = showAllUsers ? 'all-users' : 'allocations';
+      router.push(`/userlist/details?userId=${userId}&view=${viewParam}`);
     }
+  };
+
+  const handleToggleUserTable = () => {
+    const nextShowAllUsers = !showAllUsers;
+    setShowAllUsers(nextShowAllUsers);
+    const nextView = nextShowAllUsers ? 'all-users' : 'allocations';
+    router.replace(`/userlist?view=${nextView}`);
   };
 
   return (
@@ -316,7 +326,7 @@ export default function UsersList() {
             <CustomButton
               text={showAllUsers ? 'Back to Allocations' : 'Show all user'}
               icon={showAllUsers ? ArrowLeftCircle : Users}
-              onClick={() => setShowAllUsers(!showAllUsers)}
+              onClick={handleToggleUserTable}
               variant={showAllUsers ? 'secondary' : 'warning'}
               size="md"
             />
