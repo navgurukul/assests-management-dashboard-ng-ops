@@ -15,6 +15,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 import {
   USER_TABLE_ID,
   userTableColumns,
@@ -37,8 +38,8 @@ export default function UsersList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  // Filters
-  const [filters, setFilters] = useState({});
+  // Filters (persisted)
+  const [filters, setFilters] = usePersistentFilters('users-filters', {});
 
   // Search
   const [searchInput, setSearchInput] = useState('');

@@ -19,6 +19,7 @@ import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 import {
   CONSIGNMENT_TABLE_ID,
   consignmentTableColumns,
@@ -43,8 +44,8 @@ export default function ConsignmentsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
-  // Filter state
-  const [filters, setFilters] = useState({});
+  // Filter state (persisted)
+  const [filters, setFilters] = usePersistentFilters('consignments-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
