@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Autocomplete,
   AutocompleteItem
 } from "@heroui/autocomplete";
 import { useApiAutocomplete } from '@/app/hooks/useApiAutocomplete';
+import { useInfiniteApiAutocomplete } from '@/app/hooks/useInfiniteApiAutocomplete';
 import { X } from 'lucide-react';
+
+const SENTINEL_KEY = '__load-more-sentinel__';
 
 export default function ApiAutocomplete({
   name,
@@ -35,9 +38,14 @@ export default function ApiAutocomplete({
   staticItems = null,
   filterFn = null,
   emptyContent = "No results found",
+  enableSearch = false,
+  enablePagination = false,
+  pageLimit = 10,
 }) {
-  // Use custom hook to handle data fetching and processing
-  const { items, isLoading } = useApiAutocomplete({
+  const isPaginatedMode = enableSearch || enablePagination;
+
+  // Standard hook — disabled in paginated mode by passing staticItems: []
+  const { items: standardItems, isLoading: standardLoading } = useApiAutocomplete({
     name,
     apiUrl,
     queryKey,
@@ -49,27 +57,65 @@ export default function ApiAutocomplete({
     selectedItem,
     value,
     valueKey,
-    staticItems,
+    staticItems: isPaginatedMode ? [] : staticItems,
     filterFn,
   });
 
   const [inputValue, setInputValue] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const intersectionObserverRef = useRef(null);
 
-  // Ensure items is always an array to prevent iteration errors
-  const allItems = Array.isArray(items) ? items : [];
+  // Debounce inputValue → debouncedSearch (only active in search mode)
+  useEffect(() => {
+    if (!enableSearch) return;
+    const timer = setTimeout(() => {
+      setDebouncedSearch(inputValue);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [inputValue, enableSearch]);
+
+  const {
+    items: searchedItems,
+    isLoading: searchLoading,
+    isFetchingNextPage: isFetchingMore,
+    hasNextPage: hasMore,
+    fetchNextPage: loadNextPage,
+  } = useInfiniteApiAutocomplete({
+    apiUrl,
+    queryKey,
+    dependsOn,
+    dependentValue,
+    additionalParams,
+    filterFn,
+    searchTerm: debouncedSearch,
+    limit: pageLimit,
+    enabled: isPaginatedMode,
+  });
+
+  const activeItems = isPaginatedMode ? searchedItems : standardItems;
+  const isLoading = isPaginatedMode ? searchLoading : standardLoading;
+
+  // In paginated/search mode only show loading spinner on initial load (no items yet),
+  // never disable the input while a background search re-fetch is in flight
+  const isInputDisabled = isDisabled || (isPaginatedMode ? false : isLoading);
+
+  // Ensure items is always an array
+  const allItems = Array.isArray(activeItems) ? activeItems : [];
   const baseItems = excludeValue
     ? allItems.filter((item) => item[valueKey] !== excludeValue)
     : allItems;
 
-  // Format label for display
   const getItemLabel = (item) => {
-    const label = formatLabel ? formatLabel(item) : item[labelKey];
-    return label;
+    return formatLabel ? formatLabel(item) : item[labelKey];
   };
 
+  // Sync selected value back to display label
   useEffect(() => {
-    if (!value) {
-      setInputValue('');
+     if (!value) {
+      // In search/paginated mode the inputValue is the search term — never auto-clear it
+      if (!isPaginatedMode) {
+         setInputValue('');
+      }
       return;
     }
     if (allItems.length === 0 || inputValue !== '') return;
@@ -79,15 +125,44 @@ export default function ApiAutocomplete({
     }
   }, [value, allItems, valueKey]);
 
-  // Client-side filtering based on typed input
-  const safeItems = inputValue
-    ? baseItems.filter((item) =>
-        String(getItemLabel(item) ?? '').toLowerCase().includes(inputValue.toLowerCase())
-      )
-    : baseItems;
+  // IntersectionObserver ref callback — triggers next page load when sentinel is visible
+  const sentinelRef = (node) => {
+    if (intersectionObserverRef.current) {
+      intersectionObserverRef.current.disconnect();
+      intersectionObserverRef.current = null;
+    }
+    if (!node || !enablePagination) return;
 
-  // Handle selection change event
-  const handleSelectionChange = (selectedKey) => {
+    intersectionObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingMore) {
+          loadNextPage();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    intersectionObserverRef.current.observe(node);
+  };
+
+  // In standard mode: client-side filter by typed input
+  // In search mode: server already filtered, show results as-is
+  const displayItems = isPaginatedMode ? baseItems : (
+    inputValue
+      ? baseItems.filter((item) =>
+          String(getItemLabel(item) ?? '').toLowerCase().includes(inputValue.toLowerCase())
+        )
+      : baseItems
+  );
+
+  // Append sentinel item when more pages are available
+  const itemsWithSentinel = (enablePagination && hasMore)
+    ? [...displayItems, { [valueKey]: SENTINEL_KEY, [labelKey]: '' }]
+    : displayItems;
+
+  const handleSelectionChange = (selectedKey) => { 
+    if (selectedKey === SENTINEL_KEY) return;
+    // HeroUI fires null when typed text has no match — ignore it so the input stays intact
+    if (!selectedKey) return;
     onChange({ target: { name, value: selectedKey } });
     const matchedItem = allItems.find((item) => String(item[valueKey]) === String(selectedKey));
     if (matchedItem) {
@@ -96,12 +171,13 @@ export default function ApiAutocomplete({
     }
   };
 
-  const handleInputChange = (val) => {
+  const handleInputChange = (val) => { 
     setInputValue(val);
   };
 
   const handleClear = () => {
     setInputValue('');
+    setDebouncedSearch('');
     onChange({ target: { name, value: '' } });
     if (onItemSelect) onItemSelect(null);
   };
@@ -117,8 +193,8 @@ export default function ApiAutocomplete({
       {/* Autocomplete Wrapper */}
       <div
         className={`api-autocomplete-wrapper relative border rounded-lg transition-colors ${
-          isInvalid 
-            ? 'border-red-500 focus-within:border-red-600' 
+          isInvalid
+            ? 'border-red-500 focus-within:border-red-600'
             : 'border-gray-300 focus-within:border-blue-500'
         }`}
       >
@@ -126,16 +202,18 @@ export default function ApiAutocomplete({
           name={name}
           placeholder={placeholder}
           isRequired={isRequired}
-          isDisabled={isDisabled || isLoading}
+          isDisabled={isInputDisabled}
           isInvalid={isInvalid}
           errorMessage={errorMessage}
-          items={safeItems}
+          items={itemsWithSentinel}
           selectedKey={value || null}
           inputValue={inputValue}
           onInputChange={handleInputChange}
           onSelectionChange={handleSelectionChange}
           onBlur={onBlur}
-          isLoading={isLoading}
+          isLoading={isLoading || isFetchingMore}
+          allowsEmptyCollection
+          allowsCustomValue
           radius="lg"
           menuTrigger="focus"
           showScrollIndicators={false}
@@ -158,11 +236,22 @@ export default function ApiAutocomplete({
             },
           }}
         >
-          {(item) => (
-            <AutocompleteItem key={item[valueKey]} textValue={String(getItemLabel(item) ?? '')}>
-              {getItemLabel(item)}
-            </AutocompleteItem>
-          )}
+          {(item) => {
+            if (item[valueKey] === SENTINEL_KEY) {
+              return (
+                <AutocompleteItem key={SENTINEL_KEY} textValue=" " isReadOnly>
+                  <div ref={sentinelRef} className="py-2 text-center text-gray-400 text-xs">
+                    {isFetchingMore ? 'Loading more...' : 'Scroll for more'}
+                  </div>
+                </AutocompleteItem>
+              );
+            }
+            return (
+              <AutocompleteItem key={item[valueKey]} textValue={String(getItemLabel(item) ?? '')}>
+                {getItemLabel(item)}
+              </AutocompleteItem>
+            );
+          }}
         </Autocomplete>
 
         {value && !isDisabled && (
