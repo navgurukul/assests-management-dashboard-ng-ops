@@ -10,6 +10,7 @@ import ColumnSelector from '@/components/molecules/ColumnSelector';
 import { decryptData } from '@/app/utils/storageUtils';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import GenericCellRenderer from '@/components/Table/GenericCellRenderer';
 import { ticketDetailsData } from '@/dummyJson/dummyJson';
 import {
@@ -129,13 +130,12 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     setCurrentPage(1); // Reset to first page when filters change
   };
 
-  // Handle removing a single filter chip
-  const handleRemoveFilter = (filterKey) => {
-    const newFilters = { ...filters };
-    delete newFilters[filterKey];
-    onFilterChange(newFilters);
-    setCurrentPage(1);
-  };
+  // Uses custom hook for handling filter removal and clearing
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    onFilterChange,
+    setCurrentPage
+  );
 
   // Toggle between all tickets and my assigned tickets
   const handleShowAll = () => {
@@ -381,6 +381,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
         <ActiveFiltersChips
           filters={filters}
           onRemoveFilter={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
           getCategoryName={getCategoryName}
           getFilterLabel={getFilterLabel}
         />

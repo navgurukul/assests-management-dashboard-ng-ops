@@ -17,6 +17,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 import {
   COMPONENT_TABLE_ID,
   componentTableColumns,
@@ -38,8 +40,8 @@ export default function ComponentsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
-  // Filter state
-  const [filters, setFilters] = useState({});
+  // Filter state (persisted)
+  const [filters, setFilters] = usePersistentFilters('components-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -135,13 +137,12 @@ export default function ComponentsList() {
     setCurrentPage(1); // Reset to first page when filters change
   };
   
-  // Handle removing a single filter chip
-  const handleRemoveFilter = (filterKey) => {
-    const newFilters = { ...filters };
-    delete newFilters[filterKey];
-    setFilters(newFilters);
-    setCurrentPage(1);
-  };
+  // Uses custom hook for handling filter removal and clearing
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    setFilters,
+    setCurrentPage
+  );
   
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -437,6 +438,7 @@ export default function ComponentsList() {
           <ActiveFiltersChips
             filters={filters}
             onRemoveFilter={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
             getCategoryName={getCategoryName}
             getFilterLabel={getFilterLabel}
           />
