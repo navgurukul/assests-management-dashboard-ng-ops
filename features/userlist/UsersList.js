@@ -14,6 +14,7 @@ import SearchInput from '@/components/molecules/SearchInput';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import {
   USER_TABLE_ID,
   userTableColumns,
@@ -106,12 +107,13 @@ export default function UsersList() {
 
   // Filter handlers
   const handleFilterChange = (newFilters) => { setFilters(newFilters); setCurrentPage(1); };
-  const handleRemoveFilter = (key) => {
-    const updated = { ...filters };
-    delete updated[key];
-    setFilters(updated);
-    setCurrentPage(1);
-  };
+  
+  // Uses custom hook for handling filter removal and clearing
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    setFilters,
+    setCurrentPage
+  );
 
   const getFilterLabel = (filterKey, value) => value;
 
@@ -336,6 +338,7 @@ export default function UsersList() {
             <ActiveFiltersChips
               filters={filters}
               onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
               getCategoryName={getCategoryName}
               getFilterLabel={getFilterLabel}
             />

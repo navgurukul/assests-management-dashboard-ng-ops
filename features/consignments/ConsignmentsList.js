@@ -18,6 +18,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import usePatch from '@/app/hooks/query/usePatch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import {
   CONSIGNMENT_TABLE_ID,
   consignmentTableColumns,
@@ -214,13 +215,12 @@ export default function ConsignmentsList() {
     setCurrentPage(1);
   };
   
-  // Handle removing a single filter chip
-  const handleRemoveFilter = (filterKey) => {
-    const newFilters = { ...filters };
-    delete newFilters[filterKey];
-    setFilters(newFilters);
-    setCurrentPage(1);
-  };
+  // Uses custom hook for handling filter removal and clearing
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    setFilters,
+    setCurrentPage
+  );
   
   // Use static courier providers for filter options
   const courierOptions = React.useMemo(() => {
@@ -992,6 +992,7 @@ export default function ConsignmentsList() {
               getCategoryName={getCategoryName}
               getFilterLabel={getFilterLabel}
               onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
             />
           )
         }

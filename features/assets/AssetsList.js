@@ -14,6 +14,7 @@ import SearchInput from '@/components/molecules/SearchInput';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import {
   ASSET_TABLE_ID,
   assetTableColumns,
@@ -111,13 +112,12 @@ export default function AssetsList() {
     setCurrentPage(1); // Reset to first page when filters change
   };
   
-  // Handle removing a single filter chip
-  const handleRemoveFilter = (filterKey) => {
-    const newFilters = { ...filters };
-    delete newFilters[filterKey];
-    setFilters(newFilters);
-    setCurrentPage(1);
-  };
+  // Uses custom hook for handling filter removal and clearing
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    setFilters,
+    setCurrentPage
+  );
   
   // Transform campus data from API to filter options
   const campusOptions = React.useMemo(() => {
@@ -306,6 +306,7 @@ export default function AssetsList() {
           <ActiveFiltersChips
             filters={filters}
             onRemoveFilter={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
             getCategoryName={getCategoryName}
             getFilterLabel={getFilterLabel}
           />
