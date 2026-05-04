@@ -43,6 +43,11 @@ export const formatComponentStatus = (status) => {
 export const formatCondition = (condition) => {
   const conditionMap = {
     'NEW': 'New',
+    'LIKE_NEW': 'Like New',
+    'GOOD': 'Good',
+    'FAIR': 'Fair',
+    'POOR': 'Poor',
+    'NOT_WORKING': 'Not Working',
     'WORKING': 'Working',
     'DAMAGED': 'Damaged',
     'FAULTY': 'Faulty',

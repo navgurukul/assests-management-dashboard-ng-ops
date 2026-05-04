@@ -154,9 +154,12 @@ export const componentStepperConfig = [
         required: true,
         showIf: { field: 'sourceType', value: 'EXTRACTED' },
         options: [
+          { value: 'NEW', label: 'New' },
+          { value: 'LIKE_NEW', label: 'Like New' },
           { value: 'GOOD', label: 'Good' },
+          { value: 'FAIR', label: 'Fair' },
           { value: 'POOR', label: 'Poor' },
-          { value: 'MODERATE', label: 'Moderate' }
+          { value: 'NOT_WORKING', label: 'Not Working' }
         ]
       },
       // Purchase Details (only for New Purchase)
