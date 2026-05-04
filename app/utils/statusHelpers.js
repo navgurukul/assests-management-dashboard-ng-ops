@@ -62,6 +62,11 @@ const STATUS_COLOR_MAP = {
   DRAFT: 'bg-gray-100 text-gray-800',
   DISPATCHED: 'bg-amber-100 text-amber-800',
   DELIVERED: 'bg-green-100 text-green-800',
+  SHIPPED: 'bg-purple-100 text-purple-800',
+  IN_TRANSIT: 'bg-blue-100 text-blue-800',
+  RECEIVED: 'bg-teal-100 text-teal-800',
+  LOST: 'bg-red-100 text-red-800',
+  DAMAGED: 'bg-red-100 text-red-800',
 };
 
 const PRIORITY_COLOR_MAP = {

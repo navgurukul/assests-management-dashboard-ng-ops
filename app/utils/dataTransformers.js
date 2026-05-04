@@ -277,10 +277,22 @@ export const formatConsignmentStatus = (status) => {
   const statusMap = {
     'DRAFT': 'Draft',
     'draft': 'Draft',
+    'PENDING': 'Pending',
+    'pending': 'Pending',
     'DISPATCHED': 'Dispatched',
     'dispatched': 'Dispatched',
+    'SHIPPED': 'Shipped',
+    'shipped': 'Shipped',
+    'IN_TRANSIT': 'In Transit',
+    'in_transit': 'In Transit',
     'DELIVERED': 'Delivered',
     'delivered': 'Delivered',
+    'RECEIVED': 'Received',
+    'received': 'Received',
+    'LOST': 'Lost',
+    'lost': 'Lost',
+    'DAMAGED': 'Damaged',
+    'damaged': 'Damaged',
   };
   return statusMap[status] || status || 'N/A';
 };
