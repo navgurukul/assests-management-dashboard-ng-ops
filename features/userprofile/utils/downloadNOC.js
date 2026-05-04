@@ -29,7 +29,10 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     const tag = movement.newAssetTag || movement.previousAssetTag;
     if (!tag) return;
     if (!deviceMap[tag]) {
-      deviceMap[tag] = { assetTag: tag, allocatedAt: null, returnedAt: null, isReturned: false };
+      deviceMap[tag] = { assetTag: tag, allocatedAt: null, returnedAt: null, isReturned: false, notes: [] };
+    }
+    if (movement.notes && !deviceMap[tag].notes.includes(movement.notes)) {
+      deviceMap[tag].notes.push(movement.notes);
     }
     if (movement.movementType === 'ALLOCATION') {
       const movedAt = new Date(movement.movedAt).getTime();
@@ -53,6 +56,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     const statusLabel = device.isReturned ? 'Returned' : 'Pending';
     const statusColor = device.isReturned ? '#15803d' : '#b45309';
     const statusBg = device.isReturned ? '#f0fdf4' : '#fffbeb';
+    const notesText = device.notes.length > 0 ? device.notes.join(', ') : 'N/A';
 
     return `
       <tr style="${rowBg}">
@@ -64,6 +68,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
             ${statusLabel}
           </span>
         </td>
+        <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px; max-width: 150px; word-wrap: break-word;">${notesText}</td>
       </tr>
     `;
   }).join('');
@@ -79,6 +84,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Allocated On</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Returned On</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: center; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Status</th>
+          <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Notes</th>
         </tr>
       </thead>
       <tbody>
