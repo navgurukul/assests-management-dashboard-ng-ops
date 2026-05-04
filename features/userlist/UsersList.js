@@ -324,6 +324,7 @@ export default function UsersList() {
               <FilterDropdown
                 onFilterChange={handleFilterChange}
                 statusOptions={allocationStatusOptions}
+                statusLabel="Allocation Status"
                 selectedFilters={filters}
               />
             )}
