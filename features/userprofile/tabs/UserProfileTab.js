@@ -124,9 +124,18 @@ export default function UserProfileTab() {
       schoolId: rawUserData?.schoolId || '',
     });
 
-    return fields.map((field) =>
-      field.name === 'schoolId' ? { ...field, options: schoolOptions } : field
-    );
+    const rolesWithSchool = ['STUDENT', 'IT_COORDINATOR'];
+
+    return fields
+      .map((field) =>
+        field.name === 'schoolId' ? { ...field, options: schoolOptions } : field
+      )
+      .filter((field) => {
+        if (field.name === 'schoolId') {
+          return rolesWithSchool.includes(rawUserData?.role);
+        }
+        return true;
+      });
   }, [schoolsResponse, userData.phone, userData.location, rawUserData]);
 
   if (isLoadingUserData && !rawUserData) {
