@@ -76,6 +76,9 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     
     if (filters.status) params.append('status', filters.status);
     if (filters.condition) params.append('condition', filters.condition);
+
+    params.append('page', currentPage);
+    params.append('limit', pageSize);
     
     const queryString = params.toString();
     return queryString ? `${baseUrl}/assets?${queryString}` : `${baseUrl}/assets`;
@@ -110,24 +113,11 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
 
   // Filter assets based on search term
   const filteredAssets = useMemo(() => {
-    let result = availableAssets;
-    if (searchTerm) {
-      const lowerSearch = searchTerm.toLowerCase();
-      result = availableAssets.filter(asset => 
-        asset.assetId.toLowerCase().includes(lowerSearch) ||
-        asset.assetType.toLowerCase().includes(lowerSearch) ||
-        asset.brand?.toLowerCase().includes(lowerSearch) ||
-        asset.model?.toLowerCase().includes(lowerSearch) ||
-        asset.condition?.toLowerCase().includes(lowerSearch)
-      );
-    }
-    
-    // Add _isChecked and create new object instances to ensure NextUI Table re-renders row states
-    return result.map(asset => ({
+    return availableAssets.map(asset => ({
       ...asset,
       _isChecked: checkedAssets.has(asset.id)
     }));
-  }, [searchTerm, availableAssets, checkedAssets]);
+  }, [availableAssets, checkedAssets]);
 
   const handleCheckboxChange = (asset) => {
     setCheckedAssets((prevCheckedAssets) => {
