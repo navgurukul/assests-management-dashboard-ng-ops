@@ -176,10 +176,11 @@ export default function ComponentsList() {
   // Condition filter options
   const conditionOptions = [
     { value: 'NEW', label: 'New' },
+    { value: 'LIKE_NEW', label: 'Like New' },
     { value: 'GOOD', label: 'Good' },
-    { value: 'WORKING', label: 'Working' },
-    { value: 'DAMAGED', label: 'Damaged' },
-    { value: 'FAULTY', label: 'Faulty' },
+    { value: 'FAIR', label: 'Fair' },
+    { value: 'POOR', label: 'Poor' },
+    { value: 'NOT_WORKING', label: 'Not Working' },
   ];
   
   // Status filter options
