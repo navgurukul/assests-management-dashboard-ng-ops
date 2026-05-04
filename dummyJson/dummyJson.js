@@ -45,6 +45,11 @@ export const assetsPerCampusData = [
   ['Udaipur', 60, 45, 18, 12, 3, 5, 2, 7, 5, 2, 1],
 ];
 
+export const allocationStatusOptions = [
+  { value: 'ALLOCATED', label: 'Allocated' },
+  { value: 'ALLOCATION_COMPLETED', label: 'Allocation Completed' },
+];
+
   
 
 // Individual Assets List Data for /assets route

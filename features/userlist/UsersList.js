@@ -21,6 +21,7 @@ import {
   userTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/userTableConfig';
+import { allocationStatusOptions } from '@/dummyJson/dummyJson';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
@@ -87,6 +88,7 @@ export default function UsersList() {
     params.append('page', currentPage);
     params.append('limit', pageSize);
     if (filters.role) params.append('role', filters.role);
+    if (filters.status) params.append('status', filters.status);
     return params.toString();
   };
 
@@ -116,10 +118,16 @@ export default function UsersList() {
     setCurrentPage
   );
 
-  const getFilterLabel = (filterKey, value) => value;
+  const getFilterLabel = (filterKey, value) => {
+    if (filterKey === 'status') {
+      const statusOption = allocationStatusOptions.find((option) => option.value === value);
+      return statusOption ? statusOption.label : value;
+    }
+    return value;
+  };
 
   const getCategoryName = (filterKey) => {
-    const names = { role: 'Role' };
+    const names = { role: 'Role', status: 'Allocation Status' };
     return names[filterKey] || filterKey;
   };
 
@@ -315,6 +323,7 @@ export default function UsersList() {
             {!showAllUsers && (
               <FilterDropdown
                 onFilterChange={handleFilterChange}
+                statusOptions={allocationStatusOptions}
                 selectedFilters={filters}
               />
             )}
