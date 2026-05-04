@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MoreVertical } from 'lucide-react';
+import { GripVertical, List, Logs, MoreVertical } from 'lucide-react';
 
 export default function ActionMenu({ menuOptions = [], disabled = false, className = '' }) {
   const [open, setOpen] = useState(false);
@@ -31,11 +31,11 @@ export default function ActionMenu({ menuOptions = [], disabled = false, classNa
       {/* Three-dots trigger */}
       <button
         onClick={handleToggle}
-        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        className="p-2 hover:bg-gray-100 rounded-full transition-colors" 
         aria-label="Actions menu"
         disabled={disabled}
       >
-        <MoreVertical className="h-5 w-5 text-gray-600" />
+        <List className="h-7 w-7 text-gray-600" />
       </button>
 
       {/* Dropdown */}
