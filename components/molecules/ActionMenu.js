@@ -22,7 +22,7 @@ export default function ActionMenu({ menuOptions = [], disabled = false, classNa
   const stopEventBubbling = (event) => event.stopPropagation();
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-left justify-left">
       {/* Backdrop to close menu on outside click */}
       {open && (
         <div className="fixed inset-0 z-[9998]" onClick={handleClose} />
