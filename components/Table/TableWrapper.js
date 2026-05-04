@@ -71,13 +71,11 @@ export default function TableWrapper({
 
   const tableClassNames = {
     ...classNames,
-    wrapper: `shadow-none px-0 h-full overflow-y-auto pt-0 ${classNames.wrapper || ""}`,
+    wrapper: `shadow-none px-0 pt-0 overflow-visible ${classNames.wrapper || ""}`,
     base: `min-w-full ${classNames.base || ""}`,
     table: `border-collapse min-w-full ${classNames.table || ""}`,
-    thead: `[&>tr]:first:shadow-none ${classNames.thead || ""}`,
-    // Header: reduced from 11/12/13/14px → 10/11/12/13px
-    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] h-12 border-b-2 border-[var(--border)] whitespace-nowrap sticky top-0 z-10 ${classNames.th || ""}`,
-    // Body cells: reduced from 11/12/13/14px → 10/11/12/13px, row height 14→12
+    thead: `[&>tr]:first:shadow-none sticky top-0 z-10 ${classNames.thead || ""}`,
+    th: `bg-[var(--surface-soft)] text-[var(--foreground)] font-semibold text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] h-12 border-b-2 border-[var(--border)] whitespace-nowrap ${classNames.th || ""}`,
     td: `text-[var(--foreground)] text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] h-12 border-b border-[var(--border)] ${classNames.td || ""}`,
     tr: `hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)] data-[hover=true]:bg-[var(--surface-soft)] data-[hover=true]:text-[var(--foreground)] transition-colors ${classNames.tr || ""}`,
   };
@@ -195,7 +193,7 @@ export default function TableWrapper({
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden sm:flex sm:flex-col flex-1 min-h-[200px] overflow-auto relative">
+      <div className="hidden sm:block flex-1 min-h-0 overflow-y-auto relative">
         <Table aria-label={ariaLabel} classNames={tableClassNames} isHeaderSticky>
           <TableHeader>
             {columns.map((column) => (
