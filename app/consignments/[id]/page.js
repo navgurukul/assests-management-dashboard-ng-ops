@@ -10,6 +10,10 @@ export default function ConsignmentDetailsPage() {
   const params = useParams();
   const consignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
+  const handleBack = () => {
+    router.push('/consignments?view=consignments');
+  };
+
   const { data, isLoading, isError, error } = useFetch({
     url: config.endpoints.consignments.details(consignmentId),
     queryKey: ['consignment-details', consignmentId],
@@ -25,7 +29,7 @@ export default function ConsignmentDetailsPage() {
       isLoading={isLoading}
       isError={isError}
       error={error}
-      onBack={() => router.back()} 
+      onBack={handleBack}
     />
   );
 }
