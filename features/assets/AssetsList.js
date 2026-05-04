@@ -15,6 +15,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 import {
   ASSET_TABLE_ID,
   assetTableColumns,
@@ -32,8 +33,8 @@ export default function AssetsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
-  // Filter state
-  const [filters, setFilters] = useState({});
+  // Filter state (persisted)
+  const [filters, setFilters] = usePersistentFilters('assets-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');

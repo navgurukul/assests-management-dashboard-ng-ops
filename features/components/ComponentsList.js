@@ -18,6 +18,7 @@ import post from '@/app/api/post/post';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 import {
   COMPONENT_TABLE_ID,
   componentTableColumns,
@@ -39,8 +40,8 @@ export default function ComponentsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   
-  // Filter state
-  const [filters, setFilters] = useState({});
+  // Filter state (persisted)
+  const [filters, setFilters] = usePersistentFilters('components-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
