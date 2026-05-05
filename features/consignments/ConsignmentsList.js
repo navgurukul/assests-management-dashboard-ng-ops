@@ -76,6 +76,9 @@ export default function ConsignmentsList() {
   const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState('');
   const [inTransitPage, setInTransitPage] = useState(1);
   const [inTransitPageSize, setInTransitPageSize] = useState(10);
+
+  // In-transit filters state (persisted)
+  const [inTransitFilters, setInTransitFilters] = usePersistentFilters('intransit-filters', {});
   
   // In-transit action menu state
   const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
@@ -155,6 +158,7 @@ export default function ConsignmentsList() {
     params.append('page', inTransitPage);
     params.append('limit', inTransitPageSize);
     if (debouncedInTransitSearch) params.append('search', debouncedInTransitSearch);
+    if (inTransitFilters.status) params.append('status', inTransitFilters.status);
     return params.toString();
   };
 
@@ -166,7 +170,7 @@ export default function ConsignmentsList() {
     refetch: refetchInTransit,
   } = useFetch({
     url: `${config.endpoints.consignmentReturnAssets?.list || '/consignment/assets/return'}?${buildInTransitQueryString()}`,
-    queryKey: ['inTransitReturns', inTransitPage, inTransitPageSize, debouncedInTransitSearch],
+    queryKey: ['inTransitReturns', inTransitPage, inTransitPageSize, debouncedInTransitSearch, inTransitFilters],
     enabled: showInTransit,
   });
 
@@ -219,6 +223,12 @@ export default function ConsignmentsList() {
     setFilters(newFilters);
     setCurrentPage(1);
   };
+
+  // Handle in-transit filter change
+  const handleInTransitFilterChange = (newFilters) => {
+    setInTransitFilters(newFilters);
+    setInTransitPage(1);
+  };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
@@ -226,6 +236,12 @@ export default function ConsignmentsList() {
     setFilters,
     setCurrentPage
   );
+
+  // Uses custom hook for handling in-transit filter removal and clearing
+  const {
+    handleRemoveFilter: handleRemoveInTransitFilter,
+    handleClearAllFilters: handleClearAllInTransitFilters,
+  } = useFilterHandlers(inTransitFilters, setInTransitFilters, setInTransitPage);
   
   // Use static courier providers for filter options
   const courierOptions = React.useMemo(() => {
@@ -290,6 +306,13 @@ export default function ConsignmentsList() {
     { value: 'LOST', label: 'Lost' },
     { value: 'DAMAGED', label: 'Damaged' },
   ];
+
+  // In-transit return status filter options
+  const inTransitStatusOptions = [
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'ACCEPTED', label: 'Accepted' },
+    { value: 'REJECTED', label: 'Rejected' },
+  ];
   
   // Get category name for filter key
   const getCategoryName = (filterKey) => {
@@ -309,6 +332,15 @@ export default function ConsignmentsList() {
     }
     if (filterKey === 'status') {
       const option = statusOptions.find((opt) => opt.value === value);
+      return option ? option.label : value;
+    }
+    return value;
+  };
+
+  // Get label for in-transit filter value
+  const getInTransitFilterLabel = (filterKey, value) => {
+    if (filterKey === 'status') {
+      const option = inTransitStatusOptions.find((opt) => opt.value === value);
       return option ? option.label : value;
     }
     return value;
@@ -981,15 +1013,19 @@ export default function ConsignmentsList() {
             />
           )
         }
-        filterComponent={
-          <>
-          <CustomButton
+        toggleCardsComponent={
+          !showInTransit && (
+            <CustomButton
               text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
               icon={ArrowLeftCircle}
               onClick={handleToggleInTransit}
               variant={showInTransit ? 'secondary' : 'warning'}
               size="md"
             />
+          )
+        }
+        filterComponent={
+          <>
             {!showInTransit && (
               <FilterDropdown
                 statusOptions={statusOptions}
@@ -997,11 +1033,17 @@ export default function ConsignmentsList() {
                 onFilterChange={handleFilterChange}
               />
             )}
-            
+            {showInTransit && (
+              <FilterDropdown
+                statusOptions={inTransitStatusOptions}
+                selectedFilters={inTransitFilters}
+                onFilterChange={handleInTransitFilterChange}
+              />
+            )}
           </>
         }
         columnSelectorComponent={
-          !showInTransit && (
+          !showInTransit ? (
             <ColumnSelector
               allColumns={allColumns}
               visibleColumnKeys={visibleColumnKeys}
@@ -1009,6 +1051,14 @@ export default function ConsignmentsList() {
               onToggleColumn={toggleColumn}
               onShowAll={showAllColumns}
               onReset={resetToDefault}
+            />
+          ) : (
+            <CustomButton
+              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
+              icon={ArrowLeftCircle}
+              onClick={handleToggleInTransit}
+              variant={showInTransit ? 'secondary' : 'warning'}
+              size="md"
             />
           )
         }
@@ -1021,7 +1071,16 @@ export default function ConsignmentsList() {
               onRemoveFilter={handleRemoveFilter}
               onClearAll={handleClearAllFilters}
             />
-          )
+          ) ||
+          (showInTransit && Object.keys(inTransitFilters).length > 0 && (
+            <ActiveFiltersChips
+              filters={inTransitFilters}
+              getCategoryName={getCategoryName}
+              getFilterLabel={getInTransitFilterLabel}
+              onRemoveFilter={handleRemoveInTransitFilter}
+              onClearAll={handleClearAllInTransitFilters}
+            />
+          ))
         }
         serverPagination={true}
         paginationData={showInTransit ? inTransitPagination : data?.pagination}
