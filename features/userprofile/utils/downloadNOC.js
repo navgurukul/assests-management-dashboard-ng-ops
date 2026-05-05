@@ -95,7 +95,22 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
 
   const element = document.createElement('div');
   element.innerHTML = `
-    <div style="font-family: Arial, sans-serif; padding: 48px; max-width: 640px; margin: 0 auto; color: #111;">
+    <div style="position: relative; overflow: hidden; font-family: Arial, sans-serif; padding: 8px; max-width: 640px; margin: 0 auto; color: #111; z-index: 1;">
+      <!-- Watermark layer -->
+      <div style="
+        position: absolute; 
+        top: -50%; 
+        left: -50%; 
+        width: 200%; 
+        height: 200%; 
+        background-image: url('/images/1400w_x2400h__q_90_c_Navgurukul.webp'); 
+        background-repeat: repeat; 
+        background-size: 300px; 
+        opacity: 0.08; 
+        transform: rotate(-30deg); 
+        z-index: -1; 
+        pointer-events: none;
+      "></div>
       <h1 style="text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">
         NO OBJECTION CERTIFICATE
       </h1>
