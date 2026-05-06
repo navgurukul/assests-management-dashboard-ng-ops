@@ -863,12 +863,12 @@ export default function ConsignmentsList() {
           iconClassName: 'text-green-600',
           onClick: () => handleInTransitAction('Accepted', item),
         },
-        {
-          label: 'Rejected',
-          icon: XCircle,
-          iconClassName: 'text-red-500',
-          onClick: () => handleInTransitAction('Rejected', item),
-        },
+        // {
+        //   label: 'Rejected',
+        //   icon: XCircle,
+        //   iconClassName: 'text-red-500',
+        //   onClick: () => handleInTransitAction('Rejected', item),
+        // },
       ];
 
       return <ActionMenu menuOptions={menuOptions} />;
