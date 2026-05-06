@@ -44,12 +44,12 @@ export default function CreateCampusIncharge() {
   const editInitialValues = useMemo(() => {
     if (!campusDetail) return null;
     return {
-      campus: campusDetail.campusName || '',
+      campus: campusDetail.campusName || campusDetail.campus?.campusName || '',
       address: campusDetail.campus?.address || '',
       state: campusDetail.campus?.state || '',
       campusCode: campusDetail.campus?.campusCode || '',
-      capacity: campusDetail.capacity || '',
-      schoolIds: Array.isArray(campusDetail.schoolIds) ? campusDetail.schoolIds : campusDetail.schoolIds ? [campusDetail.schoolIds] : [],
+      capacity: campusDetail.campus?.capacity || '',
+      schoolIds: Array.isArray(campusDetail.campus?.schoolIds) ? campusDetail.campus.schoolIds : campusDetail.campus?.schoolIds ? [campusDetail.campus.schoolIds] : [],
       campusManagerName: campusDetail.campusManager?.name || '',
       campusManagerEmail: campusDetail.campusManager?.email || '',
       campusManagerPhone: campusDetail.campusManager?.phone || '',

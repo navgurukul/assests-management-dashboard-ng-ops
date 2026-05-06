@@ -71,13 +71,19 @@ export default function MultiSelect({
         className="relative"
         onBlur={onBlur}
       >
-        <button
-          type="button"
-          disabled={isDisabled}
-          onClick={() => setIsOpen(!isOpen)}
+        <div
+          role="button"
+          tabIndex={isDisabled ? -1 : 0}
+          onClick={() => !isDisabled && setIsOpen(!isOpen)}
+          onKeyDown={(e) => {
+            if (!isDisabled && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault();
+              setIsOpen(!isOpen);
+            }
+          }}
           className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center justify-between gap-2 ${
             isInvalid ? 'border-red-500' : 'border-gray-300'
-          } ${isDisabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
+          } ${isDisabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white cursor-pointer'}`}
         >
           <div className="flex flex-wrap gap-1 flex-1">
             {selectedLabels.length > 0 ? (
@@ -107,7 +113,7 @@ export default function MultiSelect({
               isOpen ? 'transform rotate-180' : ''
             }`}
           />
-        </button>
+        </div>
 
         {/* Dropdown Menu */}
         {isOpen && !isDisabled && (
