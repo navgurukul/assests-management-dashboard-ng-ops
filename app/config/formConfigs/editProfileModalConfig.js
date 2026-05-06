@@ -51,7 +51,7 @@ export const getEditProfileFields = (defaultValues = {}) => [
     required: false,
     hint: 'Only for students',
     options: [],
-    defaultValue: defaultValues.school || '',
+    defaultValue: defaultValues.schoolId || '',
   },
 ];
 
