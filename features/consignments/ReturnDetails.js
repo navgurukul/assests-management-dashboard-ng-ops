@@ -56,6 +56,7 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
       items: [
         { label: 'Status', value: <StatusChip value={returnItem.status || 'N/A'} /> },
         { label: 'Asset Tag', value: returnItem.assetTag || 'N/A' },
+        { label: 'Previous Asset Tag', value: returnItem.previousAssetTag || 'N/A' },
         { label: 'Consignment Code', value: returnItem.consignmentCode || 'N/A' },
       ],
     },

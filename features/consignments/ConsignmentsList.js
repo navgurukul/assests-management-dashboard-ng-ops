@@ -456,6 +456,7 @@ export default function ConsignmentsList() {
         row.asset?.id ||
         '',
       assetTag: row.assetTag || '-',
+      previousAssetTag: row.previousAssetTag || '-',
       model: row.laptopModel || row.model || row.asset?.model || '-',
       userName: row.returnByUserEmail || row.returnedBy || '-',
       userEmail: row.returnByUserEmail || row.userEmail || '',
