@@ -497,6 +497,11 @@ export default function MyAssetsTab({ userData = {} }) {
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 text-green-700 border border-green-200 cursor-default select-none">
                         <CheckCircle2 className="w-3 h-3" />
                         Returned & accepted
+                     </span>
+                    ) : asset.consignmentReturnStatus === 'PENDING' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-default select-none">
+                        <ArrowRightLeft className="w-3 h-3" />
+                        Return In Progress
                       </span>
                     ) : (
                       <ActionMenu menuOptions={getAssetMenuOptions(asset, assetMenuHandlers)} />
