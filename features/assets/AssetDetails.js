@@ -173,7 +173,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
     }
   };
 
-  // Left column sections (30%) - Multiple smaller information cards
+  // Left column sections (30%) - Multiple smaller information cards 
   const leftSections = [
     {
       title: 'Quick Info',
