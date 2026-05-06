@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export default function Modal({ isOpen, onClose, title, children, size = 'medium' }) {
+export default function Modal({ isOpen, onClose, title, children, size = 'medium', bodyClassName }) {
   // Close modal on ESC key press
   useEffect(() => {
     const handleEscape = (e) => {
@@ -50,11 +50,11 @@ export default function Modal({ isOpen, onClose, title, children, size = 'medium
       <div className="flex min-h-full items-center justify-center p-4">
         {/* Modal Content */}
         <div
-          className={`relative bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full transform transition-all`}
+          className={`relative bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full transform transition-all flex flex-col max-h-[90vh]`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
             <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
@@ -66,7 +66,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'medium
           </div>
 
           {/* Body */}
-          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className={`px-6 py-4 flex-1 min-h-0 ${bodyClassName || 'overflow-y-auto'}`}>
             {children}
           </div>
         </div>
