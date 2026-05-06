@@ -319,11 +319,12 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
         onClose={() => setIsModalOpen(false)}
         title="Select Assets for Bulk Allocation"
         size="xlarge"
+        bodyClassName="flex flex-col overflow-hidden"
       >
-        <div className="space-y-4">
+        <div className="flex flex-col flex-1 min-h-0 gap-4">
           {/* Selected Chips Display */}
           {checkedAssets.size > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="shrink-0 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h5 className="text-sm font-semibold text-blue-900 mb-2">
                 Selected Assets ({checkedAssets.size})
               </h5>
@@ -353,7 +354,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
 
           {/* Error State */}
           {isError && (
-            <div className="text-center py-8">
+            <div className="shrink-0 text-center py-8">
               <p className="text-red-600">Failed to load assets. Please try again.</p>
             </div>
           )}
@@ -420,7 +421,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
         </div>
 
         {/* Footer Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
+        <div className="shrink-0 flex justify-end gap-3 border-t border-gray-200">
           <CustomButton
             text="Cancel"
             onClick={() => setIsModalOpen(false)}
