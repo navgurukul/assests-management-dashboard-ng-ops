@@ -1208,8 +1208,8 @@ export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAs
     );
   }
 
-  if (asset.consignment?.trackingLink) {
-    options.push({
+  if (asset.consignment?.trackingLink && asset.consignmentStatus !== 'DELIVERED') {
+    options.push({ 
       label: 'Track Device',
       icon: ExternalLink,
       iconClassName: 'text-blue-600',

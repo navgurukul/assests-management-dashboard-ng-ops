@@ -503,6 +503,14 @@ export default function MyAssetsTab({ userData = {} }) {
                         <ArrowRightLeft className="w-3 h-3" />
                         Return In Progress
                       </span>
+                      ) : !asset.consignmentId ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 cursor-default select-none">
+                        Device Allocated
+                      </span>
+                      ) : asset.consignmentStatus === 'DRAFT' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-50 text-gray-600 border border-gray-200 cursor-default select-none">
+                        Dispatch Pending
+                      </span>
                     ) : (
                       <ActionMenu menuOptions={getAssetMenuOptions(asset, assetMenuHandlers)} />
                     )}
