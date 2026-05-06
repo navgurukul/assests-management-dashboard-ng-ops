@@ -418,6 +418,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                       size="md"
                       className=""
                       onClick={handleCreateAllocation}
+                      disabled={!ticket.assigneeUser}
                     />
                   ) : (
                     <span className="text-[10px] text-gray-500">
