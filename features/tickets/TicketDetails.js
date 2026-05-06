@@ -485,6 +485,9 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 { label: isSubmitting ? 'Processing...' : 'Escalation', variant: 'warning', onClick: handleEscalationClick, disabled: isSubmitting },
               ] : []),
             ] : []),
+            ...((loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD') ? [
+              { label: isSubmitting ? 'Processing...' : 'Close', variant: 'danger', onClick: (values) => console.log('Close ticket clicked', values), disabled: isSubmitting },
+            ] : []),
           ]}
         />
       </Modal>
