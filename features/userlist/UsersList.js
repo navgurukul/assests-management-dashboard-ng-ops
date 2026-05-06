@@ -21,7 +21,7 @@ import {
   userTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/userTableConfig';
-import { allocationStatusOptions } from '@/dummyJson/dummyJson';
+import { allocationStatusOptions, userRoleOptions } from '@/dummyJson/dummyJson';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
@@ -42,6 +42,9 @@ export default function UsersList() {
 
   // Filters (persisted)
   const [filters, setFilters] = usePersistentFilters('users-filters', {});
+
+  // All Users Filters (persisted)
+  const [allUsersFilters, setAllUsersFilters] = usePersistentFilters('allusers-filters', {});
 
   // Search
   const [searchInput, setSearchInput] = useState('');
@@ -101,8 +104,8 @@ export default function UsersList() {
   });
 
   const { data: allUsersResponse, isLoading: isAllUsersLoading, isError: isAllUsersError, error: allUsersError } = useFetch({
-    url: `/users?page=${allUsersPage}&limit=${allUsersPageSize}${debouncedAllUsersSearch ? `&search=${debouncedAllUsersSearch}` : ''}`,
-    queryKey: ['allUsers', allUsersPage, allUsersPageSize, debouncedAllUsersSearch],
+    url: `/users?page=${allUsersPage}&limit=${allUsersPageSize}${debouncedAllUsersSearch ? `&search=${debouncedAllUsersSearch}` : ''}${allUsersFilters.role ? `&role=${allUsersFilters.role}` : ''}`,
+    queryKey: ['allUsers', allUsersPage, allUsersPageSize, debouncedAllUsersSearch, allUsersFilters],
     enabled: showAllUsers,
   });
 
@@ -112,6 +115,18 @@ export default function UsersList() {
 
   // Filter handlers
   const handleFilterChange = (newFilters) => { setFilters(newFilters); setCurrentPage(1); };
+
+  // All Users filter handlers
+  const handleAllUsersFilterChange = (newFilters) => {
+    // Rename 'status' key to 'role' for API compatibility
+    const transformedFilters = {};
+    if (newFilters.status) {
+      transformedFilters.role = newFilters.status;
+    }
+    // If newFilters is empty (filter cleared), transformedFilters will also be empty
+    setAllUsersFilters(transformedFilters);
+    setAllUsersPage(1);
+  };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
@@ -120,10 +135,24 @@ export default function UsersList() {
     setCurrentPage
   );
 
+  // Uses custom hook for handling all users filter removal and clearing
+  const {
+    handleRemoveFilter: handleRemoveAllUsersFilter,
+    handleClearAllFilters: handleClearAllAllUsersFilters,
+  } = useFilterHandlers(allUsersFilters, setAllUsersFilters, setAllUsersPage);
+
   const getFilterLabel = (filterKey, value) => {
     if (filterKey === 'status') {
       const statusOption = allocationStatusOptions.find((option) => option.value === value);
       return statusOption ? statusOption.label : value;
+    }
+    return value;
+  };
+
+  const getAllUsersFilterLabel = (filterKey, value) => {
+    if (filterKey === 'role') {
+      const roleOption = userRoleOptions.find((option) => option.value === value);
+      return roleOption ? roleOption.label : value;
     }
     return value;
   };
@@ -323,19 +352,38 @@ export default function UsersList() {
         // Filters
         filterComponent={
           <>
-            <CustomButton
-              text={showAllUsers ? 'Back to Allocations' : 'Show all user'}
-              icon={showAllUsers ? ArrowLeftCircle : Users}
-              onClick={handleToggleUserTable}
-              variant={showAllUsers ? 'secondary' : 'warning'}
-              size="md"
-            />
+            {!showAllUsers && (
+              <CustomButton
+                text="Show all user"
+                icon={Users}
+                onClick={handleToggleUserTable}
+                variant="warning"
+                size="md"
+              />
+            )}
+            {showAllUsers && (
+              <FilterDropdown
+                onFilterChange={handleAllUsersFilterChange}
+                statusOptions={userRoleOptions}
+                statusLabel="User Role"
+                selectedFilters={allUsersFilters}
+              />
+            )}
             {!showAllUsers && (
               <FilterDropdown
                 onFilterChange={handleFilterChange}
                 statusOptions={allocationStatusOptions}
                 statusLabel="Allocation Status"
                 selectedFilters={filters}
+              />
+            )}
+            {showAllUsers && (
+              <CustomButton
+                text="Back to Allocations"
+                icon={ArrowLeftCircle}
+                onClick={handleToggleUserTable}
+                variant="secondary"
+                size="md"
               />
             )}
           </>
@@ -355,14 +403,26 @@ export default function UsersList() {
         }
         // Active filter chips
         activeFiltersComponent={
-          !showAllUsers && (
-            <ActiveFiltersChips
-              filters={filters}
-              onRemoveFilter={handleRemoveFilter}
-              onClearAll={handleClearAllFilters}
-              getCategoryName={getCategoryName}
-              getFilterLabel={getFilterLabel}
-            />
+          showAllUsers ? (
+            Object.keys(allUsersFilters).length > 0 && (
+              <ActiveFiltersChips
+                filters={allUsersFilters}
+                onRemoveFilter={handleRemoveAllUsersFilter}
+                onClearAll={handleClearAllAllUsersFilters}
+                getCategoryName={getCategoryName}
+                getFilterLabel={getAllUsersFilterLabel}
+              />
+            )
+          ) : (
+            Object.keys(filters).length > 0 && (
+              <ActiveFiltersChips
+                filters={filters}
+                onRemoveFilter={handleRemoveFilter}
+                onClearAll={handleClearAllFilters}
+                getCategoryName={getCategoryName}
+                getFilterLabel={getFilterLabel}
+              />
+            )
           )
         }
         // Loading state
