@@ -3,6 +3,7 @@ import { Truck } from 'lucide-react';
 export const inTransitColumns = [
   { key: 'consignmentCode', label: 'CONSIGNMENT'       },
   { key: 'assetTag',        label: 'ASSET TAG'         },
+  { key: 'previousAssetTag', label: 'PREVIOUS ASSET TAG' },
   { key: 'model',           label: 'LAPTOP MODEL'      },
   { key: 'userName',        label: 'RETURNED BY'       },
   { key: 'trackingId',      label: 'TRACKING ID'       },
@@ -19,6 +20,9 @@ export function renderInTransitCell(item, columnKey) {
 
     case 'assetTag':
       return <span className="font-mono text-gray-800 text-xs">{value}</span>;
+
+    case 'previousAssetTag':
+      return <span className="font-mono text-gray-600 text-xs">{value || '-'}</span>;
 
     case 'userName':
       return (
