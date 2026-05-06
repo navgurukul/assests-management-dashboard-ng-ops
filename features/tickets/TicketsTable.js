@@ -77,14 +77,17 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     // Add search parameter first
     if (debouncedSearch) params.append('search', debouncedSearch);
 
+    const isAssignedTrue = filters?.isAssigned === 'true';
     const isAssignedFalse = filters?.isAssigned === 'false';
 
     // Always add pagination params
     params.append('page', currentPage);
     params.append('limit', pageSize);
 
-    // Add assigneeEmail only in my-tickets mode (not in show-all or unassigned filter)
-    if (!isShowAllMode && assigneeEmail && !isAssignedFalse) {
+    // Add assigneeEmail in three cases:
+    // 1. In my-tickets mode (not in show-all)
+    // 2. When isAssigned filter is set to 'true' (to show only assigned to me)
+    if (((!isShowAllMode && !isAssignedFalse) || isAssignedTrue) && assigneeEmail) {
       params.append('assigneeEmail', assigneeEmail);
     }
 
@@ -126,7 +129,6 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     onFilterChange(newFilters);
-    setIsShowAllMode(false);
     setCurrentPage(1); // Reset to first page when filters change
   };
 
@@ -162,11 +164,16 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
 
   // Status filter options based on API documentation
   const filterStatusOptions = [
+    { value: 'RAISED', label: 'Raised' },
     { value: 'OPEN', label: 'Open' },
     { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'VENDOR_WAIT', label: 'Vendor Wait' },
+    { value: 'PENDING_APPROVAL', label: 'Pending Approval' },
     { value: 'RESOLVED', label: 'Resolved' },
-    { value: 'RAISED', label: 'Raised' },
+    { value: 'REJECTED', label: 'Rejected' },
+    { value: 'OVERDUE', label: 'Overdue' },
     { value: 'ESCALATED', label: 'Escalated' },
+    { value: 'CLOSED', label: 'Closed' },
   ];
 
   // isAssigned filter options

@@ -50,6 +50,16 @@ export const allocationStatusOptions = [
   { value: 'ALLOCATION_COMPLETED', label: 'Allocation Completed' },
 ];
 
+export const userRoleOptions = [
+  { value: 'STUDENT', label: 'Student' },
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'EMPLOYEE', label: 'Employee' },
+  { value: 'RESIDENTIAL_TEAM', label: 'Residential Team' },
+  { value: 'IT_COORDINATOR', label: 'IT Coordinator' },
+  { value: 'IT_LEAD', label: 'IT Lead' },
+  { value: 'OPERATION', label: 'Operation' },
+];
+
   
 
 // Individual Assets List Data for /assets route
