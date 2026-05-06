@@ -1,3 +1,5 @@
+export const estDateFields = [{name:"newEstDate",label:"New Estimated Date",type:"date",required:true},{name:"estDateComment",label:"Comment",type:"textarea",placeholder:"Add your comments here...",required:false}];
+
 import { CheckCircle2, ArrowRightLeft, Calendar, ExternalLink } from 'lucide-react';
 
 export const menuItems = [

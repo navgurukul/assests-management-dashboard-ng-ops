@@ -8,10 +8,21 @@ import CustomButton from '@/components/atoms/CustomButton';
 import BulkConsignmentModal from './BulkConsignmentModal';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 import StatusChip from '@/components/atoms/StatusChip';
+import { Edit } from 'lucide-react';
+import FormModal from '@/components/molecules/FormModal';
+import { estDateFields } from '@/dummyJson/dummyJson';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
+  
+  const [showEstDateModal, setShowEstDateModal] = useState(false);
+
+  const handleUpdateEstDate = (formData) => {
+    console.log("New Est Date Form Data:", formData);
+    // e.g., formData.newEstDate, formData.estDateComment
+    setShowEstDateModal(false);
+  };
 
   if (isLoading) {
     return (
@@ -196,7 +207,24 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       className: sharedHeightClass,
       items: [
         { label: 'Shipped At', value: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : 'Not shipped yet' },
-        { label: 'Est. Delivery', value: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A' },
+        { 
+          label: 'Est. Delivery', 
+          value: (
+            <div className="flex items-center gap-2">
+              <span>{consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A'}</span>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEstDateModal(true);
+                }} 
+                className="text-gray-500 hover:text-blue-600 transition-colors"
+                title="Update Est. Delivery"
+              >
+                <Edit size={16} />
+              </button>
+            </div>
+          ) 
+        },
         {
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
@@ -328,6 +356,15 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         sourceName={sourceName}
         sourceAddress={sourceAddress}
         filename={`Consignment_${consignment?.consignmentCode || consignment?.id || "Details"}.pdf`}
+      />
+
+      <FormModal
+        isOpen={showEstDateModal}
+        onClose={() => setShowEstDateModal(false)}
+        actionType="Update Estimated Date"
+        fields={estDateFields}
+        onSubmit={handleUpdateEstDate}
+        size="medium"
       />
     </>
   );
