@@ -33,7 +33,7 @@ export const campusInchargeModalFields = [
     label: 'State',
     type: 'api-autocomplete',
     placeholder: 'Search state...',
-    required: true,
+    required: false,
     labelKey: 'label',
     valueKey: 'value',
     staticItems: [
@@ -283,7 +283,7 @@ export const campusInchargeValidationSchema = Yup.object().shape({
 
   address: Yup.string().required('Address is required'),
 
-  state: Yup.string().required('State is required'),
+  state: Yup.string(),
 
   campusCode: Yup.string().required('Campus Code is required'),
 
