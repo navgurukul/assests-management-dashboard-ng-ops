@@ -78,7 +78,7 @@ export default function CreateCampusIncharge() {
         updatedField = { ...updatedField, options: schoolOptions };
       }
 
-      if (isEditMode && ['campus', 'address', 'state', 'campusCode'].includes(field.name)) {
+      if (isEditMode && ['campus', 'address', 'campusCode'].includes(field.name)) {
         updatedField = { ...updatedField, disabled: true };
       }
 
