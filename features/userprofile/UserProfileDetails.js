@@ -14,7 +14,7 @@ const tabs = [
   { id: 'ticketstatus', label: 'My Ticket Status', icon: Ticket, Component: TicketStatusTab },
   { id: 'ticketforapproval', label: 'Ticket for Approval', icon: Ticket, Component: TicketApprovalTab },
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
-  { id: 'managerlist', label: 'Manager List', icon: Users, Component: ManagerListTab },
+  // { id: 'managerlist', label: 'Manager List', icon: Users, Component: ManagerListTab },
 ];
 
 export default function UserProfileDetails() {

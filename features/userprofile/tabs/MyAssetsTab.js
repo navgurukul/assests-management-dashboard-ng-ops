@@ -229,7 +229,7 @@ export default function MyAssetsTab({ userData = {} }) {
       }
 
       const fields = {
-        consignmentId,
+        ...(consignmentId ? { consignmentId } : {}),
         assetId: selectedAsset?.id,
         sourceCampusId: sourceCampusIdValue,
         campusITCoordinatorEmail: formData.campusItCoordinator || coordinatorEmail || '',
