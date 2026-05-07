@@ -1174,6 +1174,93 @@ export const allocationSummaryCardsConfig = [
   },
 ];
 
+// Campus Location Data
+export const campusLocationData = [
+  {
+    id: 1,
+    campusName: 'Mumbai Campus',
+    campusCode: 'MUM',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    totalLocations: 6,
+    locations: [
+      { id: 101, name: 'Almirah 1', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 20, currentCount: 14, description: 'Stores laptops and accessories' },
+      { id: 102, name: 'Almirah 2', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 20, currentCount: 8, description: 'Stores chargers and peripherals' },
+      { id: 103, name: 'Storage Room 1', type: 'Storage Room', floor: 'Ground Floor', room: 'Main Storage', capacity: 60, currentCount: 42, description: 'Primary storage for all devices' },
+      { id: 104, name: 'Storage Room 2', type: 'Storage Room', floor: 'First Floor', room: 'Backup Storage', capacity: 40, currentCount: 18, description: 'Backup and repair queue devices' },
+      { id: 105, name: 'Server Rack A', type: 'Rack', floor: 'Ground Floor', room: 'Server Room', capacity: 10, currentCount: 6, description: 'Network and server equipment' },
+      { id: 106, name: 'Scrap Bin 1', type: 'Scrap Bin', floor: 'Ground Floor', room: 'Utility Room', capacity: 30, currentCount: 5, description: 'Devices marked for disposal' },
+    ],
+  },
+  {
+    id: 2,
+    campusName: 'Pune Campus',
+    campusCode: 'PUNE',
+    city: 'Pune',
+    state: 'Maharashtra',
+    totalLocations: 5,
+    locations: [
+      { id: 201, name: 'Almirah 1', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 25, currentCount: 20, description: 'Primary laptop storage' },
+      { id: 202, name: 'Almirah 2', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 25, currentCount: 12, description: 'Accessories and spare parts' },
+      { id: 203, name: 'Almirah 3', type: 'Almirah', floor: 'First Floor', room: 'Lab Room', capacity: 20, currentCount: 18, description: 'Lab equipment storage' },
+      { id: 204, name: 'Storage Room 1', type: 'Storage Room', floor: 'Basement', room: 'Main Storage', capacity: 80, currentCount: 55, description: 'Central storage for all assets' },
+      { id: 205, name: 'Scrap Bin 1', type: 'Scrap Bin', floor: 'Basement', room: 'Utility Room', capacity: 20, currentCount: 8, description: 'Devices marked for disposal' },
+    ],
+  },
+  {
+    id: 3,
+    campusName: 'Delhi Campus',
+    campusCode: 'DEL',
+    city: 'New Delhi',
+    state: 'Delhi',
+    totalLocations: 4,
+    locations: [
+      { id: 301, name: 'Almirah 1', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 20, currentCount: 16, description: 'Laptop and tablet storage' },
+      { id: 302, name: 'Almirah 2', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 20, currentCount: 9, description: 'Peripherals and accessories' },
+      { id: 303, name: 'Storage Room 1', type: 'Storage Room', floor: 'First Floor', room: 'Stock Room', capacity: 50, currentCount: 33, description: 'General asset storage' },
+      { id: 304, name: 'Scrap Bin 1', type: 'Scrap Bin', floor: 'Ground Floor', room: 'Utility Room', capacity: 15, currentCount: 4, description: 'End-of-life devices' },
+    ],
+  },
+  {
+    id: 4,
+    campusName: 'Sarjapura Campus',
+    campusCode: 'SARJ',
+    city: 'Bangalore',
+    state: 'Karnataka',
+    totalLocations: 7,
+    locations: [
+      { id: 401, name: 'Almirah 1', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room A', capacity: 20, currentCount: 19, description: 'Active student laptops' },
+      { id: 402, name: 'Almirah 2', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room A', capacity: 20, currentCount: 15, description: 'Spare laptops and tablets' },
+      { id: 403, name: 'Almirah 3', type: 'Almirah', floor: 'First Floor', room: 'IT Room B', capacity: 20, currentCount: 11, description: 'Accessories and chargers' },
+      { id: 404, name: 'Storage Room 1', type: 'Storage Room', floor: 'Ground Floor', room: 'Central Storage', capacity: 100, currentCount: 72, description: 'Primary bulk storage' },
+      { id: 405, name: 'Storage Room 2', type: 'Storage Room', floor: 'First Floor', room: 'Secondary Storage', capacity: 60, currentCount: 28, description: 'Overflow and repair queue' },
+      { id: 406, name: 'Server Rack A', type: 'Rack', floor: 'Ground Floor', room: 'Server Room', capacity: 12, currentCount: 10, description: 'Servers and network devices' },
+      { id: 407, name: 'Scrap Bin 1', type: 'Scrap Bin', floor: 'Ground Floor', room: 'Utility Room', capacity: 25, currentCount: 9, description: 'Scrap and unserviceable items' },
+    ],
+  },
+  {
+    id: 5,
+    campusName: 'Dharamshala Campus',
+    campusCode: 'DHAR',
+    city: 'Dharamshala',
+    state: 'Himachal Pradesh',
+    totalLocations: 3,
+    locations: [
+      { id: 501, name: 'Almirah 1', type: 'Almirah', floor: 'Ground Floor', room: 'IT Room', capacity: 15, currentCount: 10, description: 'Main laptop storage' },
+      { id: 502, name: 'Storage Room 1', type: 'Storage Room', floor: 'Ground Floor', room: 'Stock Room', capacity: 40, currentCount: 22, description: 'General asset storage' },
+      { id: 503, name: 'Scrap Bin 1', type: 'Scrap Bin', floor: 'Ground Floor', room: 'Utility Room', capacity: 10, currentCount: 2, description: 'Devices for disposal' },
+    ],
+  },
+];
+
+export const locationTypeConfig = {
+  Almirah: { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: 'Archive' },
+  'Storage Room': { color: 'bg-green-100 text-green-700 border-green-200', icon: 'Warehouse' },
+  Rack: { color: 'bg-purple-100 text-purple-700 border-purple-200', icon: 'Server' },
+  'Scrap Bin': { color: 'bg-red-100 text-red-700 border-red-200', icon: 'Trash2' },
+};
+
+
 export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAsset, handleExtendLease }) => {
   const options = [];
   const status = asset.consignmentStatus || asset.consignment?.status || asset.status;
