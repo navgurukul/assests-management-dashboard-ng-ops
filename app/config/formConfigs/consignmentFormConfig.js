@@ -71,6 +71,26 @@ export const createConsignmentInitialValues = {
 
 export const readyToDispatchFields = [
   {
+    name: 'dispatchMode',
+    label: 'Dispatch Mode',
+    type: 'radio',
+    required: true,
+    defaultValue: 'courier',
+    options: [
+      { value: 'in_person', label: 'In Person' },
+      { value: 'courier', label: 'Courier' },
+    ],
+  },
+  {
+    name: 'comment',
+    label: 'Comment',
+    type: 'textarea',
+    placeholder: 'Enter handover notes or remarks',
+    required: false,
+    rows: 3,
+    showWhen: (formData) => formData.dispatchMode === 'in_person',
+  },
+  {
     name: 'courierServiceId',
     label: 'Courier Partner Name',
     type: 'select',
@@ -80,6 +100,7 @@ export const readyToDispatchFields = [
       label: courier.name,
     })),
     required: true,
+    showWhen: (formData) => formData.dispatchMode === 'courier',
   },
   {
     name: 'trackingId',
@@ -87,6 +108,7 @@ export const readyToDispatchFields = [
     type: 'text',
     placeholder: 'Enter tracking ID',
     required: true,
+    showWhen: (formData) => formData.dispatchMode === 'courier',
   },
   {
     name: 'estimatedDeliveryDate',
@@ -94,6 +116,7 @@ export const readyToDispatchFields = [
     type: 'date',
     placeholder: 'Select estimated delivery date',
     required: true,
+    showWhen: (formData) => formData.dispatchMode === 'courier',
   },
 ];
 

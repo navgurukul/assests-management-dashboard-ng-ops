@@ -235,8 +235,11 @@ export default function FormModal({
       return isValid;
     }
 
-    // Built-in field-level validation (no Yup schema)
-    fields.forEach((field) => {
+    // Built-in field-level validation (no Yup schema) 
+    fields.forEach((field) => { 
+      if (field.showWhen && !field.showWhen(formData)) {
+        return;
+      }
       const value = formData[field.name];
 
       // Special handling for allocation-consignment-selector
