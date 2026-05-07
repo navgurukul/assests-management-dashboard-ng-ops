@@ -312,16 +312,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     adminComment: ticket.adminComment || '',
   };
 
-  const updateFormFieldsModified = ticketUpdateFormFields.map(field => {
-    if (field.name === 'timelineDate' && ticket.timelineDate) {
-      return {
-        ...field,
-        disabled: true,
-        helperText: 'Timeline is already set and cannot be changed.',
-      };
-    }
-    return field;
-  });
+  const updateFormFieldsModified = ticketUpdateFormFields;
 
   const handleAssetStatusUpdate = async (formData) => {
     const assetId = ticket.asset?.id || ticket.assetId;
