@@ -22,7 +22,7 @@ import {
 const INITIAL_MODAL_STATE = { isOpen: false, actionType: null, ticket: null };
 
 const columns = [
-  { key: 'ticketNumber', label: 'TICKET NUMBER', align: 'start' },
+  { key: 'ticketNumber', label: 'TICKET TAG', align: 'start' },
   { key: 'description', label: 'DESCRIPTION', align: 'start' },
   { key: 'ticketType', label: 'TYPE', align: 'start' },
   { key: 'priority', label: 'PRIORITY', align: 'start' },

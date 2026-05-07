@@ -399,7 +399,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
             itemsGrid: true,
             className: sharedHeightClass,
             items: [
-              { label: 'Ticket Number', value: allocationDetails.ticket.ticketNumber || 'N/A' },
+              { label: 'Ticket Tag', value: allocationDetails.ticket.ticketNumber || 'N/A' },
               { label: 'Ticket Type', value: allocationDetails.ticket.ticketType || 'N/A' },
               { label: 'Priority', value: allocationDetails.ticket.priority || 'N/A' },
               { label: 'Ticket Status', value: allocationDetails.ticket.status || 'N/A' },

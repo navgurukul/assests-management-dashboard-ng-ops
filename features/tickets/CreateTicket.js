@@ -49,7 +49,7 @@ export default function CreateTicket() {
       toast.dismiss(loadingToastId);
       
       // Show success toast
-      toast.success(`Ticket created successfully! Ticket Number: ${result.data.ticketNumber}`);
+      toast.success(`Ticket created successfully! Ticket Tag: ${result.data.ticketNumber}`);
       
       // Navigate based on user role
       if (userRole === 'STUDENT' || userRole === 'EMPLOYEE') {
