@@ -74,13 +74,6 @@ export default function UserProfileDetails() {
   return (
     <>
       <div className="h-full overflow-y-auto bg-background p-4"> 
-        {/* Breadcrumb */}
-        <div className="mb-3 text-xs text-(--muted)">
-          <span className="hover:text-(--theme-main) cursor-pointer">Dashboard</span>
-          <span className="mx-2">›</span>
-          <span className="font-medium text-foreground">User Profile</span>
-        </div>
-
         {/* Header */}
         <div className="bg-(--surface) rounded-lg shadow-sm p-4 mb-4 border border-(--border)">
           <div className="flex justify-between items-start">
