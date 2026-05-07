@@ -11,7 +11,6 @@ import Modal from '@/components/molecules/Modal';
 import FormModal from '@/components/molecules/FormModal';
 import GenericForm from '@/components/molecules/GenericForm';
 import StateHandler from '@/components/atoms/StateHandler';
-import SLAIndicator from '@/components/molecules/SLAIndicator';
 import CustomButton from '@/components/atoms/CustomButton';
 import { decryptData } from '@/app/utils/storageUtils';
 import AssigneeSelector from './AssigneeSelector';
@@ -41,7 +40,8 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     const loggedInEmail = React.useMemo(() => {
     try {
       const auth = decryptData(localStorage.getItem('__AUTH__')) || {};
-      return auth?.user?.email || null;
+      const email =  auth?.user?.email || null;
+      return email;
     } catch {
       return null;
     }
@@ -399,7 +399,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   size="md"
                   className=""
                   onClick={handleUpdateClick}
-                  disabled={ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'}
+                  disabled={
+                    ticket.ticketType?.toUpperCase() === 'REPAIR'
+                      ? !isAssigneeCurrentUser
+                      : !isAssigneeCurrentUser && ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'
+                  }
                 />
                 {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
                    (isAssigneeCurrentUser || loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD') ? (
