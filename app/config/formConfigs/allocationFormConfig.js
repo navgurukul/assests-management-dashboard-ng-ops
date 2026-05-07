@@ -162,7 +162,7 @@ export const allocationFormFields = [
     label: 'Notes',
     type: 'textarea',
     placeholder: 'Add any additional notes or comments about this allocation',
-    required: false,
+    required: true,
   },
 ];
 
@@ -246,7 +246,17 @@ export const allocationValidationSchema = Yup.object().shape({
   assetType: Yup.string().nullable(),
   
   // Common fields
-  notes: Yup.string().nullable(),
+  notes: Yup.string()
+    .required('Notes are required')
+    .test(
+      'min-words',
+      'Notes must contain at least 5 words',
+      function (value) {
+        if (!value) return false;
+        const wordCount = value.trim().split(/\s+/).length;
+        return wordCount >= 5;
+      }
+    ),
 });
 
 export const allocationInitialValues = {
