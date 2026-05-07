@@ -654,17 +654,27 @@ export default function ConsignmentsList() {
     setIsSubmitting(true);
     const loadingToastId = toast.loading('Dispatching consignment...');
     
-    try {
-      const selectedCourier = courierProviders.find(
-        (courier) => courier.id === formData.courierServiceId
-      );
+    try{
+    let payload;
 
-      const payload = {
-        courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
-        trackingId: formData.trackingId,
-        link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
-        estimatedDeliveryDate: formData.estimatedDeliveryDate,
-      };
+      if (formData.dispatchMode === 'in_person') {
+        payload = {
+          courierPartnerName: 'In Person',
+          notes: formData.comment || '',
+          deliveryMode: 'in_person',
+        };
+      } else {
+        const selectedCourier = courierProviders.find(
+          (courier) => courier.id === formData.courierServiceId
+        );
+
+        payload = {
+          courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
+          trackingId: formData.trackingId,
+          link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
+          estimatedDeliveryDate: formData.estimatedDeliveryDate,
+        };
+      }
 
       
       // Make API call to update consignment status to dispatched
