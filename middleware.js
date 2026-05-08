@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { routePermissions } from '@/app/config/routePermissions';
+import { getRoutePermissions } from '@/app/config/routePermissions';
 
 // Routes that never require authentication
 const PUBLIC_ROUTES = ['/login', '/unauthorized'];
@@ -29,12 +29,19 @@ function decodeJwtPayload(token) {
 /**
  * Find the matching permission entry for a given pathname.
  * Checks route prefixes from longest to shortest for specificity.
- * e.g. '/allocations/create' matches '/allocations' rule.
+ * Routes with exactOnly only match the exact path, not nested routes.
  */
 function getAllowedRoles(pathname) {
+  const routePermissions = getRoutePermissions();
   const routes = Object.keys(routePermissions).sort((a, b) => b.length - a.length);
-  const match = routes.find((route) => pathname === route || pathname.startsWith(route + '/'));
-  return match ? routePermissions[match] : null;
+  const match = routes.find((route) => {
+    const config = routePermissions[route];
+    if (config.exactOnly) {
+      return pathname === route;
+    }
+    return pathname === route || pathname.startsWith(route + '/');
+  });
+  return match ? routePermissions[match].allowedRoles : null;
 }
 
 export function middleware(request) {

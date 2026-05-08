@@ -21,7 +21,7 @@ import {
   PanelLeftOpen,
   PanelLeftClose,
 } from 'lucide-react';
-import { menuItems } from '@/dummyJson/dummyJson';
+import { menuItems } from '@/app/config/routePermissions';
 
 const iconMap = {
   LayoutDashboard,
@@ -57,15 +57,10 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
 
   // Selector for userRole from Redux store
   const userRole = useSelector(selectUserRole);
-  const isStudentOrEmployee = userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER';
+  // const isStudentOrEmployee = userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER';
 
   const filteredMenuItems = menuItems.filter(
-    (item) => {
-      if (userRole === 'STUDENT' && item.path === '/ticketforapproval') {
-        return false;
-      }
-      return isStudentOrEmployee ? item.studentOnly : !item.studentOnly;
-    }
+    (item) => item.allowedRoles.includes(userRole)
   );
 
   return (

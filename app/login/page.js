@@ -33,10 +33,14 @@ function LoginContent() {
 
   // Role-based landing pages
   const rolesLandingPages = {
-    ADMIN: '/dashboard',
+    ADMIN: '/userprofile',
     STUDENT: '/userprofile',
-    EMPLOYEE: '/myassets',
-    MANAGER: '/myassets',
+    EMPLOYEE: '/userprofile',
+    MANAGER: '/userprofile',
+    IT_LEAD: '/userprofile',
+    IT_COORDINATOR: '/userprofile',
+    OPERATION: '/userprofile',
+    RESIDENTIAL_TEAM: '/userprofile',
   };
 
   // Amazon pathway ID for special redirection
@@ -70,8 +74,8 @@ function LoginContent() {
     const referrer = searchParams.get('referrer');
     const primaryRole = rolesList[0] || userRole || user?.role; 
 
-    // ALWAYS redirect STUDENT and EMPLOYEE to /myassets instantly
-    if (primaryRole === 'STUDENT' || primaryRole === 'EMPLOYEE') {
+   // ALWAYS redirect STUDENT, EMPLOYEE, MANAGER to /userprofile instantly
+    if (primaryRole === 'STUDENT' || primaryRole === 'EMPLOYEE' || primaryRole === 'MANAGER') {
       sessionStorage.removeItem('redirectAfterLogin'); // clear any stuck redirects
       router.push('/userprofile');
       return;
@@ -118,7 +122,7 @@ function LoginContent() {
 
     // Default role-based redirection
 
-    const landingPage = rolesLandingPages[primaryRole] || '/dashboard'; // Safe fallback
+    const landingPage = rolesLandingPages[primaryRole] || '/userprofile'; // Safe fallback
     router.push(landingPage);
   };
 
