@@ -1,34 +1,98 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronRight, Building2, Plus, Trash2 } from 'lucide-react';
-import { campusLocationData } from '@/dummyJson/dummyJson';
+import { useQueryClient } from '@tanstack/react-query';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
+import StateHandler from '@/components/atoms/StateHandler';
+import useFetch from '@/app/hooks/query/useFetch';
+import usePost from '@/app/hooks/query/usePost';
+import { toast } from '@/app/utils/toast';
+import config from '@/app/config/env.config';
 import {
   createLocationFields,
   createLocationValidationSchema,
 } from '@/app/config/formConfigs/campusLocationModalConfig';
 
 
-
 export default function CampusLocationTab() {
-  const [selectedCampusId, setSelectedCampusId] = useState(campusLocationData[0]?.id || null);
+  const queryClient = useQueryClient();
+  const [selectedCampusId, setSelectedCampusId] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const selectedCampus = campusLocationData.find((campus) => campus.id === selectedCampusId);
+  const {
+    data: locationsResponse,
+    isLoading: isLoadingLocations,
+    isError: isErrorLocations,
+    error: locationsError,
+  } = useFetch({
+    url: '/locations',
+    queryKey: ['locations'],
+  });
+
+  const {
+    data: campusesResponse,
+    isLoading: isLoadingCampuses,
+    isError: isErrorCampuses,
+  } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+  });
+
+  const campusList = useMemo(() => {
+    return campusesResponse?.data || [];
+  }, [campusesResponse]);
+
+  const locationsByCampus = useMemo(() => {
+    const locations = locationsResponse?.data || [];
+    return locations.reduce((accumulator, location) => {
+      const { campusId } = location;
+      if (!accumulator[campusId]) {
+        accumulator[campusId] = [];
+      }
+      accumulator[campusId].push(location);
+      return accumulator;
+    }, {});
+  }, [locationsResponse]);
+
+  const activeCampusId = selectedCampusId ?? campusList[0]?.id ?? null;
+  const selectedCampus = campusList.find((campus) => campus.id === activeCampusId);
+  const selectedLocations = locationsByCampus[activeCampusId] || [];
+
+  const { mutateAsync: createLocation, isPending: isSubmitting } = usePost({
+    onSuccess: () => {
+      toast.success('Location created successfully');
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      setIsCreateModalOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err?.message || 'Failed to create location');
+    },
+  });
 
   const handleCreateLocationSubmit = async (formData) => {
-    setIsSubmitting(true);
-    try {
-      // TODO: wire up API call here
-      console.log('Create location payload:', { campusId: selectedCampusId, ...formData });
-      setIsCreateModalOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await createLocation({
+      endpoint: config.endpoints.locations.list,
+      body: { campusId: activeCampusId, name: formData.name, type: formData.type, isActive: true },
+    });
   };
+
+  const isLoading = isLoadingLocations || isLoadingCampuses;
+  const isError = isErrorLocations || isErrorCampuses;
+
+  if (isLoading || isError) {
+    return (
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        error={locationsError}
+        loadingMessage="Loading locations..."
+        errorMessage="Failed to load locations"
+        className="h-64"
+      />
+    );
+  }
 
   return (
     <div className="flex gap-4 min-h-[500px]">
@@ -42,6 +106,7 @@ export default function CampusLocationTab() {
         size="medium"
         isSubmitting={isSubmitting}
         validationSchema={createLocationValidationSchema}
+
       />
       {/* Campus Sidebar */}
       <div className="w-56 shrink-0 border border-(--border) rounded-lg overflow-hidden bg-(--surface)">
@@ -49,12 +114,12 @@ export default function CampusLocationTab() {
           <p className="text-xs font-semibold text-(--muted) uppercase tracking-wide">Campuses</p>
         </div>
         <ul className="divide-y divide-(--border)">
-          {campusLocationData.map((campus) => (
+          {campusList.map((campus) => (
             <li key={campus.id}>
               <button
                 onClick={() => setSelectedCampusId(campus.id)}
                 className={`w-full flex items-center justify-between px-3 py-3 text-left transition-colors ${
-                  selectedCampusId === campus.id
+                  activeCampusId === campus.id
                     ? 'bg-(--theme-main)/10 text-(--theme-main)'
                     : 'hover:bg-(--surface-soft) text-foreground'
                 }`}
@@ -62,13 +127,17 @@ export default function CampusLocationTab() {
                 <div className="flex items-center gap-2 min-w-0">
                   <Building2 className="w-4 h-4 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium truncate">{campus.campusName.replace(' Campus', '')}</p>
-                    <p className="text-xs text-(--muted)">{campus.totalLocations} locations</p>
+                    <p className="text-xs font-medium truncate">
+                      {campus.campusName.replace(' Campus', '')}
+                    </p>
+                    <p className="text-xs text-(--muted)">
+                      {(locationsByCampus[campus.id] || []).length} locations
+                    </p>
                   </div>
                 </div>
                 <ChevronRight
                   className={`w-3 h-3 shrink-0 ml-1 transition-transform ${
-                    selectedCampusId === campus.id ? 'rotate-90' : ''
+                    activeCampusId === campus.id ? 'rotate-90' : ''
                   }`}
                 />
               </button>
@@ -94,27 +163,34 @@ export default function CampusLocationTab() {
             </div>
 
             {/* Locations List */}
-            <div className="border border-(--border) rounded-lg overflow-hidden">
-              <div className="grid grid-cols-[1fr_auto_auto] px-4 py-2 bg-(--surface-soft) border-b border-(--border)">
-                <span className="text-xs font-semibold text-(--muted) uppercase tracking-wide">Location</span>
-                <span className="text-xs font-semibold text-(--muted) uppercase tracking-wide text-right pr-6">Count</span>
-                <span />
+            {selectedLocations.length > 0 ? (
+              <div className="border border-(--border) rounded-lg overflow-hidden">
+                <div className="grid grid-cols-[1fr_auto_auto] px-4 py-2 bg-(--surface-soft) border-b border-(--border)">
+                  <span className="text-xs font-semibold text-(--muted) uppercase tracking-wide">Location</span>
+                  <span className="text-xs font-semibold text-(--muted) uppercase tracking-wide text-right pr-6">Type</span>
+                  <span />
+                </div>
+                <ul className="divide-y divide-(--border)">
+                  {selectedLocations.map((location) => (
+                    <li key={location.id} className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 hover:bg-(--surface-soft) transition-colors">
+                      <span className="text-sm text-foreground">{location.name}</span>
+                      <span className="text-sm font-medium text-(--theme-main) text-right pr-6">{location.type}</span>
+                      <button
+                        onClick={() => console.log('Delete location:', location.id)}
+                        className="p-1 rounded hover:bg-red-50 text-(--muted) hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="divide-y divide-(--border)">
-                {selectedCampus.locations.map((location) => (
-                  <li key={location.id} className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 hover:bg-(--surface-soft) transition-colors">
-                    <span className="text-sm text-foreground">{location.name}</span>
-                    <span className="text-sm font-medium text-(--theme-main) text-right pr-6">{location.currentCount}</span>
-                    <button
-                      onClick={() => console.log('Delete location:', location.id)}
-                      className="p-1 rounded hover:bg-red-50 text-(--muted) hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full py-16 text-(--muted)">
+                <Building2 className="w-10 h-10 mb-3 opacity-30" />
+                <p className="text-sm">No locations found for this campus</p>
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full py-16 text-(--muted)">
