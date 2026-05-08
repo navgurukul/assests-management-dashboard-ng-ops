@@ -43,6 +43,7 @@ const config = {
     // Consignment Return Assets
     consignmentReturnAssets: {
       list: '/consignment/assets/return',
+      details: (id) => `/consignment/assets/return/${id}`,
       deliver: (id) => `/consignments/${id}/deliver`,
       assets: (id) => `/consignments/${id}/assets`,
       assetById: (consignmentId, assetId) => `/consignment/assets/return/${consignmentId}/${assetId}`,
