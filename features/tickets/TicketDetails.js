@@ -375,16 +375,16 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         rightGrid={true}
         onBack={onBack}
         headerActions={
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap justify-end w-full sm:w-auto">
             {assetGroupCounts.length > 0 && (
               <div className="flex items-center gap-2 flex-wrap">
                 {assetGroupCounts.map(([typeName, count]) => (
                   <div
                     key={typeName}
-                    className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5"
+                    className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-lg px-2 py-1"
                   >
                     <Package className="w-3.5 h-3.5 text-blue-600" />
-                    <span className="text-sm font-semibold text-blue-700">
+                    <span className="text-xs sm:text-sm font-semibold text-blue-700">
                       {typeName}: {count}
                     </span>
                   </div>
