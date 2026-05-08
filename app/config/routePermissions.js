@@ -23,7 +23,7 @@ const ALL_AUTHENTICATED = ['ADMIN', 'IT_LEAD', 'IT_COORDINATOR', 'OPERATION', 'R
  *
  * Route prefixes are matched longest-first, so:
  * - '/tickets/[id]' matches '/tickets'
- * - '/allocations/create' matches '/allocations'
+ * -  '/allocations/create' matches '/allocations'
  */
 export const routePermissions = {
   
