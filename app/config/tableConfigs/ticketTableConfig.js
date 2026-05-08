@@ -8,7 +8,7 @@ export const ticketTableColumns = [
   // Always visible columns
   { 
     key: 'ticketId', 
-    label: 'TICKET ID', 
+    label: 'TICKET TAG', 
     alwaysVisible: true,
     description: 'Unique ticket identifier',
     type: 'boldText'

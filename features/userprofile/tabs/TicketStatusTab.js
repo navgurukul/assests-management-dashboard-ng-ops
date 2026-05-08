@@ -11,7 +11,7 @@ import TableWrapper from '@/components/Table/TableWrapper';
 import { getPriorityChipColor } from '@/app/utils/statusHelpers';
 
 const columns = [
-  { key: 'ticketNumber', label: 'TICKET NUMBER' },
+  { key: 'ticketNumber', label: 'TICKET TAG' },
   { key: 'description', label: 'DESCRIPTION' },
   { key: 'ticketType', label: 'TYPE' },
   { key: 'priority', label: 'PRIORITY' },

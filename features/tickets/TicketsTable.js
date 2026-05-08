@@ -359,7 +359,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
         <SearchInput
           value={searchInput}
           onChange={setSearchInput}
-          placeholder="Search by ticket number, description, or resolution notes..."
+          placeholder="Search by ticket tag, description, or resolution notes..."
         />
       }
       // Filter component

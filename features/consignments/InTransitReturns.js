@@ -1,7 +1,7 @@
 import { Truck } from 'lucide-react';
 
 export const inTransitColumns = [
-  { key: 'consignmentCode', label: 'CONSIGNMENT'       },
+  { key: 'consignmentCode', label: 'CONSIGNMENT CODE'       },
   { key: 'assetTag',        label: 'ASSET TAG'         },
   { key: 'previousAssetTag', label: 'PREVIOUS ASSET TAG' },
   { key: 'model',           label: 'LAPTOP MODEL'      },

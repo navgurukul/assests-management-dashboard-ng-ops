@@ -9,12 +9,12 @@ import { getStatusChipColor } from '@/app/utils/statusHelpers';
 
 // All available columns for the consignments table
 export const consignmentTableColumns = [
-  // Column order: consignment id, asset tags, source, destination, courier partner, tracking id, status, actions
+  // Column order: consignment code, asset tags, source, destination, courier partner, tracking id, status, actions
   
-  // 1. Consignment ID
+  // 1. Consignment Code
   { 
     key: 'consignmentCode', 
-    label: 'CONSIGNMENT ID', 
+    label: 'CONSIGNMENT CODE', 
     alwaysVisible: true,
     description: 'Unique consignment identifier',
     type: 'id'
@@ -119,7 +119,7 @@ export const consignmentTableColumns = [
 
 // Columns that are visible by default (in order)
 export const defaultVisibleColumns = [
-  'consignmentCode',    // 1. Consignment ID
+  'consignmentCode',    // 1. Consignment Code
   'assetCount',         // 2. Asset Tags
   'source',             // 3. Source
   'destination',        // 4. Destination
