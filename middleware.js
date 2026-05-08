@@ -9,7 +9,23 @@ const ROOT_ROUTE = '/';
 
 /**
  * Lightweight JWT decoder for Edge Runtime.
- 
+ * Does NOT verify signature — that's fine here because:
+ *   1. We only use the role for UI routing, not for data access.
+ *   2. Real authorization happens on the API/backend.
+ *   3. Tampering with the token would just land them on /unauthorized
+ *      or break their session entirely.
+ */
+function decodeJwtPayload(token) {
+  try {
+    const base64Payload = token.split('.')[1];
+    // Edge Runtime supports atob
+    const jsonPayload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Find the matching permission entry for a given pathname.
  * Checks route prefixes from longest to shortest for specificity.

@@ -34,8 +34,6 @@ export const routePermissions = {
   // ─── Employee only routes ─────────────────────────────────────────────────
   '/ticketforapproval': EMPLOYEE_ONLY,
 
-  // ─── Tickets: All authenticated users (but with UI restrictions per role) ──
-  '/tickets': ALL_AUTHENTICATED,
 
   // ─── IT / Admin only routes ───────────────────────────────────────────────
   '/assets': IT_ROLES,
