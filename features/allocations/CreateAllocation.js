@@ -136,7 +136,7 @@ export default function CreateAllocation() {
   };
 
   const handleCancel = () => {
-    router.push('/allocations');
+    router.back();
   };
 
   // Field callbacks for form field changes
@@ -165,7 +165,7 @@ export default function CreateAllocation() {
           <CustomButton
             text="Back to Allocations"
             icon={ArrowLeft}
-            onClick={() => router.push('/allocations')}
+            onClick={() => router.back()}
             variant="secondary"
             size="sm"
             className="mb-6"
