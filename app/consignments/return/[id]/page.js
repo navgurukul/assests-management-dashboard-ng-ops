@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { useMemo } from 'react';
 import ReturnDetails from '@/features/consignments/ReturnDetails';
+import useFetch from '@/app/hooks/query/useFetch';
+import config from '@/app/config/env.config';
 
 export default function ReturnDetailsPage() {
   const router = useRouter();
@@ -13,25 +14,22 @@ export default function ReturnDetailsPage() {
     router.push('/consignments?view=in-transit');
   };
 
-  const returnData = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    const stored = sessionStorage.getItem('currentReturnData');
-    if (!stored) return null;
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed?.id === returnId) return parsed;
-      return null;
-    } catch {
-      return null;
-    }
-  }, [returnId]);
+  // Fetch return details from API
+  const { data, isLoading, isError, error } = useFetch({
+    url: config.endpoints.consignmentReturnAssets.details(returnId),
+    queryKey: ['return-details', returnId],
+    enabled: Boolean(returnId),
+  });
+
+  const normalizedReturnData = data?.data || data?.return || data || null;
 
   return (
     <ReturnDetails
-      returnData={returnData}
-      isLoading={false}
-      isError={!returnData}
-      error={!returnData ? { message: 'Return data not found. Please go back and try again.' } : null}
+      returnId={returnId}
+      returnData={normalizedReturnData}
+      isLoading={isLoading}
+      isError={isError}
+      error={error}
       onBack={handleBack}
     />
   );
