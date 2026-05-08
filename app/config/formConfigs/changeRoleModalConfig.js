@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 export const ROLE_OPTIONS = [
   { value: 'ADMIN', label: 'Admin' },
   { value: 'EMPLOYEE', label: 'Employee' },
+  { value: 'MANAGER', label: 'manager' },
   { value: 'RESIDENTIAL_TEAM', label: 'Residential Team' },
   { value: 'STUDENT', label: 'Student' },
   { value: 'IT_COORDINATOR', label: 'IT Coordinator' },
