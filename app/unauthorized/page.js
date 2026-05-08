@@ -3,7 +3,11 @@
 
 import { ArrowLeft } from 'lucide-react';
 
+import { useRouter }  from 'next/navigation';
+
 export default function UnauthorizedPage() {
+ 
+   const router = useRouter();
   return (
     <div className="flex flex-col items-center justify-center flex-1 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="text-center space-y-6 px-4">
@@ -22,8 +26,7 @@ export default function UnauthorizedPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-          <button
-            onClick={() => window.history.back()}
+          <button onClick={() => router.push('/ticketStatus')}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
