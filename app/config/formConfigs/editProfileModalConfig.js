@@ -33,7 +33,7 @@ export const getEditProfileFields = (defaultValues = {}) => [
   },
   {
     name: 'campusId',
-    label: 'Campus',
+    label: 'Campus (Only for students)',
     type: 'api-autocomplete',
     placeholder: 'Search and select campus',
     apiUrl: baseUrl + '/campuses',
@@ -45,11 +45,11 @@ export const getEditProfileFields = (defaultValues = {}) => [
   },
   {
     name: 'schoolId',
-    label: 'School',
+    label: 'School (Only for students)',
     type: 'select',
     placeholder: 'Select school',
     required: false,
-    hint: 'Only for students',
+    // hint: 'Only for students',
     options: [],
     defaultValue: defaultValues.schoolId || '',
   },
