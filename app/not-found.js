@@ -1,8 +1,10 @@
 'use client';
 
-import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { useRouter }  from 'next/navigation';
 
 export default function NotFound() {
+     const router = useRouter();
   return (
     <div className="flex flex-col items-center justify-center flex-1 h-full bg-gray-50">
       <div className="text-center space-y-6">
@@ -20,24 +22,12 @@ export default function NotFound() {
         </div>
 
         {/* Button */}
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+        <button onClick={() => router.push('/ticketStatus')}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200"
           >
-            <path
-              fillRule="evenodd"
-              d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Back to Dashboard
-        </Link>
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </button>
       </div>
     </div>
   );
