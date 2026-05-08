@@ -61,6 +61,14 @@ export const ticketFormFields = [
       const fullName = `${manager?.firstName || ''} ${manager?.lastName || ''}`.trim();
       return fullName ? `${fullName} - ${manager?.email}` : manager?.email;
     },
+    staticItems: [
+      { email: 'prabhat@navgurukul.org', firstName: 'Prabhat', lastName: '' },
+      { email: 'mubin@navgurukul.org', firstName: 'Mubin', lastName: '' },
+      { email: 'anjani.k@navgurukul.org', firstName: 'Anjani K', lastName: '' },
+      { email: 'sanjna@navgurukul.org', firstName: 'Sanjana', lastName: '' },
+      { email: 'chhaya@navgurukul.org', firstName: 'Chhaya', lastName: '' },
+      { email: 'jayshri20@navgurukul.org', firstName: 'Jayshri', lastName: '' },
+    ],
     required: true,
   },
   {
