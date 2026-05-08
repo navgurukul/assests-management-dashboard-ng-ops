@@ -13,7 +13,7 @@ export default function NotFound() {
           404
         </h1>
 
-        {/* Message */}
+        {/*   Mesage */}
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold text-gray-800">Page Not Found</h2>
           <p className="text-gray-500 max-w-sm mx-auto">
