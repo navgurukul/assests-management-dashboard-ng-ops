@@ -49,19 +49,19 @@ export const ticketFormFields = [
   {
     name: 'managerEmail',
     label: 'Manager Email',
-    type: 'select',
-    placeholder: 'Select manager email',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select manager',
+    apiUrl: baseUrl + '/users',
+    queryKey: ['managers'],
+    labelKey: 'email',
+    valueKey: 'email',
+    dataPath: 'data',
+    additionalParams: { role: 'MANAGER', limit: 1000 },
+    formatLabel: (manager) => {
+      const fullName = `${manager?.firstName || ''} ${manager?.lastName || ''}`.trim();
+      return fullName ? `${fullName} - ${manager?.email}` : manager?.email;
+    },
     required: true,
-    options: [
-      { value: 'prabhat@navgurukul.org', label: 'Prabhat - prabhat@navgurukul.org' },
-      { value: 'mubin@navgurukul.org', label: 'Mubin - mubin@navgurukul.org' },
-      { value: 'alimausmani@navgurukul.org', label: 'Ali Mausmani - alimausmani@navgurukul.org' },
-      { value: 'geetashriyadav@navgurukul.org', label: 'Geetha Shri Yadav - geetashriyadav@navgurukul.org' },
-      { value: 'anjani.k@navgurukul.org', label: 'Anjani K - anjani.k@navgurukul.org' },
-      { value: 'sanjna@navgurukul.org', label: 'Sanjana - sanjna@navgurukul.org' },
-      { value: 'chhaya@navgurukul.org', label: 'Chhaya - chhaya@navgurukul.org' },
-      { value: 'jayshri20@navgurukul.org', label: 'Jayshri - jayshri20@navgurukul.org' },
-    ],
   },
   {
     name: 'address',
