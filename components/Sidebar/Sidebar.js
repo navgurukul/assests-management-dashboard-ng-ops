@@ -57,7 +57,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }) {
 
   // Selector for userRole from Redux store
   const userRole = useSelector(selectUserRole);
-  const isStudentOrEmployee = userRole === 'STUDENT' || userRole === 'EMPLOYEE';
+  const isStudentOrEmployee = userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER';
 
   const filteredMenuItems = menuItems.filter(
     (item) => {

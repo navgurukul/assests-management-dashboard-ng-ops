@@ -36,6 +36,7 @@ function LoginContent() {
     ADMIN: '/dashboard',
     STUDENT: '/userprofile',
     EMPLOYEE: '/myassets',
+    MANAGER: '/myassets',
   };
 
   // Amazon pathway ID for special redirection
