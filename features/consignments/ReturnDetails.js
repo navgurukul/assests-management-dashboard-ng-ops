@@ -5,7 +5,7 @@ import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
 import StatusChip from '@/components/atoms/StatusChip';
 
-export default function ReturnDetails({ returnData, onBack, isLoading, isError, error }) {
+export default function ReturnDetails({ returnId, returnData, onBack, isLoading, isError, error }) {
   if (isLoading) {
     return (
       <StateHandler
@@ -35,6 +35,10 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
   }
 
   const returnItem = returnData?.data || returnData;
+  const asset = returnItem?.asset || {};
+  const consignment = returnItem?.consignment || {};
+  const storedCampus = returnItem?.storedCampus || {};
+  const returnByUser = returnItem?.returnByUser || {};
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -48,6 +52,8 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
 
   const sharedHeightClass = 'lg:h-[280px] xl:h-[260px] cursor-default';
 
+  const returnByUserName = `${returnByUser.firstName || ''} ${returnByUser.lastName || ''}`.trim() || returnByUser.email || 'N/A';
+
   const leftSections = [
     {
       title: 'Quick Info',
@@ -55,13 +61,56 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
       className: sharedHeightClass,
       items: [
         { label: 'Status', value: <StatusChip value={returnItem.status || 'N/A'} /> },
-        { label: 'Asset Tag', value: returnItem.assetTag || 'N/A' },
-        { label: 'Previous Asset Tag', value: returnItem.previousAssetTag || 'N/A' },
         { label: 'Consignment Code', value: returnItem.consignmentCode || 'N/A' },
+        { label: 'Asset Tag', value: asset.tag || 'N/A' },
+        { label: 'Asset Type', value: asset.assetTypeName || 'N/A' },
       ],
     },
     {
-      title: 'Courier Information',
+      title: 'Asset Information',
+      color: 'theme',
+      itemsGrid: true,
+      className: sharedHeightClass,
+      items: [
+        { label: 'Asset Brand', value: asset.brand || 'N/A' },
+        { label: 'Model', value: asset.model || 'N/A' },
+        { label: 'Serial Number', value: asset.serialNumber || 'N/A' },
+        { label: 'Storage', value: asset.storageSizeGB ? `${asset.storageSizeGB}GB` : 'N/A' },
+        { label: 'Condition', value: asset.condition || 'N/A' },
+        { label: 'Asset Status', value: asset.status || 'N/A' },
+      ],
+    },
+    {
+      title: 'Stored Campus Information',
+      color: 'theme',
+      itemsGrid: true,
+      className: sharedHeightClass,
+      items: [
+        { label: 'Campus Name', value: storedCampus.campusName || 'N/A' },
+        { label: 'Campus Code', value: storedCampus.campusCode || 'N/A' },
+        { label: 'State', value: storedCampus.state || 'N/A' },
+        { label: 'Address', value: storedCampus.address || 'N/A' },
+      ],
+    },
+  ];
+
+  const rightSections = [
+    {
+      title: 'Return Information',
+      color: 'theme',
+      itemsGrid: true,
+      className: sharedHeightClass,
+      items: [
+        { label: 'Return By', value: returnByUserName },
+        { label: 'Return By Email', value: returnByUser.email || 'N/A' },
+        { label: 'Return Notes', value: returnItem.returnNotes || 'N/A' },
+        { label: 'Exact Address', value: returnItem.exactAddress || 'N/A' },
+        { label: 'Manager Email', value: returnItem.managerEmail || 'N/A' },
+        { label: 'Campus IT Coordinator', value: returnItem.campusITCoordinatorEmail || 'N/A' },
+      ],
+    },
+    {
+      title: 'Shipping & Tracking',
       color: 'theme',
       itemsGrid: true,
       className: sharedHeightClass,
@@ -84,19 +133,29 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
         },
       ],
     },
-  ];
-
-  const rightSections = [
     {
-      title: 'Return Details',
+      title: 'Consignment Details',
       color: 'theme',
       itemsGrid: true,
       className: sharedHeightClass,
       items: [
-        { label: 'Return Notes', value: returnItem.returnNotes || 'N/A' },
-        { label: 'Return By', value: returnItem.returnByUserEmail || 'N/A' },
-        { label: 'Manager Email', value: returnItem.managerEmail || 'N/A' },
-        { label: 'Campus IT Coordinator', value: returnItem.campusITCoordinatorEmail || 'N/A' },
+        { label: 'Consignment Status', value: consignment.status || 'N/A' },
+        { label: 'Shipped At', value: formatDate(consignment.shippedAt) },
+        { label: 'Received At', value: formatDate(consignment.receivedAt) },
+        { label: 'Est. Delivery Date', value: formatDate(consignment.estimatedDeliveryDate) },
+        { label: 'Tracking Link', 
+          value: consignment.trackingLink ? (
+            <a
+              href={consignment.trackingLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Track Shipment
+            </a>
+          ) : 'N/A'
+        },
+        { label: 'Issue Type', value: consignment.issueType || 'N/A' },
       ],
     },
     {
@@ -106,6 +165,7 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
       className: sharedHeightClass,
       items: [
         { label: 'Created At', value: formatDateTime(returnItem.createdAt) },
+        { label: 'Updated At', value: formatDateTime(returnItem.updatedAt) },
       ],
     },
   ];
@@ -113,7 +173,7 @@ export default function ReturnDetails({ returnData, onBack, isLoading, isError, 
   return (
     <DetailsPage
       title="Return Details"
-      subtitle={`Return: ${returnItem.consignmentCode || returnItem.assetTag || returnItem.id}`}
+      subtitle={`Return: ${returnItem.consignmentCode || asset.tag || returnItem.id}`}
       leftSections={leftSections}
       rightSections={rightSections}
       onBack={onBack}

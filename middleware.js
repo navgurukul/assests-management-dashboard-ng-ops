@@ -1,44 +1,82 @@
 import { NextResponse } from 'next/server';
+import { routePermissions } from '@/app/config/routePermissions';
 
-// Define public routes that don't require authentication
-const publicRoutes = ['/login'];
+// Routes that never require authentication
+const PUBLIC_ROUTES = ['/login', '/unauthorized'];
 
-// Define the root route
-const rootRoute = '/';
+// Root route — has its own redirect logic in the page
+const ROOT_ROUTE = '/';
+
+/**
+ * Lightweight JWT decoder for Edge Runtime.
+ * Does NOT verify signature — that's fine here because:
+ *   1. We only use the role for UI routing, not for data access.
+ *   2. Real authorization happens on the API/backend.
+ *   3. Tampering with the token would just land them on /unauthorized
+ *      or break their session entirely.
+ */
+function decodeJwtPayload(token) {
+  try {
+    const base64Payload = token.split('.')[1];
+    // Edge Runtime supports atob
+    const jsonPayload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Find the matching permission entry for a given pathname.
+ * Checks route prefixes from longest to shortest for specificity.
+ * e.g. '/allocations/create' matches '/allocations' rule.
+ */
+function getAllowedRoles(pathname) {
+  const routes = Object.keys(routePermissions).sort((a, b) => b.length - a.length);
+  const match = routes.find((route) => pathname === route || pathname.startsWith(route + '/'));
+  return match ? routePermissions[match] : null;
+}
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
-  
-  // Check if the current route is public
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-  
-  // Check if the current route is root
-  const isRootRoute = pathname === rootRoute;
-  
-  // Get the auth token from cookies or headers
+
+  // 1. Always allow public routes
+  const isPublicRoute = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+  if (isPublicRoute || pathname === ROOT_ROUTE) {
+    return NextResponse.next();
+  }
+
+  // 2. Get token from cookie (set by AuthContext on login)
   const authCookie = request.cookies.get('__AUTH__');
-  const authToken = authCookie?.value;
-  
-  // Allow root route (it will handle its own redirect)
-  if (isRootRoute) {
-    return NextResponse.next();
-  }
-  
-  // If the route is public, allow access
-  if (isPublicRoute) {
-    // Allow login page access - let the page handle authenticated user redirects
-    return NextResponse.next();
-  }
-  
-  // For protected routes, check if user is authenticated
-  if (!authToken) {
-    // Store the original URL to redirect back after login
+  const token = authCookie?.value;
+
+  // 3. No token → redirect to login, save intended destination
+  if (!token) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
-  
-  // User is authenticated, allow access to protected routes
+
+  // 4. Decode token to extract role
+  const payload = decodeJwtPayload(token);
+  const userRole = payload?.role;
+
+  // 5. If token is malformed / no role → treat as unauthenticated
+  if (!userRole) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // 6. Check route-level permissions
+  const allowedRoles = getAllowedRoles(pathname);
+
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    // User is authenticated but does NOT have permission for this route
+    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  }
+
+  // 7. Authenticated + authorized → allow
   return NextResponse.next();
 }
 
