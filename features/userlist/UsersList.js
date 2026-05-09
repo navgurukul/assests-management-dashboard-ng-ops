@@ -379,7 +379,7 @@ export default function UsersList() {
             )}
             {showAllUsers && (
               <CustomButton
-                text="Back to Allocations"
+                text="Back"
                 icon={ArrowLeftCircle}
                 onClick={handleToggleUserTable}
                 variant="secondary"
