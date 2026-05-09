@@ -1296,12 +1296,21 @@ export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAs
     );
   }
 
-  if (asset.consignment?.trackingLink && asset.consignmentStatus !== 'DELIVERED') {
-    options.push({ 
+  const hasTrackingInfo = asset.consignmentStatus === 'DISPATCHED' &&
+    (asset.consignment?.trackingLink || asset.consignment?.trackingNumber);
+
+  if (hasTrackingInfo) {
+    options.push({
       label: 'Track Device',
       icon: ExternalLink,
       iconClassName: 'text-blue-600',
-      onClick: () => window.open(asset.consignment.trackingLink, '_blank', 'noopener,noreferrer'),
+      onClick: () => {
+        if (asset.consignment?.trackingLink) {
+          window.open(asset.consignment.trackingLink, '_blank', 'noopener,noreferrer');
+        } else {
+          toast.info('Tracking link not found');
+        }
+      },
     });
   }
 
