@@ -188,7 +188,7 @@ export default function UserProfileTab() {
         </div>
 
         {/* Department */}
-        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
+        {/* <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-900/50' : 'bg-purple-100'}`}>
             <Building className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
           </div>
@@ -196,7 +196,7 @@ export default function UserProfileTab() {
             <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Department</p>
             <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.department}</p>
           </div>
-        </div>
+        </div> */}
 
         {/* Location */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
