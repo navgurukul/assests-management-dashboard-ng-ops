@@ -26,7 +26,7 @@ export default function UnauthorizedPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-          <button onClick={() => router.push('/ticketStatus')}
+          <button onClick={() => router.push('/userprofile')}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
