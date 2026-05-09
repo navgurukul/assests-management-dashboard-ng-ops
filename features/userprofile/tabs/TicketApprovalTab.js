@@ -160,7 +160,7 @@ export default function TicketApprovalTab() {
   if (isError) return <StateHandler error={error?.message || 'Failed to load pending approval tickets'} />;
 
   return (
-    <div>
+    <div className="h-full flex flex-col overflow-hidden">
       <FormModal
         isOpen={modalState.isOpen}
         onClose={closeModal}

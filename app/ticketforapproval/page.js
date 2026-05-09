@@ -1,7 +1,9 @@
 import { TicketApprovalTab } from "@/features/userprofile/tabs";
 
 export default function TicketForApprovalPage() {
-  return <div className="p-6" >
-    <TicketApprovalTab />
-  </div>;
+  return (
+    <div className="h-full flex flex-col overflow-hidden">
+      <TicketApprovalTab />
+    </div>
+  );
 }
