@@ -62,7 +62,7 @@ export default function UserProfileDetails() {
   const currentRole = storeUserRole || userData.role;
 
   const filteredTabs = tabs.filter(tab => {
-    if ((currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && 
+    if ((currentRole === 'STUDENT' || currentRole === 'EMPLOYEE' || currentRole === 'MANAGER') && 
         (tab.id === 'ticketforapproval' || tab.id === 'campusincharge' || tab.id === 'managerlist' || tab.id === 'myassets' || tab.id === 'ticketstatus' || tab.id === 'campuslocation')) {
       return false;
     }
