@@ -139,7 +139,7 @@ export default function TicketApprovalTab() {
       case 'createdAt':
         return <span className="text-gray-500">{new Date(ticket.createdAt).toLocaleDateString('en-IN')}</span>;
       case 'actions':
-        if (ticket.status === 'APPROVED' ) return null;
+        if (ticket.status !== 'RETURN' ) return null;
         return (
           <ActionMenu
             menuOptions={getActionMenuOptions(ticket)}
