@@ -1296,21 +1296,15 @@ export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAs
     );
   }
 
-  const hasTrackingInfo = asset.consignmentStatus === 'DISPATCHED' &&
-    (asset.consignment?.trackingLink || asset.consignment?.trackingNumber);
-
-  if (hasTrackingInfo) {
+  if (asset.consignment && asset.consignmentStatus === 'DISPATCHED') {
+    const hasTrackingLink = !!asset.consignment.trackingLink;
     options.push({
-      label: 'Track Device',
+      label: hasTrackingLink ? 'Track Device' : 'Tracking link not available',
       icon: ExternalLink,
-      iconClassName: 'text-blue-600',
-      onClick: () => {
-        if (asset.consignment?.trackingLink) {
-          window.open(asset.consignment.trackingLink, '_blank', 'noopener,noreferrer');
-        } else {
-          toast.info('Tracking link not found');
-        }
-      },
+      iconClassName: hasTrackingLink ? 'text-blue-600' : 'text-gray-400',
+      onClick: hasTrackingLink
+        ? () => window.open(asset.consignment.trackingLink, '_blank', 'noopener,noreferrer')
+        : () => {},
     });
   }
 
