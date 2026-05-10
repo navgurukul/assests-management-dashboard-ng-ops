@@ -393,18 +393,20 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
             )}
             {!isStudentOrEmployee && (
               <>
-                <CustomButton
-                  text="Update Ticket"
-                  variant="secondary"
-                  size="md"
-                  className=""
-                  onClick={handleUpdateClick}
-                  disabled={
-                    ticket.ticketType?.toUpperCase() === 'REPAIR'
-                      ? !isAssigneeCurrentUser
-                      : !isAssigneeCurrentUser && ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'
-                  }
-                />
+                {loggedInUserRole !== 'MANAGER' && (
+                  <CustomButton
+                    text="Update Ticket"
+                    variant="secondary"
+                    size="md"
+                    className=""
+                    onClick={handleUpdateClick}
+                    disabled={
+                      ticket.ticketType?.toUpperCase() === 'REPAIR'
+                        ? !isAssigneeCurrentUser
+                        : !isAssigneeCurrentUser && ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'
+                    }
+                  />
+                )}
                 {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
                    (isAssigneeCurrentUser || loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD') ? (
                     <CustomButton
