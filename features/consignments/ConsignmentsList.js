@@ -671,7 +671,7 @@ export default function ConsignmentsList() {
         payload = {
           courierPartnerName: selectedCourier?.name || String(formData.courierServiceId || ''),
           trackingId: formData.trackingId,
-          link: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
+          trackingLink: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
           estimatedDeliveryDate: formData.estimatedDeliveryDate,
         };
       }
