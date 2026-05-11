@@ -222,15 +222,23 @@ export default function MyAssetsTab({ userData = {} }) {
         : (typeof expDate === 'string' ? expDate : '');
 
       let sourceCampusIdValue = '';
-      if (formData.returnMode === 'VISIT_CAMPUS' || formData.returnMode === 'OTHER_CAMPUS') {
+      let returnTypeValue = '';
+
+      if (formData.returnMode === 'VISIT_CAMPUS') {
         sourceCampusIdValue = formData.destinationCampusId || formData.sourceCampusId;
+        returnTypeValue = 'RETURN_PHYSICALLY';
+      } else if (formData.returnMode === 'OTHER_CAMPUS') {
+        sourceCampusIdValue = formData.destinationCampusId || formData.sourceCampusId;
+        returnTypeValue = 'RETURN_TO_OTHER_CAMPUS';
       } else if (formData.returnMode === 'SOURCED_CAMPUS') {
         sourceCampusIdValue = selectedAsset?.sourceCampusId || selectedAsset?.campusId;
+        returnTypeValue = 'RETURN_TO_SOURCE_CAMPUS';
       }
 
       const fields = {
         ...(consignmentId ? { consignmentId } : {}),
         assetId: selectedAsset?.id,
+        returnType: returnTypeValue,
         sourceCampusId: sourceCampusIdValue,
         campusITCoordinatorEmail: formData.campusItCoordinator || coordinatorEmail || '',
         exactAddress: formData.exactAddress || '',
