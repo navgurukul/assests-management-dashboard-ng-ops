@@ -304,6 +304,27 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     }
   };
 
+  const handleCloseClick = async (values) => {
+    try {
+      const payload = {
+        status: 'CLOSE',
+        ...(values.timelineDate && { timelineDate: values.timelineDate }),
+        ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
+      };
+
+      await updateTicket({
+        endpoint: config.endpoints.tickets.update(ticketId),
+        body: payload,
+      });
+
+      toast.success('Ticket closed successfully!');
+      setIsUpdateModalOpen(false);
+    } catch (error) {
+      console.error('Error closing ticket:', error);
+      toast.error(error?.message || 'Failed to close ticket. Please try again.');
+    }
+  };
+
   const updateInitialValues = {
     status: ticket.status || '',
     description: ticket.description || '',
@@ -401,7 +422,9 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                     className=""
                     onClick={handleUpdateClick}
                     disabled={
-                      ticket.ticketType?.toUpperCase() === 'REPAIR'
+                      (loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD')
+                        ? false
+                        : ticket.ticketType?.toUpperCase() === 'REPAIR'
                         ? !isAssigneeCurrentUser
                         : !isAssigneeCurrentUser && ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'
                     }
@@ -483,7 +506,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               ] : []),
             ] : []),
             ...(ticket.ticketType?.toLowerCase() === 'repair' && (loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD') ? [
-              { label: isSubmitting ? 'Processing...' : 'Close', variant: 'danger', onClick: (values) => console.log('Close ticket clicked', values), disabled: isSubmitting },
+              { label: isSubmitting ? 'Processing...' : 'Close', variant: 'danger', onClick: handleCloseClick, disabled: isSubmitting },
             ] : []),
           ]}
         />
