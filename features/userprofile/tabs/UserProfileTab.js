@@ -10,7 +10,6 @@ import { toast } from '@/app/utils/toast';
 import FormModal from '@/components/molecules/FormModal';
 import {
   getEditProfileFields,
-  editProfileValidationSchema,
 } from '@/app/config/formConfigs/editProfileModalConfig';
 import { useTheme } from '@/app/context/ThemeContext';
 
@@ -70,11 +69,19 @@ export default function UserProfileTab() {
     setIsSubmitting(true);
     const loadingToastId = toast.loading('Updating profile...');
     
+    // Remove empty fields from payload
+    const payload = Object.entries(formData).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+    
     try {
       await post({
         url: config.getApiUrl(config.endpoints.user.me),
         method: 'PUT',
-        data: formData,
+        data: payload,
       });
       
       toast.dismiss(loadingToastId);
@@ -153,7 +160,6 @@ export default function UserProfileTab() {
         onSubmit={handleEditSubmit}
         size="medium"
         isSubmitting={isSubmitting}
-        validationSchema={editProfileValidationSchema}
       />
       
       {/* Tab Heading */}
