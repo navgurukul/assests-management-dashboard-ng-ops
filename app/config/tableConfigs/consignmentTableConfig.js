@@ -82,6 +82,11 @@ export const consignmentTableColumns = [
   
   // Optional columns (not visible by default)
   { 
+    key: 'ticketId', 
+    label: 'TICKET ID',
+    description: 'Associated ticket ID'
+  },
+  { 
     key: 'allocationCode', 
     label: 'ALLOCATION',
     description: 'Associated allocation code'
