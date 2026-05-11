@@ -402,6 +402,7 @@ export default function ConsignmentsList() {
           source: resolvedSource,
           destination: resolvedDestination,
           trackingLink: extractTrackingUrl(consignment) || transformed?.trackingLink || '',
+          ticketId: consignment.ticketId || consignment.ticket?.id || transformed?.ticketId || null,
         };
       }
       
@@ -411,6 +412,7 @@ export default function ConsignmentsList() {
         consignmentCode: consignment.consignmentCode || `CON-${consignment.id}`,
         status: consignment.status,
         allocationCode: consignment.allocation?.allocationCode || '-',
+        ticketId: consignment.ticketId || consignment.ticket?.id || null,
         courierService: consignment.courierPartnerName || consignment.courierName || '-',
         courierServiceId: consignment.courierService?.id || '',
         source: resolveConsignmentLocationLabel(consignment.sourceLocation),
@@ -689,7 +691,7 @@ export default function ConsignmentsList() {
         await updateTicket({
           endpoint: config.endpoints.tickets.update(currentConsignment.ticketId),
           body: {
-            status: 'CONSIGNEMENT_DISPATCHED',
+            status: 'CONSIGNMENT_DISPATCHED',
           },
         });
       }
