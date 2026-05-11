@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
 import usePatch from '@/app/hooks/query/usePatch';
+import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
 import { downloadNOC } from '../utils/downloadNOC';
@@ -52,6 +53,7 @@ export default function MyAssetsTab({ userData = {} }) {
 
   const { mutateAsync: postMutation, isPending: isPostPending } = usePost();
   const { mutateAsync: patchMutation, isPending: isPatchPending } = usePatch();
+  const { mutateAsync: updateTicket } = usePut();
 
   const { 
     data: userAssets = [], 
@@ -129,6 +131,7 @@ export default function MyAssetsTab({ userData = {} }) {
           sourceName: allocation.sourceName,
           destinationName: allocation.destinationName,
           userAddress: allocation.userAddress,
+          ticketId: allocation.ticketId || allocation.ticket?.id,
         };
       });
     });
@@ -202,6 +205,25 @@ export default function MyAssetsTab({ userData = {} }) {
           havingIssue: formData.deviceConditionOnReceive !== 'WORKING',
         },
       });
+ 
+      const allocationTicketId = allocationMap[selectedAsset?.id]?.ticketId;
+      const ticketId = allocationTicketId || selectedAsset?.consignment?.ticketId || selectedAsset?.consignment?.ticket?.id || selectedAsset?.allocation?.ticketId || selectedAsset?.allocation?.ticket?.id;
+      
+
+      if (ticketId) {
+        console.log('Triggering updateTicket api for ticketId:', ticketId);
+        try {
+          await updateTicket({
+            endpoint: config.endpoints.tickets.update(ticketId),
+            body: {
+              status: 'CONSIGNMENT_DELIVERED',
+            },
+          });
+        } catch (e) {
+          console.error("Failed to update ticket status after asset receipt", e);
+        }
+      }
+
       toast.success('Asset received confirmation submitted successfully.');
       setReceivedModalOpen(false);
       setSelectedAsset(null);
@@ -527,6 +549,10 @@ export default function MyAssetsTab({ userData = {} }) {
 
                 {/* Info Grid — uniform boxes */}
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                  <div className=" rounded-lg px-2.5 py-2">
+                    <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Ticket ID</p>
+                    <p className="text-xs font-medium text-foreground truncate" title={allocationMap[asset.id]?.ticketId}>{allocationMap[asset.id]?.ticketId || 'N/A'}</p>
+                  </div>
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Serial No.</p>
                     <p className="text-xs font-medium text-foreground truncate" title={asset.serialNumber}>{asset.serialNumber || 'N/A'}</p>
