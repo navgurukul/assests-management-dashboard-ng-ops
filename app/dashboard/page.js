@@ -94,8 +94,6 @@ export default function DashboardPage() {
             height="500px"
             hAxisTitle="Campus"
             vAxisTitle="Count"
-            showDropdown={true}
-            dropdownLabel="Campus(If Applicable):"
             showLegendLabels={legendLabels}
           />
         </div>
