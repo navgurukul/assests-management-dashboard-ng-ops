@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
 import PdfPreviewModal from '@/components/molecules/PdfPreviewModal';
@@ -11,17 +12,38 @@ import StatusChip from '@/components/atoms/StatusChip';
 import { Edit } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
 import { estDateFields } from '@/dummyJson/dummyJson';
+import { toast } from '@/app/utils/toast';
+import usePut from '@/app/hooks/query/usePut';
+import config from '@/app/config/env.config';
 
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
   
   const [showEstDateModal, setShowEstDateModal] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { mutate: updateEstimatedDate, isPending: isUpdatingEstDate } = usePut({
+    onSuccess: () => {
+      toast.success('Estimated delivery date updated successfully');
+      setShowEstDateModal(false);
+      queryClient.invalidateQueries(['consignmentDetails', consignmentId]);
+      queryClient.invalidateQueries(['consignments']);
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || 'Failed to update estimated date');
+      console.error(error);
+    }
+  });
 
   const handleUpdateEstDate = (formData) => {
-    console.log("New Est Date Form Data:", formData);
-    // e.g., formData.newEstDate, formData.estDateComment
-    setShowEstDateModal(false);
+    updateEstimatedDate({
+      endpoint: config.endpoints.consignments.deliveryDetails(consignmentId),
+      body: {
+        estimatedDeliveryDate: formData.newEstDate ? new Date(formData.newEstDate).toISOString().split('T')[0] : null,
+        notes: formData.estDateComment || ''
+      }
+    });
   };
 
   if (isLoading) {
@@ -365,6 +387,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         fields={estDateFields}
         onSubmit={handleUpdateEstDate}
         size="medium"
+        isLoading={isUpdatingEstDate}
       />
     </>
   );
