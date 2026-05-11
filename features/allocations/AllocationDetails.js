@@ -150,7 +150,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
         await updateTicket({
           endpoint: config.endpoints.tickets.update(allocationDetails.ticket.id),
           body: {
-            status: 'CONSIGNEMENT_CREATED',
+            status: 'CONSIGNMENT_CREATED',
           },
         });
       }
