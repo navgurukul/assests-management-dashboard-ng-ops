@@ -396,7 +396,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                     }
                   />
                 )}
-                {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
+                {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE' || ticket.status === 'IN_PROGRESS') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
                    (isAssigneeCurrentUser || loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD') ? (
                     <CustomButton
                       text="Create Allocation"
