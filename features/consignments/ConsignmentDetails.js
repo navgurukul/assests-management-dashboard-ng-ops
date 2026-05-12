@@ -37,10 +37,15 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   });
 
   const handleUpdateEstDate = (formData) => {
+    const currentConsignment = consignmentData?.data || consignmentData;
+    const prevDateRaw = currentConsignment?.estimatedDeliveryDate;
+    const prevDate = prevDateRaw ? new Date(prevDateRaw).toISOString().split('T')[0] : null;
+
     updateEstimatedDate({
       endpoint: config.endpoints.consignments.deliveryDetails(consignmentId),
       body: {
         estimatedDeliveryDate: formData.newEstDate ? new Date(formData.newEstDate).toISOString().split('T')[0] : null,
+        previousEstimatedDeliveryDate: prevDate,
         notes: formData.estDateComment || ''
       }
     });
