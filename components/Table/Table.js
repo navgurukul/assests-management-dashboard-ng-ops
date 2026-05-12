@@ -129,7 +129,7 @@ export default function AssetsTable() {
     <TableWrapper
       data={paginatedData}
       columns={columns}
-      title="Consolidated Laptop Data - Navgurukul"
+      title="Consolidated Laptop Data"
       renderCell={renderCell}
       margin="m-0"
       shadow="shadow-none"
