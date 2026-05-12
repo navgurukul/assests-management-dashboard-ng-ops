@@ -31,7 +31,7 @@ export const menuItems = [
   { name: 'User List', icon: 'Users', path: '/userlist', allowedRoles: IT_ROLES },
   { name: 'My Assets', icon: 'Package', path: '/myassets', allowedRoles: END_USER_ROLES },
   { name: 'My Ticket Status', icon: 'Ticket', path: '/ticketstatus', allowedRoles: END_USER_ROLES },
-  { name: 'Ticket for Approval', icon: 'TicketCheck', path: '/ticketforapproval', allowedRoles: ['EMPLOYEE', 'MANAGER'] },
+  { name: 'Ticket for Approval', icon: 'TicketCheck', path: '/ticketforapproval', allowedRoles: ['MANAGER'] },
 ];
 
 /**
