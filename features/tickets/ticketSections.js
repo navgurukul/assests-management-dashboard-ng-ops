@@ -69,7 +69,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
           className: 'col-span-2',
         },
       ],
-      headerActions: (ticket.ticketType?.toUpperCase() === 'REPAIR' && loggedInUserRole !== 'STUDENT') ? [
+      headerActions: (ticket.ticketType?.toUpperCase() === 'REPAIR'&& ['ADMIN', 'IT_LEAD', 'OPERATION', 'IT_COORDINATOR'].includes(loggedInUserRole)) ? [
         { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
         { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
       ] : [],
