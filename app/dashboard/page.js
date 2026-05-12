@@ -40,10 +40,10 @@ export default function DashboardPage() {
   const legendLabels = {
     LWS: 'Laptops with Students',
     LIS: 'Laptops in Stock',
-    LCT: 'Laptops with Campus Team',
+    LCT: 'Lapt. Campus Team',
     LR: 'Laptops Repairable',
     LNW: 'Non-Working Laptops',
-    LWFHE: 'Work-from-Home Employees',
+    LWFHE: 'WFH Employees',
     LSD_B: 'Security Deposit/Bond',
   };
 
