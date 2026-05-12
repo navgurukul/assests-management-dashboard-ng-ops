@@ -288,7 +288,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleCloseClick = (values) => {
-    handleUpdateSubmit(values, 'CLOSE', 'Ticket closed successfully!');
+    handleUpdateSubmit(values, 'CLOSED', 'Ticket closed successfully!');
   };
 
   const updateInitialValues = {
