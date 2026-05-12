@@ -253,6 +253,10 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
             </div>
           ) 
         },
+        { 
+          label: 'Prev. Est. Delivery', 
+          value: consignment.previousEstimatedDeliveryDate ? new Date(consignment.previousEstimatedDeliveryDate).toLocaleDateString() : 'N/A' 
+        },
         {
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
