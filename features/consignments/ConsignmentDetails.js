@@ -210,25 +210,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       ],
     },
     {
-      title: 'Assets in Consignment',
-      color: 'theme',
-      itemsGrid: true, // Render as a 2-column grid
-      className: sharedHeightClass,
-      items: consignment.assets?.length > 0 ? consignment.assets.map((asset, index) => ({
-        label: `Asset ${index + 1}`,
-        value:
-          asset?.asset?.assetTag ||
-          asset?.assetTag ||
-          asset?.asset?.serialNumber ||
-          asset?.serialNumber ||
-          asset?.asset?.id ||
-          asset?.assetId ||
-          asset?.id ||
-          'Unknown',
-        className: 'text-blue-600 font-medium'
-      })) : [{ label: 'No assets', value: 'No assets found in this consignment' }],
-    },
-    {
       title: 'Shipping Timeline & Notes',
       color: 'theme',
       itemsGrid: true,
@@ -266,6 +247,25 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         },
         { label: 'Notes', value: consignment.notes || 'No notes available', className: 'col-span-2' },
       ],
+    },
+    {
+      title: 'Assets in Consignment',
+      color: 'theme',
+      itemsGrid: true, // Render as a 2-column grid
+      className: sharedHeightClass,
+      items: consignment.assets?.length > 0 ? consignment.assets.map((asset, index) => ({
+        label: `Asset ${index + 1}`,
+        value:
+          asset?.asset?.assetTag ||
+          asset?.assetTag ||
+          asset?.asset?.serialNumber ||
+          asset?.serialNumber ||
+          asset?.asset?.id ||
+          asset?.assetId ||
+          asset?.id ||
+          'Unknown',
+        className: 'text-blue-600 font-medium'
+      })) : [{ label: 'No assets', value: 'No assets found in this consignment' }],
     },
   ];
 
