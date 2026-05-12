@@ -380,7 +380,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
             )}
             {!isStudentOrEmployee && (
               <>
-                {loggedInUserRole !== 'MANAGER' && ticket.status === 'APPROVED' && (
+                {loggedInUserRole !== 'MANAGER' && !['RAISED', 'CLOSED', 'CLOSE', 'CONSIGNMENT_DELIVERED'].includes(ticket.status) && (
                   <CustomButton
                     text="Update Ticket"
                     variant="secondary"
