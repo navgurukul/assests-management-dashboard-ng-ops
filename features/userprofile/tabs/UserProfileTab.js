@@ -10,6 +10,7 @@ import { toast } from '@/app/utils/toast';
 import FormModal from '@/components/molecules/FormModal';
 import {
   getEditProfileFields,
+  editProfileValidationSchema
 } from '@/app/config/formConfigs/editProfileModalConfig';
 import { useTheme } from '@/app/context/ThemeContext';
 
@@ -160,6 +161,7 @@ export default function UserProfileTab() {
         onSubmit={handleEditSubmit}
         size="medium"
         isSubmitting={isSubmitting}
+        validationSchema={editProfileValidationSchema}
       />
       
       {/* Tab Heading */}

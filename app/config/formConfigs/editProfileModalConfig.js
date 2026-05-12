@@ -17,7 +17,7 @@ export const getEditProfileFields = (defaultValues = {}) => [
     label: 'Phone',
     type: 'text',
     placeholder: 'Enter 10-digit phone number',
-    required: false,
+    required: true,
     defaultValue: defaultValues.phone || '',
     maxLength: 10,
     inputMode: 'numeric',
@@ -28,7 +28,7 @@ export const getEditProfileFields = (defaultValues = {}) => [
     label: 'Location',
     type: 'text',
     placeholder: 'Enter location',
-    required: false,
+    required: true,
     defaultValue: defaultValues.location || '',
   },
   {
@@ -59,13 +59,13 @@ export const getEditProfileFields = (defaultValues = {}) => [
 
 export const editProfileValidationSchema = Yup.object().shape({
   phone: Yup.string()
-    .nullable()
+    .required('Phone is required')
     .matches(
       /^[0-9]{10}$/,
       'Phone number must be exactly 10 digits'
     ),
   location: Yup.string()
-    .nullable()
+    .required('Location is required')
     .min(2, 'Location must be at least 2 characters'),
   campusId: Yup.string().nullable(),
   schoolId: Yup.string().nullable(),
