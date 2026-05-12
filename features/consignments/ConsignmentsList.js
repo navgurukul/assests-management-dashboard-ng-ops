@@ -661,9 +661,8 @@ export default function ConsignmentsList() {
 
       if (formData.dispatchMode === 'in_person') {
         payload = {
-          courierPartnerName: 'In Person',
-          notes: formData.comment || '',
-          deliveryMode: 'in_person',
+          inPerson: true,
+          notes: formData.notes || 'Dispatched in person',
         };
       } else {
         const selectedCourier = courierProviders.find(
@@ -675,6 +674,7 @@ export default function ConsignmentsList() {
           trackingId: formData.trackingId,
           trackingLink: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
           estimatedDeliveryDate: formData.estimatedDeliveryDate,
+          inPerson: false,
         };
       }
 
