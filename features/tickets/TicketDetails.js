@@ -227,7 +227,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     setIsUpdateModalOpen(true);
   };
 
-  const handleUpdateSubmit = async (values, overrideStatus = null) => {
+  const handleUpdateSubmit = async (values, overrideStatus = null, successMessage = 'Ticket updated successfully!') => {
     if (ticket.ticketType?.toUpperCase() !== 'REPAIR' && !selectedAssignee) {
       toast.warning('Please select an assignee before submitting.');
       return;
@@ -265,7 +265,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         body: payload,
       });
 
-      toast.success('Ticket updated successfully!');
+      toast.success(successMessage);
       setIsUpdateModalOpen(false);
     } catch (error) {
       console.error('Error updating ticket:', error);
@@ -280,49 +280,15 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   };
 
   const handleResolvedClick = (values) => {
-    handleUpdateSubmit(values, 'RESOLVED');
+    handleUpdateSubmit(values, 'RESOLVED', 'Ticket resolved successfully!');
   };
 
-  const handleEscalationClick = async (values) => {
-    try {
-      const payload = {
-        status: 'ESCALATED',
-        ...(values.timelineDate && { timelineDate: values.timelineDate }),
-        ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
-      };
-
-      await updateTicket({
-        endpoint: config.endpoints.tickets.update(ticketId),
-        body: payload,
-      });
-
-      toast.success('Ticket escalated successfully!');
-      setIsUpdateModalOpen(false);
-    } catch (error) {
-      console.error('Error escalating ticket:', error);
-      toast.error(error?.message || 'Failed to escalate ticket. Please try again.');
-    }
+  const handleEscalationClick = (values) => {
+    handleUpdateSubmit(values, 'ESCALATED', 'Ticket escalated successfully!');
   };
 
-  const handleCloseClick = async (values) => {
-    try {
-      const payload = {
-        status: 'CLOSE',
-        ...(values.timelineDate && { timelineDate: values.timelineDate }),
-        ...(values.adminComment?.trim() && { comment: values.adminComment.trim() }),
-      };
-
-      await updateTicket({
-        endpoint: config.endpoints.tickets.update(ticketId),
-        body: payload,
-      });
-
-      toast.success('Ticket closed successfully!');
-      setIsUpdateModalOpen(false);
-    } catch (error) {
-      console.error('Error closing ticket:', error);
-      toast.error(error?.message || 'Failed to close ticket. Please try again.');
-    }
+  const handleCloseClick = (values) => {
+    handleUpdateSubmit(values, 'CLOSE', 'Ticket closed successfully!');
   };
 
   const updateInitialValues = {
@@ -414,7 +380,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
             )}
             {!isStudentOrEmployee && (
               <>
-                {loggedInUserRole !== 'MANAGER' && (
+                {loggedInUserRole !== 'MANAGER' && ticket.status === 'APPROVED' && (
                   <CustomButton
                     text="Update Ticket"
                     variant="secondary"
@@ -426,7 +392,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                         ? false
                         : ticket.ticketType?.toUpperCase() === 'REPAIR'
                         ? !isAssigneeCurrentUser
-                        : !isAssigneeCurrentUser && ticket.status !== 'APPROVED' && ticket.status !== 'ESCALATED'
+                        : !isAssigneeCurrentUser
                     }
                   />
                 )}
