@@ -1016,13 +1016,13 @@ export default function ConsignmentsList() {
             <SearchInput
               value={inTransitSearch}
               onChange={setInTransitSearch}
-              placeholder="Search by asset, user, tracking..."
+              placeholder="Search by asset, user, tracking id..."
             />
           ) : (
             <SearchInput
               value={searchInput}
               onChange={setSearchInput}
-              placeholder="Search by consignment code or tracking number..."
+              placeholder="Search by consignment code or tracking id..."
             />
           )
         }

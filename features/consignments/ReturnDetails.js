@@ -117,7 +117,7 @@ export default function ReturnDetails({ returnId, returnData, onBack, isLoading,
       className: sharedHeightClass,
       items: [
         { label: 'Courier Partner', value: returnItem.courierPartnerName || 'N/A' },
-        { label: 'Tracking Number', value: returnItem.trackingNumber || 'N/A' },
+        { label: 'Tracking ID', value: returnItem.trackingNumber || 'N/A' },
         { label: 'Expected Delivery', value: formatDate(returnItem.expectedDeliveryDate) },
         {
           label: 'Receipt',
