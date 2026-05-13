@@ -119,6 +119,7 @@ const config = {
     schools: {
       list: '/schools',
       create: '/schools',
+      delete: (id) => `/schools/${id}`,
     }
   },
   

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BuildingIcon, School } from 'lucide-react';
+import { BuildingIcon, School, Trash2 } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
 import { addSchoolFormFields } from '@/dummyJson/dummyJson';
@@ -9,8 +9,9 @@ import { toast } from '@/app/utils/toast';
 import * as Yup from 'yup';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import config from '@/app/config/env.config';
+import apiService from '@/app/utils/apiService';
 
 const validationSchema = Yup.object().shape({
   schoolName: Yup.string().required('School Name is required'),
@@ -31,6 +32,17 @@ export default function AddSchoolTab() {
   const { mutateAsync: createSchool } = usePost({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schools'] });
+    }
+  });
+
+  const { mutateAsync: deleteSchool, isPending: isDeleting } = useMutation({
+    mutationFn: (id) => apiService.delete(config.endpoints.schools.delete(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+      toast.success('School deleted successfully');
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to delete school');
     }
   });
 
@@ -86,12 +98,21 @@ export default function AddSchoolTab() {
             </div>
           ) : (
             schoolsList.map((school) => (
-              <div key={school.id} className="p-3 border border-(--border) rounded-md bg-background hover:border-(--theme-main) transition-colors">
-                <h3 className="font-semibold text-sm text-foreground">{school.name}</h3>
-                <div className="text-xs text-(--muted) mt-1.5 space-y-1">
-                  <p><span className="font-medium">Users:</span> {school.userCount || 0}</p>
-                  <p><span className="font-medium">Created:</span> {new Date(school.createdAt).toLocaleDateString()}</p>
+              <div key={school.id} className="p-3 border border-(--border) rounded-md bg-background hover:border-(--theme-main) transition-colors flex justify-between items-start">
+                <div>
+                  <h3 className="font-semibold text-sm text-foreground">{school.name}</h3>
+                  <div className="text-xs text-(--muted) mt-1.5 space-y-1">
+                    <p><span className="font-medium">Users:</span> {school.userCount || 0}</p>
+                    <p><span className="font-medium">Created:</span> {new Date(school.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
+                <button
+                  onClick={() => deleteSchool(school.id)}
+                  className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-md transition-colors"
+                  title="Delete School"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             ))
           )}
