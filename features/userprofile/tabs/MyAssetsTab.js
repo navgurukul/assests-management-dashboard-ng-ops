@@ -269,9 +269,9 @@ export default function MyAssetsTab({ userData = {} }) {
         expectedDeliveryDate: formattedDate,
       };
 
-      // Add trackingId only for SOURCED_CAMPUS and OTHER_CAMPUS (not for VISIT_CAMPUS)
+      // Add trackingID only for SOURCED_CAMPUS and OTHER_CAMPUS (not for VISIT_CAMPUS)
       if (formData.returnMode !== 'VISIT_CAMPUS') {
-        fields.trackingId = formData.trackingId || '';
+        fields.trackingNumber = formData.trackingId || '';
       }
 
       const payload = new FormData();
