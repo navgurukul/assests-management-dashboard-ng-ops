@@ -1314,13 +1314,6 @@ export const addSchoolFormFields = [
   { name: 'schoolName', label: 'School Name', type: 'text', placeholder: 'Enter School Name', required: true },
   { name: 'contactNumber', label: 'Contact Number', type: 'tel', placeholder: 'Enter Contact Number', required: true },
   { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter Email', required: true },
-  { name: 'address', label: 'Address', type: 'text', placeholder: 'Enter Full Address', required: true },
-  { name: 'state', label: 'State', type: 'text', placeholder: 'Enter State', required: true },
+  { name: 'address', label: 'Address', type: 'text', placeholder: 'Enter Full Address', required: true }
 ];
 
-export const dummySchoolsList = [
-  { id: 1, schoolName: 'Greenwood High', principalName: 'John Doe', contactNumber: '9876543210', email: 'info@greenwood.edu', state: 'Karnataka' },
-  { id: 2, schoolName: 'Oakridge International', principalName: 'Jane Smith', contactNumber: '8765432109', email: 'contact@oakridge.in', state: 'Telangana' },
-  { id: 3, schoolName: 'Delhi Public School', principalName: 'Robert Brown', contactNumber: '7654321098', email: 'admin@dps.com', state: 'Delhi' },
-  { id: 4, schoolName: 'National Public School', principalName: 'Sarah Wilson', contactNumber: '6543210987', email: 'hello@nps.edu', state: 'Maharashtra' },
-];
