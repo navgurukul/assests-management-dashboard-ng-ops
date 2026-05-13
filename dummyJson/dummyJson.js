@@ -1310,3 +1310,10 @@ export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAs
 
   return options;
 };
+export const addSchoolFormFields = [
+  { name: 'schoolName', label: 'School Name', type: 'text', placeholder: 'Enter School Name', required: true },
+  { name: 'contactNumber', label: 'Contact Number', type: 'tel', placeholder: 'Enter Contact Number', required: true },
+  { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter Email', required: true },
+  { name: 'address', label: 'Address', type: 'text', placeholder: 'Enter Full Address', required: true }
+];
+

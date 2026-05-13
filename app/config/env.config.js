@@ -118,6 +118,7 @@ const config = {
     },
     schools: {
       list: '/schools',
+      create: '/schools',
     }
   },
   
