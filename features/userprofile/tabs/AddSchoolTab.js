@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { BuildingIcon, School, Trash2 } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
+import ConfirmationModal from '@/components/molecules/ConfirmationModal';
 import { addSchoolFormFields } from '@/dummyJson/dummyJson';
 import { toast } from '@/app/utils/toast';
 import * as Yup from 'yup';
@@ -22,6 +23,7 @@ const validationSchema = Yup.object().shape({
 
 export default function AddSchoolTab() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, schoolId: null });
   const queryClient = useQueryClient();
 
   const { data: apiResponse, isLoading, isError, error } = useFetch({
@@ -40,11 +42,19 @@ export default function AddSchoolTab() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schools'] });
       toast.success('School deleted successfully');
+      setDeleteModal({ isOpen: false, schoolId: null });
     },
     onError: (error) => {
       toast.error(error?.message || 'Failed to delete school');
+      setDeleteModal({ isOpen: false, schoolId: null });
     }
   });
+
+  const handleDeleteConfirm = async () => {
+    if (deleteModal.schoolId) {
+      await deleteSchool(deleteModal.schoolId);
+    }
+  };
 
   const schoolsList = apiResponse?.data?.schools || [];
 
@@ -107,7 +117,7 @@ export default function AddSchoolTab() {
                   </div>
                 </div>
                 <button
-                  onClick={() => deleteSchool(school.id)}
+                  onClick={() => setDeleteModal({ isOpen: true, schoolId: school.id })}
                   className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-md transition-colors"
                   title="Delete School"
                 >
@@ -158,6 +168,18 @@ export default function AddSchoolTab() {
           </GenericForm>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, schoolId: null })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete School"
+        message="Are you sure you want to delete this school? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
