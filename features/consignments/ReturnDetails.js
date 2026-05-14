@@ -116,7 +116,7 @@ export default function ReturnDetails({ returnId, returnData, onBack, isLoading,
       itemsGrid: true,
       className: sharedHeightClass,
       items: [
-        { label: 'Courier Partner', value: returnItem.courierPartnerName || 'N/A' },
+        { label: 'Shipped Through', value: returnItem.courierPartnerName || 'N/A' },
         { label: 'Tracking ID', value: returnItem.trackingNumber || 'N/A' },
         { label: 'Expected Delivery', value: formatDate(returnItem.expectedDeliveryDate) },
         {
