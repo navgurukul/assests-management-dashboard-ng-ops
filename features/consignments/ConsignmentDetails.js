@@ -126,8 +126,9 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
 
   const trackingLink = consignment.link || consignment.trackingLink;
   const trackingId = consignment.trackingNumber || consignment.trackingId;
-  const courierServiceName = consignment.courierPartnerName  ;
+  const courierServiceName = consignment.courierPartnerName;
   const totalAssets = consignment.assetCount ?? consignment.assets?.length ?? 0;
+  const isInPerson = consignment.inPerson === true;
 
   const resolveUserDisplay = (userValue) => {
     if (!userValue) return 'N/A';
@@ -216,28 +217,31 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       className: sharedHeightClass,
       items: [
         { label: 'Shipped At', value: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : 'Not shipped yet' },
-        { 
-          label: 'Est. Delivery', 
-          value: (
-            <div className="flex items-center gap-2">
-              <span>{consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A'}</span>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowEstDateModal(true);
-                }} 
-                className="text-gray-500 hover:text-blue-600 transition-colors"
-                title="Update Est. Delivery"
-              >
-                <Edit size={16} />
-              </button>
-            </div>
-          ) 
-        },
-        { 
-          label: 'Prev. Est. Delivery', 
-          value: consignment.previousEstimatedDeliveryDate ? new Date(consignment.previousEstimatedDeliveryDate).toLocaleDateString() : 'N/A' 
-        },
+        // Courier mode fields - show only for courier dispatch
+        ...(!isInPerson ? [
+          { 
+            label: 'Est. Delivery', 
+            value: (
+              <div className="flex items-center gap-2">
+                <span>{consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A'}</span>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEstDateModal(true);
+                  }} 
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                  title="Update Est. Delivery"
+                >
+                  <Edit size={16} />
+                </button>
+              </div>
+            ) 
+          },
+          { 
+            label: 'Prev. Est. Delivery', 
+            value: consignment.previousEstimatedDeliveryDate ? new Date(consignment.previousEstimatedDeliveryDate).toLocaleDateString() : 'N/A' 
+          },
+        ] : []),
         {
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
@@ -245,7 +249,10 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
             : shippingDestinationDisplay,
           className: (consignment.receivedAt || consignment.deliveredAt) ? 'col-span-2 text-green-600 font-semibold' : 'col-span-2 text-gray-500'
         },
-        { label: 'Notes', value: consignment.notes || 'No notes available', className: 'col-span-2' },
+        // Notes field - show only for courier dispatch
+        ...(!isInPerson ? [
+          { label: 'Notes', value: consignment.notes || 'No notes available', className: 'col-span-2' },
+        ] : []),
       ],
     },
     {
@@ -253,19 +260,39 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       color: 'theme',
       itemsGrid: true, // Render as a 2-column grid
       className: sharedHeightClass,
-      items: consignment.assets?.length > 0 ? consignment.assets.map((asset, index) => ({
-        label: `Asset ${index + 1}`,
-        value:
-          asset?.asset?.assetTag ||
-          asset?.assetTag ||
-          asset?.asset?.serialNumber ||
-          asset?.serialNumber ||
-          asset?.asset?.id ||
-          asset?.assetId ||
-          asset?.id ||
-          'Unknown',
-        className: 'text-blue-600 font-medium'
-      })) : [{ label: 'No assets', value: 'No assets found in this consignment' }],
+      items: consignment.assets?.length > 0 ? consignment.assets.flatMap((asset, index) => {
+        const assetData = asset?.asset || asset;
+        const assetTag = assetData?.assetTag || asset?.assetTag || 'Unknown';
+        const assetType = assetData?.assetType?.name || 'N/A';
+        const serialNumber = assetData?.serialNumber || 'N/A';
+        const brand = assetData?.brand || 'N/A';
+        const model = assetData?.model || 'N/A';
+        
+        return [
+          {
+            label: `Asset ${index + 1}`,
+            value: assetTag,
+            className: 'text-blue-600 font-medium col-span-2'
+          },
+          {
+            label: 'Type',
+            value: assetType,
+          },
+          {
+            label: 'Serial Number',
+            value: serialNumber,
+          },
+          {
+            label: 'Brand',
+            value: brand,
+          },
+          {
+            label: 'Model',
+            value: model,
+            className: 'col-span-2'
+          },
+        ];
+      }) : [{ label: 'No assets', value: 'No assets found in this consignment' }],
     },
   ];
 
@@ -274,26 +301,48 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     {
       title: 'Consignment Details',
       color: 'theme',
-      itemsGrid: true, // Enable 2-column grid layout
+      itemsGrid: true,
       className: sharedHeightClass,
       items: [
         { label: 'Source', value: sourceName },
         { label: 'Destination', value: destinationName },
-        { label: 'Courier Name', value: courierServiceName || 'N/A' },
-        { 
-          label: 'Tracking Link', 
-          value: trackingLink ? (
-            <a 
-              href={trackingLink} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              Track Shipment
-            </a>
-          ) : 'N/A',
-          className: 'col-span-2'
+        {
+          label: 'Shipped Through',
+          value: isInPerson ? 'In Person' : 'Courier',
         },
+        // Courier mode fields
+        ...(!isInPerson ? [
+          {
+            label: 'Courier Name',
+            value: courierServiceName || 'N/A',
+          },
+          {
+            label: 'Tracking ID',
+            value: trackingId || 'N/A',
+          },
+          {
+            label: 'Tracking Link',
+            value: trackingLink ? (
+              <a
+                href={trackingLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Track Shipment
+              </a>
+            ) : 'N/A',
+            className: 'col-span-2',
+          },
+        ] : []),
+        // In Person fields
+        ...(isInPerson ? [
+          {
+            label: 'In Person Comment',
+            value: consignment.inPersonComment || 'No comment provided',
+            className: 'col-span-2',
+          },
+        ] : []),
       ],
     },
     {
@@ -340,7 +389,11 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   ];
 
   const sourceAddress = consignment.sourceLocation?.campus?.address || 'N/A';
-  const destinationAddress = consignment.destinationLocation?.campus?.address || 'N/A';
+  const sourceState = consignment.sourceLocation?.campus?.state || 'N/A';
+  const sourceCampusName = consignment.sourceLocation?.campus?.name || sourceName;
+  const destinationAddress = consignment.destinationLocation?.campus?.address || consignment.allocation?.userAddress || 'N/A';
+  const destinationUser = consignment.allocation?.user || null;
+  const organizationName = 'Navgurukul Foundation for Social Welfare';
 
   return (
     <>
@@ -381,13 +434,17 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         onClose={() => setShowPdfModal(false)}
         title="Consignment PDF Preview"
         documentTitle="Consignment Receipt"
-        documentCode={consignment.consignmentCode || "\x27N/A\x27"}
+        documentCode={consignment.consignmentCode || 'N/A'}
         date={consignment.createdAt}
         destinationName={destinationName}
         destinationAddress={destinationAddress}
         sourceName={sourceName}
+        sourceCampusName={sourceCampusName}
         sourceAddress={sourceAddress}
-        filename={`Consignment_${consignment?.consignmentCode || consignment?.id || "Details"}.pdf`}
+        sourceState={sourceState}
+        organizationName={organizationName}
+        destinationUser={destinationUser}
+        filename={`Consignment_${consignment?.consignmentCode || consignment?.id || 'Details'}.pdf`}
       />
 
       <FormModal
