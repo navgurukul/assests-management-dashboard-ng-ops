@@ -44,8 +44,8 @@ export const consignmentTableColumns = [
   // 5. Courier Partner
   { 
     key: 'courierService', 
-    label: 'COURIER PARTNER',
-    description: 'Courier service provider'
+    label: 'SHIPPED THROUGH',
+    description: 'How the consignment was shipped (Courier or In Person)'
   },
   
   // 6. Tracking ID

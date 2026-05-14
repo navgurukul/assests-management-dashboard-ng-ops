@@ -349,11 +349,13 @@ export const transformConsignmentForTable = (consignment) => {
     status: formatConsignmentStatus(consignment.status),
     allocationCode: getNestedValue(consignment, 'allocation.allocationCode') || consignment.allocationCode || 'N/A',
     courierService:
-      consignment.courierPartnerName ||
-      consignment.courierName ||
-      getNestedValue(consignment, 'courierService.name') ||
-      consignment.courierServiceName ||
-      'N/A',
+      consignment.inPerson === true
+        ? 'In Person'
+        : (consignment.courierPartnerName ||
+            consignment.courierName ||
+            getNestedValue(consignment, 'courierService.name') ||
+            consignment.courierServiceName ||
+            'N/A'),
     source: consignment.source || getNestedValue(consignment, 'allocation.sourceCampus.name') || 'N/A',
     destination: consignment.destination || getNestedValue(consignment, 'allocation.destinationCampus.name') || 'N/A',
     shippedAt: formatDate(consignment.shippedAt),

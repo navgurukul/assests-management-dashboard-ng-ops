@@ -318,7 +318,7 @@ export default function ConsignmentsList() {
   const getCategoryName = (filterKey) => {
     const categoryNames = {
       status: 'Status',
-      courier: 'Courier Service',
+      courier: 'Shipped Through',
       allocation: 'Allocation'
     };
     return categoryNames[filterKey] || filterKey;
@@ -355,7 +355,7 @@ export default function ConsignmentsList() {
     },
     {
       key: 'courier',
-      label: 'Courier Service',
+      label: 'Shipped Through',
       options: courierOptions,
     },
   ];
@@ -413,7 +413,9 @@ export default function ConsignmentsList() {
         status: consignment.status,
         allocationCode: consignment.allocation?.allocationCode || '-',
         ticketId: consignment.ticketId || consignment.ticket?.id || null,
-        courierService: consignment.courierPartnerName || consignment.courierName || '-',
+        courierService: consignment.inPerson === true
+        ? 'In Person'
+        : consignment.courierPartnerName || consignment.courierName || '-',
         courierServiceId: consignment.courierService?.id || '',
         source: resolveConsignmentLocationLabel(consignment.sourceLocation),
         destination: resolveConsignmentLocationLabel(consignment.destinationLocation),
@@ -662,7 +664,8 @@ export default function ConsignmentsList() {
       if (formData.dispatchMode === 'in_person') {
         payload = {
           inPerson: true,
-          notes: formData.notes || 'Dispatched in person',
+          inPersonComment: formData.comment || 'Dispatched in person',
+          // notes: formData.comment || 'Dispatched in person',
         };
       } else {
         const selectedCourier = courierProviders.find(
