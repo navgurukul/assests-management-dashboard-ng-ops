@@ -14,10 +14,14 @@ export default function PdfPreviewModal({
   destinationName,
   destinationAddress,
   sourceName,
+  sourceCampusName = null,
   sourceAddress,
+  sourceState = null,
+  organizationName = null,
   toLabel = 'To (Destination)',
   fromLabel = 'From (Source)',
   filename = 'Document.pdf',
+  destinationUser = null,
 }) {
   const pdfRef = useRef(null);
 
@@ -66,23 +70,64 @@ export default function PdfPreviewModal({
               <h3 className="text-2xl font-bold uppercase tracking-wider mb-4" style={{ color: '#6b7280' }}>
                 {toLabel}
               </h3>
-              <p className="font-semibold text-3xl mb-2" style={{ color: '#1f2937' }}>
-                {destinationName}
-              </p>
-              <p className="text-2xl leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
-                {destinationAddress}
-              </p>
+              
+              {/* User Details */}
+              {destinationUser && (
+                <div className="mt-4 mb-4 space-y-2">
+                  {(destinationUser.firstName || destinationUser.lastName) && (
+                    <p className="text-2xl font-medium" style={{ color: '#1f2937' }}>
+                      {`${destinationUser.firstName || ''} ${destinationUser.lastName || ''}`.trim()}
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {/* Address */}
+              {destinationAddress && destinationAddress !== 'N/A' && (
+                <p className="text-lg leading-relaxed whitespace-pre-wrap mb-3" style={{ color: '#4b5563' }}>
+                  {destinationAddress}
+                </p>
+              )}
+              
+              {/* Phone Number */}
+              {destinationUser && destinationUser.phone && (
+                <p className="text-lg" style={{ color: '#4b5563' }}>
+                  Phone: {destinationUser.phone}
+                </p>
+              )}
             </div>
             <div className="p-8 border rounded mt-12" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
               <h3 className="text-2xl font-bold uppercase tracking-wider mb-4" style={{ color: '#6b7280' }}>
                 {fromLabel}
               </h3>
-              <p className="font-semibold text-3xl mb-2" style={{ color: '#1f2937' }}>
-                {sourceName}
-              </p>
-              <p className="text-2xl leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
-                {sourceAddress}
-              </p>
+              
+              {/* Organization Name */}
+              {organizationName && (
+                <p className="font-semibold text-2xl mb-2" style={{ color: '#1f2937' }}>
+                  {organizationName}
+                </p>
+              )}
+              
+              {/* Campus Name */}
+              {sourceCampusName && (
+                <p className="text-xl font-medium mb-2" style={{ color: '#1f2937' }}>
+                  {sourceCampusName}
+                </p>
+              )}
+              
+              {/* State Information */}
+              {sourceState && sourceState !== 'N/A' && (
+                <p className="text-lg font-medium mb-3" style={{ color: '#4b5563' }}>
+                  {sourceState}
+                </p>
+              )}
+              
+              {/* Campus Address */}
+              {sourceAddress && sourceAddress !== 'N/A' && (
+                <p className="text-lg leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
+                  {sourceAddress}
+                </p>
+              )}
             </div>
           </div>
 
