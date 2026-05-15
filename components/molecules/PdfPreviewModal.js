@@ -18,7 +18,6 @@ export default function PdfPreviewModal({
   sourceAddress,
   sourceState = null,
   organizationName = null,
-  sourceCreatedBy = null,
   toLabel = 'To (Destination)',
   fromLabel = 'From (Source)',
   filename = 'Document.pdf',
@@ -109,33 +108,24 @@ export default function PdfPreviewModal({
                 </p>
               )}
               
-              {/* Created By User Name (First Name + Last Name) */}
-              {sourceCreatedBy && (sourceCreatedBy.firstName || sourceCreatedBy.lastName) && (
+              {/* Campus Name */}
+              {sourceCampusName && (
                 <p className="text-xl font-medium mb-2" style={{ color: '#1f2937' }}>
-                  {`${sourceCreatedBy.firstName || ''} ${sourceCreatedBy.lastName || ''}`.trim()}
+                  {sourceCampusName}
                 </p>
               )}
               
-              {/* Campus Name and State on same line */}
-              {(sourceCampusName || (sourceState && sourceState !== 'N/A')) && (
-                <p className="text-xl font-medium mb-3" style={{ color: '#1f2937' }}>
-                  {sourceCampusName}
-                  {sourceCampusName && sourceState && sourceState !== 'N/A' && ', '}
-                  {sourceState && sourceState !== 'N/A' && sourceState}
+              {/* State Information */}
+              {sourceState && sourceState !== 'N/A' && (
+                <p className="text-lg font-medium mb-3" style={{ color: '#4b5563' }}>
+                  {sourceState}
                 </p>
               )}
               
               {/* Campus Address */}
               {sourceAddress && sourceAddress !== 'N/A' && (
-                <p className="text-lg leading-relaxed whitespace-pre-wrap mb-3" style={{ color: '#4b5563' }}>
+                <p className="text-lg leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
                   {sourceAddress}
-                </p>
-              )}
-              
-              {/* Created By Phone */}
-              {sourceCreatedBy && (
-                <p className="text-lg" style={{ color: '#4b5563' }}>
-                  Phone: {sourceCreatedBy.phone || 'N/A'}
                 </p>
               )}
             </div>
