@@ -391,7 +391,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   const sourceAddress = consignment.sourceLocation?.campus?.address || 'N/A';
   const sourceState = consignment.sourceLocation?.campus?.state || 'N/A';
   const sourceCampusName = consignment.sourceLocation?.campus?.name || sourceName;
-  const sourceCreatedBy = consignment.createdBy || null;
   const destinationAddress = consignment.destinationLocation?.campus?.address || consignment.allocation?.userAddress || 'N/A';
   const destinationUser = consignment.allocation?.user || null;
   const organizationName = 'Navgurukul Foundation for Social Welfare';
@@ -444,7 +443,6 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         sourceAddress={sourceAddress}
         sourceState={sourceState}
         organizationName={organizationName}
-        sourceCreatedBy={sourceCreatedBy}
         destinationUser={destinationUser}
         filename={`Consignment_${consignment?.consignmentCode || consignment?.id || 'Details'}.pdf`}
       />
