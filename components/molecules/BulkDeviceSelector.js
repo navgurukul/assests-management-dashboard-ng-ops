@@ -97,12 +97,8 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   // Extract assets from API response
   const availableAssets = useMemo(() => {
     if (!data?.data || !Array.isArray(data.data)) return [];
-    
-    const filtered = data.data.filter(asset => {
-      return String(asset.isConsignmentCreated).toLowerCase() !== 'true';
-    });
 
-    return filtered.map(asset => ({
+    return data.data.map(asset => ({
       id: asset.id,
         assetId: asset.assetTag,
         assetType: asset.assetType?.name || 'N/A',
@@ -111,6 +107,8 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
         condition: asset.condition,
         workingCondition: asset.condition || 'WORKING', // Add workingCondition field for validation
         status: asset.status,
+        isAllocated: asset.isAllocated,
+        isConsignmentCreated: asset.isConsignmentCreated,
       }));
   }, [data]);
 
@@ -145,26 +143,28 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
   };
 
   const handleSelectAll = (checked) => {
+    const selectableAssets = filteredAssets.filter(asset => !asset.isAllocated && !asset.isConsignmentCreated);
+
     if (checked) {
       setCheckedAssets((prevCheckedAssets) => {
         const nextCheckedAssets = new Set(prevCheckedAssets);
-        filteredAssets.forEach(asset => nextCheckedAssets.add(asset.id));
+        selectableAssets.forEach(asset => nextCheckedAssets.add(asset.id));
         return nextCheckedAssets;
       });
       setSelectedAssetObjects((prevAssetMap) => {
         const nextAssetMap = new Map(prevAssetMap);
-        filteredAssets.forEach(asset => nextAssetMap.set(asset.id, asset));
+        selectableAssets.forEach(asset => nextAssetMap.set(asset.id, asset));
         return nextAssetMap;
       });
     } else {
       setCheckedAssets((prevCheckedAssets) => {
         const nextCheckedAssets = new Set(prevCheckedAssets);
-        filteredAssets.forEach(asset => nextCheckedAssets.delete(asset.id));
+        selectableAssets.forEach(asset => nextCheckedAssets.delete(asset.id));
         return nextCheckedAssets;
       });
       setSelectedAssetObjects((prevAssetMap) => {
         const nextAssetMap = new Map(prevAssetMap);
-        filteredAssets.forEach(asset => nextAssetMap.delete(asset.id));
+        selectableAssets.forEach(asset => nextAssetMap.delete(asset.id));
         return nextAssetMap;
       });
     }
@@ -213,7 +213,8 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     return condition.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   };
 
-  const isAllSelected = filteredAssets.length > 0 && filteredAssets.every(asset => checkedAssets.has(asset.id));
+  const selectableAssets = filteredAssets.filter(asset => !asset.isAllocated && !asset.isConsignmentCreated);
+  const isAllSelected = selectableAssets.length > 0 && selectableAssets.every(asset => checkedAssets.has(asset.id));
 
   // Table columns configuration
   const columns = [
@@ -233,12 +234,17 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     { key: 'brand', label: 'Brand' },
     { key: 'model', label: 'Model' },
     { key: 'condition', label: 'Condition' },
+    { key: 'isAllocated', label: 'Allocated' },
+    { key: 'isConsignmentCreated', label: 'Consignment' },
   ];
 
   // Custom render for table cells
   const renderCell = (asset, columnKey) => {
     switch (columnKey) {
       case 'select':
+        if (asset.isAllocated || asset.isConsignmentCreated) {
+          return null; // hide checkbox if allocated or consignment created
+        }
         return (
           <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
             <input
@@ -261,6 +267,18 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
         return (
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getConditionBadge(asset.condition)}`}>
             {getConditionLabel(asset.condition)}
+          </span>
+        );
+      case 'isAllocated':
+        return (
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${asset.isAllocated ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+            {asset.isAllocated ? 'Yes' : 'No'}
+          </span>
+        );
+      case 'isConsignmentCreated':
+        return (
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${asset.isConsignmentCreated ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
+            {asset.isConsignmentCreated ? 'Yes' : 'No'}
           </span>
         );
       default:
