@@ -11,7 +11,6 @@ import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import ColumnSelector from '@/components/molecules/ColumnSelector';
 import SearchInput from '@/components/molecules/SearchInput';
 import FormModal from '@/components/molecules/FormModal';
-import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -58,10 +57,6 @@ export default function ConsignmentsList() {
   
   // Status dropdown state
   const [openStatusDropdownId, setOpenStatusDropdownId] = useState(null);
-  
-  // Asset modal state
-  const [assetModalOpen, setAssetModalOpen] = useState(false);
-  const [selectedAssets, setSelectedAssets] = useState([]);
   
   // Modal states for different actions
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -910,21 +905,10 @@ export default function ConsignmentsList() {
     }
         
     if (columnKey === 'assetCount') {
-      const sourceData = Array.isArray(data?.data) ? data.data : [];
-      const fullConsignment = sourceData.find(c => c.id === item.id) || item.consignmentData;
-      const assets = fullConsignment?.assets || [];
-      
       return (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedAssets(assets);
-            setAssetModalOpen(true);
-          }}
-          className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
-        >
+        <span className="text-gray-900">
           {cellValue}
-        </button>
+        </span>
       );
     }
         
@@ -1148,40 +1132,6 @@ export default function ConsignmentsList() {
         onFormDataChange={handleDispatchFormDataChange}
         helpText="Enter courier partner details and tracking information to dispatch the consignment"
       />
-      
-      {/* Asset List Modal */}
-      <Modal
-        isOpen={assetModalOpen}
-        onClose={() => {
-          setAssetModalOpen(false);
-          setSelectedAssets([]);
-        }}
-        title={`Asset Tags (${selectedAssets.length})`}
-        size="medium"
-      >
-        <div className="max-h-96 overflow-y-auto">
-          {selectedAssets.length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {selectedAssets.map((asset, index) => (
-                <div
-                  key={asset.id || index}
-                  className="px-6 py-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900">{asset.assetTag}</span>
-                    <span className="text-xs text-gray-500">#{index + 1}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="px-6 py-12 text-center">
-              <Package className="mx-auto h-12 w-12 text-gray-400" />
-              <p className="mt-2 text-sm text-gray-500">No assets found</p>
-            </div>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 }
