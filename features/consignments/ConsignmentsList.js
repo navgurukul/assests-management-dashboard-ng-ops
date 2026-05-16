@@ -916,11 +916,11 @@ export default function ConsignmentsList() {
       
       return (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedAssets(assets);
-            setAssetModalOpen(true);
-          }}
+          // onClick={(e) => {
+          //   e.stopPropagation();
+          //   setSelectedAssets(assets);
+          //   setAssetModalOpen(true);
+          // }}
           className="px-3 py-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer hover:underline"
         >
           {cellValue}
@@ -1150,7 +1150,7 @@ export default function ConsignmentsList() {
       />
       
       {/* Asset List Modal */}
-      <Modal
+      {/* <Modal
         isOpen={assetModalOpen}
         onClose={() => {
           setAssetModalOpen(false);
@@ -1181,7 +1181,7 @@ export default function ConsignmentsList() {
             </div>
           )}
         </div>
-      </Modal>
+      </Modal> */}
     </div>
   );
 }
