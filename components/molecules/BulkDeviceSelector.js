@@ -393,7 +393,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                 setCurrentPage(1);
               }}
               ariaLabel="Asset selection table"
-              onRowClick={handleCheckboxChange}
+              // onRowClick={handleCheckboxChange}
               emptyContent={
                 <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200 mt-4">
                   <p className="text-base font-semibold text-gray-700 mb-1">No Assets Available</p>
@@ -407,17 +407,17 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                   placeholder="Search by Asset Tag, Brand, Model, or Condition..."
                 />
               }
-              filterComponent={
-                <FilterDropdown
-                  onFilterChange={(newFilters) => {
-                    setFilters(newFilters);
-                    setCurrentPage(1);
-                  }}
-                  statusOptions={filterStatusOptions}
-                  conditionOptions={filterConditionOptions}
-                  selectedFilters={filters}
-                />
-              }
+              // filterComponent={
+              //   <FilterDropdown
+              //     onFilterChange={(newFilters) => {
+              //       setFilters(newFilters);
+              //       setCurrentPage(1);
+              //     }}
+              //     statusOptions={filterStatusOptions}
+              //     conditionOptions={filterConditionOptions}
+              //     selectedFilters={filters}
+              //   />
+              // }
               activeFiltersComponent={
                 <ActiveFiltersChips
                   filters={filters}
