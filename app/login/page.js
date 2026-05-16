@@ -261,32 +261,6 @@ function LoginContent() {
         <div className={`absolute bottom-0 left-1/2 w-96 h-96 ${isDarkMode ? 'bg-cyan-600' : 'bg-cyan-400'} rounded-full mix-blend-screen filter blur-3xl animate-blob opacity-30 animation-delay-4000`}></div>
       </div>
 
-      {/* Navigation */}
-      {/* <nav className={`relative z-20 flex justify-between items-center p-6 px-12 ${isDarkMode ? 'bg-linear-to-b from-slate-950/80 to-transparent backdrop-blur-xl border-white/5' : 'bg-linear-to-b from-white/80 to-transparent backdrop-blur-xl'} transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
-      
-      <div className="flex items-center gap-3">
-        <div className="w-11 h-11 bg-linear-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <Laptop className="w-6 h-6 text-white font-bold" />
-        </div>
-        <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Asset Tracker</div>
-      </div>
-
-      
-      <div className="flex items-center gap-4">
-        
-        <button
-          onClick={toggleTheme}
-          className={`p-2 rounded-lg ${isDarkMode ? 'bg-white/10 hover:bg-white/20 text-yellow-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'} transition-all duration-300 border ${isDarkMode ? 'border-white/10' : 'border-gray-300'}`}
-          aria-label="Toggle theme"
-        >
-          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
-        <div>
-          <div className={`text-xs ${isDarkMode ? 'text-cyan-400' : 'text-blue-600'}`}>Enterprise Solutions</div>
-        </div>
-      </div>
-      </nav> */}
-
       <div className="relative z-10 flex items-start justify-center overflow-hidden w-full">
         {/* Animated Grid Background */}
         <div className={`absolute inset-0 ${isDarkMode ? 'opacity-5' : 'opacity-10'}`}>
@@ -548,59 +522,6 @@ function LoginContent() {
           </div>
         </div>
       </div>
-
-      {/* Footer - Fixed Vertical Order */}
-      <footer className={`relative z-10 ${isDarkMode ? 'border-white/10 bg-slate-950' : 'border-gray-200 bg-white'} border-t py-10 md:py-16 px-4 md:px-6`}>
-        <div className="max-w-6xl mx-auto">
-          {/* Brand - full width on mobile */}
-          <div className="mb-8 text-center md:text-left">
-            <div className="flex items-center gap-2 mb-3 justify-center md:justify-start">
-              <div className="w-8 h-8 bg-linear-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                <Laptop className="w-5 h-5 text-white" />
-              </div>
-              <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} text-lg`}>Asset Tracker</span>
-            </div>
-            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm leading-relaxed max-w-xs mx-auto md:mx-0`}>Enterprise asset management solutions for modern organizations</p>
-          </div>
-
-          {/* Links - 3 columns on mobile */}
-          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-8">
-            {/* Product Column */}
-            <div>
-              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-sm md:text-lg mb-3 md:mb-6`}>Product</h3>
-              <ul className="space-y-2 md:space-y-3">
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Features</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Pricing</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Security</a></li>
-              </ul>
-            </div>
-
-            {/* Company Column */}
-            <div>
-              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-sm md:text-lg mb-3 md:mb-6`}>Company</h3>
-              <ul className="space-y-2 md:space-y-3">
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>About</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Blog</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Careers</a></li>
-              </ul>
-            </div>
-
-            {/* Legal Column */}
-            <div>
-              <h3 className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-bold text-sm md:text-lg mb-3 md:mb-6`}>Legal</h3>
-              <ul className="space-y-2 md:space-y-3">
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Privacy</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Terms</a></li>
-                <li><a href="#" className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-xs md:text-base transition duration-300`}>Contact</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className={`${isDarkMode ? 'border-white/10 text-gray-500' : 'border-gray-200 text-gray-600'} border-t mt-8 md:mt-12 pt-6 md:pt-8 text-center text-xs md:text-sm`}>
-            <p>&copy; 2026 AssetHub. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
 
       <style jsx>{`
         @keyframes blob {
