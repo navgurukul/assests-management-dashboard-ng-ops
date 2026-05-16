@@ -13,8 +13,8 @@ export default function StatusChip({ value, colorFn, className = '', icon }) {
   const displayLabel = String(value)
     .replace(/_/g, ' ')
     .toUpperCase()
-    .replace(/CONSIGNMENT/g, 'CONG.')
-    .replace(/CONSIGNEMNT/g, 'CONG.');
+    .replace(/CONSIGNMENT/g, 'CONS.')
+    .replace(/CONSIGNEMNT/g, 'CONS.');
 
   return (
     <span className={`${CHIP_CLASSES} ${colorClass} ${className}`.trim()}>
