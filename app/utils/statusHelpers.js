@@ -10,8 +10,7 @@
 // Base chip class – capsule form, used everywhere
 // ---------------------------------------------------------------------------
 export const CHIP_CLASSES =
-  'px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] md:text-xs font-semibold inline-flex items-center';
-
+  'px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] md:text-[10px] font-semibold inline-flex items-center justify-center text-center';
 // ---------------------------------------------------------------------------
 // Internal normalizer: uppercase + collapse spaces/hyphens to underscore
 // e.g.  "In Stock" → "IN_STOCK"   "in-progress" → "IN_PROGRESS"
