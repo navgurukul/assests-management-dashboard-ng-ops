@@ -315,7 +315,7 @@ function LoginContent() {
                   >
                     {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
                   </button>
-                  Asset Tracking Dashboard.
+                  Assets Management Dashboard.
                 </span>
               </div>
 
@@ -359,7 +359,7 @@ function LoginContent() {
                 className={`w-full md:w-[75%] text-xs md:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-6 md:mb-8 leading-relaxed transition-all duration-1000 transform mx-auto md:mx-0 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: '200ms' }}
               >
-                Complete asset tracking solution for your organization. Seamlessly allocate laptops, mobiles, and tablets to students and employees. Monitor device status, manage assignments, handle requests, and maintain full visibility of all organizational assets in one powerful dashboard.
+                Complete assets management solution for your organization. Seamlessly allocate laptops, mobiles, and tablets to students and employees. Monitor device status, manage assignments, handle requests, and maintain full visibility of all organizational assets in one powerful dashboard.
               </p>
 
               {/* CTA Buttons */}
