@@ -65,9 +65,22 @@ export const allocationFormFields = [
       campusId: formData?.campusId || undefined,
       status: 'IN_STOCK',
     }),
-    filterFn: (item) => item.isConsignmentCreated !== true,
     emptyContent: 'No available assets. They may be out of stock or already assigned to a consignment.',
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
+    renderItem: (item, label) => (
+      <div className="flex justify-between items-center w-full">
+        <span>{label}</span>
+        <div className="flex gap-2">
+          <span className={`px-2 py-0.5 text-[8px] rounded-full ${item.isAllocated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+            Allocation: {item.isAllocated ? 'Yes' : 'No'}
+          </span>
+          <span className={`px-2 py-0.5 text-[8px] rounded-full ${item.isConsignmentCreated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+            Consignment: {item.isConsignmentCreated ? 'Yes' : 'No'}
+          </span>
+        </div>
+      </div>
+    ),
+    isItemDisabled: (item) => item.isAllocated || item.isConsignmentCreated,
     enableSearch: true,
     enablePagination: true,
     pageLimit: 10,
