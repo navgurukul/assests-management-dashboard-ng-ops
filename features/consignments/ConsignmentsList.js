@@ -1030,15 +1030,13 @@ export default function ConsignmentsList() {
           )
         }
         toggleCardsComponent={
-          !showInTransit && (
-            <CustomButton
-              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
-              icon={ArrowLeftCircle}
-              onClick={handleToggleInTransit}
-              variant={showInTransit ? 'secondary' : 'warning'}
-              size="md"
-            />
-          )
+          <CustomButton
+            text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
+            icon={ArrowLeftCircle}
+            onClick={handleToggleInTransit}
+            variant={showInTransit ? 'secondary' : 'warning'}
+            size="md"
+          />
         }
         filterComponent={
           <>
@@ -1059,7 +1057,7 @@ export default function ConsignmentsList() {
           </>
         }
         columnSelectorComponent={
-          !showInTransit ? (
+          !showInTransit && (
             <ColumnSelector
               allColumns={allColumns}
               visibleColumnKeys={visibleColumnKeys}
@@ -1067,14 +1065,6 @@ export default function ConsignmentsList() {
               onToggleColumn={toggleColumn}
               onShowAll={showAllColumns}
               onReset={resetToDefault}
-            />
-          ) : (
-            <CustomButton
-              text={showInTransit ? 'Back to Consignments' : 'In-Transit Returns'}
-              icon={ArrowLeftCircle}
-              onClick={handleToggleInTransit}
-              variant={showInTransit ? 'secondary' : 'warning'}
-              size="md"
             />
           )
         }
