@@ -158,25 +158,45 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
     return `${day}/${month}/${year}, ${hours}:${mins}`;
   };
 
+  const normalizeStatus = (status) => (status || '').toUpperCase().replaceAll('_', ' ');
+
   const statusBadgeClass = (status) => {
-    switch ((status || '').toUpperCase()) {
-      case 'APPROVED':  return 'bg-green-100 text-green-700 border-green-200';
-      case 'RAISED':    return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'RESOLVED':  return 'bg-teal-100 text-teal-700 border-teal-200';
-      case 'ESCALATED': return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'CLOSED':    return 'bg-gray-100 text-gray-600 border-gray-200';
-      default:          return 'bg-gray-100 text-gray-600 border-gray-200';
+    switch (normalizeStatus(status)) {
+      case 'APPROVED':                return 'bg-green-100 text-green-700 border-green-200';
+      case 'RAISED':                  return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'RESOLVED':                return 'bg-teal-100 text-teal-700 border-teal-200';
+      case 'ESCALATED':               return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'CLOSED':                  return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'IN PROGRESS':             return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'CONSIGNMENT CREATED':     return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+      case 'CONSIGNMENT DISPATCHED':  return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'DEVICE ALLOCATED':        return 'bg-cyan-100 text-cyan-700 border-cyan-200';
+      case 'OPEN':                    return 'bg-sky-100 text-sky-700 border-sky-200';
+      case 'OVERDUE':                 return 'bg-red-100 text-red-700 border-red-200';
+      case 'REJECTED':                return 'bg-rose-100 text-rose-700 border-rose-200';
+      case 'PENDING':                 return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'ASSIGNED':                return 'bg-violet-100 text-violet-700 border-violet-200';
+      default:                        return 'bg-gray-100 text-gray-600 border-gray-200';
     }
   };
 
   const dotColorClass = (status) => {
-    switch ((status || '').toUpperCase()) {
-      case 'APPROVED':  return 'bg-green-500 border-green-300';
-      case 'RAISED':    return 'bg-blue-500 border-blue-300';
-      case 'RESOLVED':  return 'bg-teal-500 border-teal-300';
-      case 'ESCALATED': return 'bg-orange-500 border-orange-300';
-      case 'CLOSED':    return 'bg-gray-400 border-gray-300';
-      default:          return 'bg-gray-400 border-gray-300';
+    switch (normalizeStatus(status)) {
+      case 'APPROVED':                return 'bg-green-500 border-green-300';
+      case 'RAISED':                  return 'bg-blue-500 border-blue-300';
+      case 'RESOLVED':                return 'bg-teal-500 border-teal-300';
+      case 'ESCALATED':               return 'bg-orange-500 border-orange-300';
+      case 'CLOSED':                  return 'bg-gray-400 border-gray-300';
+      case 'IN PROGRESS':             return 'bg-yellow-500 border-yellow-300';
+      case 'CONSIGNMENT CREATED':     return 'bg-indigo-500 border-indigo-300';
+      case 'CONSIGNMENT DISPATCHED':  return 'bg-purple-500 border-purple-300';
+      case 'DEVICE ALLOCATED':        return 'bg-cyan-500 border-cyan-300';
+      case 'OPEN':                    return 'bg-sky-500 border-sky-300';
+      case 'OVERDUE':                 return 'bg-red-500 border-red-300';
+      case 'REJECTED':                return 'bg-rose-500 border-rose-300';
+      case 'PENDING':                 return 'bg-amber-500 border-amber-300';
+      case 'ASSIGNED':                return 'bg-violet-500 border-violet-300';
+      default:                        return 'bg-gray-400 border-gray-300';
     }
   };
 
@@ -202,7 +222,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
               </div>
               {log.status && (
                 <span className={`text-[9px] sm:text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${statusBadgeClass(log.status)}`}>
-                  {log.status}
+                  {log.status.replaceAll('_', ' ')}
                 </span>
               )}
             </div>

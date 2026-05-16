@@ -10,7 +10,11 @@ export default function StatusChip({ value, colorFn, className = '', icon }) {
 
   const colorClass = colorFn ? colorFn(value) : getStatusChipColor(value);
 
-  const displayLabel = String(value).replace(/_/g, ' ').toUpperCase();
+  const displayLabel = String(value)
+    .replace(/_/g, ' ')
+    .toUpperCase()
+    .replace(/CONSIGNMENT/g, 'CONS.')
+    .replace(/CONSIGNEMNT/g, 'CONS.');
 
   return (
     <span className={`${CHIP_CLASSES} ${colorClass} ${className}`.trim()}>
