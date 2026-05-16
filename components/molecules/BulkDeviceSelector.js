@@ -393,7 +393,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                 setCurrentPage(1);
               }}
               ariaLabel="Asset selection table"
-              onRowClick={handleCheckboxChange}
+              // onRowClick={handleCheckboxChange}
               emptyContent={
                 <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200 mt-4">
                   <p className="text-base font-semibold text-gray-700 mb-1">No Assets Available</p>
