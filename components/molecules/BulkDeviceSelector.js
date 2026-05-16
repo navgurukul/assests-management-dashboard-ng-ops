@@ -407,17 +407,17 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
                   placeholder="Search by Asset Tag, Brand, Model, or Condition..."
                 />
               }
-              filterComponent={
-                <FilterDropdown
-                  onFilterChange={(newFilters) => {
-                    setFilters(newFilters);
-                    setCurrentPage(1);
-                  }}
-                  statusOptions={filterStatusOptions}
-                  conditionOptions={filterConditionOptions}
-                  selectedFilters={filters}
-                />
-              }
+              // filterComponent={
+              //   <FilterDropdown
+              //     onFilterChange={(newFilters) => {
+              //       setFilters(newFilters);
+              //       setCurrentPage(1);
+              //     }}
+              //     statusOptions={filterStatusOptions}
+              //     conditionOptions={filterConditionOptions}
+              //     selectedFilters={filters}
+              //   />
+              // }
               activeFiltersComponent={
                 <ActiveFiltersChips
                   filters={filters}
