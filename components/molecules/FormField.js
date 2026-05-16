@@ -228,6 +228,8 @@ export default function FormField({ field, formik, onFieldChange }) {
             enableSearch={field.enableSearch || false}
             enablePagination={field.enablePagination || false}
             pageLimit={field.pageLimit || 10}
+            renderItem={field.renderItem}
+            isItemDisabled={field.isItemDisabled}
           />
         );
 

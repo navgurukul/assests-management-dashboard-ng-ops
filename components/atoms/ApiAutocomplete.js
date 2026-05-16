@@ -41,6 +41,8 @@ export default function ApiAutocomplete({
   enableSearch = false,
   enablePagination = false,
   pageLimit = 10,
+  renderItem = null,
+  isItemDisabled = null,
 }) {
   const isPaginatedMode = enableSearch || enablePagination;
 
@@ -247,8 +249,12 @@ export default function ApiAutocomplete({
               );
             }
             return (
-              <AutocompleteItem key={item[valueKey]} textValue={String(getItemLabel(item) ?? '')}>
-                {getItemLabel(item)}
+              <AutocompleteItem 
+                key={item[valueKey]} 
+                textValue={String(getItemLabel(item) ?? '')}
+                isDisabled={isItemDisabled ? isItemDisabled(item) : false}
+              >
+                {renderItem ? renderItem(item, getItemLabel(item)) : getItemLabel(item)}
               </AutocompleteItem>
             );
           }}
