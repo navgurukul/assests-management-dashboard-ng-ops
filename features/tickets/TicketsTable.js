@@ -322,6 +322,12 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
       return <span className="text-gray-700">{deviceTag}</span>;
     }
 
+    if (columnKey === 'actionTakenBy') {
+      const rawValue = item[columnKey] || '—';
+      const displayValue = String(rawValue).replace(/_/g, ' ');
+      return <span className="text-gray-700 text-xs">{displayValue}</span>;
+    }
+
     const columnDef = ticketTableColumns.find(col => col.key === columnKey); 
     return <GenericCellRenderer item={item} column={columnDef || { key: columnKey }} />;
   };
