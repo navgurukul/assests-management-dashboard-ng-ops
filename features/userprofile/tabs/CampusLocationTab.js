@@ -175,12 +175,12 @@ export default function CampusLocationTab() {
                     <li key={location.id} className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 hover:bg-(--surface-soft) transition-colors">
                       <span className="text-sm text-foreground">{location.name}</span>
                       <span className="text-sm font-medium text-(--theme-main) text-right pr-6">{location.type}</span>
-                      <button
+                      {/* <button
                         onClick={() => console.log('Delete location:', location.id)}
                         className="p-1 rounded hover:bg-red-50 text-(--muted) hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      </button> */}
                     </li>
                   ))}
                 </ul>
