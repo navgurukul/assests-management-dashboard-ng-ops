@@ -10,9 +10,13 @@ import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
 import usePut from '@/app/hooks/query/usePut';
+import {
+  changeLocationFields,
+  changeLocationValidationSchema,
+} from '@/app/config/formConfigs/assetFormConfig';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
-  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | null
+  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutateAsync: moveToStock, isPending: isMovingToStock } = usePut({
@@ -52,13 +56,18 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
           reasonForScrapping: formData.description,
         });
         toast.success('Asset marked as scrap successfully.');
-      }
+     } else if (modalAction === 'CHANGE_LOCATION') {
+        await apiService.put(config.endpoints.assets.update(id), {
+          currentLocationId: formData.locationId,
+      });
+      toast.success('Asset location changed successfully.');
+     }
       setModalAction(null);
       if (refetch) {
         refetch(); // Refresh asset details after status update
       }
     } catch (error) {
-      toast.error(error?.message || 'Failed to update asset status. Please try again.');
+      toast.error(error?.message || 'Failed to update asset. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +117,21 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   }
 
   const assetDetails = assetData;
+
+  // Fields for changing asset location (same campus, different location)
+  // Must be defined AFTER assetDetails is created
+  const getChangeLocationFields = () => {
+    return changeLocationFields.map((field) => {
+      if (field.name === 'locationId') {
+        return {
+          ...field,
+          apiUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/locations/campus/${assetDetails.campus?.id}`,
+          queryKey: ['locations', assetDetails.campus?.id],
+        };
+      }
+      return field;
+    });
+  };
 
   // Map API status to display format
   const formatStatus = (status) => {
@@ -252,7 +276,19 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   return (
     <>
       <FormModal
-        isOpen={modalAction !== null}
+        isOpen={modalAction === 'CHANGE_LOCATION'}
+        onClose={() => setModalAction(null)}
+        componentName={assetDetails.assetTag}
+        actionType="CHANGE_LOCATION"
+        fields={getChangeLocationFields()}
+        validationSchema={changeLocationValidationSchema}
+        onSubmit={handleStatusUpdate}
+        isSubmitting={isSubmitting}
+        helpText={`Current location: ${assetDetails.location?.name || 'N/A'} (${assetDetails.campus?.name || 'N/A'}) — Select a new location within the same campus.`}
+        size="medium"
+      />
+      <FormModal
+        isOpen={modalAction !== null && modalAction !== 'CHANGE_LOCATION'}
         onClose={() => setModalAction(null)}
         componentName={assetDetails.assetTag}
         actionType={modalAction === 'IN_STOCK' ? 'Move to In Stock' : modalAction === 'REPAIR' ? 'Put in Repair' : 'Scrap this Device'}
@@ -277,6 +313,11 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         onBack={onBack}
         headerActions={
           <>
+            <CustomButton
+              text="Change Location"
+              variant="secondary"
+              onClick={() => setModalAction('CHANGE_LOCATION')}
+            />
             <CustomButton
               text={assetDetails.status === 'REPAIR' ? 'Move to in Stock' : 'Moved to Repair'}
               variant="warning"
