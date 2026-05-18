@@ -407,3 +407,22 @@ export const assetInitialValues = {
   notes: "",
   charger: false,
 };
+
+// Change Location Form Configuration
+export const changeLocationFields = [
+  {
+    name: "locationId",
+    label: "New Location",
+    type: "api-autocomplete",
+    placeholder: "Search and select new location",
+    apiUrl: baseUrl + "/locations/campus/", // Campus ID will be appended dynamically in AssetDetails
+    queryKey: ["locations"],
+    labelKey: "name",
+    valueKey: "id",
+    required: true,
+  },
+];
+
+export const changeLocationValidationSchema = Yup.object().shape({
+  locationId: Yup.string().required("New location is required"),
+});
