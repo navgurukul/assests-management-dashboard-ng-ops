@@ -23,7 +23,7 @@ export const ALL_AUTHENTICATED = [...IT_ROLES, ...END_USER_ROLES];
  */
 export const menuItems = [
   { name: 'Dashboard', icon: 'LayoutDashboard', path: '/dashboard', allowedRoles: IT_ROLES },
-  { name: 'Tickets', icon: 'Ticket', path: '/tickets', allowedRoles: IT_ROLES, exactOnly: true },
+  { name: 'Tickets', icon: 'Ticket', path: '/tickets', allowedRoles: IT_ROLES },
   { name: 'Allocations', icon: 'Share2', path: '/allocations', allowedRoles: IT_ROLES },
   { name: 'Consignments', icon: 'Archive', path: '/consignments', allowedRoles: IT_ROLES },
   { name: 'Assets', icon: 'Package', path: '/assets', allowedRoles: IT_ROLES },
