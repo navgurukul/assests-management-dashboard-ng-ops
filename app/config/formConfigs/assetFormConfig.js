@@ -157,7 +157,7 @@ export const assetFormFields = [
     name: "serialNumber",
     label: "Serial Number",
     type: "text",
-    placeholder: "Enter manufacturer serial number",
+    placeholder: "Enter manufacturer serial number (e.g., 5CG7450GK6",
     required: true,
   },
   {
@@ -331,14 +331,14 @@ export const assetValidationSchema = Yup.object().shape({
   serialNumber: Yup.string()
     .required("Serial number is required")
     .min(2, "Serial number must be at least 2 characters")
-    .matches(
-      /^[a-zA-Z0-9\-]+$/,
-      "Only letters, numbers, hyphens allowed"
-    )
-    .test("contains-letter", "Serial number must contain at least one letter (e.g., 'SN-12345')", function (value) {
-      if (!value) return true;
-      return /[a-zA-Z]/.test(value);
-    }),
+     .matches(
+    /^[a-zA-Z0-9]+$/,          // ← sirf letters aur numbers, koi special char nahi
+    "Only letters and numbers allowed. No spaces, hyphens, slashes, or special characters."
+  )
+   .test("contains-letter", "Serial number must contain at least one letter (e.g., 'SN12345')", function (value) {
+    if (!value) return true;
+    return /[a-zA-Z]/.test(value);
+  }),
   campusId: Yup.string().required("Campus is required"),
   currentLocationId: Yup.string().required("Current location is required"),
   status: Yup.string()
