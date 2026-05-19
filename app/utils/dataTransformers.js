@@ -10,6 +10,21 @@
  * @param {string} status - Status code from API
  * @returns {string} Readable status text
  */
+
+/**
+ * Build spec label from processor, RAM, and storage
+ * Used when API returns null for specLabel
+ * @param {object} asset - Raw asset data
+ * @returns {string} Combined spec label or 'N/A'
+ */
+export const buildSpecLabel = (asset) => {
+  const parts = [];
+  if (asset.processor) parts.push(asset.processor);
+  if (asset.ramSizeGB) parts.push(`${asset.ramSizeGB}GB RAM`);
+  if (asset.storageSizeGB) parts.push(`${asset.storageSizeGB}GB`);
+  return parts.length > 0 ? parts.join(' / ') : 'N/A';
+};
+
 export const formatAssetStatus = (status) => {
   const statusMap = {
     'IN_STOCK': 'In Stock',
@@ -141,7 +156,7 @@ export const transformAssetForTable = (asset) => {
   return {
     id: asset.id,
     assetTag: asset.assetTag,
-    type: getNestedValue(asset, 'assetType.name', 'Unknown'),
+    type: asset.assetType?.name || getNestedValue(asset, 'assetType.name', null) || 'N/A',
     brand: asset.brand || 'N/A',
     model: asset.model || 'N/A',
     campus: getNestedValue(asset, 'campus.name'),
@@ -158,7 +173,7 @@ export const transformAssetForTable = (asset) => {
     cost: formatCurrency(asset.cost),
     charger: asset.charger,
     bag: asset.bag,
-    specLabel: asset.specLabel || 'N/A',
+    specLabel: asset.specLabel || buildSpecLabel(asset),
     sourceBy: asset.sourceBy || 'N/A',
     notes: asset.notes || 'N/A',
     createdAt: formatDate(asset.createdAt),
