@@ -332,7 +332,7 @@ export const assetValidationSchema = Yup.object().shape({
     .required("Serial number is required")
     .min(2, "Serial number must be at least 2 characters")
      .matches(
-    /^[a-zA-Z0-9]+$/,          // ← sirf letters aur numbers, koi special char nahi
+    /^[a-zA-Z0-9]+$/,     
     "Only letters and numbers allowed. No spaces, hyphens, slashes, or special characters."
   )
    .test("contains-letter", "Serial number must contain at least one letter (e.g., 'SN12345')", function (value) {

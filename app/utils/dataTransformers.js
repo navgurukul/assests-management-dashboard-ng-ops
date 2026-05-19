@@ -6,12 +6,6 @@
  */
 
 /**
- * Format asset status codes to readable text
- * @param {string} status - Status code from API
- * @returns {string} Readable status text
- */
-
-/**
  * Build spec label from processor, RAM, and storage
  * Used when API returns null for specLabel
  * @param {object} asset - Raw asset data
@@ -20,11 +14,16 @@
 export const buildSpecLabel = (asset) => {
   const parts = [];
   if (asset.processor) parts.push(asset.processor);
-  if (asset.ramSizeGB) parts.push(`${asset.ramSizeGB}GB RAM`);
+  if (asset.ramSizeGB) parts.push(`${asset.ramSizeGB}GB`);
   if (asset.storageSizeGB) parts.push(`${asset.storageSizeGB}GB`);
   return parts.length > 0 ? parts.join(' / ') : 'N/A';
 };
 
+/**
+ * Format asset status codes to readable text
+ * @param {string} status - Status code from API
+ * @returns {string} Readable status text
+ */
 export const formatAssetStatus = (status) => {
   const statusMap = {
     'IN_STOCK': 'In Stock',
@@ -156,7 +155,7 @@ export const transformAssetForTable = (asset) => {
   return {
     id: asset.id,
     assetTag: asset.assetTag,
-    type: asset.assetType?.name || getNestedValue(asset, 'assetType.name', null) || 'N/A',
+    type: getNestedValue(asset, 'assetType.name', 'Unknown'),
     brand: asset.brand || 'N/A',
     model: asset.model || 'N/A',
     campus: getNestedValue(asset, 'campus.name'),

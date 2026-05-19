@@ -286,12 +286,12 @@ export default function AllocationDetails({ allocationId, onBack }) {
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">SPEC LABEL</p>
                    <p className="font-medium">{asset.specLabel || buildSpecLabel(asset)}</p>
                 </div>
-                <div className="col-span-1 sm:col-span-2">
+                {/* <div className="col-span-1 sm:col-span-2">
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">PROCESSOR / RAM / STORAGE</p>
                   <p className="font-medium">
                     {`${asset.processor || 'N/A'} : ${asset.ramSizeGB ? `${asset.ramSizeGB}GB` : 'N/A'} : ${asset.storageSizeGB ? `${asset.storageSizeGB}GB` : 'N/A'}`}
                   </p>
-                </div>
+                </div> */}
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">CONDITION</p>
                   <p className="font-medium">{formatAssetStatus(asset.condition)}</p>
