@@ -63,6 +63,11 @@ export default function UserProfileDetails() {
   const currentRole = storeUserRole || userData.role;
 
   const filteredTabs = tabs.filter(tab => {
+    // For MANAGER, STUDENT, EMPLOYEE, only show 'userprofile' option
+    if ((currentRole === 'MANAGER' || currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
+      return false;
+    }
+
     const adminOnlyTabs = [  'campusincharge', 'campuslocation', 'addschool'];
     
     // Only ADMIN should see these tabs
@@ -70,10 +75,6 @@ export default function UserProfileDetails() {
       return false;
     }
 
-    // Hide myassets for STUDENT, EMPLOYEE, or MANAGER
-    if (tab.id === 'myassets' && (currentRole === 'STUDENT' || currentRole === 'EMPLOYEE' || currentRole === 'MANAGER')) {
-      return false;
-    }
     return true;
   });
 
