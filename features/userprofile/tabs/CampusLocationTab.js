@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronRight, Building2, Plus, Trash2 } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient , useMutation} from '@tanstack/react-query';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StateHandler from '@/components/atoms/StateHandler';
@@ -14,12 +14,14 @@ import {
   createLocationFields,
   createLocationValidationSchema,
 } from '@/app/config/formConfigs/campusLocationModalConfig';
-
+import apiService from '@/app/utils/apiService';
+import ConfirmationModal from '@/components/molecules/ConfirmationModal';
 
 export default function CampusLocationTab() {
   const queryClient = useQueryClient();
   const [selectedCampusId, setSelectedCampusId] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, locationId: null });
 
   const {
     data: locationsResponse,
@@ -71,11 +73,30 @@ export default function CampusLocationTab() {
     },
   });
 
+  const { mutateAsync: deleteLocation, isPending: isDeleting } = useMutation({
+    mutationFn: (id) => apiService.delete(config.endpoints.locations.details(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Location deleted successfully');
+      setDeleteModal({ isOpen: false, locationId: null });
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to delete location');
+      setDeleteModal({ isOpen: false, locationId: null });
+    },
+  });
+
   const handleCreateLocationSubmit = async (formData) => {
     await createLocation({
       endpoint: config.endpoints.locations.list,
       body: { campusId: activeCampusId, name: formData.name, type: formData.type, isActive: true },
     });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteModal.locationId) {
+      await deleteLocation(deleteModal.locationId);
+    }
   };
 
   const isLoading = isLoadingLocations || isLoadingCampuses;
@@ -106,7 +127,17 @@ export default function CampusLocationTab() {
         size="medium"
         isSubmitting={isSubmitting}
         validationSchema={createLocationValidationSchema}
+      />
 
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, locationId: null })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Location"
+        message="Are you sure you want to delete this location? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={isDeleting}
       />
       {/* Campus Sidebar */}
       <div className="w-56 shrink-0 border border-(--border) rounded-lg overflow-hidden bg-(--surface)">
@@ -175,12 +206,12 @@ export default function CampusLocationTab() {
                     <li key={location.id} className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 hover:bg-(--surface-soft) transition-colors">
                       <span className="text-sm text-foreground">{location.name}</span>
                       <span className="text-sm font-medium text-(--theme-main) text-right pr-6">{location.type}</span>
-                      {/* <button
-                        onClick={() => console.log('Delete location:', location.id)}
+                      <button
+                        onClick={() => setDeleteModal({ isOpen: true, locationId: location.id })}
                         className="p-1 rounded hover:bg-red-50 text-(--muted) hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                      </button> */}
+                      </button>
                     </li>
                   ))}
                 </ul>

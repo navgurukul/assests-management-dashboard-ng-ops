@@ -14,6 +14,7 @@ import {
   changeLocationFields,
   changeLocationValidationSchema,
 } from '@/app/config/formConfigs/assetFormConfig';
+import { buildSpecLabel } from '@/app/utils/dataTransformers';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
   const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | null
@@ -245,7 +246,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         { label: 'RAM', value: assetDetails.ramSizeGB ? `${assetDetails.ramSizeGB} GB` : 'N/A' },
         { label: 'Storage', value: assetDetails.storageSizeGB ? `${assetDetails.storageSizeGB} GB` : 'N/A' },
         { label: 'Serial Number', value: assetDetails.serialNumber || 'N/A', className: 'col-span-2' },
-        { label: 'Spec Label', value: assetDetails.specLabel || 'N/A', className: 'col-span-2' },
+        { label: 'Spec Label', value: assetDetails.specLabel || buildSpecLabel(assetDetails), className: 'col-span-2' },
       ],
     },
     {

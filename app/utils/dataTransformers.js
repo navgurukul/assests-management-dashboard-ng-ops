@@ -6,6 +6,20 @@
  */
 
 /**
+ * Build spec label from processor, RAM, and storage
+ * Used when API returns null for specLabel
+ * @param {object} asset - Raw asset data
+ * @returns {string} Combined spec label or 'N/A'
+ */
+export const buildSpecLabel = (asset) => {
+  const parts = [];
+  if (asset.processor) parts.push(asset.processor);
+  if (asset.ramSizeGB) parts.push(`${asset.ramSizeGB}GB`);
+  if (asset.storageSizeGB) parts.push(`${asset.storageSizeGB}GB`);
+  return parts.length > 0 ? parts.join(' / ') : 'N/A';
+};
+
+/**
  * Format asset status codes to readable text
  * @param {string} status - Status code from API
  * @returns {string} Readable status text
@@ -158,7 +172,7 @@ export const transformAssetForTable = (asset) => {
     cost: formatCurrency(asset.cost),
     charger: asset.charger,
     bag: asset.bag,
-    specLabel: asset.specLabel || 'N/A',
+    specLabel: asset.specLabel || buildSpecLabel(asset),
     sourceBy: asset.sourceBy || 'N/A',
     notes: asset.notes || 'N/A',
     createdAt: formatDate(asset.createdAt),
