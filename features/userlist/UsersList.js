@@ -223,7 +223,7 @@ export default function UsersList() {
         location: user.location || 'N/A',
         // Asset fields
         assetTag: asset.assetTag || 'N/A',
-        assetType: asset.specLabel || 'N/A',
+        assetType: asset.assetType?.name || 'N/A',
         assetBrand: asset.brand || 'N/A',
         assetModel: asset.model || 'N/A',
         assetCondition: asset.condition || 'N/A',
