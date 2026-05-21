@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { User, Package, Ticket, Building2, Users } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab, ManagerListTab, CampusLocationTab, AddSchoolTab } from './tabs';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
@@ -20,7 +21,16 @@ const tabs = [
 ];
 
 export default function UserProfileDetails() {
-  const [activeTab, setActiveTab] = useState('userprofile');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isInternalChange = useRef(false);
+  
+  // Initialize activeTab from URL directly (avoid extra render)
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabFromUrl = searchParams?.get('tab');
+    return tabFromUrl || 'userprofile';
+  });
+  
   const storeUserRole = useAppSelector(selectUserRole);
 
   // Fetch user data using React Query
@@ -62,21 +72,53 @@ export default function UserProfileDetails() {
 
   const currentRole = storeUserRole || userData.role;
 
-  const filteredTabs = tabs.filter(tab => {
-    // For MANAGER, STUDENT, EMPLOYEE, only show 'userprofile' option
-    if ((currentRole === 'MANAGER' || currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
-      return false;
-    }
+  // Memoize filteredTabs - only recreate when currentRole changes
+  const filteredTabs = useMemo(() => {
+    return tabs.filter(tab => {
+      // For MANAGER, STUDENT, EMPLOYEE, only show 'userprofile' option
+      if ((currentRole === 'MANAGER' || currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
+        return false;
+      }
 
-    const adminOnlyTabs = [  'campusincharge', 'campuslocation', 'addschool'];
+      const adminOnlyTabs = ['campusincharge', 'campuslocation', 'addschool'];
+      
+      // Only ADMIN should see these tabs
+      if (adminOnlyTabs.includes(tab.id) && currentRole !== 'ADMIN') {
+        return false;
+      }
+
+      return true;
+    });
+  }, [currentRole]); // Only recreate when currentRole changes
+
+  //  Handle external changes only (browser back/forward, email links, etc.)
+  //  Validate against currentRole and filteredTabs
+  useEffect(() => {
+    if (!currentRole) return; // Wait for role to load
     
-    // Only ADMIN should see these tabs
-    if (adminOnlyTabs.includes(tab.id) && currentRole !== 'ADMIN') {
-      return false;
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return; // Skip internal changes
     }
+    
+    const tabFromUrl = searchParams?.get('tab');
+    const isValid = filteredTabs.some(t => t.id === tabFromUrl);
+    
+    if (tabFromUrl && isValid) {
+      setActiveTab(tabFromUrl);
+    } else if (tabFromUrl && !isValid) {
+      // Fallback to 'userprofile' if unauthorized tab is in URL
+      setActiveTab('userprofile');
+      router.replace('/userprofile?tab=userprofile', { scroll: false });
+    }
+  }, [currentRole, searchParams, filteredTabs]);
 
-    return true;
-  });
+  // Handle tab change - mark as internal, update URL and state
+  const handleTabChange = (tabId) => {
+    isInternalChange.current = true;
+    setActiveTab(tabId);
+    router.replace(`/userprofile?tab=${tabId}`, { scroll: false });
+  };
 
   const ActiveTabComponent = filteredTabs.find(tab => tab.id === activeTab)?.Component;
 
@@ -116,7 +158,7 @@ export default function UserProfileDetails() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabChange(tab.id)}
                     className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'border-(--theme-main) text-(--theme-main) bg-(--surface-soft)'
