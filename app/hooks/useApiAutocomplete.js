@@ -21,7 +21,7 @@ const buildApiUrl = (baseUrl, dependsOn, dependentValue, additionalParams) => {
       finalUrl = `${baseUrl}${dependentValue}`;
     } else {
       // Otherwise, add as query parameter
-      queryParams.push(`${dependsOn.paramKey}=${dependentValue}`);
+      queryParams.push(`${dependsOn.paramKey}=${encodeURIComponent(dependentValue)}`);
     }
   }
 
@@ -30,7 +30,7 @@ const buildApiUrl = (baseUrl, dependsOn, dependentValue, additionalParams) => {
     Object.entries(additionalParams).forEach(([paramKey, paramValue]) => {
       // Only add non-empty values
       if (paramValue != null && paramValue !== '') {
-        queryParams.push(`${paramKey}=${paramValue}`);
+        queryParams.push(`${paramKey}=${encodeURIComponent(paramValue)}`);
       }
     });
   }
