@@ -3,6 +3,16 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const assetFormFields = [
   {
+    name: "assetCategory",
+    label: "Asset Category",
+    type: "radio",
+    required: true,
+    options: [
+      { label: "Digital Asset", value: "DIGITAL" },
+      { label: "Non-Digital Asset", value: "NON_DIGITAL" },
+    ],
+  },
+  {
     name: "assetTypeId",
     label: "Asset Type",
     type: "api-autocomplete",
@@ -16,6 +26,101 @@ export const assetFormFields = [
     companionField: "assetTypeName",
     companionKey: "name",
     onFieldChange: "onAssetTypeChange",
+    showIf: { field: "assetCategory", value: ["DIGITAL"] },
+  },
+  {
+    name: "nonDigitalCategory",
+    label: "Asset Type",
+    type: "select",
+    placeholder: "Select asset type",
+    required: true,
+    showIf: { field: "assetCategory", value: ["NON_DIGITAL"] },
+    options: [
+      { value: "FURNITURE", label: "Furniture" },
+      { value: "SPORTS_EQUIPMENT", label: "Sports Equipment" },
+      { value: "BOOKS", label: "Books" },
+      { value: "STATIONERY", label: "Stationery" },
+      { value: "KITCHEN", label: "Kitchen Equipment" },
+      { value: "CLEANING", label: "Cleaning Equipment" },
+    ],
+    onFieldChange: "onNonDigitalCategoryChange",
+  },
+  {
+    name: "nonDigitalSubCategoryFurniture",
+    label: "Item Type",
+    type: "select",
+    placeholder: "Select item type",
+    required: true,
+    showIf: { field: "nonDigitalCategory", value: ["FURNITURE"] },
+    options: [
+      { value: "CHAIR", label: "Chair" },
+      { value: "TABLE", label: "Table" },
+      { value: "CUPBOARD", label: "Cupboard" },
+      { value: "SHELF", label: "Shelf" },
+      { value: "BED", label: "Bed" },
+      { value: "OTHER", label: "Other" },
+    ],
+  },
+  {
+    name: "nonDigitalSubCategorySports",
+    label: "Equipment Type",
+    type: "select",
+    placeholder: "Select equipment type",
+    required: true,
+    showIf: { field: "nonDigitalCategory", value: ["SPORTS_EQUIPMENT"] },
+    options: [
+      { value: "CRICKET", label: "Cricket Kit" },
+      { value: "FOOTBALL", label: "Football" },
+      { value: "BADMINTON", label: "Badminton" },
+      { value: "CHESS", label: "Chess" },
+      { value: "OTHER", label: "Other" },
+    ],
+  },
+  {
+    name: "nonDigitalSubCategoryStationery",
+    label: "Item Type",
+    type: "select",
+    required: true,
+    showIf: { field: "nonDigitalCategory", value: ["STATIONERY"] },
+    options: [
+      { value: "PEN", label: "Pen" },
+      { value: "PENCIL", label: "Pencil" },
+      { value: "NOTEBOOK", label: "Notebook" },
+      { value: "MARKER", label: "Marker" },
+      { value: "OTHER", label: "Other" },
+    ],
+  },
+  {
+    name: "nonDigitalSubCategoryKitchen",
+    label: "Item Type",
+    type: "select",
+    required: true,
+    showIf: { field: "nonDigitalCategory", value: ["KITCHEN"] },
+    options: [
+      { value: "UTENSILS", label: "Utensils" },
+      { value: "APPLIANCE", label: "Appliance" },
+      { value: "OTHER", label: "Other" },
+    ],
+  },
+  {
+    name: "nonDigitalSubCategoryCleaning",
+    label: "Item Type",
+    type: "select",
+    required: true,
+    showIf: { field: "nonDigitalCategory", value: ["CLEANING"] },
+    options: [
+      { value: "BROOM", label: "Broom" },
+      { value: "MOP", label: "Mop" },
+      { value: "OTHER", label: "Other" },
+    ],
+  },
+  {
+    name: "bookName",
+    label: "Book Name",
+    type: "text",
+    placeholder: "Enter book name (e.g., Harry Potter, NCERT Science)",
+    required: true,
+    showIf: { field: "nonDigitalCategory", value: ["BOOKS"] },
   },
   {
     name: "brand",
@@ -39,6 +144,15 @@ export const assetFormFields = [
       { label: "Toshiba", value: "Toshiba" },
     ],
     required: true,
+    showIf: { field: "assetCategory", value: ["DIGITAL"] },
+  },
+  {
+    name: "nonDigitalBrand",
+    label: "Brand / Manufacturer",
+    type: "text",
+    placeholder: "Enter brand or manufacturer name (optional)",
+    required: false,
+    showIf: { field: "assetCategory", value: ["NON_DIGITAL"] },
   },
   {
     name: "model",
@@ -46,14 +160,16 @@ export const assetFormFields = [
     type: "text",
     placeholder: "Enter model (e.g., Latitude 5400)",
     required: true,
+    showIf: { field: "assetCategory", value: ["DIGITAL"] },
   },
-  // {
-  //   name: 'specLabel',
-  //   label: 'Specification Label',
-  //   type: 'text',
-  //   placeholder: 'Enter full specs (e.g., Intel i5, 8GB RAM, 256GB SSD)',
-  //   required: true,
-  // },
+  {
+    name: "nonDigitalModel",
+    label: "Model / Description",
+    type: "text",
+    placeholder: "Enter description (optional, e.g., Plastic Chair, A4 Size)",
+    required: false,
+    showIf: { field: "assetCategory", value: ["NON_DIGITAL"] },
+  },
   {
     name: "processor",
     label: "Processor",
@@ -94,8 +210,10 @@ export const assetFormFields = [
       { label: "Other", value: "Other" },
     ],
     showIf: {
-      field: "assetTypeName",
-      value: ["Laptop", "Desktop", "Tablet", "Smartphone", "Server", "CPU"],
+      conditions: [
+        { field: "assetCategory", value: ["DIGITAL"] },
+        { field: "assetTypeName", value: ["Laptop", "Desktop", "Tablet", "Smartphone", "Server", "CPU"] },
+      ],
     },
   },
   {
@@ -118,8 +236,10 @@ export const assetFormFields = [
     ],
     required: false,
     showIf: {
-      field: "assetTypeName",
-      value: ["Laptop", "Desktop", "Tablet", "Smartphone", "Server", "RAM"],
+      conditions: [
+        { field: "assetCategory", value: ["DIGITAL"] },
+        { field: "assetTypeName", value: ["Laptop", "Desktop", "Tablet", "Smartphone", "Server", "RAM"] },
+      ],
     },
   },
   {
@@ -139,17 +259,19 @@ export const assetFormFields = [
     ],
     required: false,
     showIf: {
-      field: "assetTypeName",
-      value: [
-        "Laptop",
-        "Desktop",
-        "Tablet",
-        "Smartphone",
-        "Server",
-        "External Hard Drive",
-        "USB Flash Drive",
-        "SSD",
-        "HDD",
+      conditions: [
+        { field: "assetCategory", value: ["DIGITAL"] },
+        { field: "assetTypeName", value: [
+          "Laptop",
+          "Desktop",
+          "Tablet",
+          "Smartphone",
+          "Server",
+          "External Hard Drive",
+          "USB Flash Drive",
+          "SSD",
+          "HDD",
+        ] },
       ],
     },
   },
@@ -159,6 +281,7 @@ export const assetFormFields = [
     type: "text",
     placeholder: "Enter manufacturer serial number (e.g., 5CG7450GK6",
     required: true,
+    showIf: { field: "assetCategory", value: ["DIGITAL"] },
   },
   {
     name: "campusId",
@@ -262,28 +385,80 @@ export const assetFormFields = [
     type: "checkbox",
     required: false,
     showIf: {
-      field: "assetTypeName",
-      value: ["Laptop", "Tablet", "Smartphone"],
+      conditions: [
+        { field: "assetCategory", value: ["DIGITAL"] },
+        { field: "assetTypeName", value: ["Laptop", "Tablet", "Smartphone"] },
+      ],
     },
   },
 ];
 
 export const assetValidationSchema = Yup.object().shape({
-  assetTypeId: Yup.string().required("Asset type is required"),
-  brand: Yup.string()
-    .required("Brand is required")
-    .min(2, "Brand must be at least 2 characters"),
-  model: Yup.string()
-    .required("Model is required")
-    .min(2, "Model must be at least 2 characters")
-    .matches(
-      /^[a-zA-Z0-9\s\-]+$/,
-      "Only letters, numbers, spaces, hyphens allowed"
-    )
-    .test("contains-letter", "Model must contain at least one letter (e.g., 'Latitude 5400')", function (value) {
-      if (!value) return true;
-      return /[a-zA-Z]/.test(value);
-    }),
+  assetCategory: Yup.string()
+    .required("Asset category is required")
+    .oneOf(["DIGITAL", "NON_DIGITAL"], "Invalid category"),
+  assetTypeId: Yup.string().when("assetCategory", {
+    is: "DIGITAL",
+    then: (schema) => schema.required("Asset type is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalCategory: Yup.string().when("assetCategory", {
+    is: "NON_DIGITAL",
+    then: (schema) => schema.required("Category is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalSubCategoryFurniture: Yup.string().when("nonDigitalCategory", {
+    is: "FURNITURE",
+    then: (schema) => schema.required("Item type is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalSubCategorySports: Yup.string().when("nonDigitalCategory", {
+    is: "SPORTS_EQUIPMENT",
+    then: (schema) => schema.required("Equipment type is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalSubCategoryStationery: Yup.string().when("nonDigitalCategory", {
+    is: "STATIONERY",
+    then: (schema) => schema.required("Item type is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalSubCategoryKitchen: Yup.string().when("nonDigitalCategory", {
+    is: "KITCHEN",
+    then: (schema) => schema.required("Item type is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalSubCategoryCleaning: Yup.string().when("nonDigitalCategory", {
+    is: "CLEANING",
+    then: (schema) => schema.required("Item type is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  bookName: Yup.string().when("nonDigitalCategory", {
+    is: "BOOKS",
+    then: (schema) => schema.required("Book name is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  brand: Yup.string().when("assetCategory", {
+    is: "DIGITAL",
+    then: (schema) => schema.required("Brand is required").min(2, "Brand must be at least 2 characters"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalBrand: Yup.string().notRequired(),
+  model: Yup.string().when("assetCategory", {
+    is: "DIGITAL",
+    then: (schema) => schema
+      .required("Model is required")
+      .min(2, "Model must be at least 2 characters")
+      .matches(
+        /^[a-zA-Z0-9\s\-]+$/,
+        "Only letters, numbers, spaces, hyphens allowed"
+      )
+      .test("contains-letter", "Model must contain at least one letter (e.g., 'Latitude 5400')", function (value) {
+        if (!value) return true;
+        return /[a-zA-Z]/.test(value);
+      }),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  nonDigitalModel: Yup.string().notRequired(),
   assetTypeName: Yup.string(),
   processor: Yup.string().when("assetTypeName", {
     is: (val) => ["Laptop", "Desktop", "Server", "CPU"].includes(val),
@@ -328,16 +503,20 @@ export const assetValidationSchema = Yup.object().shape({
           .min(1, "Storage size must be at least 1 GB"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  serialNumber: Yup.string()
-    .required("Serial number is required")
-    .min(2, "Serial number must be at least 2 characters")
-     .matches(
-    /^[a-zA-Z0-9]+$/,     
-    "Only letters and numbers allowed. No spaces, hyphens, slashes, or special characters."
-  )
-   .test("contains-letter", "Serial number must contain at least one letter (e.g., 'SN12345')", function (value) {
-    if (!value) return true;
-    return /[a-zA-Z]/.test(value);
+  serialNumber: Yup.string().when("assetCategory", {
+    is: "DIGITAL",
+    then: (schema) => schema
+      .required("Serial number is required")
+      .min(2, "Serial number must be at least 2 characters")
+      .matches(
+        /^[a-zA-Z0-9]+$/,     
+        "Only letters and numbers allowed. No spaces, hyphens, slashes, or special characters."
+      )
+      .test("contains-letter", "Serial number must contain at least one letter (e.g., 'SN12345')", function (value) {
+        if (!value) return true;
+        return /[a-zA-Z]/.test(value);
+      }),
+    otherwise: (schema) => schema.notRequired(),
   }),
   campusId: Yup.string().required("Campus is required"),
   currentLocationId: Yup.string().required("Current location is required"),
@@ -388,10 +567,20 @@ export const assetValidationSchema = Yup.object().shape({
 });
 
 export const assetInitialValues = {
+  assetCategory: "DIGITAL",
+  nonDigitalCategory: "",
+  nonDigitalSubCategoryFurniture: "",
+  nonDigitalSubCategorySports: "",
+  nonDigitalSubCategoryStationery: "",
+  nonDigitalSubCategoryKitchen: "",
+  nonDigitalSubCategoryCleaning: "",
+  bookName: "",
   assetTypeId: "",
   assetTypeName: "",
   brand: "",
+  nonDigitalBrand: "",
   model: "",
+  nonDigitalModel: "",
   processor: "",
   ramSizeGB: "",
   storageSizeGB: "",
