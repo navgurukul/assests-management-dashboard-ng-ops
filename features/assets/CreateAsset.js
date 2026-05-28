@@ -24,46 +24,94 @@ export default function CreateAsset() {
     const loadingToastId = toast.loading('Creating asset...');
     
     try {
-      // Coerce string fields the API expects as numbers; strip internal form-only fields
       const { assetTypeName, ...rest } = values;
       
-      // Define which fields are relevant for each asset type
-      const assetTypeFieldMap = {
-        processor: ["Laptop", "Desktop", "Server", "CPU", "Tablet", "Smartphone"],
-        ramSizeGB: ["Laptop", "Desktop", "Server", "RAM", "Tablet", "Smartphone"],
-        storageSizeGB: ["Laptop", "Desktop", "Server", "SSD", "HDD", "External Hard Drive", "USB Flash Drive", "Tablet", "Smartphone"],
-        charger: ["Laptop", "Tablet", "Smartphone"],
-      };
+      let finalPayload;
 
-      // Build raw payload with type coercion
-      const rawPayload = {
-        ...rest,
-        status: 'IN_STOCK', // Always set to IN_STOCK for new assets
-        ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
-        storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
-        cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
-      };
+      // Handle Non-Digital Asset
+      if (values.assetCategory === 'NON_DIGITAL') {
+        const subCategory = 
+          values.nonDigitalSubCategoryFurniture ||
+          values.nonDigitalSubCategorySports ||
+          values.nonDigitalSubCategoryStationery ||
+          values.nonDigitalSubCategoryKitchen ||
+          values.nonDigitalSubCategoryCleaning ||
+          (values.nonDigitalCategory === 'BOOKS' ? 'BOOKS' : '');
 
-      // Remove fields not relevant to the selected asset type
-      Object.keys(assetTypeFieldMap).forEach((field) => {
-        const allowedTypes = assetTypeFieldMap[field];
-        if (!allowedTypes.includes(assetTypeName)) {
-          delete rawPayload[field];
+        finalPayload = {
+          assetCategory: 'NON_DIGITAL',
+          nonDigitalCategory: values.nonDigitalCategory,
+          campusId: values.campusId,
+          currentLocationId: values.currentLocationId,
+          condition: values.condition,
+          sourceType: values.sourceType,
+          sourceBy: values.sourceBy,
+          status: 'IN_STOCK',
+        };
+
+        if (subCategory) finalPayload.nonDigitalSubCategory = subCategory;
+
+        if (values.nonDigitalCategory === 'BOOKS') {
+          finalPayload.bookName = values.bookName;
         }
-      });
+        if (values.nonDigitalBrand) finalPayload.brand = values.nonDigitalBrand;
+        if (values.nonDigitalModel) finalPayload.model = values.nonDigitalModel;
+        if (values.purchaseDate && values.sourceType !== 'DONATED') finalPayload.purchaseDate = values.purchaseDate;
+        if (values.cost !== '' && values.cost !== null) finalPayload.cost = Number(values.cost);
+        if (values.notes) finalPayload.notes = values.notes || null;
 
-      // Remove purchaseDate if sourceType is DONATED (since it's not applicable)
-      if (values.sourceType === "DONATED") {
-        delete rawPayload.purchaseDate;
+      } else {
+        // Handle Digital Asset
+        const assetTypeFieldMap = {
+          processor: ["Laptop", "Desktop", "Server", "CPU", "Tablet", "Smartphone"],
+          ramSizeGB: ["Laptop", "Desktop", "Server", "RAM", "Tablet", "Smartphone"],
+          storageSizeGB: ["Laptop", "Desktop", "Server", "SSD", "HDD", "External Hard Drive", "USB Flash Drive", "Tablet", "Smartphone"],
+          charger: ["Laptop", "Tablet", "Smartphone"],
+        };
+
+        const rawPayload = {
+          ...rest,
+          assetCategory: 'DIGITAL',
+          status: 'IN_STOCK', // Always set to IN_STOCK for new assets
+          ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
+          storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
+          cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
+        };
+
+        // Remove non-digital specific internal fields
+        delete rawPayload.nonDigitalCategory;
+        delete rawPayload.nonDigitalSubCategoryFurniture;
+        delete rawPayload.nonDigitalSubCategorySports;
+        delete rawPayload.nonDigitalSubCategoryStationery;
+        delete rawPayload.nonDigitalSubCategoryKitchen;
+        delete rawPayload.nonDigitalSubCategoryCleaning;
+        delete rawPayload.nonDigitalSubCategoryOther;
+        delete rawPayload.nonDigitalSubCategory;
+        delete rawPayload.bookName;
+        delete rawPayload.nonDigitalBrand;
+        delete rawPayload.nonDigitalModel;
+
+        // Remove fields not relevant to the selected asset type
+        Object.keys(assetTypeFieldMap).forEach((field) => {
+          const allowedTypes = assetTypeFieldMap[field];
+          if (!allowedTypes.includes(assetTypeName)) {
+            delete rawPayload[field];
+          }
+        });
+
+        // Remove purchaseDate if sourceType is DONATED
+        if (values.sourceType === "DONATED") {
+          delete rawPayload.purchaseDate;
+        }
+
+        // Remove empty values
+        finalPayload = Object.fromEntries(
+          Object.entries(rawPayload).filter(([, fieldValue]) => {
+            if (fieldValue === '' || fieldValue === undefined || fieldValue === null) return false;
+            return true;
+          })
+        );
       }
-
-      // Remove empty values
-      const payload = Object.fromEntries(
-        Object.entries(rawPayload).filter(([, fieldValue]) => {
-          if (fieldValue === '' || fieldValue === undefined || fieldValue === null) return false;
-          return true;
-        })
-      );
 
       // Make API call to create asset
       const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
@@ -71,7 +119,7 @@ export default function CreateAsset() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(finalPayload),
       });
 
       // Dismiss loading toast
@@ -106,6 +154,18 @@ export default function CreateAsset() {
   };
 
   const fieldCallbacks = {
+    clearAssetSelections: (value, formik) => {
+      formik.setFieldValue('assetTypeId', '');
+      formik.setFieldValue('assetId', '');
+      formik.setFieldValue('nonDigitalCategory', '');
+    },
+    clearAssetId: (value, formik) => {
+      // Clear assetId when assetType changes
+      formik.setFieldValue('assetId', '');
+    },
+    clearAssetIdNonDigital: (value, formik) => {
+      formik.setFieldValue('assetId', '');
+    },
     onAssetTypeChange: (value, formik) => {
       // Always clear assetTypeName first; onItemSelect will re-set it if the item is found
       formik.setFieldValue('assetTypeName', '');
@@ -117,6 +177,14 @@ export default function CreateAsset() {
     },
     onCampusChange: (value, formik) => {
       formik.setFieldValue('currentLocationId', '');
+    },
+    onNonDigitalCategoryChange: (value, formik) => {
+      formik.setFieldValue("nonDigitalSubCategoryFurniture", "");
+      formik.setFieldValue("nonDigitalSubCategorySports", "");
+      formik.setFieldValue("nonDigitalSubCategoryStationery", "");
+      formik.setFieldValue("nonDigitalSubCategoryKitchen", "");
+      formik.setFieldValue("nonDigitalSubCategoryCleaning", "");
+      formik.setFieldValue("bookName", "");
     },
   };
 
