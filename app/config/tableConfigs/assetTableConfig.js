@@ -20,6 +20,28 @@ export const assetTableColumns = [
     description: 'Unique asset identifier'
   },
   
+  // Non-Digital Asset Default Columns
+  { 
+    key: 'assetCategory', 
+    label: 'CATEGORY',
+    description: 'Asset Category (Digital/Non-Digital)'
+  },
+  { 
+    key: 'nonDigitalCategory', 
+    label: 'ITEM TYPE',
+    description: 'Furniture, Books, etc.'
+  },
+  { 
+    key: 'nonDigitalSubCategory', 
+    label: 'SUB TYPE',
+    description: 'Chair, Table, etc.'
+  },
+  { 
+    key: 'bookName', 
+    label: 'BOOK NAME',
+    description: 'Name of the book'
+  },
+  
   // Default visible columns
   { 
     key: 'type', 
@@ -127,6 +149,7 @@ export const assetTableColumns = [
 export const defaultVisibleColumns = [
   'status',
   'assetTag',
+  'assetCategory',
   'type',
   'brand',
   'model',
