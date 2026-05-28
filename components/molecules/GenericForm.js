@@ -5,6 +5,25 @@ import { Formik, Form } from 'formik';
 import FormField from './FormField';
 import CustomButton from '@/components/atoms/CustomButton';
 
+// Helper function to evaluate showIf conditions securely and support array and AND evaluation
+const checkShowIf = (field, values) => {
+  if (!field.showIf) return true;
+
+  if (field.showIf.conditions) {
+    return field.showIf.conditions.every((condition) => {
+      const fieldValue = values[condition.field];
+      return Array.isArray(condition.value)
+        ? condition.value.includes(fieldValue)
+        : fieldValue === condition.value;
+    });
+  }
+
+  const fieldValue = values[field.showIf.field];
+  return Array.isArray(field.showIf.value)
+    ? field.showIf.value.includes(fieldValue)
+    : fieldValue === field.showIf.value;
+};
+
 export default function GenericForm({
   fields,
   initialValues,
@@ -39,15 +58,8 @@ export default function GenericForm({
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {section.fields.map((field) => {
-                    // Handle conditional fields (showIf)
-                    if (field.showIf) {
-                      const fieldValue = formik.values[field.showIf.field];
-                      const conditionMet = Array.isArray(field.showIf.value)
-                        ? field.showIf.value.includes(fieldValue)
-                        : fieldValue === field.showIf.value;
-                      if (!conditionMet) return null;
-                    }
-                    
+                    if (!checkShowIf(field, formik.values)) return null;
+
                     return (
                       <div
                         key={field.name}
@@ -68,18 +80,10 @@ export default function GenericForm({
               </div>
             ))
           ) : (
-            /* Render fields without sections */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {fields.map((field) => {
-                // Handle conditional fields (showIf)
-                if (field.showIf) {
-                  const fieldValue = formik.values[field.showIf.field];
-                  const conditionMet = Array.isArray(field.showIf.value)
-                    ? field.showIf.value.includes(fieldValue)
-                    : fieldValue === field.showIf.value;
-                  if (!conditionMet) return null;
-                }
-                
+                if (!checkShowIf(field, formik.values)) return null;
+
                 return (
                   <div
                     key={field.name}
