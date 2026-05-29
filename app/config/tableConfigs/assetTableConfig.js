@@ -56,6 +56,11 @@ export const assetTableColumns = [
     label: 'LOCATION',
     description: 'Specific location within campus'
   },
+  { 
+    key: 'allocatedTo', 
+    label: 'ALLOCATED TO',
+    description: 'User the asset is allocated to'
+  },
   
   // Optional columns (not visible by default)
   { 
@@ -134,6 +139,7 @@ export const defaultVisibleColumns = [
   'condition',
   'campus',
   'location',
+  'allocatedTo',
   'actions',
 ];
 
