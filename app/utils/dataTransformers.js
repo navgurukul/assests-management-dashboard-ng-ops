@@ -177,6 +177,12 @@ export const transformAssetForTable = (asset) => {
     notes: asset.notes || 'N/A',
     createdAt: formatDate(asset.createdAt),
     updatedAt: formatDate(asset.updatedAt),
+    // Extract allocated user details if allocation exists
+    allocatedTo: asset.allocation?.user ? {
+      firstName: asset.allocation.user.firstName,
+      lastName: asset.allocation.user.lastName,
+      email: asset.allocation.user.email,
+    } : null,
     // Store full asset data for details page
     assetData: asset,
   };
