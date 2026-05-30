@@ -32,6 +32,7 @@ export default function TableWrapper({
   onToggleCards,
   onShowAll,
   showAllButtonText = "Show All",
+  exportActionsComponent,
   // Server-side pagination props
   serverPagination = false,
   paginationData = null,
@@ -129,6 +130,7 @@ export default function TableWrapper({
           )}
           {filterComponent}
           {columnSelectorComponent}
+          {exportActionsComponent}
           {showCreateButton && (
             <CustomButton
               text={createButtonText}
