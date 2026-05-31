@@ -18,7 +18,31 @@ import { CheckCircle2, ArrowRightLeft, Calendar, ExternalLink } from 'lucide-rea
 //   // { name: 'Campus Incharge', icon: 'Building2', path: '/campusincharge', studentOnly: true },
 // ];
 
+export const MOCK_DATA = [
+  { campus: 'Amaravati', category: 'DIGITAL', type: 'Laptop', subType: '', inStock: 30, allocated: 45, repair: 15, nonWorking: 10, withStudents: 20, remote: 15, campusTeam: 10, subTotal: 145 },
+  { campus: 'Amaravati', category: 'DIGITAL', type: 'Smartphone', subType: '', inStock: 10, allocated: 20, repair: 5, nonWorking: 2, withStudents: 8, remote: 6, campusTeam: 4, subTotal: 55 },
+  { campus: 'Amaravati', category: 'DIGITAL', type: 'Desktop', subType: '', inStock: 5, allocated: 15, repair: 2, nonWorking: 1, withStudents: 5, remote: 3, campusTeam: 2, subTotal: 33 },
+  { campus: 'Amaravati', category: 'NON_DIGITAL', type: 'FURNITURE', subType: 'CHAIR', inStock: 50, allocated: 100, repair: 20, nonWorking: 10, withStudents: 40, remote: 0, campusTeam: 25, subTotal: 245 },
+  { campus: 'Amaravati', category: 'NON_DIGITAL', type: 'FURNITURE', subType: 'TABLE', inStock: 20, allocated: 50, repair: 5, nonWorking: 2, withStudents: 15, remote: 0, campusTeam: 10, subTotal: 102 },
+  { campus: 'Amaravati', category: 'NON_DIGITAL', type: 'SPORTS_EQUIPMENT', subType: 'FOOTBALL', inStock: 5, allocated: 10, repair: 2, nonWorking: 1, withStudents: 8, remote: 0, campusTeam: 2, subTotal: 28 },
+  { campus: 'Pune', category: 'DIGITAL', type: 'Laptop', subType: '', inStock: 40, allocated: 55, repair: 25, nonWorking: 18, withStudents: 30, remote: 20, campusTeam: 15, subTotal: 203 },
+  { campus: 'Pune', category: 'NON_DIGITAL', type: 'FURNITURE', subType: 'CHAIR', inStock: 70, allocated: 120, repair: 15, nonWorking: 5, withStudents: 50, remote: 0, campusTeam: 30, subTotal: 290 },
+  { campus: 'Dharamshala', category: 'DIGITAL', type: 'Laptop', subType: '', inStock: 28, allocated: 42, repair: 18, nonWorking: 8, withStudents: 18, remote: 12, campusTeam: 8, subTotal: 134 },
+  { campus: 'Dharamshala', category: 'NON_DIGITAL', type: 'SPORTS_EQUIPMENT', subType: 'CRICKET', inStock: 2, allocated: 5, repair: 1, nonWorking: 0, withStudents: 3, remote: 0, campusTeam: 1, subTotal: 12 },
+  { campus: 'Bangalore', category: 'DIGITAL', type: 'Desktop', subType: '', inStock: 15, allocated: 80, repair: 5, nonWorking: 3, withStudents: 25, remote: 20, campusTeam: 15, subTotal: 163 },
+];
 
+export const ASSET_TYPES = {
+  DIGITAL: ['Laptop', 'Desktop', 'Smartphone', 'Tablet'],
+  NON_DIGITAL: ['FURNITURE', 'SPORTS_EQUIPMENT', 'STATIONERY', 'KITCHEN']
+};
+
+export const SUB_TYPES = {
+  FURNITURE: ['CHAIR', 'TABLE', 'CUPBOARD', 'BED', 'SHELF'],
+  SPORTS_EQUIPMENT: ['CRICKET', 'FOOTBALL', 'BADMINTON', 'CHESS'],
+  STATIONERY: ['PEN', 'PENCIL', 'NOTEBOOK', 'MARKER'],
+  KITCHEN: ['UTENSILS', 'APPLIANCE'],
+};
 
 export const dashboardCards = [
   { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-100', iconColor: 'text-teal-600' },
