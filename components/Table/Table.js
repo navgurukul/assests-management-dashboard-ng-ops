@@ -1,11 +1,24 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useEffect} from "react";
 import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
 import config from "@/app/config/env.config";
 
-const columns = [
+const filteredColumns = [
+  { key: "campus", label: "Campus" },
+  { key: "inStock", label: "In Stock" },
+  { key: "allocated", label: "Allocated" },
+  { key: "repair", label: "Repair" },
+  { key: "nonWorking", label: "Non Working" },
+  { key: "subTotal", label: "Sub Total" },
+  { key: "withStudents", label: "With Students" },
+  { key: "remote", label: "Remote" },
+  { key: "campusTeam", label: "Campus Team" },
+  { key: "grandTotal", label: "Grand Total" },
+];
+
+const originalColumns = [
   { key: "campus", label: "Campus" },
   { key: "lws", label: "LWS" },
   { key: "lis", label: "LIS" },
@@ -18,7 +31,23 @@ const columns = [
   { key: "grandTotal", label: "Grand Total" },
 ];
 
-function transformRow(item) {
+function transformFilteredRow(item) {
+  return {
+    id: item.campus,
+    campus: item.campus,
+    inStock: item.inStock ?? 0,
+    allocated: item.allocated ?? 0,
+    repair: item.repair ?? 0,
+    nonWorking: item.nonWorking ?? 0,
+    subTotal: item.subTotal ?? 0,
+    withStudents: item.withStudents ?? 0,
+    remote: item.remote ?? 0,
+    campusTeam: item.campusTeam ?? 0,
+    grandTotal: item.grandTotal ?? 0,
+  };
+}
+
+function transformOriginalRow(item) {
   return {
     id: item.campus,
     campus: item.campus,
@@ -34,55 +63,104 @@ function transformRow(item) {
   };
 }
 
-export default function AssetsTable() {
+const formatLabel = (str) =>
+  str.replace(/_/g, ' ')
+     .toLowerCase()
+     .replace(/\b\w/g, c => c.toUpperCase());
+
+export default function AssetsTable({ isFiltered, dummyData, type, subType, category }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [isFiltered]);
 
   const { data: response, isLoading, isError, error } = useFetch({
     url: config.endpoints.assets.consolidatedByCampus,
     queryKey: ["assets", "consolidated-by-campus"],
+    enabled: !isFiltered,
   });
 
-  const tableData = (response?.data ?? []).map(transformRow);
+  const columns = isFiltered ? filteredColumns : originalColumns;
+
+  const rawData = isFiltered
+    ? (dummyData || [])
+    : (response?.data || []);
+
+  const tableData = isFiltered
+    ? rawData.map(transformFilteredRow)
+    : rawData.map(transformOriginalRow);
+
 
   // Calculate totals across all rows
-  const totals = tableData.reduce(
-    (acc, row) => {
-      acc.lws += row.lws || 0;
-      acc.lis += row.lis || 0;
-      acc.lct += row.lct || 0;
-      acc.lr += row.lr || 0;
-      acc.subTotal += row.subTotal || 0;
-      acc.lnw += row.lnw || 0;
-      acc.lwfhe += row.lwfhe || 0;
-      acc.lsdb += row.lsdb || 0;
-      acc.grandTotal += row.grandTotal || 0;
-      return acc;
-    },
-    {
-      id: "total-row",
-      campus: "Total",
-      lws: 0,
-      lis: 0,
-      lct: 0,
-      lr: 0,
-      subTotal: 0,
-      lnw: 0,
-      lwfhe: 0,
-      lsdb: 0,
-      grandTotal: 0,
-    }
-  );
+  const totals = isFiltered
+  ? tableData.reduce(
+      (acc, row) => {
+        acc.inStock += row.inStock || 0;
+        acc.allocated += row.allocated || 0;
+        acc.repair += row.repair || 0;
+        acc.nonWorking += row.nonWorking || 0;
+        acc.subTotal += row.subTotal || 0;        
+        acc.withStudents += row.withStudents || 0; 
+        acc.remote += row.remote || 0;             
+        acc.campusTeam += row.campusTeam || 0;    
+        acc.grandTotal += row.grandTotal || 0;
+        return acc;
+      },
+      {
+        id: "total-row",
+        campus: "Total",
+        inStock: 0,
+        allocated: 0,
+        repair: 0,
+        nonWorking: 0,
+        subTotal: 0,
+        withStudents: 0,
+        remote: 0,
+        campusTeam: 0,
+        grandTotal: 0,
+      }
+    )
+  : tableData.reduce(
+      (acc, row) => {
+        acc.lws += row.lws || 0;
+        acc.lis += row.lis || 0;
+        acc.lct += row.lct || 0;
+        acc.lr += row.lr || 0;
+        acc.subTotal += row.subTotal || 0;
+        acc.lnw += row.lnw || 0;
+        acc.lwfhe += row.lwfhe || 0;
+        acc.lsdb += row.lsdb || 0;
+        acc.grandTotal += row.grandTotal || 0;
+        return acc;
+      },
+      {
+        id: "total-row",
+        campus: "Total",
+        lws: 0,
+        lis: 0,
+        lct: 0,
+        lr: 0,
+        subTotal: 0,
+        lnw: 0,
+        lwfhe: 0,
+        lsdb: 0,
+        grandTotal: 0,
+      }
+    );
 
   const totalCount = tableData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = tableData.slice(startIndex, startIndex + pageSize);
+  const paginatedData = tableData.length > 0
+  ? [...tableData.slice(startIndex, startIndex + pageSize), totals]
+  : [];
 
-  // Append totals row at the bottom of the current page view
-  if (tableData.length > 0) {
-    paginatedData.push(totals);
-  }
+  // // Append totals row at the bottom of the current page view
+  // if (tableData.length > 0) {
+  //   paginatedData.push(totals);
+  // }
 
   const handlePageChange = (page) => setCurrentPage(page);
   const handlePageSizeChange = (newSize) => {
@@ -129,7 +207,19 @@ export default function AssetsTable() {
     <TableWrapper
       data={paginatedData}
       columns={columns}
-      title="Consolidated Laptop Data"
+      title={
+        isFiltered
+          ? `Consolidated ${
+              subType && subType !== 'ALL'
+                ? formatLabel(subType)
+                : type && type !== 'ALL'
+                ? formatLabel(type)
+                : category === 'DIGITAL'
+                ? 'Digital Assets'
+                : 'Non-Digital Assets'
+            } Data`
+          : "Consolidated Assets Data"
+      }
       renderCell={renderCell}
       margin="m-0"
       shadow="shadow-none"
