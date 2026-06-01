@@ -18,7 +18,61 @@ import { CheckCircle2, ArrowRightLeft, Calendar, ExternalLink } from 'lucide-rea
 //   // { name: 'Campus Incharge', icon: 'Building2', path: '/campusincharge', studentOnly: true },
 // ];
 
+export const MOCK_DATA = [
+  { campus: 'Eternal',   category: 'IT & Electronics',       type: 'Laptop',            subType: '', inStock: 30,  allocated: 45, repair: 15, nonWorking: 10, withStudents: 20, remote: 15, campusTeam: 10 },
+  { campus: 'Pune',        category: 'IT & Electronics',       type: 'Desktop',           subType: '', inStock: 8,   allocated: 10, repair: 2,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 1  },
+  { campus: 'Dharamshala', category: 'IT & Electronics',       type: 'Printer',           subType: '', inStock: 5,   allocated: 3,  repair: 1,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 2  },
+  { campus: 'Sarjapura',   category: 'IT & Electronics',       type: 'Projector',         subType: '', inStock: 3,   allocated: 2,  repair: 0,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 1  },
+  { campus: 'Kishanganj',  category: 'IT & Electronics',       type: 'Monitor',           subType: '', inStock: 10,  allocated: 8,  repair: 1,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 2  },
+  { campus: 'Raipur',      category: 'IT & Electronics',       type: 'Scanner',           subType: '', inStock: 2,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Dantewada',   category: 'IT & Electronics',       type: 'Router',            subType: '', inStock: 4,   allocated: 3,  repair: 1,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Pune',        category: 'IT & Electronics',       type: 'CCTV',              subType: '', inStock: 6,   allocated: 5,  repair: 0,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 0  },
 
+  { campus: 'Eternal',   category: 'Furniture & Fixtures',   type: 'Chair',             subType: '', inStock: 50,  allocated: 30, repair: 5,  nonWorking: 2,  withStudents: 0,  remote: 0,  campusTeam: 10 },
+  { campus: 'Pune',        category: 'Furniture & Fixtures',   type: 'Table',             subType: '', inStock: 20,  allocated: 15, repair: 2,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 5  },
+  { campus: 'Amaravati',   category: 'Furniture & Fixtures',   type: 'Bed',               subType: '', inStock: 15,  allocated: 12, repair: 1,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Dharamshala', category: 'Furniture & Fixtures',   type: 'Cupboard',          subType: '', inStock: 8,   allocated: 6,  repair: 1,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Kishanganj',  category: 'Furniture & Fixtures',   type: 'Shelf',             subType: '', inStock: 12,  allocated: 10, repair: 0,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Raipur',      category: 'Furniture & Fixtures',   type: 'Whiteboard',        subType: '', inStock: 4,   allocated: 3,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Dantewada',   category: 'Furniture & Fixtures',   type: 'Mattress',          subType: '', inStock: 20,  allocated: 18, repair: 2,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+
+  { campus: 'Eternal',  category: 'Appliances & Equipment', type: 'Refrigerator',      subType: '', inStock: 4,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 1  },
+  { campus: 'Pune',        category: 'Appliances & Equipment', type: 'Washing Machine',   subType: '', inStock: 2,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Amaravati',   category: 'Appliances & Equipment', type: 'Fan',               subType: '', inStock: 25,  allocated: 20, repair: 3,  nonWorking: 2,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Sarjapura',   category: 'Appliances & Equipment', type: 'Cooler',            subType: '', inStock: 8,   allocated: 6,  repair: 1,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Dharamshala', category: 'Appliances & Equipment', type: 'RO',                subType: '', inStock: 3,   allocated: 2,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Kishanganj',  category: 'Appliances & Equipment', type: 'Inverter',          subType: '', inStock: 2,   allocated: 2,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Dantewada',   category: 'Appliances & Equipment', type: 'Generator',         subType: '', inStock: 1,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+
+  { campus: 'Eternal',      category: 'Vehicles & Mobility',    type: 'Scooter',           subType: '', inStock: 3,   allocated: 0,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Amaravati',   category: 'Vehicles & Mobility',    type: 'Bicycle',           subType: '', inStock: 5,   allocated: 4,  repair: 1,  nonWorking: 0,  withStudents: 3,  remote: 0,  campusTeam: 0  },
+  { campus: 'Sarjapura',   category: 'Vehicles & Mobility',    type: 'E-Bike',            subType: '', inStock: 2,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 1  },
+
+  { campus: 'Dantewada',   category: 'Learning & Recreation',  type: 'Books',             subType: '', inStock: 120, allocated: 80, repair: 0,  nonWorking: 0,  withStudents: 100,remote: 0,  campusTeam: 5  },
+  { campus: 'Amaravati',   category: 'Learning & Recreation',  type: 'Sports Equipment',  subType: '', inStock: 5,   allocated: 10, repair: 2,  nonWorking: 1,  withStudents: 8,  remote: 0,  campusTeam: 2  },
+  { campus: 'Pune',        category: 'Learning & Recreation',  type: 'Sports Equipment',  subType: '', inStock: 4,   allocated: 6,  repair: 1,  nonWorking: 0,  withStudents: 5,  remote: 0,  campusTeam: 1  },
+  { campus: 'Dharamshala', category: 'Learning & Recreation',  type: 'Gym Equipment',     subType: '', inStock: 1,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Kishanganj',  category: 'Learning & Recreation',  type: 'Learning Kits',     subType: '', inStock: 10,  allocated: 8,  repair: 0,  nonWorking: 1,  withStudents: 8,  remote: 0,  campusTeam: 0  },
+
+  { campus: 'Jabalpur',    category: 'Kitchen & Housekeeping', type: 'Stove',             subType: '', inStock: 6,   allocated: 2,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 1  },
+  { campus: 'Pune',        category: 'Kitchen & Housekeeping', type: 'Utensils',          subType: '', inStock: 8,   allocated: 5,  repair: 0,  nonWorking: 1,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Sarjapura',   category: 'Kitchen & Housekeeping', type: 'Vacuum Cleaner',    subType: '', inStock: 2,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Amaravati',   category: 'Kitchen & Housekeeping', type: 'Cleaning Equipment',subType: '', inStock: 10,  allocated: 8,  repair: 0,  nonWorking: 2,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+
+  { campus: 'Himachal',    category: 'Infrastructure Assets',  type: 'Solar System',      subType: '', inStock: 1,   allocated: 0,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Dantewada',   category: 'Infrastructure Assets',  type: 'Water Tank',        subType: '', inStock: 2,   allocated: 2,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+  { campus: 'Kishanganj',  category: 'Infrastructure Assets',  type: 'Electrical Panels', subType: '', inStock: 1,   allocated: 1,  repair: 0,  nonWorking: 0,  withStudents: 0,  remote: 0,  campusTeam: 0  },
+];
+
+export const ASSET_TYPES = {
+  'IT & Electronics':        ['Laptop', 'Desktop', 'Printer', 'Scanner', 'Router', 'Projector', 'CCTV', 'Monitor'],
+  'Furniture & Fixtures':    ['Bed', 'Mattress', 'Table', 'Chair', 'Cupboard', 'Shelf', 'Whiteboard'],
+  'Appliances & Equipment':  ['Fan', 'Cooler', 'Refrigerator', 'Washing Machine', 'RO', 'Water Cooler', 'Motor', 'Inverter', 'Battery', 'Generator'],
+  'Vehicles & Mobility':     ['Scooter', 'Bicycle', 'E-Bike'],
+  'Learning & Recreation':   ['Books', 'Sports Equipment', 'Gym Equipment', 'Learning Kits'],
+  'Kitchen & Housekeeping':  ['Stove', 'Utensils', 'Dining Equipment', 'Cleaning Equipment', 'Vacuum Cleaner'],
+  'Infrastructure Assets':   ['Solar System', 'Water Tank', 'Electrical Panels', 'Plumbing Assets', 'Fixed Installations'],
+} ;
 
 export const dashboardCards = [
   { id: 1, count: 792, label: 'Active', icon: 'CheckCircle2', bgColor: 'bg-teal-100', iconColor: 'text-teal-600' },
