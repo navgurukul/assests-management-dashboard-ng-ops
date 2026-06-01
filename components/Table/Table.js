@@ -4,6 +4,7 @@ import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
 import config from "@/app/config/env.config";
+import FilterDropdown from "../molecules/FilterDropdown";
 
 const filteredColumns = [
   { key: "campus", label: "Campus" },
@@ -68,19 +69,38 @@ const formatLabel = (str) =>
      .toLowerCase()
      .replace(/\b\w/g, c => c.toUpperCase());
 
-export default function AssetsTable({ isFiltered, dummyData, type, subType, category }) {
+export default function AssetsTable({ 
+  isFiltered, 
+  dummyData, 
+  type, 
+  category,
+  assetTypesByCategory,
+  handleCategoryChange,
+  handleTypeChange,
+}) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [isFiltered]);
+  }, [category, type]);
 
   const { data: response, isLoading, isError, error } = useFetch({
     url: config.endpoints.assets.consolidatedByCampus,
     queryKey: ["assets", "consolidated-by-campus"],
     enabled: !isFiltered,
   });
+
+  // Build category options from assetTypesByCategory object keys
+  const categoryOptions = [
+    { value: "ALL", label: "All" },
+    ...Object.keys(assetTypesByCategory || {}).map((key) => ({ value: key, label: formatLabel(key) })),
+  ];
+
+  // Build type options. If category is ALL, include all types across categories
+  const allTypes = Object.values(assetTypesByCategory || {}).flat();
+  const selectedTypes = category === 'ALL' ? allTypes : (assetTypesByCategory?.[category] || []);
+  const typeOptions = selectedTypes.map((t) => ({ value: t, label: formatLabel(t) }));
 
   const columns = isFiltered ? filteredColumns : originalColumns;
 
@@ -203,21 +223,22 @@ export default function AssetsTable({ isFiltered, dummyData, type, subType, cate
     );
   }
 
+  // Build dynamic title for filtered view
+  let filteredTitleLabel = 'Assets';
+  if (type && type !== 'ALL') filteredTitleLabel = formatLabel(type);
+  else if (category && category !== 'ALL') filteredTitleLabel = formatLabel(category);
+
+  const activeFilters = {};
+  if (category !== 'ALL') activeFilters.category = category;
+  if (type !== 'ALL') activeFilters.type = type;
+
   return (
     <TableWrapper
       data={paginatedData}
       columns={columns}
       title={
         isFiltered
-          ? `Consolidated ${
-              subType && subType !== 'ALL'
-                ? formatLabel(subType)
-                : type && type !== 'ALL'
-                ? formatLabel(type)
-                : category === 'DIGITAL'
-                ? 'Digital Assets'
-                : 'Non-Digital Assets'
-            } Data`
+          ? `Consolidated ${filteredTitleLabel} Data`
           : "Consolidated Assets Data"
       }
       renderCell={renderCell}
@@ -226,6 +247,21 @@ export default function AssetsTable({ isFiltered, dummyData, type, subType, cate
       itemsPerPage={pageSize}
       showPagination={true}
       serverPagination={true}
+      titleAction={
+        <FilterDropdown
+          selectedFilters={activeFilters}
+          onFilterChange={(newFilters) => {
+            const newCategory = newFilters.category ?? 'ALL';
+            const newType = newFilters.type ?? 'ALL';
+
+            if (newCategory !== category) handleCategoryChange(newCategory);
+            if (newType !== type) handleTypeChange({ target: { value: newType } });
+          }}
+          categoryOptions={categoryOptions}
+          assetTypeOptions={typeOptions}
+        />
+      }
+      filterComponent={null}
       paginationData={{
         page: currentPage,
         limit: pageSize,
