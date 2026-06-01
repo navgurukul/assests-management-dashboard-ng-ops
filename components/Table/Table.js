@@ -5,6 +5,7 @@ import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
 import config from "@/app/config/env.config";
 import FilterDropdown from "../molecules/FilterDropdown";
+import ActiveFiltersChips from "../molecules/ActiveFiltersChips";
 
 const filteredColumns = [
   { key: "campus", label: "Campus" },
@@ -187,6 +188,27 @@ export default function AssetsTable({
     setPageSize(newSize);
     setCurrentPage(1);
   };
+  const getCategoryName = (filterKey) => {
+    const names = {
+        category: "Category",
+        type: "Asset Type",
+    };
+    return names[filterKey] || filterKey;   
+  };
+
+  const getFilterLabel = (filterKey, value) => {
+    if (filterKey === "category") {
+        const opt = categoryOptions.find((o) => o.value === value);
+        return opt ? opt.label : value;
+    }
+
+    if (filterKey === "type") {
+        const opt = typeOptions.find((o) => o.value === value);
+        return opt ? opt.label : value;
+    }
+
+    return value;
+  };
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -261,7 +283,24 @@ export default function AssetsTable({
           assetTypeOptions={typeOptions}
         />
       }
-      filterComponent={null}
+     filterComponent={null}
+      activeFiltersComponent={
+        Object.keys(activeFilters).length > 0 ? (
+          <ActiveFiltersChips
+            filters={activeFilters}
+            onRemoveFilter={(filterKey) => {
+              if (filterKey === 'category') handleCategoryChange('ALL');
+              if (filterKey === 'type') handleTypeChange({ target: { value: 'ALL' } });
+            }}
+            onClearAll={() => {
+              handleCategoryChange('ALL');
+              handleTypeChange({ target: { value: 'ALL' } });
+            }}
+            getCategoryName={getCategoryName}
+            getFilterLabel={getFilterLabel}
+          />
+        ) : null
+      }
       paginationData={{
         page: currentPage,
         limit: pageSize,
