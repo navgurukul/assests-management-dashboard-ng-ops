@@ -11,11 +11,28 @@ import {
   assetValidationSchema,
   assetInitialValues,
 } from '@/app/config/formConfigs/assetFormConfig';
+import { getCategoryConfig } from '@/app/config/formConfigs/categoryFormConfigs';
 import { toast } from '@/app/utils/toast';
 
 export default function CreateAsset() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assetCategory, setAssetCategory] = useState("IT & Electronics");
+
+  const categories = [
+    "IT & Electronics",
+    "Furniture & Fixtures",
+    "Appliances & Equipment",
+    "Vehicles & Mobility",
+    "Learning & Recreation",
+    "Kitchen & Housekeeping",
+    "Infrastructure Assets"
+  ];
+  
+  const currentConfig = assetCategory === "IT & Electronics" 
+    ? { fields: assetFormFields, validationSchema: assetValidationSchema, initialValues: assetInitialValues }
+    : getCategoryConfig(assetCategory);
+
 
   const handleFormSubmit = async (values) => {
     setIsSubmitting(true);
@@ -143,10 +160,26 @@ export default function CreateAsset() {
 
         {/* Form Container */}
         <div className="bg-(--surface) text-foreground rounded-xl shadow-lg border border-(--border) p-8">
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-1">Asset Category</label>
+            <select
+              value={assetCategory}
+              onChange={(e) => setAssetCategory(e.target.value)}
+              className="w-full bg-(--surface) border border-(--border) rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent transition-shadow"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <GenericForm
-            fields={assetFormFields}
-            initialValues={assetInitialValues}
-            validationSchema={assetValidationSchema}
+            key={assetCategory}
+            fields={currentConfig.fields}
+            initialValues={currentConfig.initialValues}
+            validationSchema={currentConfig.validationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
             submitButtonText="Create Asset"
