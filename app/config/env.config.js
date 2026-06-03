@@ -26,6 +26,7 @@ const config = {
       repair: (id) => `/assets/${id}/repair`,
       scrap: (id) => `/assets/${id}/scrap`,
       consolidatedByCampus: '/assets/consolidated-data/by-campus',
+      export: '/assets/export/csv',
       types: '/asset-types',
     },
     
