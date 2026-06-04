@@ -43,7 +43,6 @@ export default function TableWrapper({
   margin = "m-0",
   shadow = "shadow-md",
   emptyContent,
-  titleAction,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
@@ -87,13 +86,10 @@ export default function TableWrapper({
 
       {/* Title */}
       {title && (
-        <div className="flex items-center justify-between mb-2 shrink-0">
+        <div className="mb-2 shrink-0">
           <h2 className="text-xl sm:text-2xl md:text-[26px] font-semibold text-gray-800 font-(family-name:--font-poppins)">
             {title}
           </h2>
-          {titleAction && (
-            <div className="shrink-0">{titleAction}</div>
-          )}
         </div>
       )}
 
