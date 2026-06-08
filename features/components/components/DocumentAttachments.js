@@ -187,11 +187,16 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
           
           {documents.map((doc, index) => {
             const Icon = getFileIcon(doc.mimeType || 'application/pdf');
-            const typeInfo = getFileTypeLabel(doc.type);
+            const documentType = doc.type || doc.documentType || 'OTHER';
+            const fileName = doc.name || doc.fileName || 'Untitled document';
+            const fileUrl = doc.url || doc.fileUrl;
+            const fileSize = doc.size || doc.fileSize;
+            const uploadedAt = doc.uploadedAt || doc.createdAt;
+            const typeInfo = getFileTypeLabel(documentType);
             
             return (
               <div
-                key={index}
+                key={doc.id || index}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -199,18 +204,23 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
                   
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      {doc.name}
+                      {fileName}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeInfo.color}`}>
                         {typeInfo.label}
                       </span>
                       <span className="text-xs text-gray-500">
-                        {doc.size && `${(doc.size / 1024).toFixed(1)} KB`}
+                        {fileSize && `${(fileSize / 1024).toFixed(1)} KB`}
                       </span>
-                      {doc.uploadedAt && (
+                      {uploadedAt && (
                         <span className="text-xs text-gray-500">
-                          • {new Date(doc.uploadedAt).toLocaleDateString('en-IN')}
+                          • {new Date(uploadedAt).toLocaleDateString('en-IN')}
+                        </span>
+                      )}
+                      {doc.description && (
+                        <span className="text-xs text-gray-500 truncate">
+                          • {doc.description}
                         </span>
                       )}
                     </div>
@@ -218,11 +228,11 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
                 </div>
 
                 <div className="flex items-center gap-2 ml-4">
-                  {doc.url && (
+                  {fileUrl && (
                     <>
                       <CustomButton
                         icon={Eye}
-                        onClick={() => window.open(doc.url, '_blank')}
+                        onClick={() => window.open(fileUrl, '_blank')}
                         variant="info"
                         size="sm"
                         title="View"
@@ -230,7 +240,7 @@ export default function DocumentAttachments({ documents = [], onUpload, onDelete
                       />
                       <CustomButton
                         icon={Download}
-                        onClick={() => window.open(doc.url, '_blank')}
+                        onClick={() => window.open(fileUrl, '_blank')}
                         variant="success"
                         size="sm"
                         title="Download"
