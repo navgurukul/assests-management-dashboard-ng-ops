@@ -59,6 +59,36 @@ export function CurrentlyInstalledCard({ deviceInfo }) {
             <span className="text-sm font-medium text-gray-900">{deviceInfo.location}</span>
           </div>
         )}
+        {deviceInfo.slotLabel && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Slot Label</span>
+            <span className="text-sm font-medium text-gray-900">{deviceInfo.slotLabel}</span>
+          </div>
+        )}
+
+        {deviceInfo.removedAt && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Removed At</span>
+            <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+                {new Date(deviceInfo.removedAt).toLocaleDateString('en-IN')}
+            </span>
+          </div>
+        )}
+
+        {deviceInfo.removalReason && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Removal Reason</span>
+            <span className="text-sm font-medium text-gray-900">{deviceInfo.removalReason}</span>
+          </div>
+        )}
+
+        {deviceInfo.notes && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Notes</span>
+            <span className="text-sm font-medium text-gray-900">{deviceInfo.notes}</span>
+          </div>
+      )}
       </div>
     </div>
   );
