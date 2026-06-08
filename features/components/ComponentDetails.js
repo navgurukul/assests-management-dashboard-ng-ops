@@ -226,9 +226,9 @@ export default function ComponentDetails({ componentId, componentData, onBack })
                       installationDate: h.installedAt,
                       location: componentDetails.location?.name || null,
                       currentUser: componentDetails.ownedBy || null,
-                      slotLabel: h.slotLabel || null, // ADD
-                      removedAt: h.removedAt || null, // ADD
-                      removalReason: h.removalReason || null, // ADD
+                      slotLabel: h.slotLabel || null,
+                      removedAt: h.removedAt || null,
+                      removalReason: h.removalReason || null,
                       notes: h.notes || null,
                     }}
                   />
