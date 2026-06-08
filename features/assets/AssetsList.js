@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown } from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown} from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -32,7 +32,7 @@ export default function AssetsList() {
   const router = useRouter();
   
   // Export functionality
-  const { exportToPDF, exportToExcel } = useAssetExport();
+  const { exportToPDF, exportToCSV } = useAssetExport();
   const [isExporting, setIsExporting] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef(null);
@@ -205,11 +205,13 @@ export default function AssetsList() {
     }));
   }, [data]);
 
-  // Handle PDF export
+  // Handle PDF export 
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
-      exportToPDF(assetsListData, visibleColumns, 'assets');
+      const selectedCampusOpt = campusOptions.find(opt => opt.value === filters.campus);
+      const campusName = selectedCampusOpt ? selectedCampusOpt.label : 'all';
+      await exportToPDF(filters, visibleColumns, `assets-${campusName.toLowerCase().replace(/\s+/g, '-')}`);
     } catch (error) {
       console.error('PDF export failed:', error);
     } finally {
@@ -217,13 +219,15 @@ export default function AssetsList() {
     }
   };
 
-  // Handle Excel export
-  const handleExportExcel = async () => {
+  // Handle CSV export
+  const handleExportCSV = async () => {
     setIsExporting(true);
     try {
-      exportToExcel(assetsListData, visibleColumns, 'assets');
+      const selectedCampusOpt = campusOptions.find(opt => opt.value === filters.campus);
+      const campusName = selectedCampusOpt ? selectedCampusOpt.label : 'all';
+      await exportToCSV(filters, campusName);
     } catch (error) {
-      console.error('Excel export failed:', error);
+      console.error('CSV export failed:', error);
     } finally {
       setIsExporting(false);
     }
@@ -316,9 +320,6 @@ export default function AssetsList() {
 
       {exportDropdownOpen && (
         <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2">
-          <p className="text-xs text-gray-400 px-3 pt-1 pb-2">
-            Current page ({assetsListData.length} records)
-          </p>
           <button
             onClick={() => { handleExportPDF(); setExportDropdownOpen(false); }}
             className="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -330,20 +331,16 @@ export default function AssetsList() {
             </div>
           </button>
           <button
-            onClick={() => { handleExportExcel(); setExportDropdownOpen(false); }}
+            onClick={() => { handleExportCSV(); setExportDropdownOpen(false); }}
             className="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <Download className="w-4 h-4 text-green-600 flex-shrink-0" />
             <div className="text-left">
-              <p className="font-medium text-gray-800 text-sm">Export as Excel</p>
-              <p className="text-xs text-gray-500">.xlsx with auto column widths</p>
+              <p className="font-medium text-gray-800 text-sm">Export as CSV</p>
+              <p className="text-xs text-gray-500">Download all assets as CSV</p>
             </div>
           </button>
-          <div className="border-t border-gray-100 mt-1.5 pt-1.5 px-3 pb-1">
-            <p className="text-xs text-gray-400">
-              {assetsListData.length} visible records exported
-            </p>
-          </div>
+          
         </div>
       )}
     </div>
