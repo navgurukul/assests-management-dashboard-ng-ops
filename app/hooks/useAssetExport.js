@@ -37,9 +37,9 @@ export function useAssetExport() {
   const exportToPDF = useCallback(async (filters = {}, visibleColumns, filename = 'assets') => {
     try {
       const params = new URLSearchParams();
-      if (filters.campus) {
-        params.append('campusId', filters.campus);
-      }
+      if (filters.campus) params.append('campusId', filters.campus);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.type) params.append('assetType', filters.type);
       const endpoint = `${config.endpoints.assets.export}?${params.toString()}`;
       
       // Request file as blob (contentType: 'text/csv' instructs get.js fetch client to parse response as Blob)
@@ -136,9 +136,9 @@ export function useAssetExport() {
   const exportToCSV = useCallback(async (filters = {}, campusName = 'all') => {
     try {
       const params = new URLSearchParams();
-      if (filters.campus) {
-        params.append('campusId', filters.campus);
-      } 
+      if (filters.campus) params.append('campusId', filters.campus);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.type) params.append('assetType', filters.type);
       const endpoint = `${config.endpoints.assets.export}?${params.toString()}`;
       
       // Request file as blob (contentType: 'text/csv' instructs get.js fetch client to parse response as Blob)
