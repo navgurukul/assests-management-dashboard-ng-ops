@@ -1,26 +1,11 @@
 "use client";
-import React, { useState, useEffect} from "react";
+import { useState } from "react";
 import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
 import config from "@/app/config/env.config";
-import FilterDropdown from "../molecules/FilterDropdown";
-import ActiveFiltersChips from "../molecules/ActiveFiltersChips";
 
-const filteredColumns = [
-  { key: "campus", label: "Campus" },
-  { key: "inStock", label: "In Stock" },
-  { key: "allocated", label: "Allocated" },
-  { key: "repair", label: "Repair" },
-  { key: "nonWorking", label: "Non Working" },
-  { key: "subTotal", label: "Sub Total" },
-  { key: "withStudents", label: "With Students" },
-  { key: "remote", label: "Remote" },
-  { key: "campusTeam", label: "Campus Team" },
-  { key: "grandTotal", label: "Grand Total" },
-];
-
-const originalColumns = [
+const columns = [
   { key: "campus", label: "Campus" },
   { key: "lws", label: "LWS" },
   { key: "lis", label: "LIS" },
@@ -33,23 +18,7 @@ const originalColumns = [
   { key: "grandTotal", label: "Grand Total" },
 ];
 
-function transformFilteredRow(item) {
-  return {
-    id: item.campus,
-    campus: item.campus,
-    inStock: item.inStock ?? 0,
-    allocated: item.allocated ?? 0,
-    repair: item.repair ?? 0,
-    nonWorking: item.nonWorking ?? 0,
-    subTotal: item.subTotal ?? 0,
-    withStudents: item.withStudents ?? 0,
-    remote: item.remote ?? 0,
-    campusTeam: item.campusTeam ?? 0,
-    grandTotal: item.grandTotal ?? 0,
-  };
-}
-
-function transformOriginalRow(item) {
+function transformRow(item) {
   return {
     id: item.campus,
     campus: item.campus,
@@ -65,149 +34,60 @@ function transformOriginalRow(item) {
   };
 }
 
-const formatLabel = (str) =>
-  str.replace(/_/g, ' ')
-     .toLowerCase()
-     .replace(/\b\w/g, c => c.toUpperCase());
-
-export default function AssetsTable({ 
-  isFiltered, 
-  dummyData, 
-  type, 
-  category,
-  assetTypesByCategory,
-  handleCategoryChange,
-  handleTypeChange,
-}) {
+export default function AssetsTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [category, type]);
 
   const { data: response, isLoading, isError, error } = useFetch({
     url: config.endpoints.assets.consolidatedByCampus,
     queryKey: ["assets", "consolidated-by-campus"],
-    enabled: !isFiltered,
   });
 
-  // Build category options from assetTypesByCategory object keys
-  const categoryOptions = [
-    { value: "ALL", label: "All" },
-    ...Object.keys(assetTypesByCategory || {}).map((key) => ({ value: key, label: formatLabel(key) })),
-  ];
-
-  // Build type options. If category is ALL, include all types across categories
-  const allTypes = Object.values(assetTypesByCategory || {}).flat();
-  const selectedTypes = category === 'ALL' ? allTypes : (assetTypesByCategory?.[category] || []);
-  const typeOptions = selectedTypes.map((t) => ({ value: t, label: formatLabel(t) }));
-
-  const columns = isFiltered ? filteredColumns : originalColumns;
-
-  const rawData = isFiltered
-    ? (dummyData || [])
-    : (response?.data || []);
-
-  const tableData = isFiltered
-    ? rawData.map(transformFilteredRow)
-    : rawData.map(transformOriginalRow);
-
+  const tableData = (response?.data ?? []).map(transformRow);
 
   // Calculate totals across all rows
-  const totals = isFiltered
-  ? tableData.reduce(
-      (acc, row) => {
-        acc.inStock += row.inStock || 0;
-        acc.allocated += row.allocated || 0;
-        acc.repair += row.repair || 0;
-        acc.nonWorking += row.nonWorking || 0;
-        acc.subTotal += row.subTotal || 0;        
-        acc.withStudents += row.withStudents || 0; 
-        acc.remote += row.remote || 0;             
-        acc.campusTeam += row.campusTeam || 0;    
-        acc.grandTotal += row.grandTotal || 0;
-        return acc;
-      },
-      {
-        id: "total-row",
-        campus: "Total",
-        inStock: 0,
-        allocated: 0,
-        repair: 0,
-        nonWorking: 0,
-        subTotal: 0,
-        withStudents: 0,
-        remote: 0,
-        campusTeam: 0,
-        grandTotal: 0,
-      }
-    )
-  : tableData.reduce(
-      (acc, row) => {
-        acc.lws += row.lws || 0;
-        acc.lis += row.lis || 0;
-        acc.lct += row.lct || 0;
-        acc.lr += row.lr || 0;
-        acc.subTotal += row.subTotal || 0;
-        acc.lnw += row.lnw || 0;
-        acc.lwfhe += row.lwfhe || 0;
-        acc.lsdb += row.lsdb || 0;
-        acc.grandTotal += row.grandTotal || 0;
-        return acc;
-      },
-      {
-        id: "total-row",
-        campus: "Total",
-        lws: 0,
-        lis: 0,
-        lct: 0,
-        lr: 0,
-        subTotal: 0,
-        lnw: 0,
-        lwfhe: 0,
-        lsdb: 0,
-        grandTotal: 0,
-      }
-    );
+  const totals = tableData.reduce(
+    (acc, row) => {
+      acc.lws += row.lws || 0;
+      acc.lis += row.lis || 0;
+      acc.lct += row.lct || 0;
+      acc.lr += row.lr || 0;
+      acc.subTotal += row.subTotal || 0;
+      acc.lnw += row.lnw || 0;
+      acc.lwfhe += row.lwfhe || 0;
+      acc.lsdb += row.lsdb || 0;
+      acc.grandTotal += row.grandTotal || 0;
+      return acc;
+    },
+    {
+      id: "total-row",
+      campus: "Total",
+      lws: 0,
+      lis: 0,
+      lct: 0,
+      lr: 0,
+      subTotal: 0,
+      lnw: 0,
+      lwfhe: 0,
+      lsdb: 0,
+      grandTotal: 0,
+    }
+  );
 
   const totalCount = tableData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = tableData.length > 0
-  ? [...tableData.slice(startIndex, startIndex + pageSize), totals]
-  : [];
+  const paginatedData = tableData.slice(startIndex, startIndex + pageSize);
 
-  // // Append totals row at the bottom of the current page view
-  // if (tableData.length > 0) {
-  //   paginatedData.push(totals);
-  // }
+  // Append totals row at the bottom of the current page view
+  if (tableData.length > 0) {
+    paginatedData.push(totals);
+  }
 
   const handlePageChange = (page) => setCurrentPage(page);
   const handlePageSizeChange = (newSize) => {
     setPageSize(newSize);
     setCurrentPage(1);
-  };
-  const getCategoryName = (filterKey) => {
-    const names = {
-        category: "Category",
-        type: "Asset Type",
-    };
-    return names[filterKey] || filterKey;   
-  };
-
-  const getFilterLabel = (filterKey, value) => {
-    if (filterKey === "category") {
-        const opt = categoryOptions.find((o) => o.value === value);
-        return opt ? opt.label : value;
-    }
-
-    if (filterKey === "type") {
-        const opt = typeOptions.find((o) => o.value === value);
-        return opt ? opt.label : value;
-    }
-
-    return value;
   };
 
   const renderCell = (item, columnKey) => {
@@ -245,62 +125,17 @@ export default function AssetsTable({
     );
   }
 
-  // Build dynamic title for filtered view
-  let filteredTitleLabel = 'Assets';
-  if (type && type !== 'ALL') filteredTitleLabel = formatLabel(type);
-  else if (category && category !== 'ALL') filteredTitleLabel = formatLabel(category);
-
-  const activeFilters = {};
-  if (category !== 'ALL') activeFilters.category = category;
-  if (type !== 'ALL') activeFilters.type = type;
-
   return (
     <TableWrapper
       data={paginatedData}
       columns={columns}
-      title={
-        isFiltered
-          ? `Consolidated ${filteredTitleLabel} Data`
-          : "Consolidated Assets Data"
-      }
+      title="Consolidated Laptop Data"
       renderCell={renderCell}
       margin="m-0"
       shadow="shadow-none"
       itemsPerPage={pageSize}
       showPagination={true}
       serverPagination={true}
-      titleAction={
-        <FilterDropdown
-          selectedFilters={activeFilters}
-          onFilterChange={(newFilters) => {
-            const newCategory = newFilters.category ?? 'ALL';
-            const newType = newFilters.type ?? 'ALL';
-
-            if (newCategory !== category) handleCategoryChange(newCategory);
-            if (newType !== type) handleTypeChange({ target: { value: newType } });
-          }}
-          categoryOptions={categoryOptions}
-          assetTypeOptions={typeOptions}
-        />
-      }
-     filterComponent={null}
-      activeFiltersComponent={
-        Object.keys(activeFilters).length > 0 ? (
-          <ActiveFiltersChips
-            filters={activeFilters}
-            onRemoveFilter={(filterKey) => {
-              if (filterKey === 'category') handleCategoryChange('ALL');
-              if (filterKey === 'type') handleTypeChange({ target: { value: 'ALL' } });
-            }}
-            onClearAll={() => {
-              handleCategoryChange('ALL');
-              handleTypeChange({ target: { value: 'ALL' } });
-            }}
-            getCategoryName={getCategoryName}
-            getFilterLabel={getFilterLabel}
-          />
-        ) : null
-      }
       paginationData={{
         page: currentPage,
         limit: pageSize,

@@ -24,10 +24,14 @@ export default function SLAIndicator({
   const expectedResolution = new Date(expectedResolutionDate);
   
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  allocation.setHours(0, 0, 0, 0);
+  expectedResolution.setHours(0, 0, 0, 0);
+
   const daysElapsed = Math.floor((now - allocation) / (1000 * 60 * 60 * 24));
   const totalDays = Math.floor((expectedResolution - allocation) / (1000 * 60 * 60 * 24));
   const daysRemaining = Math.floor((expectedResolution - now) / (1000 * 60 * 60 * 24));
-  
+
   // Check if ticket is closed/resolved
   const isCompleted = ['CLOSED', 'RESOLVED'].includes(status?.toUpperCase());
   
@@ -77,7 +81,7 @@ export default function SLAIndicator({
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-semibold text-sm text-inherit">{statusText}</h4>
             <span className={`text-xs font-medium px-2 py-1 rounded border-none ${themeClass}`}>
-              {totalDays} days
+              {Math.max(totalDays, 1)} days
             </span>
           </div>
           
@@ -102,12 +106,12 @@ export default function SLAIndicator({
                     'bg-blue-500'
                   }`}
                   style={{ 
-                    width: `${Math.min(100, (daysElapsed / totalDays) * 100)}%` 
+                    width: `${Math.min(100, (daysElapsed / Math.max(totalDays, 1)) * 100)}%`
                   }}
                 />
               </div>
               <div className="flex justify-between mt-1 text-xs text-gray-500">
-                <span>Day {daysElapsed} of {totalDays}</span>
+                <span>Day {daysElapsed} of {Math.max(totalDays, 1)}</span>
                 {!isCompleted && (
                   <span className={daysRemaining < 0 ? 'text-red-600 font-semibold' : ''}>
                     {daysRemaining < 0 ? `${Math.abs(daysRemaining)} days overdue` : `${daysRemaining} days left`}
