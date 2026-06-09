@@ -7,7 +7,7 @@ import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
 import MultiSelect from '@/components/atoms/MultiSelect';
 import CampusAssetTable from './CampusAssetTable';
 import CustomDatePicker from '@/components/atoms/CustomDatePicker';
-
+import PurchaseBillSelector from './PurchaseBillSelector';
 const parseDateValue = (value) => {
   if (!value) return null;
   return new Date(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value) ? `${value}T00:00:00` : value);
@@ -175,6 +175,15 @@ export default function FormField({ field, formik, onFieldChange }) {
           />
         );
 
+      case 'purchase-bill-selector':
+        return (
+          <PurchaseBillSelector
+            selectedBills={formik.values[name] || []}
+            onBillsChange={(bills) => formik.setFieldValue(name, bills)}
+            allowMultiple={field.allowMultiple === true}
+          />
+        );
+
       case 'api-autocomplete':
         // Handle dependsOn - disable field if dependent field has no value
         const dependsOnField = field.dependsOn?.field;
@@ -259,14 +268,14 @@ export default function FormField({ field, formik, onFieldChange }) {
 
   return (
     <div className="mb-2">
-      {type !== 'checkbox' && type !== 'api-autocomplete' && type !== 'multi-select' && (
+      {type !== 'checkbox' && type !== 'api-autocomplete' && type !== 'multi-select' && type !== 'purchase-bill-selector' && (
         <label htmlFor={name} className="block text-xs font-medium text-gray-700 mb-1">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       {renderInput()}
-      {type !== 'api-autocomplete' && type !== 'multi-select' && (
+      {type !== 'api-autocomplete' && type !== 'multi-select' && type !== 'purchase-bill-selector' && (
         <ErrorMessage name={name}>
           {(msg) => <div className="text-red-500 text-xs mt-0.5">{msg}</div>}
         </ErrorMessage>
