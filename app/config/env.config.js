@@ -30,6 +30,10 @@ const config = {
       types: '/asset-types',
     },
     
+    purchaseBills: {
+    create: '/purchase-bills',
+    list: '/purchase-bills',
+    },
     // Consignments
     consignments: {
       list: '/consignments',
