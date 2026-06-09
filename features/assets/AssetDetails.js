@@ -259,6 +259,8 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         { label: 'Source By', value: assetDetails.sourceBy || 'N/A' },
         { label: 'Purchase Date', value: assetDetails.purchaseDate ? new Date(assetDetails.purchaseDate).toLocaleDateString() : 'N/A' },
         { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost.toLocaleString()}` : 'N/A' },
+        { label: 'Purchase Bill', value: assetDetails.purchaseBillDetails?.url ? <a href={assetDetails.purchaseBillDetails.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">{assetDetails.purchaseBillDetails.name}</a> : 'N/A' },
+        { label: 'Bill Uploaded By', value: assetDetails.purchaseBillDetails?.uploadedBy ? `${assetDetails.purchaseBillDetails.uploadedBy.firstName} ${assetDetails.purchaseBillDetails.uploadedBy.lastName} (${assetDetails.purchaseBillDetails.uploadedBy.email})` : 'N/A' },
       ],
     },
     {
