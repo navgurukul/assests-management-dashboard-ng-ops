@@ -266,6 +266,15 @@ export const assetFormFields = [
       value: ["Laptop", "Tablet", "Smartphone"],
     },
   },
+
+  {
+  name: 'purchaseBills',
+  label: 'Purchase Bills / Invoices',
+  type: 'purchase-bill-selector',   
+  required: false,
+  allowMultiple: false,
+  helpText: 'Link or upload purchase bills for this asset',
+},
 ];
 
 export const assetValidationSchema = Yup.object().shape({
@@ -406,6 +415,7 @@ export const assetInitialValues = {
   cost: "",
   notes: "",
   charger: false,
+  purchaseBills: [],
 };
 
 // Change Location Form Configuration

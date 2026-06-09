@@ -4,7 +4,6 @@ import React from 'react';
 import { Formik, Form } from 'formik';
 import FormField from './FormField';
 import CustomButton from '@/components/atoms/CustomButton';
-
 export default function GenericForm({
   fields,
   initialValues,
@@ -86,6 +85,7 @@ export default function GenericForm({
                     className={
                       field.type === 'textarea' || 
                       field.type === 'campus-asset-table' || 
+                      field.type === 'purchase-bill-selector' ||
                       field.type === 'radio' ||
                       field.fullWidth
                         ? 'md:col-span-2' 

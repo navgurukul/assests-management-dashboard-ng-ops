@@ -240,16 +240,6 @@ export default function ComponentsList() {
     }));
   }, [data]);
 
-  const handleViewDetails = (componentId) => {
-    // Find the full component data
-    const component = componentsListData.find(comp => comp.id === componentId);
-    if (component && component.componentData) {
-      // Store component data in sessionStorage for details page
-      sessionStorage.setItem('currentComponentData', JSON.stringify(component.componentData));
-    }
-    router.push(`/components/${componentId}`);
-  };
-
   // Handle opening the action modal
   const handleOpenActionModal = (actionType, component) => {
     setCurrentAction(actionType);
@@ -326,14 +316,7 @@ export default function ComponentsList() {
 
     switch (columnKey) {
       case "componentTag":
-        return (
-          <button 
-            onClick={() => handleViewDetails(item.id)}
-            className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-          >
-            {cellValue}
-          </button>
-        );
+        return <span className="font-medium text-gray-900">{cellValue}</span>;
       
       case "status":
         return <StatusChip value={cellValue} />;
@@ -352,6 +335,10 @@ export default function ComponentsList() {
       default:
         return <span className="text-gray-700">{cellValue}</span>;
     }
+  };
+
+  const handleRowClick = (component) => {
+    router.push(`/components/${component.id}`);
   };
 
   const handleCreateClick = () => {
@@ -399,6 +386,7 @@ export default function ComponentsList() {
         itemsPerPage={pageSize}
         showPagination={true}
         ariaLabel="Components table"
+        onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
         // Loading state

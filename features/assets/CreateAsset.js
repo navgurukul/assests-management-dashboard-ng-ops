@@ -25,7 +25,7 @@ export default function CreateAsset() {
     
     try {
       // Coerce string fields the API expects as numbers; strip internal form-only fields
-      const { assetTypeName, ...rest } = values;
+      const { assetTypeName, purchaseBills, ...rest } = values;
       
       // Define which fields are relevant for each asset type
       const assetTypeFieldMap = {
@@ -42,6 +42,7 @@ export default function CreateAsset() {
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
         cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
+        purchaseBillId: values.purchaseBills?.[0]?.id || undefined, 
       };
 
       // Remove fields not relevant to the selected asset type
