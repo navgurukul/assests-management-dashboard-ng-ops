@@ -250,6 +250,13 @@ export const assetFormFields = [
     min: 0,
   },
   {
+    name: "serviceDate",
+    label: "Service Date",
+    type: "date",
+    placeholder: "Select service date",
+    required: false,
+  },
+  {
     name: "notes",
     label: "Notes",
     type: "textarea",
@@ -392,6 +399,7 @@ export const assetValidationSchema = Yup.object().shape({
     )
     .min(0, "Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
+  serviceDate: Yup.string().nullable(),
   notes: Yup.string(),
   charger: Yup.boolean(),
 });
@@ -413,6 +421,7 @@ export const assetInitialValues = {
   sourceBy: "",
   purchaseDate: "",
   cost: "",
+  serviceDate: "",
   notes: "",
   charger: false,
   purchaseBills: [],
@@ -464,6 +473,20 @@ export const otherCategoryInitialValues = {
 };
 
 export const commonAssetFields = [
+  {
+    name: "brand",
+    label: "Brand",
+    type: "text",
+    placeholder: "Enter brand name",
+    required: false,
+  },
+  {
+    name: "model",
+    label: "Model",
+    type: "text",
+    placeholder: "Enter model",
+    required: false,
+  },
   {
     name: "campusId",
     label: "Campus",
@@ -554,6 +577,13 @@ export const commonAssetFields = [
     min: 0,
   },
   {
+    name: "serviceDate",
+    label: "Service Date",
+    type: "date",
+    placeholder: "Select service date",
+    required: false,
+  },
+  {
     name: "notes",
     label: "Notes",
     type: "textarea",
@@ -573,6 +603,8 @@ export const commonAssetFields = [
 ];
 
 export const commonAssetValidation = {
+  brand: Yup.string(),
+  model: Yup.string(),
   campusId: Yup.string().required("Campus is required"),
   currentLocationId: Yup.string().required("Current location is required"),
   status: Yup.string()
@@ -617,11 +649,14 @@ export const commonAssetValidation = {
     )
     .min(0, "Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
+  serviceDate: Yup.string().nullable(),
   notes: Yup.string(),
   charger: Yup.boolean(),
 };
 
 export const commonAssetInitial = {
+  brand: "",
+  model: "",
   campusId: "",
   currentLocationId: "",
   status: "IN_STOCK",
@@ -630,6 +665,7 @@ export const commonAssetInitial = {
   sourceBy: "",
   purchaseDate: "",
   cost: "",
+  serviceDate: "",
   notes: "",
   charger: false,
 };

@@ -17,38 +17,34 @@ export const categoryConfigs = {
   "Appliances & Equipment": {
     assetTypes: ["Fan", "Cooler", "Refrigerator", "Washing Machine", "RO", "Water Cooler", "Motor", "Inverter", "Battery", "Generator"],
     fields: [
-      { name: "brand", label: "Brand", type: "text", placeholder: "e.g. LG, Samsung", required: true },
       { name: "powerRating", label: "Power Rating (Watts)", type: "number", placeholder: "e.g. 1500", required: true }
     ],
     validation: {
-      brand: Yup.string().required("Brand is required"),
       powerRating: Yup.number().required("Power Rating is required").min(1)
     },
-    initial: { brand: "", powerRating: "" }
+    initial: {  powerRating: "" }
   },
   "Vehicles & Mobility": {
     assetTypes: ["Scooter", "Bicycle", "E-Bike"],
     fields: [
       { name: "vehicleNumber", label: "Vehicle Number", type: "text", placeholder: "e.g. MH 12 AB 1234", required: true },
-      { name: "brand", label: "Brand / Make", type: "text", placeholder: "e.g. Honda, Hero", required: true }
     ],
     validation: {
       vehicleNumber: Yup.string().required("Vehicle Number is required"),
-      brand: Yup.string().required("Brand is required")
     },
-    initial: { vehicleNumber: "", brand: "" }
+    initial: { vehicleNumber: "" }
   },
   "Learning & Recreation": {
     assetTypes: ["Books", "Sports Equipment", "Gym Equipment", "Learning Kits"],
     fields: [
-      { name: "subjectOrSport", label: "Subject / Sport Category", type: "text", placeholder: "e.g. Cricket, Math", required: true },
-      { name: "quantity", label: "Quantity", type: "number", placeholder: "e.g. 10", required: true }
+      { name: "itemName", label: "Item Name", type: "text", placeholder: "e.g. Cricket, Algebra Textbook", required: true },
+      { name: "isbn", label: "ISBN", type: "text", placeholder: "978-3-16-148410-0", required: false, showIf: { field: "assetTypeName", value: ["Books"] } },
     ],
     validation: {
-      subjectOrSport: Yup.string().required("Category is required"),
-      quantity: Yup.number().required("Quantity is required").min(1)
+      itemName: Yup.string().required("Item Name is required"),
+      isbn: Yup.string().required("ISBN is required").min(1)
     },
-    initial: { subjectOrSport: "", quantity: "" }
+    initial: { itemName: "", isbn: "" }
   },
   "Kitchen & Housekeeping": {
     assetTypes: ["Stove", "Utensils", "Dining Equipment", "Cleaning Equipment", "Vacuum Cleaner"],
