@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
+import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import {
   assetFormFields,
@@ -83,38 +84,28 @@ export default function CreateAsset() {
         })
       );
 
-      // Make API call to create asset
-      const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      // Make API call to create asset using apiService wrapper
+      await apiService.post(
+        config.endpoints.assets.create,
+        payload
+      );
 
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData?.message || `Failed to create asset (Status: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      
       // Show success toast
       toast.success('Asset created successfully!');
-      
+
       // Navigate back to assets list
       router.push('/assets');
-      
+
     } catch (error) {
       console.error('Error creating asset:', error);
-      
+
+      const errorMessage = error?.message || 'Failed to create asset. Please try again.';
+      const errorDetails = error?.errors ? ` - ${JSON.stringify(error.errors)}` : '';
+
       // Show error toast
-      toast.error(error?.message || 'Failed to create asset. Please try again.');
+      toast.error(`${errorMessage}${errorDetails}`);
     } finally {
+      toast.dismiss(loadingToastId);
       setIsSubmitting(false);
     }
   };
