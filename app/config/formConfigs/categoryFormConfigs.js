@@ -161,14 +161,14 @@ export const categoryConfigs = {
   },
   "Learning & Recreation": {
     fields: [
-      { name: "itemName", label: "Item Name", type: "text", placeholder: "e.g. Cricket, Algebra Textbook", required: true },
+      { name: "name", label: "Name", type: "text", placeholder: "e.g. Cricket, Algebra Textbook", required: true },
       { name: "isbn", label: "ISBN", type: "text", placeholder: "978-3-16-148410-0", required: false, showIf: { field: "assetTypeName", value: ["Books"] } },
     ],
     validation: {
-      itemName: Yup.string().required("Item Name is required"),
+      name: Yup.string().required("Name is required"),
       isbn: Yup.string().required("ISBN is required").min(1),
     },
-    initial: { itemName: "", isbn: "" },
+    initial: { name: "", isbn: "" },
   },
   "Kitchen & Housekeeping": {
     fields: [
