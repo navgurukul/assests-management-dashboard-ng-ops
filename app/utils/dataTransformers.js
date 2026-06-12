@@ -155,6 +155,7 @@ export const transformAssetForTable = (asset) => {
   return {
     id: asset.id,
     assetTag: asset.assetTag,
+    category: asset.assetType?.category || 'N/A', 
     type: getNestedValue(asset, 'assetType.name', 'Unknown'),
     brand: asset.brand || 'N/A',
     model: asset.model || 'N/A',
@@ -170,6 +171,7 @@ export const transformAssetForTable = (asset) => {
     ownedBy: asset.ownedBy || 'N/A',
     purchaseDate: formatDate(asset.purchaseDate),
     cost: formatCurrency(asset.cost),
+    serviceDate: formatDate(asset.serviceDate),
     charger: asset.charger,
     bag: asset.bag,
     specLabel: asset.specLabel || buildSpecLabel(asset),
