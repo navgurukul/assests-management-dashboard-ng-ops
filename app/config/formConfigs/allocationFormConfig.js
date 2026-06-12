@@ -38,7 +38,7 @@ export const allocationFormFields = [
     queryKey: ['asset-types-remote'],
     labelKey: 'name',
     valueKey: 'id',
-    filterCategory: 'DEVICE',
+    // filterCategory: 'DEVICE',  //Currently showing all asset types to support furniture, vehicles, etc.
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
     dependsOn: {
@@ -141,7 +141,7 @@ export const allocationFormFields = [
     queryKey: ['asset-types-campus'],
     labelKey: 'name',
     valueKey: 'id',
-    filterCategory: 'DEVICE',
+    // filterCategory: 'DEVICE', // Currently showing all asset types to support furniture, vehicles, etc.
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
   },
