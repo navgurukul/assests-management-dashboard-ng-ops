@@ -28,6 +28,8 @@ const config = {
       consolidatedByCampus: '/assets/consolidated-data/by-campus',
       export: '/assets/export/csv',
       types: '/asset-types',
+      categories: '/asset-categories',
+      categoryById: (id) => `/asset-categories/${id}`,
     },
     
     purchaseBills: {

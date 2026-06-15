@@ -142,6 +142,11 @@ export default function CreateAllocation() {
   // Field callbacks for form field changes
   const fieldCallbacks = {
     clearAssetSelections: (value, formik) => {
+      formik.setFieldValue('assetCategoryId', '');
+      formik.setFieldValue('assetTypeId', '');
+      formik.setFieldValue('assetId', '');
+    },
+    clearCategoryDependentsRemote: (value, formik) => {
       formik.setFieldValue('assetTypeId', '');
       formik.setFieldValue('assetId', '');
     },
@@ -149,10 +154,18 @@ export default function CreateAllocation() {
       // Clear assetId when assetType changes
       formik.setFieldValue('assetId', '');
     },
-    clearSourceCampusDependents: (value, formik) => {
+    clearSourceCampusSelections: (value, formik) => {
       formik.setFieldValue('destinationCampus', '');
       formik.setFieldValue('destinationCampusName', '');
+      formik.setFieldValue('campusAssetCategoryId', '');
       formik.setFieldValue('assetType', '');
+      formik.setFieldValue('campusAssets', []);
+    },
+    clearCategoryDependentsCampus: (value, formik) => {
+      formik.setFieldValue('assetType', '');
+      formik.setFieldValue('campusAssets', []);
+    },
+    clearAssetTypeDependentsCampus: (value, formik) => {
       formik.setFieldValue('campusAssets', []);
     },
   };

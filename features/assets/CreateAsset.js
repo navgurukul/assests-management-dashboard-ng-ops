@@ -5,34 +5,47 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import GenericForm from '@/components/molecules/GenericForm';
 import CustomButton from '@/components/atoms/CustomButton';
+import ApiAutocomplete from '@/components/atoms/ApiAutocomplete';
+import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
-import {
-  assetFormFields,
-  assetValidationSchema,
-  assetInitialValues,
-} from '@/app/config/formConfigs/assetFormConfig';
+import { assetCategoryField } from '@/app/config/formConfigs/assetFormConfig';
+import { getCategoryConfig, getNoCategoryConfig } from '@/app/config/formConfigs/categoryFormConfigs';
 import { toast } from '@/app/utils/toast';
 
 export default function CreateAsset() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assetCategoryId, setAssetCategoryId] = useState('');
+  const [assetCategoryName, setAssetCategoryName] = useState('');
+
+  const currentConfig = getCategoryConfig(assetCategoryName) ?? getNoCategoryConfig();
 
   const handleFormSubmit = async (values) => {
+    if (!assetCategoryId) {
+      toast.error('Please select an asset category first.');
+      return;
+    }
+
     setIsSubmitting(true);
     
     // Show loading toast
     const loadingToastId = toast.loading('Creating asset...');
-    
+
     try {
       // Coerce string fields the API expects as numbers; strip internal form-only fields
-      const { assetTypeName, purchaseBills, ...rest } = values;
-      
-      // Define which fields are relevant for each asset type
+      const {
+        assetTypeName,
+        assetCategoryId: _assetCategoryId,
+        assetCategoryName: _assetCategoryName,
+        purchaseBills,
+        ...rest
+      } = values;
+
       const assetTypeFieldMap = {
-        processor: ["Laptop", "Desktop", "Server", "CPU", "Tablet", "Smartphone"],
-        ramSizeGB: ["Laptop", "Desktop", "Server", "RAM", "Tablet", "Smartphone"],
-        storageSizeGB: ["Laptop", "Desktop", "Server", "SSD", "HDD", "External Hard Drive", "USB Flash Drive", "Tablet", "Smartphone"],
-        charger: ["Laptop", "Tablet", "Smartphone"],
+        processor: ['Laptop', 'Desktop', 'Server', 'CPU', 'Tablet', 'Smartphone'],
+        ramSizeGB: ['Laptop', 'Desktop', 'Server', 'RAM', 'Tablet', 'Smartphone'],
+        storageSizeGB: ['Laptop', 'Desktop', 'Server', 'SSD', 'HDD', 'External Hard Drive', 'USB Flash Drive', 'Tablet', 'Smartphone'],
+        charger: ['Laptop', 'Tablet', 'Smartphone'],
       };
 
       // Build raw payload with type coercion
@@ -42,7 +55,7 @@ export default function CreateAsset() {
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
         cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
-        purchaseBillId: values.purchaseBills?.[0]?.id || undefined, 
+        purchaseBillId: values.purchaseBills?.[0]?.id || undefined,
       };
 
       // Remove fields not relevant to the selected asset type
@@ -54,50 +67,39 @@ export default function CreateAsset() {
       });
 
       // Remove purchaseDate if sourceType is DONATED (since it's not applicable)
-      if (values.sourceType === "DONATED") {
+      if (values.sourceType === 'DONATED') {
         delete rawPayload.purchaseDate;
       }
 
-      // Remove empty values
       const payload = Object.fromEntries(
         Object.entries(rawPayload).filter(([, fieldValue]) => {
           if (fieldValue === '' || fieldValue === undefined || fieldValue === null) return false;
           return true;
-        })
+        }),
       );
 
-      // Make API call to create asset
-      const response = await fetch(config.getApiUrl(config.endpoints.assets.create), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      // Make API call to create asset using apiService wrapper
+      await apiService.post(
+        config.endpoints.assets.create,
+        payload
+      );
 
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData?.message || `Failed to create asset (Status: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      
       // Show success toast
       toast.success('Asset created successfully!');
-      
+
       // Navigate back to assets list
       router.push('/assets');
-      
+
     } catch (error) {
       console.error('Error creating asset:', error);
-      
+
+      const errorMessage = error?.message || 'Failed to create asset. Please try again.';
+      const errorDetails = error?.errors ? ` - ${JSON.stringify(error.errors)}` : '';
+
       // Show error toast
-      toast.error(error?.message || 'Failed to create asset. Please try again.');
+      toast.error(`${errorMessage}${errorDetails}`);
     } finally {
+      toast.dismiss(loadingToastId);
       setIsSubmitting(false);
     }
   };
@@ -143,10 +145,42 @@ export default function CreateAsset() {
 
         {/* Form Container */}
         <div className="bg-(--surface) text-foreground rounded-xl shadow-lg border border-(--border) p-8">
+          <div className="mb-6">
+            <ApiAutocomplete
+              name={assetCategoryField.name}
+              label={assetCategoryField.label}
+              placeholder={assetCategoryField.placeholder}
+              apiUrl={assetCategoryField.apiUrl}
+              queryKey={assetCategoryField.queryKey}
+              labelKey={assetCategoryField.labelKey}
+              valueKey={assetCategoryField.valueKey}
+              dataPath={assetCategoryField.dataPath}
+              isRequired={assetCategoryField.required}
+              value={assetCategoryId}
+              onChange={(e) => {
+                const categoryId = e.target.value;
+                setAssetCategoryId(categoryId);
+                if (!categoryId) {
+                  setAssetCategoryName('');
+                }
+              }}
+              onItemSelect={(item) => {
+                if (!item) {
+                  setAssetCategoryId('');
+                  setAssetCategoryName('');
+                  return;
+                }
+                setAssetCategoryId(item.id);
+                setAssetCategoryName(item.name);
+              }}
+            />
+          </div>
+
           <GenericForm
-            fields={assetFormFields}
-            initialValues={assetInitialValues}
-            validationSchema={assetValidationSchema}
+            key={assetCategoryId}
+            fields={currentConfig.fields}
+            initialValues={{ ...currentConfig.initialValues, assetCategoryId }}
+            validationSchema={currentConfig.validationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
             submitButtonText="Create Asset"
