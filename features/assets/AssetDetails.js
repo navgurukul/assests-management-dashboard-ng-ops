@@ -167,6 +167,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   };
 
   const displayStatus = formatStatus(assetDetails.status);
+  const computedSpecLabel = assetDetails.specLabel || buildSpecLabel(assetDetails);
 
   const getStatusColor = () => {
     switch (assetDetails.status) {
@@ -236,7 +237,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   // Right column sections (70%) - Larger content cards
   const rightSections = [
     {
-      title: 'Device Information',
+      title: 'Asset Information',
       color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
@@ -246,7 +247,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         ...(assetDetails.ramSizeGB ? [{ label: 'RAM', value: `${assetDetails.ramSizeGB} GB` }] : []),
         ...(assetDetails.storageSizeGB ? [{ label: 'Storage', value: `${assetDetails.storageSizeGB} GB` }] : []),
         ...(assetDetails.serialNumber ? [{ label: 'Serial Number', value: assetDetails.serialNumber, className: 'col-span-2' }] : []),
-        ...(assetDetails.specLabel || buildSpecLabel(assetDetails) ? [{ label: 'Spec Label', value: assetDetails.specLabel || buildSpecLabel(assetDetails), className: 'col-span-2' }] : []),
+        ...(computedSpecLabel && computedSpecLabel !== 'N/A' ? [{ label: 'Spec Label', value: computedSpecLabel, className: 'col-span-2' }] : []),
         ...(assetDetails.name ? [{ label: 'Name', value: assetDetails.name }] : []),
         ...(assetDetails.material ? [{ label: 'Material', value: assetDetails.material }] : []),
         ...(assetDetails.dimensions ? [{ label: 'Dimensions', value: assetDetails.dimensions }] : []),
@@ -278,7 +279,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
-        { label: 'Asset Type Category', value: assetDetails.assetType?.category || 'N/A' },
+        { label: 'Asset Category', value: assetDetails.assetType?.assetCategory?.name || assetDetails.assetType?.category || 'N/A' },
         { label: 'Campus Code', value: assetDetails.campus?.code || 'N/A' },
         { label: 'Created At', value: assetDetails.createdAt ? new Date(assetDetails.createdAt).toLocaleString() : 'N/A' },
         { label: 'Updated At', value: assetDetails.updatedAt ? new Date(assetDetails.updatedAt).toLocaleString() : 'N/A' },

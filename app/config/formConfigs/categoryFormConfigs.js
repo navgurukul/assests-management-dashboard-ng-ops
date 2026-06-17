@@ -184,13 +184,13 @@ export const categoryConfigs = {
   "Infrastructure Assets": {
     fields: [
       { name: "installationDate", label: "Installation Date", type: "date", required: true },
-      { name: "vendor", label: "Vendor / Contractor", type: "text", placeholder: "e.g. ABC Corp", required: true },
+      { name: "contractorVendor", label: "Vendor / Contractor", type: "text", placeholder: "e.g. ABC Corp", required: true },
     ],
     validation: {
       installationDate: Yup.string().required("Installation Date is required"),
-      vendor: Yup.string().required("Vendor is required"),
+      contractorVendor: Yup.string().required("Vendor is required"),
     },
-    initial: { installationDate: "", vendor: "" },
+    initial: { installationDate: "", contractorVendor: "" },
   },
 };
 

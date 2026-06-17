@@ -155,7 +155,7 @@ export const transformAssetForTable = (asset) => {
   return {
     id: asset.id,
     assetTag: asset.assetTag,
-    category: asset.assetType?.category || 'N/A', 
+    category: asset.assetType?.assetCategory?.name || asset.assetType?.category || 'N/A',
     type: getNestedValue(asset, 'assetType.name', 'Unknown'),
     brand: asset.brand || 'N/A',
     model: asset.model || 'N/A',
