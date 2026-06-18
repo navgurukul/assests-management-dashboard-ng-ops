@@ -33,8 +33,20 @@ const config = {
     },
     
     purchaseBills: {
-    create: '/purchase-bills',
-    list: '/purchase-bills',
+      create: '/purchase-bills',
+      list: '/purchase-bills',
+    },
+
+    inspectionHistory: {
+      create: '/inspection-history',
+    },
+
+    maintenanceHistory: {
+      create: '/maintenance-history',
+    },
+
+    insurance: {
+      create: '/insurance',
     },
     // Consignments
     consignments: {
