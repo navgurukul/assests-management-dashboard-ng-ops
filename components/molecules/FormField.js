@@ -148,6 +148,13 @@ export default function FormField({ field, formik, onFieldChange }) {
           </div>
         );
 
+      case 'section-header':
+        return (
+          <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mt-2 mb-1">
+            {label}
+          </h4>
+        );
+
       case 'radio':
         return (
           <div className="space-y-1">
@@ -268,14 +275,14 @@ export default function FormField({ field, formik, onFieldChange }) {
 
   return (
     <div className="mb-2">
-      {type !== 'checkbox' && type !== 'api-autocomplete' && type !== 'multi-select' && type !== 'purchase-bill-selector' && (
+      {type !== 'checkbox' && type !== 'api-autocomplete' && type !== 'multi-select' && type !== 'purchase-bill-selector' && type !== 'section-header' && (
         <label htmlFor={name} className="block text-xs font-medium text-gray-700 mb-1">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       {renderInput()}
-      {type !== 'api-autocomplete' && type !== 'multi-select' && type !== 'purchase-bill-selector' && (
+      {type !== 'api-autocomplete' && type !== 'multi-select' && type !== 'purchase-bill-selector' && type !== 'section-header' && (
         <ErrorMessage name={name}>
           {(msg) => <div className="text-red-500 text-xs mt-0.5">{msg}</div>}
         </ErrorMessage>
