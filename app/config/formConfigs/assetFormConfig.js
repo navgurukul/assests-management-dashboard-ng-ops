@@ -39,7 +39,7 @@ export const itBrandField = {
   label: "Brand",
   type: "api-autocomplete",
   placeholder: "Search and select brand",
-  apiUrl: "",// No API URL since we are using static items for brands 
+  apiUrl: "", // No API URL since we are using static items for brands
   queryKey: [],
   labelKey: "label",
   valueKey: "value",
@@ -173,12 +173,171 @@ export const commonAssetFields = [
     required: false,
     min: 0,
   },
+  // Service / Maintenance
+  {
+    name: "needsServicing",
+    label: "This asset needs periodic servicing / maintenance",
+    type: "checkbox",
+    required: false,
+    fullWidth: true,
+  },
+  {
+    name: "inspectionHeader",
+    label: "Inspection",
+    type: "section-header",
+    fullWidth: true,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "inspectionDate",
+    label: "Inspection Date",
+    type: "date",
+    placeholder: "Select inspection date",
+    required: false,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "nextInspectionDate",
+    label: "Next Inspection Date",
+    type: "date",
+    placeholder: "Select next inspection date",
+    required: false,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "serviceHeader",
+    label: "Service",
+    type: "section-header",
+    fullWidth: true,
+    showIf: { field: "needsServicing", value: true },
+  },
   {
     name: "serviceDate",
     label: "Service Date",
     type: "date",
     placeholder: "Select service date",
     required: false,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "nextServiceDate",
+    label: "Next Service Date",
+    type: "date",
+    placeholder: "Select next service date",
+    required: false,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "serviceStatus",
+    label: "Status",
+    type: "select",
+    placeholder: "Select status",
+    required: false,
+    options: [
+      { value: "HEALTHY", label: "Healthy" },
+      { value: "NEED_ATTENTION", label: "Need Attention" },
+      { value: "SERVICE_DUE", label: "Service Due" },
+      { value: "INSPECTION_DUE", label: "Inspection Due" },
+    ],
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "serviceVendor",
+    label: "Vendor",
+    type: "text",
+    placeholder: "Enter vendor name",
+    required: false,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "serviceCost",
+    label: "Cost",
+    type: "number",
+    placeholder: "Enter cost (optional)",
+    required: false,
+    min: 0,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "serviceRemark",
+    label: "Remark",
+    type: "textarea",
+    placeholder: "Add any remarks",
+    required: false,
+    fullWidth: true,
+    showIf: { field: "needsServicing", value: true },
+  },
+  // AMC / Insurance
+  {
+    name: "hasAmcInsurance",
+    label: "This asset has an AMC / Insurance",
+    type: "checkbox",
+    required: false,
+    fullWidth: true,
+  },
+  {
+    name: "amcStartDate",
+    label: "AMC / Insurance Start Date",
+    type: "date",
+    placeholder: "Select start date",
+    required: true,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcExpiryDate",
+    label: "Expiry Date",
+    type: "date",
+    placeholder: "Select expiry date",
+    required: false,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "healthStatus",
+    label: "AMC / Insurance Status",
+    type: "select",
+    placeholder: "Select status",
+    required: true,
+    options: [
+      { value: "ACTIVE", label: "Active" },
+      { value: "EXPIRING_SOON", label: "Expiring Soon" },
+      { value: "EXPIRED", label: "Expired" },
+    ],
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcProvider",
+    label: "Provider",
+    type: "text",
+    placeholder: "Enter provider name",
+    required: false,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcCost",
+    label: "AMC / Insurance Cost",
+    type: "number",
+    placeholder: "Enter cost (optional)",
+    required: false,
+    min: 0,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcVendor",
+    label: "Vendor Detail",
+    type: "text",
+    placeholder: "Enter vendor detail",
+    required: false,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcDocument",
+    label: "Upload Document",
+    type: "file",
+    documentType: "INVOICE",
+    allowMultiple: false,
+    required: false,
+    fullWidth: true,
+    showIf: { field: "hasAmcInsurance", value: true },
   },
   {
     name: "notes",
@@ -285,7 +444,67 @@ export const commonAssetValidation = {
     )
     .min(0, "Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
+  // Service / Maintenance
+  needsServicing: Yup.boolean(),
+  inspectionDate: Yup.string().nullable(),
+  nextInspectionDate: Yup.string().nullable(),
   serviceDate: Yup.string().nullable(),
+  nextServiceDate: Yup.string().nullable(),
+  serviceStatus: Yup.string()
+    .nullable()
+    .oneOf(
+      ["HEALTHY", "NEED_ATTENTION", "SERVICE_DUE", "INSPECTION_DUE", "", null],
+      "Invalid status",
+    ),
+  serviceVendor: Yup.string().nullable(),
+  serviceCost: Yup.number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" ||
+      originalValue === null ||
+      originalValue === undefined
+        ? null
+        : value,
+    )
+    .min(0, "Cost must be a positive number")
+    .max(9999999, "Cost cannot exceed 99,99,999"),
+  serviceRemark: Yup.string().nullable(),
+  // AMC / Insurance
+  hasAmcInsurance: Yup.boolean(),
+  amcStartDate: Yup.string()
+    .nullable()
+    .when("hasAmcInsurance", {
+      is: true,
+      then: (schema) =>
+        schema.required("AMC / Insurance start date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  amcExpiryDate: Yup.string()
+    .nullable()
+    .test(
+      "expiry-after-start",
+      "Expiry date must be after the start date",
+      function (value) {
+        const { amcStartDate } = this.parent;
+        if (!value || !amcStartDate) return true;
+        return new Date(value) >= new Date(amcStartDate);
+      },
+    ),
+  healthStatus: Yup.string().required("AMC / Insurance status is required"),
+  amcProvider: Yup.string().nullable(),
+  amcCost: Yup.number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" ||
+      originalValue === null ||
+      originalValue === undefined
+        ? null
+        : value,
+    )
+    .min(0, "Cost must be a positive number")
+    .max(9999999, "Cost cannot exceed 99,99,999"),
+  amcVendor: Yup.string().nullable(),
+  amcDocument: Yup.array().nullable(),
   notes: Yup.string(),
   charger: Yup.boolean(),
 };
@@ -308,13 +527,30 @@ export const commonAssetInitial = {
   sourceBy: "",
   purchaseDate: "",
   cost: "",
+  // Service / Maintenance
+  needsServicing: false,
+  inspectionDate: "",
+  nextInspectionDate: "",
   serviceDate: "",
+  nextServiceDate: "",
+  serviceStatus: "",
+  serviceVendor: "",
+  serviceCost: "",
+  serviceRemark: "",
+  // AMC / Insurance
+  hasAmcInsurance: false,
+  amcStartDate: "",
+  amcExpiryDate: "",
+  amcProvider: "",
+  amcCost: "",
+  amcVendor: "",
+  amcDocument: [],
   notes: "",
   charger: false,
   purchaseBills: [],
 };
 
-// Helpers 
+// Helpers
 const IT_ELECTRONICS = "IT & Electronics";
 
 export const getBrandModelFields = (categoryName) =>
@@ -325,7 +561,7 @@ export const getBrandModelFields = (categoryName) =>
 export const getBrandModelValidation = (categoryName) =>
   categoryName === IT_ELECTRONICS ? itBrandModelValidation : {};
 
-//  Other form configs (unchanged) 
+//  Other form configs (unchanged)
 export const changeLocationFields = [
   {
     name: "locationId",
@@ -370,3 +606,257 @@ export const otherCategoryInitialValues = {
   assetName: "",
   description: "",
 };
+
+export const inspectionLogFields = [
+  {
+    name: "inspectionDate",
+    label: "Inspection Date",
+    type: "date",
+    placeholder: "dd/mm/yyyy",
+    required: true,
+    rowWith: "nextInspectionDate",
+  },
+  {
+    name: "nextInspectionDate",
+    label: "Next Inspection Due",
+    type: "date",
+    placeholder: "dd/mm/yyyy",
+    required: false,
+    hint: "Pick when the next inspection should happen.",
+    pairedWith: "inspectionDate",
+  },
+  {
+    name: "healthStatus",
+    label: "Health After Inspection",
+    type: "select",
+    placeholder: "Select health status",
+    required: true,
+    options: [
+      { value: "HEALTHY", label: "Healthy" },
+      { value: "NEED_ATTENTION", label: "Need Attention" },
+      // { value: "SERVICE_DUE", label: "Service Due" },
+      { value: "INSPECTION_DUE", label: "Inspection Due" },
+    ],
+  },
+  {
+    name: "cost",
+    label: "Cost (optional)",
+    type: "number",
+    placeholder: "Enter cost",
+    required: false,
+    min: 0,
+  },
+  {
+    name: "notes",
+    label: "Notes / Remarks",
+    type: "textarea",
+    placeholder: "Add any notes about this inspection...",
+    required: false,
+  },
+];
+
+export const inspectionLogValidationSchema = Yup.object().shape({
+  inspectionDate: Yup.string().required("Inspection date is required"),
+  nextInspectionDate: Yup.string()
+    .nullable()
+    .test(
+      "next-after-inspection",
+      "Next inspection date cannot be before the inspection date",
+      function (value) {
+        const { inspectionDate } = this.parent;
+        if (!value || !inspectionDate) return true;
+        return new Date(value) >= new Date(inspectionDate);
+      },
+    ),
+  healthStatus: Yup.string().required("Health status is required"),
+  cost: Yup.number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || originalValue === null || originalValue === undefined
+        ? null
+        : value,
+    )
+    .min(0, "Cost must be a positive number"),
+  notes: Yup.string(),
+});
+
+////// Service Log — maps to POST /api/maintenance-history
+export const serviceLogFields = [
+  {
+    name: "serviceDate",
+    label: "Service Date",
+    type: "date",
+    placeholder: "dd/mm/yyyy",
+    required: true,
+    rowWith: "nextServiceDate",
+  },
+  {
+    name: "nextServiceDate",
+    label: "Next Service Due",
+    type: "date",
+    placeholder: "dd/mm/yyyy",
+    required: false,
+    hint: "Pick when the next service should happen.",
+    pairedWith: "serviceDate",
+  },
+  {
+    name: "cost",
+    label: "Cost (optional)",
+    type: "number",
+    placeholder: "Enter service cost",
+    required: false,
+    min: 0,
+  },
+  {
+    name: "healthStatus",
+    label: "Health After Service",
+    type: "select",
+    placeholder: "Select health status",
+    required: true,
+    options: [
+      { value: "HEALTHY", label: "Healthy" },
+      { value: "NEED_ATTENTION", label: "Need Attention" },
+      { value: "SERVICE_DUE", label: "Service Due" },
+      { value: "INSPECTION_DUE", label: "Inspection Due" },
+    ],
+  },
+  {
+    name: "notes",
+    label: "Notes / Remarks",
+    type: "textarea",
+    placeholder: "Add any notes about this service...",
+    required: false,
+  },
+  {
+    name: "billFile",
+    label: "Bill / Receipt",
+    type: "file",
+    accept: "image/*,application/pdf",
+    required: false,
+    // NOTE: this holds the raw File object in the form; AssetDetails.jsx uploads
+    // it separately and swaps it for `billId` before calling the API.
+  },
+];
+
+export const serviceLogValidationSchema = Yup.object().shape({
+  serviceDate: Yup.string().required("Service date is required"),
+  nextServiceDate: Yup.string()
+    .nullable()
+    .test(
+      "next-after-service",
+      "Next service date cannot be before the service date",
+      function (value) {
+        const { serviceDate } = this.parent;
+        if (!value || !serviceDate) return true;
+        return new Date(value) >= new Date(serviceDate);
+      },
+    ),
+  cost: Yup.number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || originalValue === null || originalValue === undefined
+        ? null
+        : value,
+    )
+    .min(0, "Cost must be a positive number"),
+  healthStatus: Yup.string().required("Health status is required"),
+  notes: Yup.string(),
+});
+
+////// AMC / Insurance Renewal — maps to POST /api/insurance
+export const amcRenewalFields = [
+  {
+    name: "amcStartDate",
+    label: "AMC Start Date",
+    type: "date",
+    placeholder: "dd/mm/yyyy",
+    required: true,
+    rowWith: "amcExpiryDate",
+  },
+  {
+    name: "amcExpiryDate",
+    label: "AMC Expiry Due",
+    type: "date",
+    placeholder: "dd/mm/yyyy",
+    required: true,
+    hint: "Pick the AMC / insurance expiry date.",
+    pairedWith: "amcStartDate",
+  },
+  {
+    name: "healthStatus",
+    label: "AMC / Insurance Status",
+    type: "select",
+    placeholder: "Select status",
+    required: true,
+    options: [
+      { value: "ACTIVE", label: "Active" },
+      { value: "EXPIRING_SOON", label: "Expiring Soon" },
+      { value: "EXPIRED", label: "Expired" },
+    ],
+  },
+  {
+    name: "insuranceProvider",
+    label: "AMC / Insurance Provider",
+    type: "text",
+    placeholder: "e.g., HDFC Ergo / Dell Pro Support",
+    required: true,
+  },
+  {
+    name: "vendorDetails",
+    label: "Vendor Details",
+    type: "textarea",
+    placeholder: "Contact person, phone, email, address",
+    required: false,
+  },
+  {
+    name: "cost",
+    label: "Cost",
+    type: "number",
+    placeholder: "Enter AMC / Insurance cost",
+    required: false,
+    min: 0,
+  },
+  {
+    name: "notes",
+    label: "Notes / Remarks",
+    type: "textarea",
+    placeholder: "Add any notes about this AMC / Insurance renewal...",
+    required: false,
+  },
+  {
+    name: "policyFile",
+    label: "AMC / Policy Document",
+    type: "file",
+    accept: "image/*,application/pdf",
+    required: false,
+    // NOTE: this holds the raw File object in the form; AssetDetails.jsx uploads
+    // it separately and swaps it for `policyDocumentId` before calling the API.
+  },
+];
+
+export const amcRenewalValidationSchema = Yup.object().shape({
+  amcStartDate: Yup.string().required("AMC start date is required"),
+  amcExpiryDate: Yup.string()
+    .required("AMC expiry date is required")
+    .test(
+      "expiry-after-start",
+      "Expiry date cannot be before the start date",
+      function (value) {
+        const { amcStartDate } = this.parent;
+        if (!value || !amcStartDate) return true;
+        return new Date(value) >= new Date(amcStartDate);
+      },
+    ),
+  healthStatus: Yup.string().required("AMC / Insurance status is required"),
+  insuranceProvider: Yup.string().required("AMC / Insurance provider is required"),
+  vendorDetails: Yup.string(),
+  cost: Yup.number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || originalValue === null || originalValue === undefined
+        ? null
+        : value,
+    )
+    .min(0, "Cost must be a positive number"),
+  notes: Yup.string(),
+});
