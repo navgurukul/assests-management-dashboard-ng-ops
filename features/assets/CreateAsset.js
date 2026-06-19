@@ -49,7 +49,7 @@ export default function CreateAsset() {
         'serviceDate',
         'nextServiceDate',
         'serviceStatus',
-        'serviceVendor',
+        'serviceProvider',
         'serviceCost',
         'serviceRemark',
       ];
@@ -142,6 +142,7 @@ export default function CreateAsset() {
           assetId: newAssetId,
           serviceDate: toDateTime(values.serviceDate),
           nextServiceDate: toDateTime(values.nextServiceDate) || undefined,
+          serviceProvider: values.serviceProvider || undefined,
           cost: values.serviceCost ? Number(values.serviceCost) : undefined,
           notes: values.serviceRemark || undefined,
         });

@@ -242,10 +242,10 @@ export const commonAssetFields = [
     showIf: { field: "needsServicing", value: true },
   },
   {
-    name: "serviceVendor",
-    label: "Vendor",
+    name: "serviceProvider",
+    label: "Service Provider",
     type: "text",
-    placeholder: "Enter vendor name",
+    placeholder: "Enter service provider name",
     required: false,
     showIf: { field: "needsServicing", value: true },
   },
@@ -456,7 +456,7 @@ export const commonAssetValidation = {
       ["HEALTHY", "NEED_ATTENTION", "SERVICE_DUE", "INSPECTION_DUE", "", null],
       "Invalid status",
     ),
-  serviceVendor: Yup.string().nullable(),
+  serviceProvider: Yup.string().nullable(),
   serviceCost: Yup.number()
     .nullable()
     .transform((value, originalValue) =>
@@ -534,7 +534,7 @@ export const commonAssetInitial = {
   serviceDate: "",
   nextServiceDate: "",
   serviceStatus: "",
-  serviceVendor: "",
+  serviceProvider: "",
   serviceCost: "",
   serviceRemark: "",
   // AMC / Insurance
@@ -700,6 +700,13 @@ export const serviceLogFields = [
     pairedWith: "serviceDate",
   },
   {
+    name: "serviceProvider",
+    label: "Service Provider",
+    type: "text",
+    placeholder: "Enter service provider name",
+    required: false,
+  },
+  {
     name: "cost",
     label: "Cost (optional)",
     type: "number",
@@ -759,6 +766,7 @@ export const serviceLogValidationSchema = Yup.object().shape({
         : value,
     )
     .min(0, "Cost must be a positive number"),
+  serviceProvider: Yup.string(),
   healthStatus: Yup.string().required("Health status is required"),
   notes: Yup.string(),
 });

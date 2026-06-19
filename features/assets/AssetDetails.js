@@ -371,6 +371,10 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
                 value: item.healthStatus || 'N/A',
               },
               {
+                label: 'Service Provider',
+                value: item.serviceProvider || 'N/A',
+              },
+              {
                 label: 'Cost',
                 value: item.cost ? `₹${Number(item.cost).toLocaleString()}` : 'N/A',
               },
