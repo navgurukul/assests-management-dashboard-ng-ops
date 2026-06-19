@@ -27,7 +27,7 @@ export default function CreateAsset() {
     }
 
     setIsSubmitting(true);
-    
+
     // Show loading toast
     const loadingToastId = toast.loading('Creating asset...');
 
@@ -38,9 +38,33 @@ export default function CreateAsset() {
         assetCategoryId: _assetCategoryId,
         assetCategoryName: _assetCategoryName,
         purchaseBills,
+        amcDocument,
         ...rest
       } = values;
 
+      // Service / Maintenance and AMC / Insurance field groups (sent only when their toggle is on)
+      const serviceFields = [
+        'inspectionDate',
+        'nextInspectionDate',
+        'serviceDate',
+        'nextServiceDate',
+        'serviceStatus',
+        'serviceVendor',
+        'serviceCost',
+        'serviceRemark',
+      ];
+      const amcFields = [
+        'amcStartDate',
+        'amcExpiryDate',
+        'healthStatus',
+        'amcProvider',
+        'amcCost',
+        'amcVendor',
+      ];
+      const toDateTime = (dateStr) => {
+        if (!dateStr) return undefined;
+        return new Date(dateStr).toISOString(); // "2026-06-18" → "2026-06-18T00:00:00.000Z"
+      };
       const assetTypeFieldMap = {
         processor: ['Laptop', 'Desktop', 'Server', 'CPU', 'Tablet', 'Smartphone'],
         ramSizeGB: ['Laptop', 'Desktop', 'Server', 'RAM', 'Tablet', 'Smartphone'],
@@ -55,8 +79,22 @@ export default function CreateAsset() {
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
         cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
+        serviceCost: values.serviceCost !== '' && values.serviceCost !== null ? Number(values.serviceCost) : undefined,
+        amcCost: values.amcCost !== '' && values.amcCost !== null ? Number(values.amcCost) : undefined,
+        amcDocumentId: amcDocument?.[0]?.id || undefined,
         purchaseBillId: values.purchaseBills?.[0]?.id || undefined,
       };
+
+      // Drop the service / AMC field groups when their toggle is off
+      if (!values.needsServicing) {
+        serviceFields.forEach((field) => delete rawPayload[field]);
+        delete rawPayload.needsServicing;
+      }
+      if (!values.hasAmcInsurance) {
+        amcFields.forEach((field) => delete rawPayload[field]);
+        delete rawPayload.amcDocumentId;
+        delete rawPayload.hasAmcInsurance;
+      }
 
       // Remove fields not relevant to the selected asset type
       Object.keys(assetTypeFieldMap).forEach((field) => {
@@ -79,10 +117,49 @@ export default function CreateAsset() {
       );
 
       // Make API call to create asset using apiService wrapper
-      await apiService.post(
+      // await apiService.post(
+      //   config.endpoints.assets.create,
+      //   payload
+      // );
+      const createdAsset = await apiService.post(
         config.endpoints.assets.create,
         payload
       );
+      const newAssetId = createdAsset?.data?.id;
+      if (values.needsServicing && newAssetId && values.inspectionDate) {
+        await apiService.post(config.endpoints.inspectionHistory.create, {
+          assetId: newAssetId,
+          inspectionDate: toDateTime(values.inspectionDate),
+          nextInspectionDate: toDateTime(values.nextInspectionDate) || undefined,
+          cost: values.serviceCost ? Number(values.serviceCost) : undefined,
+          notes: values.serviceRemark || undefined,
+        });
+      }
+
+      // Maintenance history
+      if (values.needsServicing && newAssetId && values.serviceDate) {
+        await apiService.post(config.endpoints.maintenanceHistory.create, {
+          assetId: newAssetId,
+          serviceDate: toDateTime(values.serviceDate),
+          nextServiceDate: toDateTime(values.nextServiceDate) || undefined,
+          cost: values.serviceCost ? Number(values.serviceCost) : undefined,
+          notes: values.serviceRemark || undefined,
+        });
+      }
+
+      // AMC / Insurance
+      if (values.hasAmcInsurance && newAssetId) {
+        await apiService.post(config.endpoints.insurance.create, {
+          assetId: newAssetId,
+          amcStartDate: toDateTime(values.amcStartDate),
+          amcExpiryDate: toDateTime(values.amcExpiryDate) || undefined,
+          healthStatus: values.healthStatus || undefined,
+          insuranceProvider: values.amcProvider || undefined,
+          vendorDetails: values.amcVendor || undefined,
+          cost: values.amcCost ? Number(values.amcCost) : undefined,
+          policyDocumentId: values.amcDocument?.[0]?.id || undefined,
+        });
+      }
 
       // Show success toast
       toast.success('Asset created successfully!');
@@ -136,7 +213,7 @@ export default function CreateAsset() {
             size="sm"
             className="mb-6"
           />
-          
+
           <div className="bg-(--surface) text-foreground rounded-xl shadow-sm border border-(--border) p-6">
             <h1 className="text-xl font-bold mb-2">Register New Asset</h1>
             <p className="text-(--muted)">Fill in the details below to register a new asset in your inventory system</p>
