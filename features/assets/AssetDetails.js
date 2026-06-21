@@ -72,18 +72,6 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
           currentLocationId: formData.locationId,
         });
         toast.success('Asset location changed successfully.');
-        // } else if (modalAction === 'INSPECTION_LOG') {
-        //   // TODO: replace with the real inspection-log endpoint once the backend is ready
-        //   await apiService.post(config.endpoints.assets.inspectionLog(id), formData);
-        //   toast.success('Inspection logged successfully.');
-        // } else if (modalAction === 'SERVICE_LOG') {
-        //   // TODO: replace with the real service-log endpoint once the backend is ready
-        //   await apiService.post(config.endpoints.assets.serviceLog(id), formData);
-        //   toast.success('Service logged successfully.');
-        // } else if (modalAction === 'AMC_RENEWAL') {
-        //   // TODO: replace with the real AMC renewal endpoint once the backend is ready
-        //   await apiService.post(config.endpoints.assets.amcRenewal(id), formData);
-        //   toast.success('AMC / Insurance renewal logged successfully.');
       } else if (modalAction === 'INSPECTION_LOG') {
         const { cost, inspectionDate, nextInspectionDate, ...rest } = formData;
         await apiService.post(config.endpoints.inspectionHistory.create, {
@@ -95,39 +83,25 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         });
         toast.success('Inspection logged successfully.');
       } else if (modalAction === 'SERVICE_LOG') {
-        const { cost, billFile, serviceDate, nextServiceDate, ...rest } = formData;
-        // let billId;
-        // if (billFile) {
-        //   const uploadFormData = new FormData();
-        //   uploadFormData.append('file', billFile);
-        //   const uploadResult = await apiService.post(config.endpoints.upload, uploadFormData);
-        //   billId = uploadResult?.id;
-        // }
+        const { cost, billDocument, serviceDate, nextServiceDate, ...rest } = formData;
         await apiService.post(config.endpoints.maintenanceHistory.create, {
           assetId: id,
           ...rest,
           serviceDate: toDateTime(serviceDate),
           nextServiceDate: toDateTime(nextServiceDate),
           cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
-          // billId,
+          billId: billDocument?.[0]?.id || undefined,
         });
         toast.success('Service logged successfully.');
       } else if (modalAction === 'AMC_RENEWAL') {
-        const { cost, policyFile, amcStartDate, amcExpiryDate, ...rest } = formData;
-        // let policyDocumentId;
-        // if (policyFile) {
-        //   const uploadFormData = new FormData();
-        //   uploadFormData.append('file', policyFile);
-        //   const uploadResult = await apiService.post(config.endpoints.upload, uploadFormData);
-        //   policyDocumentId = uploadResult?.id;
-        // }
+        const { cost, policyDocument, amcStartDate, amcExpiryDate, ...rest } = formData;
         await apiService.post(config.endpoints.insurance.create, {
           assetId: id,
           ...rest,
           amcStartDate: toDateTime(amcStartDate),
           amcExpiryDate: toDateTime(amcExpiryDate),
           cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
-          // policyDocumentId,
+          policyDocumentId: policyDocument?.[0]?.id || undefined,
         });
         toast.success('AMC / Insurance renewal logged successfully.');
       }
@@ -389,6 +363,20 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
                 value: item.notes || 'N/A',
                 className: 'col-span-2',
               },
+              {
+                label: 'Bill / Receipt',
+                value: item.bill?.url ? (
+                  <a
+                    href={item.bill.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {item.bill.name}
+                  </a>
+                ) : 'N/A',
+                className: 'col-span-2',
+              },
             ])
           : [
               {
@@ -495,6 +483,20 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               {
                 label: 'Notes',
                 value: item.notes || 'N/A',
+                className: 'col-span-2',
+              },
+              {
+                label: 'Policy Document',
+                value: item.policyDocument?.url ? (
+                  <a
+                    href={item.policyDocument.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {item.policyDocument.name}
+                  </a>
+                ) : 'N/A',
                 className: 'col-span-2',
               },
             ])
