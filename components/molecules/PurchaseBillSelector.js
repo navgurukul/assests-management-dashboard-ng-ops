@@ -10,6 +10,7 @@ export default function PurchaseBillSelector({
   selectedBills = [],
   onBillsChange,
   allowMultiple = false,
+  simpleMode = false,
 }) {
   const [mode, setMode] = useState('link');
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +21,7 @@ export default function PurchaseBillSelector({
   const { data, isLoading, error } = useFetch({
     url: '/purchase-bills?page=1&limit=100',
     queryKey: ['purchase-bills', 'list'],
-    enabled: true,
+    enabled: !simpleMode,
   });
 
   // Extract bills from API response
@@ -96,12 +97,89 @@ export default function PurchaseBillSelector({
     }
   };
 
-  const formatFileSize = (bytes) => {
+    const formatFileSize = (bytes) => {
     if (!bytes) return '';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
+
+  if (simpleMode) {
+    const currentFile = selectedBills[0];
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2">
+          <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+
+          <span className="flex-1 text-sm text-gray-600 truncate">
+            {isUploading
+              ? 'Uploading...'
+              : currentFile
+              ? currentFile.name
+              : 'No file chosen'}
+          </span>
+
+          {currentFile && !isUploading && (
+            <button
+              type="button"
+              onClick={() => onBillsChange([])}
+              className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          {!currentFile && (
+            <label
+              className={`cursor-pointer shrink-0 ${
+                isUploading ? 'pointer-events-none opacity-60' : ''
+              }`}
+            >
+              <span className="px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors inline-flex items-center gap-1">
+                {isUploading ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Upload className="w-3 h-3" />
+                )}
+                Browse
+              </span>
+
+              <input
+                type="file"
+                className="hidden"
+                onChange={handleFileUpload}
+                accept=".pdf,.jpg,.jpeg,.png"
+                disabled={isUploading}
+              />
+            </label>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-500">
+          PDF or image, max 10MB
+        </p>
+
+        {uploadError && (
+          <div className="p-2 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+
+            <p className="text-xs text-red-800 flex-1">
+              {uploadError}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setUploadError(null)}
+              className="text-red-400 hover:text-red-600"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
