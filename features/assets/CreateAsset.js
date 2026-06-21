@@ -38,33 +38,35 @@ export default function CreateAsset() {
         assetCategoryId: _assetCategoryId,
         assetCategoryName: _assetCategoryName,
         purchaseBills,
+        serviceBillDocument,
         amcDocument,
+        needsServicing,
+        hasAmcInsurance,
+        inspectionDate,
+        nextInspectionDate,
+        serviceDate,
+        nextServiceDate,
+        serviceStatus,
+        serviceProvider,
+        serviceCost,
+        serviceRemark,
+        amcStartDate,
+        amcExpiryDate,
+        healthStatus,
+        amcProvider,
+        amcCost,
+        amcVendor,
         ...rest
       } = values;
 
-      // Service / Maintenance and AMC / Insurance field groups (sent only when their toggle is on)
-      const serviceFields = [
-        'inspectionDate',
-        'nextInspectionDate',
-        'serviceDate',
-        'nextServiceDate',
-        'serviceStatus',
-        'serviceProvider',
-        'serviceCost',
-        'serviceRemark',
-      ];
-      const amcFields = [
-        'amcStartDate',
-        'amcExpiryDate',
-        'healthStatus',
-        'amcProvider',
-        'amcCost',
-        'amcVendor',
-      ];
       const toDateTime = (dateStr) => {
         if (!dateStr) return undefined;
         return new Date(dateStr).toISOString(); // "2026-06-18" → "2026-06-18T00:00:00.000Z"
       };
+
+      const toNumber = (value) =>
+        value !== '' && value !== null && value !== undefined ? Number(value) : undefined;
+
       const assetTypeFieldMap = {
         processor: ['Laptop', 'Desktop', 'Server', 'CPU', 'Tablet', 'Smartphone'],
         ramSizeGB: ['Laptop', 'Desktop', 'Server', 'RAM', 'Tablet', 'Smartphone'],
@@ -78,22 +80,48 @@ export default function CreateAsset() {
         status: 'IN_STOCK', // Always set to IN_STOCK for new assets
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
-        cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
-        serviceCost: values.serviceCost !== '' && values.serviceCost !== null ? Number(values.serviceCost) : undefined,
-        amcCost: values.amcCost !== '' && values.amcCost !== null ? Number(values.amcCost) : undefined,
-        amcDocumentId: amcDocument?.[0]?.id || undefined,
+        cost: toNumber(values.cost),
         purchaseBillId: values.purchaseBills?.[0]?.id || undefined,
+        isMaintanceAndInspection: Boolean(needsServicing),
+        isInsurance: Boolean(hasAmcInsurance),
       };
 
-      // Drop the service / AMC field groups when their toggle is off
-      if (!values.needsServicing) {
-        serviceFields.forEach((field) => delete rawPayload[field]);
-        delete rawPayload.needsServicing;
+      if (needsServicing) {
+        // Service record → maintenance-history (carries cost, provider and bill).
+        // Also mirror the date into the top-level serviceDate summary (date-only, per asset schema).
+        if (serviceDate) {
+          rawPayload.serviceDate = serviceDate;
+          rawPayload.maintenanceHistory = {
+            serviceDate: toDateTime(serviceDate),
+            nextServiceDate: toDateTime(nextServiceDate),
+            serviceProvider: serviceProvider || undefined,
+            cost: toNumber(serviceCost),
+            healthStatus: serviceStatus || undefined,
+            notes: serviceRemark || undefined,
+            billId: serviceBillDocument?.[0]?.id || undefined,
+          };
+        }
+        // Inspection-history
+        if (inspectionDate) {
+          rawPayload.inspectionHistory = {
+            inspectionDate: toDateTime(inspectionDate),
+            nextInspectionDate: toDateTime(nextInspectionDate),
+            healthStatus: serviceStatus || undefined,
+            notes: serviceRemark || undefined,
+          };
+        }
       }
-      if (!values.hasAmcInsurance) {
-        amcFields.forEach((field) => delete rawPayload[field]);
-        delete rawPayload.amcDocumentId;
-        delete rawPayload.hasAmcInsurance;
+
+      if (hasAmcInsurance) {
+        rawPayload.insurance = {
+          amcStartDate: toDateTime(amcStartDate),
+          amcExpiryDate: toDateTime(amcExpiryDate),
+          insuranceProvider: amcProvider || undefined,
+          insuranceProviderDetails: amcVendor || undefined,
+          cost: toNumber(amcCost),
+          healthStatus: healthStatus || undefined,
+          policyDocumentId: amcDocument?.[0]?.id || undefined,
+        };
       }
 
       // Remove fields not relevant to the selected asset type
@@ -117,50 +145,10 @@ export default function CreateAsset() {
       );
 
       // Make API call to create asset using apiService wrapper
-      // await apiService.post(
-      //   config.endpoints.assets.create,
-      //   payload
-      // );
-      const createdAsset = await apiService.post(
+      await apiService.post(
         config.endpoints.assets.create,
         payload
       );
-      const newAssetId = createdAsset?.data?.id;
-      if (values.needsServicing && newAssetId && values.inspectionDate) {
-        await apiService.post(config.endpoints.inspectionHistory.create, {
-          assetId: newAssetId,
-          inspectionDate: toDateTime(values.inspectionDate),
-          nextInspectionDate: toDateTime(values.nextInspectionDate) || undefined,
-          cost: values.serviceCost ? Number(values.serviceCost) : undefined,
-          notes: values.serviceRemark || undefined,
-        });
-      }
-
-      // Maintenance history
-      if (values.needsServicing && newAssetId && values.serviceDate) {
-        await apiService.post(config.endpoints.maintenanceHistory.create, {
-          assetId: newAssetId,
-          serviceDate: toDateTime(values.serviceDate),
-          nextServiceDate: toDateTime(values.nextServiceDate) || undefined,
-          serviceProvider: values.serviceProvider || undefined,
-          cost: values.serviceCost ? Number(values.serviceCost) : undefined,
-          notes: values.serviceRemark || undefined,
-        });
-      }
-
-      // AMC / Insurance
-      if (values.hasAmcInsurance && newAssetId) {
-        await apiService.post(config.endpoints.insurance.create, {
-          assetId: newAssetId,
-          amcStartDate: toDateTime(values.amcStartDate),
-          amcExpiryDate: toDateTime(values.amcExpiryDate) || undefined,
-          healthStatus: values.healthStatus || undefined,
-          insuranceProvider: values.amcProvider || undefined,
-          vendorDetails: values.amcVendor || undefined,
-          cost: values.amcCost ? Number(values.amcCost) : undefined,
-          policyDocumentId: values.amcDocument?.[0]?.id || undefined,
-        });
-      }
 
       // Show success toast
       toast.success('Asset created successfully!');
