@@ -267,6 +267,15 @@ export const commonAssetFields = [
     fullWidth: true,
     showIf: { field: "needsServicing", value: true },
   },
+  {
+    name: "serviceBillDocument",
+    label: "Service Bill / Receipt",
+    type: "purchase-bill-selector",
+    required: false,
+    allowMultiple: false,
+    simpleMode: true,
+    showIf: { field: "needsServicing", value: true },
+  },
   // AMC / Insurance
   {
     name: "hasAmcInsurance",
@@ -331,12 +340,11 @@ export const commonAssetFields = [
   },
   {
     name: "amcDocument",
-    label: "Upload Document",
-    type: "file",
-    documentType: "INVOICE",
+    label: "AMC / Policy Document",
+    type: "purchase-bill-selector",
     allowMultiple: false,
     required: false,
-    fullWidth: true,
+    simpleMode: true,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
@@ -469,6 +477,7 @@ export const commonAssetValidation = {
     .min(0, "Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
   serviceRemark: Yup.string().nullable(),
+  serviceBillDocument: Yup.array().nullable(),
   // AMC / Insurance
   hasAmcInsurance: Yup.boolean(),
   amcStartDate: Yup.string()
@@ -490,7 +499,13 @@ export const commonAssetValidation = {
         return new Date(value) >= new Date(amcStartDate);
       },
     ),
-  healthStatus: Yup.string().required("AMC / Insurance status is required"),
+  healthStatus: Yup.string()
+    .nullable()
+    .when("hasAmcInsurance", {
+      is: true,
+      then: (schema) => schema.required("AMC / Insurance status is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   amcProvider: Yup.string().nullable(),
   amcCost: Yup.number()
     .nullable()
@@ -537,10 +552,12 @@ export const commonAssetInitial = {
   serviceProvider: "",
   serviceCost: "",
   serviceRemark: "",
+  serviceBillDocument: [],
   // AMC / Insurance
   hasAmcInsurance: false,
   amcStartDate: "",
   amcExpiryDate: "",
+  healthStatus: "",
   amcProvider: "",
   amcCost: "",
   amcVendor: "",
@@ -735,13 +752,12 @@ export const serviceLogFields = [
     required: false,
   },
   {
-    name: "billFile",
+    name: "billDocument",
     label: "Bill / Receipt",
-    type: "file",
-    accept: "image/*,application/pdf",
+    type: "purchase-bill-selector",
     required: false,
-    // NOTE: this holds the raw File object in the form; AssetDetails.jsx uploads
-    // it separately and swaps it for `billId` before calling the API.
+    allowMultiple: false,
+    simpleMode: true,
   },
 ];
 
@@ -832,13 +848,12 @@ export const amcRenewalFields = [
     required: false,
   },
   {
-    name: "policyFile",
+    name: "policyDocument",
     label: "AMC / Policy Document",
-    type: "file",
-    accept: "image/*,application/pdf",
+    type: "purchase-bill-selector",
     required: false,
-    // NOTE: this holds the raw File object in the form; AssetDetails.jsx uploads
-    // it separately and swaps it for `policyDocumentId` before calling the API.
+    allowMultiple: false,
+    simpleMode: true,
   },
 ];
 
