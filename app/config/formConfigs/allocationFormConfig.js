@@ -30,20 +30,38 @@ export const allocationFormFields = [
     companionKey: 'campusName',
   },
   {
-    name: 'assetTypeId',
-    label: 'Asset Type',
+    name: 'assetCategoryId',
+    label: 'Asset Category',
     type: 'api-autocomplete',
-    placeholder: 'Search and select asset type',
-    apiUrl: baseUrl + '/asset-types',
-    queryKey: ['asset-types-remote'],
+    placeholder: 'Search and select asset category',
+    apiUrl: baseUrl + '/asset-categories',
+    queryKey: ['asset-categories-remote'],
     labelKey: 'name',
     valueKey: 'id',
-    filterCategory: 'DEVICE',
+    // filterCategory: 'DEVICE',  //Currently showing all asset types to support furniture, vehicles, etc.
     required: true,
     showIf: { field: 'allocationType', value: 'REMOTE' },
     dependsOn: {
       field: 'campusId',
       paramKey: 'campusId',
+    },
+    onFieldChange: 'clearCategoryDependentsRemote',
+  },
+  {
+    name: 'assetTypeId',
+    label: 'Asset Type',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select asset type',
+    apiUrl: baseUrl + '/asset-categories/',
+    queryKey: null,
+    labelKey: 'name',
+    valueKey: 'id',
+    dataPath: 'data.assetTypes',
+    required: true,
+    showIf: { field: 'allocationType', value: 'REMOTE' },
+    dependsOn: {
+      field: 'assetCategoryId',
+      paramKey: 'categoryId',
     },
     onFieldChange: 'clearAssetId',
   },
@@ -133,17 +151,40 @@ export const allocationFormFields = [
     companionKey: 'campusName',
   }, 
   {
+    name: 'campusAssetCategoryId',
+    label: 'Asset Category',
+    type: 'api-autocomplete',
+    placeholder: 'Search and select asset category',
+    apiUrl: baseUrl + '/asset-categories',
+    queryKey: ['asset-categories-campus'],
+    labelKey: 'name',
+    valueKey: 'id',
+    dataPath: 'data',
+    required: true,
+    showIf: { field: 'allocationType', value: 'CAMPUS' },
+    dependsOn: {
+      field: 'sourceCampus',
+      paramKey: 'campusId',
+    },
+    onFieldChange: 'clearCategoryDependentsCampus',
+  },
+  {
     name: 'assetType',
     label: 'Asset Type',
     type: 'api-autocomplete',
     placeholder: 'Search and select asset type',
-    apiUrl: baseUrl + '/asset-types',
-    queryKey: ['asset-types-campus'],
+    apiUrl: baseUrl + '/asset-categories/',
+    queryKey: null,
     labelKey: 'name',
     valueKey: 'id',
-    filterCategory: 'DEVICE',
+    dataPath: 'data.assetTypes',
     required: true,
     showIf: { field: 'allocationType', value: 'CAMPUS' },
+    dependsOn: {
+      field: 'campusAssetCategoryId',
+      paramKey: 'categoryId',
+    },
+    onFieldChange: 'clearAssetTypeDependentsCampus',
   },
   {
     name: 'campusAssets',
@@ -191,6 +232,12 @@ export const allocationValidationSchema = Yup.object().shape({
       then: (schema) => schema.required('Campus is required'),
       otherwise: (schema) => schema.nullable(),
     }),
+  assetCategoryId: Yup.string()
+    .when('allocationType', {
+      is: 'REMOTE',
+      then: (schema) => schema.required('Asset category is required'),
+      otherwise: (schema) => schema.nullable(),
+    }),
   assetId: Yup.string()
     .when('allocationType', {
       is: 'REMOTE',
@@ -231,6 +278,12 @@ export const allocationValidationSchema = Yup.object().shape({
               return value !== this.parent.sourceCampus;
             }
           ),
+      otherwise: (schema) => schema.nullable(),
+    }),
+  campusAssetCategoryId: Yup.string()
+    .when('allocationType', {
+      is: 'CAMPUS',
+      then: (schema) => schema.required('Asset category is required'),
       otherwise: (schema) => schema.nullable(),
     }),
   // allocationReason: Yup.string()
@@ -276,6 +329,7 @@ export const allocationInitialValues = {
   allocationType: 'REMOTE',
   // Remote fields
   campusId: '',
+  assetCategoryId: '',
   assetTypeId: '',
   assetId: '',
   userEmail: '',
@@ -288,6 +342,7 @@ export const allocationInitialValues = {
   sourceCampusName: '',
   destinationCampus: '',
   destinationCampusName: '',
+  campusAssetCategoryId: '',
   personRaising: '',
   campusAssets: [],
   // Common fields

@@ -22,6 +22,11 @@ export const assetTableColumns = [
   
   // Default visible columns
   { 
+    key: 'category', 
+    label: 'CATEGORY',
+    description: 'Asset category (IT & Electronics, Furniture, etc.)'
+  },
+  { 
     key: 'type', 
     label: 'TYPE',
     description: 'Asset type (e.g., Laptop, Desktop)'
@@ -55,6 +60,11 @@ export const assetTableColumns = [
     key: 'location', 
     label: 'LOCATION',
     description: 'Specific location within campus'
+  },
+  { 
+    key: 'allocatedTo', 
+    label: 'ALLOCATED TO',
+    description: 'User the asset is allocated to'
   },
   
   // Optional columns (not visible by default)
@@ -94,6 +104,11 @@ export const assetTableColumns = [
     description: 'Purchase cost'
   },
   { 
+    key: 'serviceDate', 
+    label: 'SERVICE DATE',
+    description: 'Last service date'
+  },
+  { 
     key: 'specLabel', 
     label: 'SPEC LABEL',
     description: 'Specification label'
@@ -127,6 +142,7 @@ export const assetTableColumns = [
 export const defaultVisibleColumns = [
   'status',
   'assetTag',
+  'category',
   'type',
   'brand',
   'model',
@@ -134,6 +150,7 @@ export const defaultVisibleColumns = [
   'condition',
   'campus',
   'location',
+  'allocatedTo',
   'actions',
 ];
 

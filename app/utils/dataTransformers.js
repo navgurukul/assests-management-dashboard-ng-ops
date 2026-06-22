@@ -155,6 +155,7 @@ export const transformAssetForTable = (asset) => {
   return {
     id: asset.id,
     assetTag: asset.assetTag,
+    category: asset.assetType?.assetCategory?.name || asset.assetType?.category || 'N/A',
     type: getNestedValue(asset, 'assetType.name', 'Unknown'),
     brand: asset.brand || 'N/A',
     model: asset.model || 'N/A',
@@ -170,6 +171,7 @@ export const transformAssetForTable = (asset) => {
     ownedBy: asset.ownedBy || 'N/A',
     purchaseDate: formatDate(asset.purchaseDate),
     cost: formatCurrency(asset.cost),
+    serviceDate: formatDate(asset.serviceDate),
     charger: asset.charger,
     bag: asset.bag,
     specLabel: asset.specLabel || buildSpecLabel(asset),
@@ -177,6 +179,12 @@ export const transformAssetForTable = (asset) => {
     notes: asset.notes || 'N/A',
     createdAt: formatDate(asset.createdAt),
     updatedAt: formatDate(asset.updatedAt),
+    // Extract allocated user details if allocation exists
+    allocatedTo: asset.allocation?.user ? {
+      firstName: asset.allocation.user.firstName,
+      lastName: asset.allocation.user.lastName,
+      email: asset.allocation.user.email,
+    } : null,
     // Store full asset data for details page
     assetData: asset,
   };

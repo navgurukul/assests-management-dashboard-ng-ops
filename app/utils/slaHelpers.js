@@ -22,12 +22,18 @@ export function calculateSLAStatus(allocationDate, expectedResolutionDays, curre
   }
 
   const allocation = new Date(allocationDate);
+  allocation.setHours(0, 0, 0, 0);
   const now = new Date();
-  
+  now.setHours(0, 0, 0, 0);
+
+  const expectedResolution = new Date(allocation);
+  expectedResolution.setDate(allocation.getDate() + Number(expectedResolutionDays));
+
   // Calculate elapsed days
   const daysElapsed = Math.floor((now - allocation) / (1000 * 60 * 60 * 24));
-  const daysRemaining = Number(expectedResolutionDays) - daysElapsed;
-  
+  const totalDays = Math.max(Number(expectedResolutionDays), 1);
+  const daysRemaining = totalDays - daysElapsed;
+
   // Check if already closed/resolved
   const isCompleted = ['CLOSED', 'RESOLVED'].includes(currentStatus?.toUpperCase());
   

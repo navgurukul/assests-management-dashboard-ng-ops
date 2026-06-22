@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, ArrowLeft, Calendar, Package, Wrench, Clock, FileText } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
-import ComponentTimeline from './components/ComponentTimeline';
 import { 
   CurrentlyInstalledCard 
 } from './components/InfoCards';
@@ -11,7 +10,7 @@ import DocumentAttachments from './components/DocumentAttachments';
 
 // Tab definitions - matching Create Component stepper order + Component Journey
 const tabs = [
-  { id: 'journey', label: 'Component Journey', icon: Clock },
+  { id: 'journey', label: 'Installation History', icon: Wrench },
   { id: 'source', label: 'Component Source', icon: Package },
   { id: 'basic', label: 'Basic Information', icon: FileText },
   { id: 'documents', label: 'Documents', icon: FileText },
@@ -64,9 +63,9 @@ export default function ComponentDetails({ componentId, componentData, onBack })
   const warrantyStatus = calculateWarrantyStatus(componentDetails.purchaseDetails?.warrantyExpiryDate);
   const summaryStats = {
     age: componentDetails.purchaseDetails?.purchaseDate ? calculateAge(componentDetails.purchaseDetails.purchaseDate) : 'N/A',
-    devicesUsedIn: componentDetails.previousInstallations?.length || 0,
+    devicesUsedIn: componentDetails.installationHistory?.length || 0,
     currentValue: (componentDetails.purchaseDetails?.purchasePrice && componentDetails.purchaseDetails?.purchaseDate) 
-      ? Math.round(calculateDepreciation(componentDetails.purchaseDetails.purchasePrice, componentDetails.purchaseDetails.purchaseDate))
+      ? Math.round(calculateDepreciation(Number(componentDetails.purchaseDetails.purchasePrice), componentDetails.purchaseDetails.purchaseDate))
       : 0,
     ...warrantyStatus
   };
@@ -213,42 +212,30 @@ export default function ComponentDetails({ componentId, componentData, onBack })
         <div className="min-h-[400px]">
           {/* Journey Tab */}
           {activeTab === 'journey' && (
-            <div className="space-y-6">
-              {/* Component Journey Timeline */}
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                    Component Journey / Lifecycle History
-                  </h3>
-                  
-                  {/* Timeline filter */}
-                  <select
-                    value={timelineFilter || ''}
-                    onChange={(e) => setTimelineFilter(e.target.value || null)}
-                    className="text-sm border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All Events</option>
-                    <option value="ACQUIRED">Acquired</option>
-                    <option value="INSTALLED">Installed</option>
-                    <option value="REMOVED">Removed</option>
-                    <option value="TESTED">Tested</option>
-                    <option value="LOCATION_CHANGED">Location Changed</option>
-                  </select>
-                </div>
-
-                <ComponentTimeline 
-                  events={componentDetails.journey || []} 
-                  filterType={timelineFilter}
-                />
-              </div>
-
-              {/* Currently Installed In */}
-              {componentDetails.currentDevice && (
-                <CurrentlyInstalledCard deviceInfo={componentDetails.currentDevice} />
+            <div className="space-y-4">
+              {!componentDetails.installationHistory?.length ? (
+                <CurrentlyInstalledCard deviceInfo={null} />
+              ) : (
+                componentDetails.installationHistory.map((h) => (
+                  <CurrentlyInstalledCard
+                    key={h.id}
+                    deviceInfo={{
+                      id: h.asset?.id,
+                      tag: h.asset?.assetTag,
+                      type: [h.asset?.brand, h.asset?.model].filter(Boolean).join(' ') || 'Device',
+                      installationDate: h.installedAt,
+                      location: componentDetails.location?.name || null,
+                      currentUser: componentDetails.ownedBy || null,
+                      slotLabel: h.slotLabel || null,
+                      removedAt: h.removedAt || null,
+                      removalReason: h.removalReason || null,
+                      notes: h.notes || null,
+                    }}
+                  />
+                ))
               )}
             </div>
           )}
-
           {/* Component Source Tab */}
           {activeTab === 'source' && (
             <div className="space-y-6">

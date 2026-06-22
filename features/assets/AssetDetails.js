@@ -167,6 +167,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   };
 
   const displayStatus = formatStatus(assetDetails.status);
+  const computedSpecLabel = assetDetails.specLabel || buildSpecLabel(assetDetails);
 
   const getStatusColor = () => {
     switch (assetDetails.status) {
@@ -236,17 +237,27 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   // Right column sections (70%) - Larger content cards
   const rightSections = [
     {
-      title: 'Device Information',
+      title: 'Asset Information',
       color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
-        { label: 'Brand', value: assetDetails.brand || 'N/A' },
-        { label: 'Model', value: assetDetails.model || 'N/A' },
-        { label: 'Processor', value: assetDetails.processor || 'N/A' },
-        { label: 'RAM', value: assetDetails.ramSizeGB ? `${assetDetails.ramSizeGB} GB` : 'N/A' },
-        { label: 'Storage', value: assetDetails.storageSizeGB ? `${assetDetails.storageSizeGB} GB` : 'N/A' },
-        { label: 'Serial Number', value: assetDetails.serialNumber || 'N/A', className: 'col-span-2' },
-        { label: 'Spec Label', value: assetDetails.specLabel || buildSpecLabel(assetDetails), className: 'col-span-2' },
+        ...(assetDetails.brand ? [{ label: 'Brand', value: assetDetails.brand }] : []),
+        ...(assetDetails.model ? [{ label: 'Model', value: assetDetails.model }] : []),
+        ...(assetDetails.processor ? [{ label: 'Processor', value: assetDetails.processor }] : []),
+        ...(assetDetails.ramSizeGB ? [{ label: 'RAM', value: `${assetDetails.ramSizeGB} GB` }] : []),
+        ...(assetDetails.storageSizeGB ? [{ label: 'Storage', value: `${assetDetails.storageSizeGB} GB` }] : []),
+        ...(assetDetails.serialNumber ? [{ label: 'Serial Number', value: assetDetails.serialNumber, className: 'col-span-2' }] : []),
+        ...(computedSpecLabel && computedSpecLabel !== 'N/A' ? [{ label: 'Spec Label', value: computedSpecLabel, className: 'col-span-2' }] : []),
+        ...(assetDetails.name ? [{ label: 'Name', value: assetDetails.name }] : []),
+        ...(assetDetails.material ? [{ label: 'Material', value: assetDetails.material }] : []),
+        ...(assetDetails.dimensions ? [{ label: 'Dimensions', value: assetDetails.dimensions }] : []),
+        ...(assetDetails.powerRating ? [{ label: 'Power Rating', value: assetDetails.powerRating }] : []),
+        ...(assetDetails.vehicleNumber ? [{ label: 'Vehicle Number', value: assetDetails.vehicleNumber }] : []),
+        ...(assetDetails.isbn ? [{ label: 'ISBN', value: assetDetails.isbn }] : []),
+        ...(assetDetails.capacity ? [{ label: 'Capacity', value: assetDetails.capacity }] : []),
+        ...(assetDetails.installationDate ? [{ label: 'Installation Date', value: new Date(assetDetails.installationDate).toLocaleDateString() }] : []),
+        ...(assetDetails.contractorVendor ? [{ label: 'Contractor / Vendor', value: assetDetails.contractorVendor }] : []),
+        ...(assetDetails.serviceDate ? [{ label: 'Service Date', value: new Date(assetDetails.serviceDate).toLocaleDateString() }] : []),
       ],
     },
     {
@@ -259,6 +270,8 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         { label: 'Source By', value: assetDetails.sourceBy || 'N/A' },
         { label: 'Purchase Date', value: assetDetails.purchaseDate ? new Date(assetDetails.purchaseDate).toLocaleDateString() : 'N/A' },
         { label: 'Cost', value: assetDetails.cost ? `₹${assetDetails.cost.toLocaleString()}` : 'N/A' },
+        { label: 'Purchase Bill', value: assetDetails.purchaseBillDetails?.url ? <a href={assetDetails.purchaseBillDetails.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">{assetDetails.purchaseBillDetails.name}</a> : 'N/A' },
+        { label: 'Bill Uploaded By', value: assetDetails.purchaseBillDetails?.uploadedBy ? `${assetDetails.purchaseBillDetails.uploadedBy.firstName} ${assetDetails.purchaseBillDetails.uploadedBy.lastName} (${assetDetails.purchaseBillDetails.uploadedBy.email})` : 'N/A' },
       ],
     },
     {
@@ -266,7 +279,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
       items: [
-        { label: 'Asset Type Category', value: assetDetails.assetType?.category || 'N/A' },
+        { label: 'Asset Category', value: assetDetails.assetType?.assetCategory?.name || assetDetails.assetType?.category || 'N/A' },
         { label: 'Campus Code', value: assetDetails.campus?.code || 'N/A' },
         { label: 'Created At', value: assetDetails.createdAt ? new Date(assetDetails.createdAt).toLocaleString() : 'N/A' },
         { label: 'Updated At', value: assetDetails.updatedAt ? new Date(assetDetails.updatedAt).toLocaleString() : 'N/A' },

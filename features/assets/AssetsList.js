@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText, X, Check } from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown} from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -16,18 +16,26 @@ import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import CustomButton from '@/components/atoms/CustomButton';
 import {
   ASSET_TABLE_ID,
   assetTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/assetTableConfig';
 import { transformAssetForTable } from '@/app/utils/dataTransformers';
+import { useAssetExport } from '@/app/hooks/useAssetExport';
 
 const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
 const actionOptions = ['View', 'Assign', 'Details'];
 
 export default function AssetsList() {
   const router = useRouter();
+  
+  // Export functionality
+  const { exportToPDF, exportToCSV } = useAssetExport();
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,6 +68,17 @@ export default function AssetsList() {
     
     return () => clearTimeout(timer);
   }, [searchInput]);
+  
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target)) {
+        setExportDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
   // Build query string with pagination, filters, and search
   const buildQueryString = () => {
@@ -186,6 +205,34 @@ export default function AssetsList() {
     }));
   }, [data]);
 
+  // Handle PDF export 
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const selectedCampusOpt = campusOptions.find(opt => opt.value === filters.campus);
+      const campusName = selectedCampusOpt ? selectedCampusOpt.label : 'all';
+      await exportToPDF(filters, visibleColumns, `assets-${campusName.toLowerCase().replace(/\s+/g, '-')}`);
+    } catch (error) {
+      console.error('PDF export failed:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Handle CSV export
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      const selectedCampusOpt = campusOptions.find(opt => opt.value === filters.campus);
+      const campusName = selectedCampusOpt ? selectedCampusOpt.label : 'all';
+      await exportToCSV(filters, campusName);
+    } catch (error) {
+      console.error('CSV export failed:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
 
@@ -213,6 +260,19 @@ export default function AssetsList() {
       
       case "cost":
         return <span className="font-medium text-gray-700">{cellValue}</span>;
+      
+      case "allocatedTo":
+        if (cellValue && typeof cellValue === 'object') {
+          return (
+            <div className="flex flex-col gap-0.5">
+              <p className="text-xs font-medium text-gray-800">
+                {cellValue.firstName} {cellValue.lastName}
+              </p>
+              <p className="text-xs text-gray-500">{cellValue.email}</p>
+            </div>
+          );
+        }
+        return <span className="text-xs text-gray-400">—</span>;
       
       case "actions":
         const actionIcons = {
@@ -244,6 +304,47 @@ export default function AssetsList() {
   const handleCreateClick = () => {
     router.push('/assets/create');
   };
+
+  // Export actions component
+  const exportActionsComponent = (
+    <div className="relative" ref={exportDropdownRef}>
+      <CustomButton
+        text={isExporting ? 'Exporting...' : 'Export'}
+        icon={Download}
+        onClick={() => setExportDropdownOpen((prev) => !prev)}
+        variant="secondary"
+        size="md"
+        disabled={isExporting || assetsListData.length === 0}
+        className="flex items-center gap-1 sm:gap-1.5"
+      />
+
+      {exportDropdownOpen && (
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2">
+          <button
+            onClick={() => { handleExportPDF(); setExportDropdownOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <FileText className="w-4 h-4 text-red-500 flex-shrink-0" />
+            <div className="text-left">
+              <p className="font-medium text-gray-800 text-sm">Export as PDF</p>
+              <p className="text-xs text-gray-500">Landscape A4 table</p>
+            </div>
+          </button>
+          <button
+            onClick={() => { handleExportCSV(); setExportDropdownOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Download className="w-4 h-4 text-green-600 flex-shrink-0" />
+            <div className="text-left">
+              <p className="font-medium text-gray-800 text-sm">Export as CSV</p>
+              <p className="text-xs text-gray-500">Download all assets as CSV</p>
+            </div>
+          </button>
+          
+        </div>
+      )}
+    </div>
+  );
 
   // Handle loading and error states
   if (isError) {
@@ -312,6 +413,8 @@ export default function AssetsList() {
             getFilterLabel={getFilterLabel}
           />
         }
+        // Export actions component
+        exportActionsComponent={exportActionsComponent}
         // Loading state
         isLoading={isLoading}
         // Server-side pagination props

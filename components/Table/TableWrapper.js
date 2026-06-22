@@ -32,6 +32,7 @@ export default function TableWrapper({
   onToggleCards,
   onShowAll,
   showAllButtonText = "Show All",
+  exportActionsComponent,
   // Server-side pagination props
   serverPagination = false,
   paginationData = null,
@@ -85,7 +86,7 @@ export default function TableWrapper({
 
       {/* Title */}
       {title && (
-        <div className="mb-2 shrink-0">
+         <div className="flex items-center justify-between mb-2 shrink-0">
           <h2 className="text-xl sm:text-2xl md:text-[26px] font-semibold text-gray-800 font-(family-name:--font-poppins)">
             {title}
           </h2>
@@ -129,6 +130,7 @@ export default function TableWrapper({
           )}
           {filterComponent}
           {columnSelectorComponent}
+          {exportActionsComponent}
           {showCreateButton && (
             <CustomButton
               text={createButtonText}
