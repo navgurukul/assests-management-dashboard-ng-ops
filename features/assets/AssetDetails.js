@@ -6,6 +6,7 @@ import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StateHandler from '@/components/atoms/StateHandler';
 import MovementTimeline from '@/components/molecules/MovementTimeline';
+import MaintenanceHistoryTimeline from '@/components/molecules/MaintenanceHistoryTimeline';
 import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
@@ -273,6 +274,17 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       title: 'MOVEMENT HISTORY',
       color: 'theme',
       content: <MovementTimeline movements={assetDetails.assetMovements || []} />,
+    },
+    {
+      title: 'MAINTENANCE HISTORY',
+      color: 'theme',
+      content: (
+        <MaintenanceHistoryTimeline
+          maintenanceHistory={assetDetails.maintenanceHistory || []}
+          inspectionHistory={assetDetails.inspectionHistory || []}
+          insurance={assetDetails.insurance || []}
+        />
+      ),
     },
   ];
 
