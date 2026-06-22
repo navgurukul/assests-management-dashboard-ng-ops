@@ -86,13 +86,13 @@ export const allocationFormFields = [
     emptyContent: 'No available assets. They may be out of stock or already assigned to a consignment.',
     formatLabel: (item) => `${item.assetTag} - ${item.brand || 'N/A'} ${item.model || ''}`,
     renderItem: (item, label) => (
-      <div className="flex justify-between items-center w-full">
-        <span>{label}</span>
-        <div className="flex gap-2">
-          <span className={`px-2 py-0.5 text-[8px] rounded-full ${item.isAllocated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+      <div className="flex justify-between items-center w-full gap-2 min-w-0">
+        <span className="truncate flex-1 min-w-0">{label}</span>
+        <div className="flex gap-1 flex-shrink-0">
+          <span className={`px-2 py-0.5 text-[8px] rounded-full whitespace-nowrap ${item.isAllocated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
             Allocation: {item.isAllocated ? 'Yes' : 'No'}
           </span>
-          <span className={`px-2 py-0.5 text-[8px] rounded-full ${item.isConsignmentCreated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+          <span className={`px-2 py-0.5 text-[8px] rounded-full whitespace-nowrap ${item.isConsignmentCreated ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
             Consignment: {item.isConsignmentCreated ? 'Yes' : 'No'}
           </span>
         </div>
