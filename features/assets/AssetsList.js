@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown} from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
-import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import { getConditionChipColor, getHealthStatusChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
 import StateHandler from '@/components/atoms/StateHandler';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -246,6 +246,9 @@ export default function AssetsList() {
       case "condition":
         return <StatusChip value={cellValue} colorFn={getConditionChipColor} />;
       
+      case "healthStatus":
+        return <StatusChip value={cellValue} colorFn={getHealthStatusChipColor} />;
+        
       case "charger":
       case "bag":
         return (
