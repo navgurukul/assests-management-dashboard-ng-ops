@@ -193,7 +193,7 @@ export const commonAssetFields = [
     label: "Inspection Date",
     type: "date",
     placeholder: "Select inspection date",
-    required: false,
+    required: (values) => !!values.needsServicing,
     showIf: { field: "needsServicing", value: true },
   },
   {
@@ -201,7 +201,7 @@ export const commonAssetFields = [
     label: "Next Inspection Date",
     type: "date",
     placeholder: "Select next inspection date",
-    required: false,
+    required: (values) => !!values.needsServicing,
     showIf: { field: "needsServicing", value: true },
   },
   {
@@ -216,7 +216,7 @@ export const commonAssetFields = [
     label: "Service Date",
     type: "date",
     placeholder: "Select service date",
-    required: false,
+    required: (values) => !!values.needsServicing,
     showIf: { field: "needsServicing", value: true },
   },
   {
@@ -224,7 +224,7 @@ export const commonAssetFields = [
     label: "Next Service Date",
     type: "date",
     placeholder: "Select next service date",
-    required: false,
+    required: (values) => !!values.needsServicing,
     showIf: { field: "needsServicing", value: true },
   },
   {
@@ -232,7 +232,7 @@ export const commonAssetFields = [
     label: "Status",
     type: "select",
     placeholder: "Select status",
-    required: false,
+    required: (values) => !!values.needsServicing,
     options: [
       { value: "HEALTHY", label: "Healthy" },
       { value: "NEED_ATTENTION", label: "Need Attention" },
@@ -246,7 +246,7 @@ export const commonAssetFields = [
     label: "Service Provider",
     type: "text",
     placeholder: "Enter service provider name",
-    required: false,
+    required: (values) => !!values.needsServicing,
     showIf: { field: "needsServicing", value: true },
   },
   {
@@ -289,7 +289,7 @@ export const commonAssetFields = [
     label: "AMC / Insurance Start Date",
     type: "date",
     placeholder: "Select start date",
-    required: true,
+    required: (values) => !!values.hasAmcInsurance,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
@@ -297,7 +297,7 @@ export const commonAssetFields = [
     label: "Expiry Date",
     type: "date",
     placeholder: "Select expiry date",
-    required: false,
+    required: (values) => !!values.hasAmcInsurance,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
@@ -305,7 +305,7 @@ export const commonAssetFields = [
     label: "AMC / Insurance Status",
     type: "select",
     placeholder: "Select status",
-    required: true,
+    required: (values) => !!values.hasAmcInsurance,
     options: [
       { value: "ACTIVE", label: "Active" },
       { value: "EXPIRING_SOON", label: "Expiring Soon" },
@@ -318,7 +318,15 @@ export const commonAssetFields = [
     label: "Provider",
     type: "text",
     placeholder: "Enter provider name",
-    required: false,
+    required: (values) => !!values.hasAmcInsurance,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcVendor",
+    label: "Vendor Detail",
+    type: "text",
+    placeholder: "Enter vendor detail",
+    required: (values) => !!values.hasAmcInsurance,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
@@ -328,14 +336,6 @@ export const commonAssetFields = [
     placeholder: "Enter cost (optional)",
     required: false,
     min: 0,
-    showIf: { field: "hasAmcInsurance", value: true },
-  },
-  {
-    name: "amcVendor",
-    label: "Vendor Detail",
-    type: "text",
-    placeholder: "Enter vendor detail",
-    required: false,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
@@ -454,17 +454,69 @@ export const commonAssetValidation = {
     .max(9999999, "Cost cannot exceed 99,99,999"),
   // Service / Maintenance
   needsServicing: Yup.boolean(),
-  inspectionDate: Yup.string().nullable(),
-  nextInspectionDate: Yup.string().nullable(),
-  serviceDate: Yup.string().nullable(),
-  nextServiceDate: Yup.string().nullable(),
-  serviceStatus: Yup.string()
+  inspectionDate: Yup.string()
     .nullable()
-    .oneOf(
-      ["HEALTHY", "NEED_ATTENTION", "SERVICE_DUE", "INSPECTION_DUE", "", null],
-      "Invalid status",
+    .when("needsServicing", {
+      is: true,
+      then: (schema) => schema.required("Inspection date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  nextInspectionDate: Yup.string()
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) => schema.required("Next inspection date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    })
+    .test(
+      "next-after-inspection",
+      "Next inspection date cannot be before the inspection date",
+      function (value) {
+        const { inspectionDate } = this.parent;
+        if (!value || !inspectionDate) return true;
+        return new Date(value) >= new Date(inspectionDate);
+      },
     ),
-  serviceProvider: Yup.string().nullable(),
+  serviceDate: Yup.string()
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) => schema.required("Service date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  nextServiceDate: Yup.string()
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) => schema.required("Next service date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    })
+    .test(
+      "next-after-service",
+      "Next service date cannot be before the service date",
+      function (value) {
+        const { serviceDate } = this.parent;
+        if (!value || !serviceDate) return true;
+        return new Date(value) >= new Date(serviceDate);
+      },
+    ),
+  serviceStatus: Yup.string()
+  .nullable()
+  .when("needsServicing", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Service status is required")
+        .oneOf(["HEALTHY", "NEED_ATTENTION", "SERVICE_DUE", "INSPECTION_DUE"], "Invalid status"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  serviceProvider: Yup.string()
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) => schema.required("Service provider is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   serviceCost: Yup.number()
     .nullable()
     .transform((value, originalValue) =>
@@ -490,6 +542,11 @@ export const commonAssetValidation = {
     }),
   amcExpiryDate: Yup.string()
     .nullable()
+    .when("hasAmcInsurance", {
+      is: true,
+      then: (schema) => schema.required("Expiry date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    })
     .test(
       "expiry-after-start",
       "Expiry date must be after the start date",
@@ -503,10 +560,19 @@ export const commonAssetValidation = {
     .nullable()
     .when("hasAmcInsurance", {
       is: true,
-      then: (schema) => schema.required("AMC / Insurance status is required"),
+      then: (schema) =>
+        schema
+          .required("AMC / Insurance status is required")
+          .oneOf(["ACTIVE", "EXPIRING_SOON", "EXPIRED"], "Invalid status"),
+        otherwise: (schema) => schema.notRequired(),
+  }),
+  amcProvider: Yup.string()
+    .nullable()
+    .when("hasAmcInsurance", {
+      is: true,
+      then: (schema) => schema.required("Provider is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  amcProvider: Yup.string().nullable(),
   amcCost: Yup.number()
     .nullable()
     .transform((value, originalValue) =>
@@ -518,7 +584,13 @@ export const commonAssetValidation = {
     )
     .min(0, "Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
-  amcVendor: Yup.string().nullable(),
+  amcVendor: Yup.string()
+    .nullable()
+    .when("hasAmcInsurance", {
+      is: true,
+      then: (schema) => schema.required("Vendor details are required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   amcDocument: Yup.array().nullable(),
   notes: Yup.string(),
   charger: Yup.boolean(),
@@ -635,10 +707,10 @@ export const inspectionLogFields = [
   },
   {
     name: "nextInspectionDate",
-    label: "Next Inspection Due",
+    label: "Next Inspection Date",
     type: "date",
     placeholder: "dd/mm/yyyy",
-    required: false,
+    required: true,
     hint: "Pick when the next inspection should happen.",
     pairedWith: "inspectionDate",
   },
@@ -657,7 +729,7 @@ export const inspectionLogFields = [
   },
   {
     name: "cost",
-    label: "Cost (optional)",
+    label: "Cost",
     type: "number",
     placeholder: "Enter cost",
     required: false,
@@ -675,6 +747,7 @@ export const inspectionLogFields = [
 export const inspectionLogValidationSchema = Yup.object().shape({
   inspectionDate: Yup.string().required("Inspection date is required"),
   nextInspectionDate: Yup.string()
+    .required("Next inspection date is required")
     .nullable()
     .test(
       "next-after-inspection",
@@ -709,27 +782,12 @@ export const serviceLogFields = [
   },
   {
     name: "nextServiceDate",
-    label: "Next Service Due",
+    label: "Next Service Date",
     type: "date",
     placeholder: "dd/mm/yyyy",
-    required: false,
+    required: true,
     hint: "Pick when the next service should happen.",
     pairedWith: "serviceDate",
-  },
-  {
-    name: "serviceProvider",
-    label: "Service Provider",
-    type: "text",
-    placeholder: "Enter service provider name",
-    required: false,
-  },
-  {
-    name: "cost",
-    label: "Cost (optional)",
-    type: "number",
-    placeholder: "Enter service cost",
-    required: false,
-    min: 0,
   },
   {
     name: "healthStatus",
@@ -741,9 +799,25 @@ export const serviceLogFields = [
       { value: "HEALTHY", label: "Healthy" },
       { value: "NEED_ATTENTION", label: "Need Attention" },
       { value: "SERVICE_DUE", label: "Service Due" },
-      { value: "INSPECTION_DUE", label: "Inspection Due" },
+      // { value: "INSPECTION_DUE", label: "Inspection Due" },
     ],
   },
+  {
+    name: "serviceProvider",
+    label: "Service Provider",
+    type: "text",
+    placeholder: "Enter service provider name",
+    required: true,
+  },
+  {
+    name: "cost",
+    label: "Cost",
+    type: "number",
+    placeholder: "Enter service cost",
+    required: false,
+    min: 0,
+  },
+  
   {
     name: "notes",
     label: "Notes / Remarks",
@@ -764,6 +838,7 @@ export const serviceLogFields = [
 export const serviceLogValidationSchema = Yup.object().shape({
   serviceDate: Yup.string().required("Service date is required"),
   nextServiceDate: Yup.string()
+    .required("Next service date is required")
     .nullable()
     .test(
       "next-after-service",
@@ -782,7 +857,8 @@ export const serviceLogValidationSchema = Yup.object().shape({
         : value,
     )
     .min(0, "Cost must be a positive number"),
-  serviceProvider: Yup.string(),
+  serviceProvider: Yup.string()
+  .required("Service provider is required"),
   healthStatus: Yup.string().required("Health status is required"),
   notes: Yup.string(),
 });
@@ -799,7 +875,7 @@ export const amcRenewalFields = [
   },
   {
     name: "amcExpiryDate",
-    label: "AMC Expiry Due",
+    label: "AMC Expiry Date",
     type: "date",
     placeholder: "dd/mm/yyyy",
     required: true,
@@ -830,7 +906,7 @@ export const amcRenewalFields = [
     label: "Vendor Details",
     type: "textarea",
     placeholder: "Contact person, phone, email, address",
-    required: false,
+    required: true,
   },
   {
     name: "cost",
@@ -872,7 +948,8 @@ export const amcRenewalValidationSchema = Yup.object().shape({
     ),
   healthStatus: Yup.string().required("AMC / Insurance status is required"),
   insuranceProvider: Yup.string().required("AMC / Insurance provider is required"),
-  vendorDetails: Yup.string(),
+  vendorDetails: Yup.string()
+  .required("Vendor details are required"),
   cost: Yup.number()
     .nullable()
     .transform((value, originalValue) =>
