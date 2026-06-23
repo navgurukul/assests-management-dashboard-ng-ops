@@ -132,6 +132,7 @@ export const commonAssetFields = [
     type: "select",
     placeholder: "Select asset condition",
     required: true,
+    disabled: true, // Disabled for new assets - backend sets default 'WORKING' condition
     options: [
       { value: "WORKING", label: "Working" },
       { value: "MINOR_ISSUES", label: "Minor Issues" },
