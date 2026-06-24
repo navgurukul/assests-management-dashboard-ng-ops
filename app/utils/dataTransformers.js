@@ -177,6 +177,10 @@ export const transformAssetForTable = (asset) => {
     specLabel: asset.specLabel || buildSpecLabel(asset),
     sourceBy: asset.sourceBy || 'N/A',
     notes: asset.notes || 'N/A',
+    healthStatus: asset.maintenanceHistory?.healthStatus || null,
+    nextServiceDate: asset.maintenanceHistory?.nextServiceDate 
+      ? formatDate(asset.maintenanceHistory.nextServiceDate) 
+      : 'N/A',
     createdAt: formatDate(asset.createdAt),
     updatedAt: formatDate(asset.updatedAt),
     // Extract allocated user details if allocation exists

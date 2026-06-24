@@ -10,6 +10,7 @@ import ActiveFiltersChips from './ActiveFiltersChips';
 import AllocationConsignmentSelector from './AllocationConsignmentSelector';
 import CustomDatePicker from '@/components/atoms/CustomDatePicker';
 import MultiSelect from '@/components/atoms/MultiSelect';
+import PurchaseBillSelector from './PurchaseBillSelector';
 
 const parseDateValue = (value) => {
   if (!value) return null;
@@ -620,6 +621,16 @@ export default function FormModal({
               <p className="text-xs text-gray-500">{field.hint}</p>
             )}
           </div>
+        );
+
+      case 'purchase-bill-selector':
+        return (
+          <PurchaseBillSelector
+            selectedBills={Array.isArray(value) ? value : []}
+            onBillsChange={(bills) => handleChange(field.name, bills)}
+            allowMultiple={field.allowMultiple === true}
+            simpleMode={field.simpleMode === true}
+          />
         );
 
       case 'select':

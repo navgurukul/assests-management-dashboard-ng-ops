@@ -6,6 +6,7 @@ import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StateHandler from '@/components/atoms/StateHandler';
 import MovementTimeline from '@/components/molecules/MovementTimeline';
+import MaintenanceHistoryTimeline from '@/components/molecules/MaintenanceHistoryTimeline';
 import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
@@ -13,6 +14,12 @@ import usePut from '@/app/hooks/query/usePut';
 import {
   changeLocationFields,
   changeLocationValidationSchema,
+  inspectionLogFields,
+  inspectionLogValidationSchema,
+  serviceLogFields,
+  serviceLogValidationSchema,
+  amcRenewalFields,
+  amcRenewalValidationSchema,
 } from '@/app/config/formConfigs/assetFormConfig';
 import { buildSpecLabel } from '@/app/utils/dataTransformers';
 
@@ -32,6 +39,10 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       toast.error(error?.message || 'Failed to move asset to In Stock. Please try again.');
     },
   });
+  const toDateTime = (dateStr) => {
+    if (!dateStr) return undefined;
+    return new Date(dateStr).toISOString();
+  };
 
   const handleStatusUpdate = async (formData) => {
     const id = assetId || assetData?.id;
@@ -57,12 +68,44 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
           reasonForScrapping: formData.description,
         });
         toast.success('Asset marked as scrap successfully.');
-     } else if (modalAction === 'CHANGE_LOCATION') {
+      } else if (modalAction === 'CHANGE_LOCATION') {
         await apiService.put(config.endpoints.assets.update(id), {
           currentLocationId: formData.locationId,
-      });
-      toast.success('Asset location changed successfully.');
-     }
+        });
+        toast.success('Asset location changed successfully.');
+      } else if (modalAction === 'INSPECTION_LOG') {
+        const { cost, inspectionDate, nextInspectionDate, ...rest } = formData;
+        await apiService.post(config.endpoints.inspectionHistory.create, {
+          assetId: id,
+          ...rest,
+          inspectionDate: toDateTime(inspectionDate),
+          nextInspectionDate: toDateTime(nextInspectionDate),
+          cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
+        });
+        toast.success('Inspection logged successfully.');
+      } else if (modalAction === 'SERVICE_LOG') {
+        const { cost, billDocument, serviceDate, nextServiceDate, ...rest } = formData;
+        await apiService.post(config.endpoints.maintenanceHistory.create, {
+          assetId: id,
+          ...rest,
+          serviceDate: toDateTime(serviceDate),
+          nextServiceDate: toDateTime(nextServiceDate),
+          cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
+          billId: billDocument?.[0]?.id || undefined,
+        });
+        toast.success('Service logged successfully.');
+      } else if (modalAction === 'AMC_RENEWAL') {
+        const { cost, policyDocument, amcStartDate, amcExpiryDate, ...rest } = formData;
+        await apiService.post(config.endpoints.insurance.create, {
+          assetId: id,
+          ...rest,
+          amcStartDate: toDateTime(amcStartDate),
+          amcExpiryDate: toDateTime(amcExpiryDate),
+          cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
+          policyDocumentId: policyDocument?.[0]?.id || undefined,
+        });
+        toast.success('AMC / Insurance renewal logged successfully.');
+      }
       setModalAction(null);
       if (refetch) {
         refetch(); // Refresh asset details after status update
@@ -232,6 +275,17 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       color: 'theme',
       content: <MovementTimeline movements={assetDetails.assetMovements || []} />,
     },
+    {
+      title: 'MAINTENANCE HISTORY',
+      color: 'theme',
+      content: (
+        <MaintenanceHistoryTimeline
+          maintenanceHistory={assetDetails.maintenanceHistory || []}
+          inspectionHistory={assetDetails.inspectionHistory || []}
+          insurance={assetDetails.insurance || []}
+        />
+      ),
+    },
   ];
 
   // Right column sections (70%) - Larger content cards
@@ -317,6 +371,39 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
             : 'Provide a reason for scrapping. This will mark the asset as no longer in service.'
         }
       />
+      <FormModal
+        isOpen={modalAction === 'INSPECTION_LOG'}
+        onClose={() => setModalAction(null)}
+        componentName={`Log Inspection — ${assetDetails.assetTag}`}
+        actionType="Log Inspection"
+        fields={inspectionLogFields}
+        validationSchema={inspectionLogValidationSchema}
+        onSubmit={handleStatusUpdate}
+        isSubmitting={isSubmitting}
+        size="medium"
+      />
+      <FormModal
+        isOpen={modalAction === 'SERVICE_LOG'}
+        onClose={() => setModalAction(null)}
+        componentName={`Log Service — ${assetDetails.assetTag}`}
+        actionType="Log Service"
+        fields={serviceLogFields}
+        validationSchema={serviceLogValidationSchema}
+        onSubmit={handleStatusUpdate}
+        isSubmitting={isSubmitting}
+        size="medium"
+      />
+      <FormModal
+        isOpen={modalAction === 'AMC_RENEWAL'}
+        onClose={() => setModalAction(null)}
+        componentName={`Log AMC Renewal — ${assetDetails.assetTag}`}
+        actionType="Log AMC Renewal"
+        fields={amcRenewalFields}
+        validationSchema={amcRenewalValidationSchema}
+        onSubmit={handleStatusUpdate}
+        isSubmitting={isSubmitting}
+        size="medium"
+      />
       <DetailsPage
         title={`ASSET: ${assetDetails.assetTag}`}
         subtitle={`Status: ${displayStatus} | Condition: ${formatCondition(assetDetails.condition)}`}
@@ -338,16 +425,31 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               onClick={() => {
                 if (assetDetails.status === 'REPAIR') {
                   setModalAction('IN_STOCK');
-              }else {
-                setModalAction('REPAIR');
-              }
-            }}
+                } else {
+                  setModalAction('REPAIR');
+                }
+              }}
             />
             <CustomButton
               text="Mark as Scrap"
               disabled={assetDetails?.ownedBy === 'lnw'}
               variant="danger"
               onClick={() => setModalAction('SCRAP')}
+            />
+            <CustomButton
+              text="Inspection Log"
+              variant="info"
+              onClick={() => setModalAction('INSPECTION_LOG')}
+            />
+            <CustomButton
+              text="Service Log"
+              variant="purple"
+              onClick={() => setModalAction('SERVICE_LOG')}
+            />
+            <CustomButton
+              text="AMC Renew"
+              variant="success"
+              onClick={() => setModalAction('AMC_RENEWAL')}
             />
           </>
         }
