@@ -43,6 +43,7 @@ const config = {
 
     maintenanceHistory: {
       create: '/maintenance-history',
+      count: '/maintenance-history/count',
     },
 
     insurance: {
