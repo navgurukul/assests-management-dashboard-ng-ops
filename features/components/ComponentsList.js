@@ -36,9 +36,9 @@ export default function ComponentsList() {
   const router = useRouter();
   const queryClient = useQueryClient();
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Pagination state (persisted)
+  const [paginationState, setPaginationState] = usePersistentFilters('components-pagination', { currentPage: 1, pageSize: 20 });
+  const { currentPage, pageSize } = paginationState;
   
   // Filter state (persisted)
   const [filters, setFilters] = usePersistentFilters('components-filters', {});
@@ -63,12 +63,14 @@ export default function ComponentsList() {
   }, []);
   
   // Debounce search input (800ms delay)
+  const prevSearchRef = React.useRef(searchInput);
   useEffect(() => {
+    if (prevSearchRef.current === searchInput) return;
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1); // Reset to first page when search changes
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     }, 800);
-    
     return () => clearTimeout(timer);
   }, [searchInput]);
   
@@ -122,26 +124,25 @@ export default function ComponentsList() {
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setPaginationState({ currentPage: 1, pageSize: newSize });
   };
   
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     setFilters,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
   
   // Transform campus data from API to filter options
@@ -389,6 +390,7 @@ export default function ComponentsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        scrollKey="components-list"
         // Loading state
         isLoading={isLoading}
         // Search component
