@@ -1,21 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export function usePersistentFilters(key, initialValue = {}) {
-  const [filters, setFilters] = useState(initialValue);
-
-  // Load from storage on mount
-  useEffect(() => {
+  const [filters, setFilters] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
         const item = sessionStorage.getItem(key);
         if (item) {
-          setFilters(JSON.parse(item));
+          return JSON.parse(item);
         }
       } catch (error) {
         console.warn(`Error reading sessionStorage key "${key}":`, error);
       }
     }
-  }, [key]);
+    return initialValue;
+  });
 
   // Update storage & state
   const setValue = (value) => {
