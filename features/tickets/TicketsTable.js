@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useRef} from 'react';
 import { useRouter } from 'next/navigation';
 import TableWrapper from '@/components/Table/TableWrapper';
 import SearchInput from '@/components/molecules/SearchInput';
@@ -18,20 +18,23 @@ import {
   ticketTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/ticketTableConfig';
+import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
 
 export default function TicketsTable({ filters = {}, onFilterChange, showCards, onToggleCards, summaryCardsComponent }) {
   const router = useRouter();
   
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [paginationState, setPaginationState] = usePersistentFilters('tickets-pagination', {currentPage: 1, pageSize: 20});
+  const { currentPage, pageSize } = paginationState;
 
   // Search state
   const [searchInput, setSearchInput] = useState('');
+  const prevSearchRef = useRef(searchInput);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [assigneeEmail, setAssigneeEmail] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
-  const [isShowAllMode, setIsShowAllMode] = useState(true);
+  const [showAllModeState, setShowAllModeState] = usePersistentFilters('tickets-show-all-mode', { isShowAll: true });
+  const isShowAllMode = showAllModeState.isShowAll;
 
   // Column visibility management
   const {
@@ -46,11 +49,18 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
 
   // Debounce search input (800ms delay)
   useEffect(() => {
+    // Skip entirely if searchInput hasn't actually changed
+    // (guards against dev-mode effect re-invocation / fast-refresh reconnects)
+    if (prevSearchRef.current === searchInput) {
+      return;
+    }
+
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1); // Reset to first page when search changes
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 })); // Reset to first page when search changes
     }, 800);
-    
+
     return () => clearTimeout(timer);
   }, [searchInput]);
 
@@ -117,35 +127,35 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setPaginationState({ currentPage: 1, pageSize: newSize });// Reset to first page when changing page size
   };
 
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     onFilterChange(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 })); // Reset to first page when filters change
   };
 
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     onFilterChange,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
 
   // Toggle between all tickets and my assigned tickets
   const handleShowAll = () => {
-    setIsShowAllMode((prev) => !prev);
+    setShowAllModeState({ isShowAll: !isShowAllMode });
     onFilterChange({});
     setSearchInput('');
     setDebouncedSearch('');
-    setCurrentPage(1);
+    setPaginationState({ currentPage: 1, pageSize });
+    sessionStorage.removeItem('scroll-tickets-list');
   };
 
   const showAllButtonText = isShowAllMode
@@ -350,6 +360,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
       data={ticketsData}
       columns={visibleColumns}
       title="Tickets"
+      scrollKey="tickets-list"
       renderCell={renderCell}
       itemsPerPage={pageSize}
       showPagination={true}
