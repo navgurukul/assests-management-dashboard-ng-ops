@@ -52,6 +52,8 @@ export default function GenericCellRenderer({ item, column }) {
           allocationDate={cellValue.allocationDate}
           expectedResolutionDate={cellValue.expectedResolutionDate}
           status={cellValue.status}
+          resolvedAt={cellValue.resolvedAt}
+          closedAt={cellValue.closedAt}
           compact={true}
         />
       );
