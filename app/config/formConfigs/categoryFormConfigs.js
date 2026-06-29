@@ -233,3 +233,41 @@ export const getCategoryConfig = (categoryName) => {
     initialValues: buildCreateAssetInitialValues(categoryName, config.initial),
   };
 };
+
+export const getCategoryDisplayItems = (categoryName, assetTypeName, assetData) => {
+  const config = categoryConfigs[categoryName];
+  if (!config) return [];
+
+  return config.fields
+    .filter((field) => {
+      // Skip section header fields — not needed for display
+      if (field.type === 'section-header') return false;
+
+      // If field has a showIf condition, check it against the asset type name
+      if (field.showIf) {
+        const { field: condField, value: condValue } = field.showIf;
+        if (condField === 'assetTypeName') {
+          const allowed = Array.isArray(condValue) ? condValue : [condValue];
+          if (!allowed.includes(assetTypeName)) return false;
+        }
+      }
+      return true;
+    })
+    .map((field) => {
+      let value = assetData[field.name];
+
+      // Format date fields, and fallback to 'N/A' if value is empty
+      if (field.type === 'date' && value) {
+        value = new Date(value).toLocaleDateString();
+      } else if (value === null || value === undefined || value === '') {
+        value = 'N/A';
+      } else {
+        value = String(value);
+      }
+
+      return {
+        label: field.label,
+        value,
+      };
+    });
+};
