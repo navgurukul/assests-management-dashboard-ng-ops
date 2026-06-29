@@ -164,7 +164,9 @@ export default function AssetsList() {
   const assetTypeOptions = React.useMemo(() => {
     if (!assetTypesData || !assetTypesData.data) return [];
     
-    return assetTypesData.data.map((assetType) => ({
+    return assetTypesData.data
+    .filter((assetType) => assetType.assetCategory?.name !== 'Components')
+    .map((assetType) => ({
       value: assetType.id,
       label: assetType.name,
     }));

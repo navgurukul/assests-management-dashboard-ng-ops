@@ -95,14 +95,15 @@ const extractNestedData = (data, dataPath) => {
 };
 
 /**
- * Filters items by category if filterCategory is provided
+ * Filters items by assetCategory.name if filterCategory is provided.
+ * Uses assetCategory.name (stable, UI-visible) instead of the deprecated
  * @param {array} items - Items to filter
- * @param {string|null} filterCategory - Category to filter by
+ * @param {string|null} filterCategory - assetCategory.name value to filter by (e.g. 'Components')
  * @returns {array} Filtered items
  */
 const filterByCategory = (items, filterCategory) => {
   if (!filterCategory) return items;
-  return items.filter((item) => item.category === filterCategory);
+  return items.filter((item) => item.assetCategory?.name === filterCategory);
 };
 
 /**
