@@ -22,8 +22,7 @@ import {
   amcRenewalValidationSchema,
 } from '@/app/config/formConfigs/assetFormConfig';
 import { buildSpecLabel } from '@/app/utils/dataTransformers';
-import {
-  categoryConfigs,   
+import {   
   getCategoryDisplayItems,
 } from '@/app/config/formConfigs/categoryFormConfigs';
 
@@ -251,6 +250,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
     {
       title: 'Quick Info',
       color: 'theme',
+      itemsGrid: true, // 2 column grid
       items: [
         { label: 'Status', value: displayStatus, className: `font-semibold ${getStatusColor()}` },
         { label: 'Condition', value: formatCondition(assetDetails.condition), className: `font-semibold ${getConditionColor()}` },
@@ -259,21 +259,21 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         { label: 'Location', value: assetDetails.location?.name || 'N/A' },
       ],
     },
-    {
-      title: 'Accessories',
-      color: 'theme',
-      itemsGrid: true,
-      items: [
-        { label: 'Charger', value: assetDetails.charger ? 'Yes' : 'No', className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
-      ],
-    },
-    {
-      title: 'Notes & Additional Information',
-      color: 'theme',
-      items: [
-        { label: 'Notes', value: assetDetails.notes || 'No notes available' },
-      ],
-    },
+    // {
+    //   title: 'Accessories',
+    //   color: 'theme',
+    //   itemsGrid: true,
+    //   items: [
+    //     { label: 'Charger', value: assetDetails.charger ? 'Yes' : 'No', className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' },
+    //   ],
+    // },
+    // {
+    //   title: 'Notes & Additional Information',
+    //   color: 'theme',
+    //   items: [
+    //     { label: 'Notes', value: assetDetails.notes || 'No notes available' },
+    //   ],
+    // },
     {
       title: 'MOVEMENT HISTORY',
       color: 'theme',
@@ -301,8 +301,14 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       items: (() => {
         const categoryName = assetDetails.assetType?.assetCategory?.name;
         const assetTypeName = assetDetails.assetType?.name;
-        
-        // Show Brand & Model for all categories, even if value is empty
+
+        // Asset Type & Category — basic identification fields
+        const typeItems = [
+          { label: 'Asset Type', value: assetTypeName || 'N/A' },
+          { label: 'Asset Category', value: categoryName || 'N/A' },
+        ];
+
+        // Brand & Model — show for all categories
         const brandModelItems = [
           { label: 'Brand', value: assetDetails.brand || 'N/A' },
           { label: 'Model', value: assetDetails.model || 'N/A' },
@@ -316,7 +322,21 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
           ? [{ label: 'Spec Label', value: computedSpecLabel, className: 'col-span-2' }]
           : [];
 
-        return [...brandModelItems, ...categoryItems, ...specItems];
+        // Charger — only show if backend sends a non-null value
+        const accessoryItems = assetDetails.charger !== null && assetDetails.charger !== undefined
+          ? [{ 
+            label: 'Charger', 
+            value: assetDetails.charger ? 'Yes' : 'No', 
+            className: assetDetails.charger ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold',
+          }]
+        : [];
+        
+        // Notes — full width at the bottom
+        const notesItems = [
+          { label: 'Notes', value: assetDetails.notes || 'No notes available', className: 'col-span-2' },
+        ];
+
+        return [...typeItems, ...brandModelItems, ...categoryItems, ...specItems, ...accessoryItems, ...notesItems];
       })(),
     },
     {
