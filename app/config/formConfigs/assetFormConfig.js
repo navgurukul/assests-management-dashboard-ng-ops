@@ -15,6 +15,7 @@ export const assetCategoryField = {
   valueKey: "id",
   dataPath: "data",
   required: true,
+  filterFn: (category) => category.name !== 'Components',
 };
 
 export const assetTypeField = {
