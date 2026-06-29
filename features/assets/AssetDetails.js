@@ -22,6 +22,10 @@ import {
   amcRenewalValidationSchema,
 } from '@/app/config/formConfigs/assetFormConfig';
 import { buildSpecLabel } from '@/app/utils/dataTransformers';
+import {
+  categoryConfigs,   
+  getCategoryDisplayItems,
+} from '@/app/config/formConfigs/categoryFormConfigs';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
   const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | null
@@ -294,25 +298,26 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       title: 'Asset Information',
       color: 'theme',
       itemsGrid: true, // Enable 2-column grid layout
-      items: [
-        ...(assetDetails.brand ? [{ label: 'Brand', value: assetDetails.brand }] : []),
-        ...(assetDetails.model ? [{ label: 'Model', value: assetDetails.model }] : []),
-        ...(assetDetails.processor ? [{ label: 'Processor', value: assetDetails.processor }] : []),
-        ...(assetDetails.ramSizeGB ? [{ label: 'RAM', value: `${assetDetails.ramSizeGB} GB` }] : []),
-        ...(assetDetails.storageSizeGB ? [{ label: 'Storage', value: `${assetDetails.storageSizeGB} GB` }] : []),
-        ...(assetDetails.serialNumber ? [{ label: 'Serial Number', value: assetDetails.serialNumber, className: 'col-span-2' }] : []),
-        ...(computedSpecLabel && computedSpecLabel !== 'N/A' ? [{ label: 'Spec Label', value: computedSpecLabel, className: 'col-span-2' }] : []),
-        ...(assetDetails.name ? [{ label: 'Name', value: assetDetails.name }] : []),
-        ...(assetDetails.material ? [{ label: 'Material', value: assetDetails.material }] : []),
-        ...(assetDetails.dimensions ? [{ label: 'Dimensions', value: assetDetails.dimensions }] : []),
-        ...(assetDetails.powerRating ? [{ label: 'Power Rating', value: assetDetails.powerRating }] : []),
-        ...(assetDetails.vehicleNumber ? [{ label: 'Vehicle Number', value: assetDetails.vehicleNumber }] : []),
-        ...(assetDetails.isbn ? [{ label: 'ISBN', value: assetDetails.isbn }] : []),
-        ...(assetDetails.capacity ? [{ label: 'Capacity', value: assetDetails.capacity }] : []),
-        ...(assetDetails.installationDate ? [{ label: 'Installation Date', value: new Date(assetDetails.installationDate).toLocaleDateString() }] : []),
-        ...(assetDetails.contractorVendor ? [{ label: 'Contractor / Vendor', value: assetDetails.contractorVendor }] : []),
-        ...(assetDetails.serviceDate ? [{ label: 'Service Date', value: new Date(assetDetails.serviceDate).toLocaleDateString() }] : []),
-      ],
+      items: (() => {
+        const categoryName = assetDetails.assetType?.assetCategory?.name;
+        const assetTypeName = assetDetails.assetType?.name;
+        
+        // Show Brand & Model for all categories, even if value is empty
+        const brandModelItems = [
+          { label: 'Brand', value: assetDetails.brand || 'N/A' },
+          { label: 'Model', value: assetDetails.model || 'N/A' },
+        ];
+
+        // Get category-specific fields based on asset category
+        const categoryItems = getCategoryDisplayItems(categoryName, assetTypeName, assetDetails);
+
+        // Show Spec Label only if available (IT & Electronics assets)
+        const specItems = computedSpecLabel && computedSpecLabel !== 'N/A'
+          ? [{ label: 'Spec Label', value: computedSpecLabel, className: 'col-span-2' }]
+          : [];
+
+        return [...brandModelItems, ...categoryItems, ...specItems];
+      })(),
     },
     {
       title: 'Purchase Info',
