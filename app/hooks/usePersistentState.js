@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-export function usePersistentFilters(key, initialValue = {}) {
-  const [filters, setFilters] = useState(() => {
+export function usePersistentState(key, initialValue = {}) {
+  const [state, setState] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
         const item = sessionStorage.getItem(key);
@@ -18,9 +18,8 @@ export function usePersistentFilters(key, initialValue = {}) {
   // Update storage & state
   const setValue = (value) => {
     try {
-      // Allow value to be a function so we have same API as useState
-      const valueToStore = value instanceof Function ? value(filters) : value;
-      setFilters(valueToStore);
+      const valueToStore = value instanceof Function ? value(state) : value;
+      setState(valueToStore);
       if (typeof window !== 'undefined') {
         if (Object.keys(valueToStore).length === 0) {
           sessionStorage.removeItem(key);
@@ -33,5 +32,5 @@ export function usePersistentFilters(key, initialValue = {}) {
     }
   };
 
-  return [filters, setValue];
+  return [state, setValue];
 }

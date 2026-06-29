@@ -23,7 +23,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import {
   ALLOCATION_TABLE_ID,
   allocationTableColumns,
@@ -39,14 +39,14 @@ export default function AllocationsList() {
   const router = useRouter();
   
   // Pagination state (persisted)
-  const [paginationState, setPaginationState] = usePersistentFilters('allocations-pagination', { currentPage: 1, pageSize: 20 });
+  const [paginationState, setPaginationState] = usePersistentState('allocations-pagination', { currentPage: 1, pageSize: 20 });
   const { currentPage, pageSize } = paginationState;
   
   // Dashboard toggle state
   const [showCards, setShowCards] = useState(false);
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('allocations-filters', {});
+  const [filters, setFilters] = usePersistentState('allocations-filters', {});
 
   // Search state
   const [searchInput, setSearchInput] = useState('');

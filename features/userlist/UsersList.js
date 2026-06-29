@@ -15,7 +15,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import {
   USER_TABLE_ID,
   userTableColumns,
@@ -37,18 +37,18 @@ export default function UsersList() {
   const searchParams = useSearchParams();
 
   // Pagination (persisted)
-  const [paginationState, setPaginationState] = usePersistentFilters('users-pagination', { currentPage: 1, pageSize: 20 });
+  const [paginationState, setPaginationState] = usePersistentState('users-pagination', { currentPage: 1, pageSize: 20 });
   const { currentPage, pageSize } = paginationState;
 
   // All Users pagination (persisted)
-  const [allUsersPaginationState, setAllUsersPaginationState] = usePersistentFilters('allusers-pagination', { allUsersPage: 1, allUsersPageSize: 20 });
+  const [allUsersPaginationState, setAllUsersPaginationState] = usePersistentState('allusers-pagination', { allUsersPage: 1, allUsersPageSize: 20 });
   const { allUsersPage, allUsersPageSize } = allUsersPaginationState;
 
   // Filters (persisted)
-  const [filters, setFilters] = usePersistentFilters('users-filters', {});
+  const [filters, setFilters] = usePersistentState('users-filters', {});
 
   // All Users Filters (persisted)
-  const [allUsersFilters, setAllUsersFilters] = usePersistentFilters('allusers-filters', {});
+  const [allUsersFilters, setAllUsersFilters] = usePersistentState('allusers-filters', {});
 
   // Search
   const [searchInput, setSearchInput] = useState('');

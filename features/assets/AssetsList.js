@@ -15,7 +15,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import CustomButton from '@/components/atoms/CustomButton';
 import SummaryCard from '@/components/atoms/SummaryCard';
 import {
@@ -39,14 +39,14 @@ export default function AssetsList() {
   const exportDropdownRef = useRef(null);
   
   // Pagination state (persisted)
-  const [paginationState, setPaginationState] = usePersistentFilters('assets-pagination', { currentPage: 1, pageSize: 20 });
+  const [paginationState, setPaginationState] = usePersistentState('assets-pagination', { currentPage: 1, pageSize: 20 });
   const { currentPage, pageSize } = paginationState;
   
   // Dashboard toggle state
   const [showCards, setShowCards] = useState(false);
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('assets-filters', {});
+  const [filters, setFilters] = usePersistentState('assets-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');

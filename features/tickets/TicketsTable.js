@@ -18,13 +18,13 @@ import {
   ticketTableColumns,
   defaultVisibleColumns,
 } from '@/app/config/tableConfigs/ticketTableConfig';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 
 export default function TicketsTable({ filters = {}, onFilterChange, showCards, onToggleCards, summaryCardsComponent }) {
   const router = useRouter();
   
   // Pagination state
-  const [paginationState, setPaginationState] = usePersistentFilters('tickets-pagination', {currentPage: 1, pageSize: 20});
+  const [paginationState, setPaginationState] = usePersistentState('tickets-pagination', {currentPage: 1, pageSize: 20});
   const { currentPage, pageSize } = paginationState;
 
   // Search state
@@ -33,7 +33,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [assigneeEmail, setAssigneeEmail] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
-  const [showAllModeState, setShowAllModeState] = usePersistentFilters('tickets-show-all-mode', { isShowAll: true });
+  const [showAllModeState, setShowAllModeState] = usePersistentState('tickets-show-all-mode', { isShowAll: true });
   const isShowAllMode = showAllModeState.isShowAll;
 
   // Column visibility management

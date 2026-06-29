@@ -20,7 +20,7 @@ import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import {
   CONSIGNMENT_TABLE_ID,
   consignmentTableColumns,
@@ -43,15 +43,15 @@ export default function ConsignmentsList() {
   const searchParams = useSearchParams();
   
   // Pagination state (persisted)
-  const [paginationState, setPaginationState] = usePersistentFilters('consignments-pagination', { currentPage: 1, pageSize: 20 });
+  const [paginationState, setPaginationState] = usePersistentState('consignments-pagination', { currentPage: 1, pageSize: 20 });
   const { currentPage, pageSize } = paginationState;
   
   // In-transit pagination state (persisted)
-  const [inTransitPaginationState, setInTransitPaginationState] = usePersistentFilters('intransit-pagination', { inTransitPage: 1, inTransitPageSize: 10 });
+  const [inTransitPaginationState, setInTransitPaginationState] = usePersistentState('intransit-pagination', { inTransitPage: 1, inTransitPageSize: 10 });
   const { inTransitPage, inTransitPageSize } = inTransitPaginationState;
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('consignments-filters', {});
+  const [filters, setFilters] = usePersistentState('consignments-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -80,7 +80,7 @@ export default function ConsignmentsList() {
   const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState('');
 
   // In-transit filters state (persisted)
-  const [inTransitFilters, setInTransitFilters] = usePersistentFilters('intransit-filters', {});
+  const [inTransitFilters, setInTransitFilters] = usePersistentState('intransit-filters', {});
   
   // In-transit action menu state
   const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
