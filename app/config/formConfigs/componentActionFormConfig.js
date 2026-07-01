@@ -24,7 +24,7 @@ const getInstallUninstallBaseFields = (componentData = null) => [
       queryKey: ['asset-types'],
       labelKey: 'name',
       valueKey: 'id',
-      filterCategory: 'DEVICE',
+      filterCategory: 'IT & Electronics',
       required: true,
     },
     {

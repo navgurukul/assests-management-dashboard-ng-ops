@@ -204,7 +204,7 @@ export const componentStepperConfig = [
         labelKey: 'name',
         valueKey: 'id',
         required: true,
-        filterCategory: 'COMPONENT', // Filter to show only COMPONENT category
+        filterCategory: 'Components',// Filter to show only COMPONENT category
       },
       {
         name: 'brand',

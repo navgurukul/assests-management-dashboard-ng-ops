@@ -222,6 +222,7 @@ export default function CreateAsset() {
               valueKey={assetCategoryField.valueKey}
               dataPath={assetCategoryField.dataPath}
               isRequired={assetCategoryField.required}
+              filterFn={assetCategoryField.filterFn}
               value={assetCategoryId}
               onChange={(e) => {
                 const categoryId = e.target.value;

@@ -161,7 +161,7 @@ export default function ComponentsList() {
     
     // Filter only items with category "COMPONENT"
     return assetTypesData.data
-      .filter((assetType) => assetType.category === 'COMPONENT')
+      .filter((assetType) => assetType.assetCategory?.name === 'Components')
       .map((assetType) => ({
         value: assetType.id,
         label: assetType.name,
