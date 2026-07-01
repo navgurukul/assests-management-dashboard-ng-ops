@@ -20,7 +20,7 @@ import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import {
   CONSIGNMENT_TABLE_ID,
   consignmentTableColumns,
@@ -42,12 +42,16 @@ export default function ConsignmentsList() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Pagination state (persisted)
+  const [paginationState, setPaginationState] = usePersistentState('consignments-pagination', { currentPage: 1, pageSize: 20 });
+  const { currentPage, pageSize } = paginationState;
+  
+  // In-transit pagination state (persisted)
+  const [inTransitPaginationState, setInTransitPaginationState] = usePersistentState('intransit-pagination', { inTransitPage: 1, inTransitPageSize: 10 });
+  const { inTransitPage, inTransitPageSize } = inTransitPaginationState;
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('consignments-filters', {});
+  const [filters, setFilters] = usePersistentState('consignments-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -74,11 +78,9 @@ export default function ConsignmentsList() {
   const [showInTransit, setShowInTransit] = useState(initialShowInTransit);
   const [inTransitSearch, setInTransitSearch] = useState('');
   const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState('');
-  const [inTransitPage, setInTransitPage] = useState(1);
-  const [inTransitPageSize, setInTransitPageSize] = useState(10);
 
   // In-transit filters state (persisted)
-  const [inTransitFilters, setInTransitFilters] = usePersistentFilters('intransit-filters', {});
+  const [inTransitFilters, setInTransitFilters] = usePersistentState('intransit-filters', {});
   
   // In-transit action menu state
   const [openInTransitMenuId, setOpenInTransitMenuId] = useState(null);
@@ -103,22 +105,26 @@ export default function ConsignmentsList() {
   } = useTableColumns(CONSIGNMENT_TABLE_ID, consignmentTableColumns, defaultVisibleColumns);
   
   // Debounce main search input (800ms delay)
+  const prevSearchRef = React.useRef(searchInput);
   useEffect(() => {
+    if (prevSearchRef.current === searchInput) return;
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1);
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     }, 800);
-    
     return () => clearTimeout(timer);
   }, [searchInput]);
 
   // Debounce in-transit search input (800ms delay)
+  const prevInTransitSearchRef = React.useRef(inTransitSearch);
   useEffect(() => {
+    if (prevInTransitSearchRef.current === inTransitSearch) return;
     const timer = setTimeout(() => {
+      prevInTransitSearchRef.current = inTransitSearch;
       setDebouncedInTransitSearch(inTransitSearch);
-      setInTransitPage(1);
+      setInTransitPaginationState((prev) => ({ ...prev, inTransitPage: 1 }));
     }, 800);
-
     return () => clearTimeout(timer);
   }, [inTransitSearch]);
   
@@ -209,39 +215,38 @@ export default function ConsignmentsList() {
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1);
+    setPaginationState({ currentPage: 1, pageSize: newSize });
   };
   
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1);
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   // Handle in-transit filter change
   const handleInTransitFilterChange = (newFilters) => {
     setInTransitFilters(newFilters);
-    setInTransitPage(1);
+    setInTransitPaginationState((prev) => ({ ...prev, inTransitPage: 1 }));
   };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     setFilters,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
 
   // Uses custom hook for handling in-transit filter removal and clearing
   const {
     handleRemoveFilter: handleRemoveInTransitFilter,
     handleClearAllFilters: handleClearAllInTransitFilters,
-  } = useFilterHandlers(inTransitFilters, setInTransitFilters, setInTransitPage);
+  } = useFilterHandlers(inTransitFilters, setInTransitFilters, () => setInTransitPaginationState((prev) => ({ ...prev, inTransitPage: 1 })));
   
   // Use static courier providers for filter options
   const courierOptions = React.useMemo(() => {
@@ -1014,6 +1019,7 @@ export default function ConsignmentsList() {
         showCreateButton={false}
         onCreateClick={handleCreateClick}
         isLoading={showInTransit ? isInTransitLoading : showLoading}
+        scrollKey={showInTransit ? 'intransit-list' : 'consignments-list'}
         searchComponent={
           showInTransit ? (
             <SearchInput
@@ -1090,8 +1096,8 @@ export default function ConsignmentsList() {
         }
         serverPagination={true}
         paginationData={showInTransit ? inTransitPagination : data?.pagination}
-        onPageChange={showInTransit ? setInTransitPage : handlePageChange}
-        onPageSizeChange={showInTransit ? (size) => { setInTransitPageSize(size); setInTransitPage(1); } : handlePageSizeChange}
+        onPageChange={showInTransit ? (page) => setInTransitPaginationState((prev) => ({ ...prev, inTransitPage: page })) : handlePageChange}
+        onPageSizeChange={showInTransit ? (size) => setInTransitPaginationState({ inTransitPage: 1, inTransitPageSize: size }) : handlePageSizeChange}
       />
       </div>
       

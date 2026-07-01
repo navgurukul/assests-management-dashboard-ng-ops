@@ -8,6 +8,8 @@ export default function SLAIndicator({
   allocationDate, 
   expectedResolutionDate, 
   status = 'OPEN',
+  resolvedAt = null,
+  closedAt = null,
   compact = false 
 }) {
   // If no SLA data, show "Not Set"
@@ -28,13 +30,19 @@ export default function SLAIndicator({
   allocation.setHours(0, 0, 0, 0);
   expectedResolution.setHours(0, 0, 0, 0);
 
-  const daysElapsed = Math.floor((now - allocation) / (1000 * 60 * 60 * 24));
-  const totalDays = Math.floor((expectedResolution - allocation) / (1000 * 60 * 60 * 24));
-  const daysRemaining = Math.floor((expectedResolution - now) / (1000 * 60 * 60 * 24));
-
   // Check if ticket is closed/resolved
   const isCompleted = ['CLOSED', 'RESOLVED'].includes(status?.toUpperCase());
   
+  const completionDateRaw = status?.toUpperCase() === 'CLOSED' ? closedAt : resolvedAt;
+  const completionDate = completionDateRaw ? new Date(completionDateRaw) : null;
+  if (completionDate) completionDate.setHours(0, 0, 0, 0);
+
+  const referenceDate = (isCompleted && completionDate) ? completionDate : now;
+
+  const daysElapsed = Math.floor((referenceDate - allocation) / (1000 * 60 * 60 * 24));
+  const totalDays = Math.floor((expectedResolution - allocation) / (1000 * 60 * 60 * 24));
+  const daysRemaining = Math.floor((expectedResolution - now) / (1000 * 60 * 60 * 24));
+
   // Determine status
   let slaStatus = 'on-track'; // green
   let statusText = 'On Track';

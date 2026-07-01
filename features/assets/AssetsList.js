@@ -15,7 +15,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import CustomButton from '@/components/atoms/CustomButton';
 import SummaryCard from '@/components/atoms/SummaryCard';
 import {
@@ -38,15 +38,15 @@ export default function AssetsList() {
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef(null);
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Pagination state (persisted)
+  const [paginationState, setPaginationState] = usePersistentState('assets-pagination', { currentPage: 1, pageSize: 20 });
+  const { currentPage, pageSize } = paginationState;
   
   // Dashboard toggle state
   const [showCards, setShowCards] = useState(false);
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('assets-filters', {});
+  const [filters, setFilters] = usePersistentState('assets-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -64,12 +64,14 @@ export default function AssetsList() {
   } = useTableColumns(ASSET_TABLE_ID, assetTableColumns, defaultVisibleColumns);
   
   // Debounce search input (800ms delay)
+  const prevSearchRef = useRef(searchInput);
   useEffect(() => {
+    if (prevSearchRef.current === searchInput) return;
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1); // Reset to first page when search changes
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     }, 800);
-    
     return () => clearTimeout(timer);
   }, [searchInput]);
   
@@ -128,26 +130,25 @@ export default function AssetsList() {
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setPaginationState({ currentPage: 1, pageSize: newSize });
   };
   
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     setFilters,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
   
   // Transform campus data from API to filter options
@@ -239,7 +240,7 @@ export default function AssetsList() {
       newFilters.healthStatus = filterValue;
     }
     setFilters(newFilters);
-    setCurrentPage(1);
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   // Transform API data to match table structure
@@ -427,6 +428,7 @@ export default function AssetsList() {
         showDashboardToggle={true}
         showCards={showCards}
         onToggleCards={() => setShowCards((prev) => !prev)}
+        scrollKey="assets-list"
         summaryCardsComponent={showCards ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
             {summaryCards.map((card) => (
