@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown} from 'lucide-react';
+import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown, BarChart2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
-import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import { getConditionChipColor, getHealthStatusChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
 import StateHandler from '@/components/atoms/StateHandler';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
@@ -15,8 +15,9 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import CustomButton from '@/components/atoms/CustomButton';
+import SummaryCard from '@/components/atoms/SummaryCard';
 import {
   ASSET_TABLE_ID,
   assetTableColumns,
@@ -37,12 +38,15 @@ export default function AssetsList() {
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef(null);
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Pagination state (persisted)
+  const [paginationState, setPaginationState] = usePersistentState('assets-pagination', { currentPage: 1, pageSize: 20 });
+  const { currentPage, pageSize } = paginationState;
+  
+  // Dashboard toggle state
+  const [showCards, setShowCards] = useState(false);
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('assets-filters', {});
+  const [filters, setFilters] = usePersistentState('assets-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -60,12 +64,14 @@ export default function AssetsList() {
   } = useTableColumns(ASSET_TABLE_ID, assetTableColumns, defaultVisibleColumns);
   
   // Debounce search input (800ms delay)
+  const prevSearchRef = useRef(searchInput);
   useEffect(() => {
+    if (prevSearchRef.current === searchInput) return;
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1); // Reset to first page when search changes
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     }, 800);
-    
     return () => clearTimeout(timer);
   }, [searchInput]);
   
@@ -93,6 +99,7 @@ export default function AssetsList() {
     if (filters.campus) params.append('campusId', filters.campus);
     if (filters.status) params.append('status', filters.status);
     if (filters.type) params.append('type', filters.type);
+    if (filters.healthStatus) params.append('healthStatus', filters.healthStatus);
     
     return params.toString();
   };
@@ -101,6 +108,12 @@ export default function AssetsList() {
   const { data, isLoading, isError, error } = useFetch({
     url: `/assets?${buildQueryString()}`,
     queryKey: ['assets', currentPage, pageSize, filters, debouncedSearch],
+  });
+
+  // Fetch maintenance health status counts
+  const { data: maintenanceCountData } = useFetch({
+    url: '/maintenance-history/count',
+    queryKey: ['maintenance-history-count'],
   });
   
   // Fetch campus options from API
@@ -117,26 +130,25 @@ export default function AssetsList() {
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setPaginationState({ currentPage: 1, pageSize: newSize });
   };
   
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     setFilters,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
   
   // Transform campus data from API to filter options
@@ -153,7 +165,9 @@ export default function AssetsList() {
   const assetTypeOptions = React.useMemo(() => {
     if (!assetTypesData || !assetTypesData.data) return [];
     
-    return assetTypesData.data.map((assetType) => ({
+    return assetTypesData.data
+    .filter((assetType) => assetType.assetCategory?.name !== 'Components')
+    .map((assetType) => ({
       value: assetType.id,
       label: assetType.name,
     }));
@@ -166,6 +180,14 @@ export default function AssetsList() {
     { value: 'REPAIR', label: 'Under Repair' },
     { value: 'SCRAP', label: 'Scrap' },
     { value: 'PARTED_OUT', label: 'Parted Out' },
+  ];
+
+  // Health status filter options
+  const healthStatusOptions = [
+    { value: 'HEALTHY', label: 'Healthy' },
+    { value: 'SERVICE_DUE', label: 'Service Due' },
+    { value: 'NEED_ATTENTION', label: 'Need Attention' },
+    { value: 'INSPECTION_DUE', label: 'Inspection Due' },
   ];
   
   // Get label for a filter value
@@ -182,6 +204,10 @@ export default function AssetsList() {
       const status = filterStatusOptions.find(opt => opt.value === value);
       return status ? status.label : value;
     }
+    if (filterKey === 'healthStatus') {
+      const status = healthStatusOptions.find(opt => opt.value === value);
+      return status ? status.label : value;
+    }
     return value;
   };
   
@@ -190,9 +216,33 @@ export default function AssetsList() {
     const categoryNames = {
       campus: 'Campus',
       type: 'Asset Type',
-      status: 'Status'
+      status: 'Status',
+      healthStatus: 'Health Status',
     };
     return categoryNames[filterKey] || filterKey;
+  };
+
+  // Setup summary cards — only health/maintenance status from /maintenance-history/count
+  const healthStats = maintenanceCountData?.data?.byStatus || {};
+  const totalMaintained = maintenanceCountData?.data?.total ?? data?.pagination?.totalCount ?? 0;
+
+  const summaryCards = [
+    { label: 'Total', filterKey: null, filterValue: null, value: totalMaintained, Icon: BarChart2, valueColor: 'text-gray-900', iconColor: 'text-gray-500' },
+    { label: 'Healthy', filterKey: 'healthStatus', filterValue: 'HEALTHY', value: healthStats.HEALTHY ?? 0, Icon: CheckCircle, valueColor: 'text-green-600', iconColor: 'text-green-500' },
+    { label: 'Service Due', filterKey: 'healthStatus', filterValue: 'SERVICE_DUE', value: healthStats.SERVICE_DUE ?? 0, Icon: Clock, valueColor: 'text-yellow-600', iconColor: 'text-yellow-500' },
+    { label: 'Need Attention', filterKey: 'healthStatus', filterValue: 'NEED_ATTENTION', value: healthStats.NEED_ATTENTION ?? 0, Icon: AlertCircle, valueColor: 'text-red-600', iconColor: 'text-red-500' },
+    { label: 'Inspection Due', filterKey: 'healthStatus', filterValue: 'INSPECTION_DUE', value: healthStats.INSPECTION_DUE ?? 0, Icon: Calendar, valueColor: 'text-orange-600', iconColor: 'text-orange-500' },
+  ];
+
+  const handleCardClick = (filterKey, filterValue) => {
+    const newFilters = { ...filters };
+    if (!filterKey) {
+      delete newFilters.healthStatus;
+    } else {
+      newFilters.healthStatus = filterValue;
+    }
+    setFilters(newFilters);
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   // Transform API data to match table structure
@@ -246,6 +296,9 @@ export default function AssetsList() {
       case "condition":
         return <StatusChip value={cellValue} colorFn={getConditionChipColor} />;
       
+      case "healthStatus":
+        return <StatusChip value={cellValue} colorFn={getHealthStatusChipColor} />;
+        
       case "charger":
       case "bag":
         return (
@@ -374,6 +427,27 @@ export default function AssetsList() {
         onRowClick={handleRowClick}
         showCreateButton={true}
         onCreateClick={handleCreateClick}
+        showDashboardToggle={true}
+        showCards={showCards}
+        onToggleCards={() => setShowCards((prev) => !prev)}
+        scrollKey="assets-list"
+        summaryCardsComponent={showCards ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+            {summaryCards.map((card) => (
+              <SummaryCard
+                key={card.label}
+                label={card.label}
+                value={card.value}
+                Icon={card.Icon}
+                valueColor={card.valueColor}
+                iconColor={card.iconColor}
+                clickable={true}
+                onClick={() => handleCardClick(card.filterKey, card.filterValue)}
+                isActive={card.filterKey === null ? !filters.healthStatus : filters.healthStatus === card.filterValue}
+              />
+            ))}
+          </div>
+        ) : null}
         // Search component
         searchComponent={
           <SearchInput
@@ -389,6 +463,7 @@ export default function AssetsList() {
             campusOptions={campusOptions}
             statusOptions={filterStatusOptions}
             assetTypeOptions={assetTypeOptions}
+            healthStatusOptions={healthStatusOptions}
             selectedFilters={filters}
           />
         }

@@ -52,6 +52,11 @@ export const assetTableColumns = [
     description: 'Physical condition (Working, Damaged, etc.)'
   },
   { 
+    key: 'healthStatus', 
+    label: 'HEALTH STATUS',
+    description: 'Latest maintenance health status'
+  },
+  { 
     key: 'campus', 
     label: 'CAMPUS',
     description: 'Campus location'
@@ -109,6 +114,11 @@ export const assetTableColumns = [
     description: 'Last service date'
   },
   { 
+    key: 'nextServiceDate', 
+    label: 'NEXT SERVICE',
+    description: 'Next scheduled service date'
+  },
+  { 
     key: 'specLabel', 
     label: 'SPEC LABEL',
     description: 'Specification label'
@@ -148,6 +158,7 @@ export const defaultVisibleColumns = [
   'model',
   'serialNumber',
   'condition',
+  'healthStatus',
   'campus',
   'location',
   'allocatedTo',

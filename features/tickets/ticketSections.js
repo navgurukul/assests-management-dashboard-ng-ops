@@ -11,6 +11,8 @@ export function getTicketLeftSections(ticket, historyTimeline) {
           allocationDate={ticket.assignDate}
           expectedResolutionDate={ticket.timelineDate}
           status={ticket.status}
+          resolvedAt={ticket.resolvedAt}
+          closedAt={ticket.closedAt}
           compact={false}
         />
       ),

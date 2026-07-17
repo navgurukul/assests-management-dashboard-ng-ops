@@ -23,7 +23,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import {
   ALLOCATION_TABLE_ID,
   allocationTableColumns,
@@ -38,15 +38,15 @@ const actionOptions = ['View', 'Return', 'Details'];
 export default function AllocationsList() {
   const router = useRouter();
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Pagination state (persisted)
+  const [paginationState, setPaginationState] = usePersistentState('allocations-pagination', { currentPage: 1, pageSize: 20 });
+  const { currentPage, pageSize } = paginationState;
   
   // Dashboard toggle state
   const [showCards, setShowCards] = useState(false);
   
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('allocations-filters', {});
+  const [filters, setFilters] = usePersistentState('allocations-filters', {});
 
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -64,12 +64,14 @@ export default function AllocationsList() {
   } = useTableColumns(ALLOCATION_TABLE_ID, allocationTableColumns, defaultVisibleColumns);
   
   // Debounce search input (800ms delay)
+  const prevSearchRef = React.useRef(searchInput);
   useEffect(() => {
+    if (prevSearchRef.current === searchInput) return;
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1); // Reset to first page when search changes
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     }, 800);
-    
     return () => clearTimeout(timer);
   }, [searchInput]);
   
@@ -122,26 +124,25 @@ export default function AllocationsList() {
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
   // Handle page size change
   const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1);
+    setPaginationState({ currentPage: 1, pageSize: newSize });
   };
 
   // Handle filter change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1);
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     setFilters,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
 
   // Get label for a filter value
@@ -233,6 +234,7 @@ export default function AllocationsList() {
         showDashboardToggle={true}
         showCards={showCards}
         onToggleCards={() => setShowCards((prev) => !prev)}
+        scrollKey="allocations-list"
         summaryCardsComponent={showCards ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {summaryCards.map((card) => (

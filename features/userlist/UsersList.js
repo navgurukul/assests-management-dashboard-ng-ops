@@ -15,7 +15,7 @@ import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import {
   USER_TABLE_ID,
   userTableColumns,
@@ -36,15 +36,19 @@ export default function UsersList() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Pagination (persisted)
+  const [paginationState, setPaginationState] = usePersistentState('users-pagination', { currentPage: 1, pageSize: 20 });
+  const { currentPage, pageSize } = paginationState;
+
+  // All Users pagination (persisted)
+  const [allUsersPaginationState, setAllUsersPaginationState] = usePersistentState('allusers-pagination', { allUsersPage: 1, allUsersPageSize: 20 });
+  const { allUsersPage, allUsersPageSize } = allUsersPaginationState;
 
   // Filters (persisted)
-  const [filters, setFilters] = usePersistentFilters('users-filters', {});
+  const [filters, setFilters] = usePersistentState('users-filters', {});
 
   // All Users Filters (persisted)
-  const [allUsersFilters, setAllUsersFilters] = usePersistentFilters('allusers-filters', {});
+  const [allUsersFilters, setAllUsersFilters] = usePersistentState('allusers-filters', {});
 
   // Search
   const [searchInput, setSearchInput] = useState('');
@@ -55,8 +59,6 @@ export default function UsersList() {
   const [showAllUsers, setShowAllUsers] = useState(initialShowAllUsers);
   const [allUsersSearch, setAllUsersSearch] = useState('');
   const [debouncedAllUsersSearch, setDebouncedAllUsersSearch] = useState('');
-  const [allUsersPage, setAllUsersPage] = useState(1);
-  const [allUsersPageSize, setAllUsersPageSize] = useState(20);
 
   // Column visibility
   const {
@@ -70,18 +72,24 @@ export default function UsersList() {
   } = useTableColumns(USER_TABLE_ID, userTableColumns, defaultVisibleColumns);
 
   // Debounce search (800 ms)
+  const prevSearchRef = React.useRef(searchInput);
   useEffect(() => {
+    if (prevSearchRef.current === searchInput) return;
     const timer = setTimeout(() => {
+      prevSearchRef.current = searchInput;
       setDebouncedSearch(searchInput);
-      setCurrentPage(1);
+      setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     }, 800);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  const prevAllUsersSearchRef = React.useRef(allUsersSearch);
   useEffect(() => {
+    if (prevAllUsersSearchRef.current === allUsersSearch) return;
     const timer = setTimeout(() => {
+      prevAllUsersSearchRef.current = allUsersSearch;
       setDebouncedAllUsersSearch(allUsersSearch);
-      setAllUsersPage(1);
+      setAllUsersPaginationState((prev) => ({ ...prev, allUsersPage: 1 }));
     }, 800);
     return () => clearTimeout(timer);
   }, [allUsersSearch]);
@@ -110,11 +118,11 @@ export default function UsersList() {
   });
 
   // Pagination handlers
-  const handlePageChange = (page) => setCurrentPage(page);
-  const handlePageSizeChange = (size) => { setPageSize(size); setCurrentPage(1); };
+  const handlePageChange = (page) => setPaginationState((prev) => ({ ...prev, currentPage: page }));
+  const handlePageSizeChange = (size) => setPaginationState({ currentPage: 1, pageSize: size });
 
   // Filter handlers
-  const handleFilterChange = (newFilters) => { setFilters(newFilters); setCurrentPage(1); };
+  const handleFilterChange = (newFilters) => { setFilters(newFilters); setPaginationState((prev) => ({ ...prev, currentPage: 1 })); };
 
   // All Users filter handlers
   const handleAllUsersFilterChange = (newFilters) => {
@@ -125,21 +133,21 @@ export default function UsersList() {
     }
     // If newFilters is empty (filter cleared), transformedFilters will also be empty
     setAllUsersFilters(transformedFilters);
-    setAllUsersPage(1);
+    setAllUsersPaginationState((prev) => ({ ...prev, allUsersPage: 1 }));
   };
   
   // Uses custom hook for handling filter removal and clearing
   const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
     filters,
     setFilters,
-    setCurrentPage
+    () => setPaginationState((prev) => ({ ...prev, currentPage: 1 }))
   );
 
   // Uses custom hook for handling all users filter removal and clearing
   const {
     handleRemoveFilter: handleRemoveAllUsersFilter,
     handleClearAllFilters: handleClearAllAllUsersFilters,
-  } = useFilterHandlers(allUsersFilters, setAllUsersFilters, setAllUsersPage);
+  } = useFilterHandlers(allUsersFilters, setAllUsersFilters, () => setAllUsersPaginationState((prev) => ({ ...prev, allUsersPage: 1 })));
 
   const getFilterLabel = (filterKey, value) => {
     if (filterKey === 'status') {
@@ -430,8 +438,9 @@ export default function UsersList() {
         // Pagination
         serverPagination={true}
         paginationData={showAllUsers ? allUsersResponse?.pagination : data?.data?.pagination}
-        onPageChange={showAllUsers ? setAllUsersPage : handlePageChange}
-        onPageSizeChange={showAllUsers ? (size) => { setAllUsersPageSize(size); setAllUsersPage(1); } : handlePageSizeChange}
+        onPageChange={showAllUsers ? (page) => setAllUsersPaginationState((prev) => ({ ...prev, allUsersPage: page })) : handlePageChange}
+        onPageSizeChange={showAllUsers ? (size) => setAllUsersPaginationState({ allUsersPage: 1, allUsersPageSize: size }) : handlePageSizeChange}
+        scrollKey={showAllUsers ? 'allusers-list' : 'users-list'}
       />
       </div>
     </div>

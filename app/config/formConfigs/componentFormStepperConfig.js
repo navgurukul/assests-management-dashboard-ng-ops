@@ -35,21 +35,21 @@ export const componentStepperConfig = [
         required: false,
         showIf: { field: 'sourceType', value: 'NEW_PURCHASE' }
       },
-      {
-        name: 'purchaseVendorName',
-        label: 'Vendor Name',
-        type: 'select',
-        placeholder: 'Select vendor',
-        required: false,
-        showIf: { field: 'sourceType', value: 'NEW_PURCHASE' },
-        options: [
-          { value: 'Vendor A', label: 'Vendor A' },
-          { value: 'Vendor B', label: 'Vendor B' },
-          { value: 'Vendor C', label: 'Vendor C' },
-          { value: 'Vendor D', label: 'Vendor D' },
-          { value: 'Vendor E', label: 'Vendor E' }
-        ]
-      },
+      // {
+      //   name: 'purchaseVendorName',
+      //   label: 'Vendor Name',
+      //   type: 'select',
+      //   placeholder: 'Select vendor',
+      //   required: false,
+      //   showIf: { field: 'sourceType', value: 'NEW_PURCHASE' },
+      //   options: [
+      //     { value: 'Vendor A', label: 'Vendor A' },
+      //     { value: 'Vendor B', label: 'Vendor B' },
+      //     { value: 'Vendor C', label: 'Vendor C' },
+      //     { value: 'Vendor D', label: 'Vendor D' },
+      //     { value: 'Vendor E', label: 'Vendor E' }
+      //   ]
+      // },
       {
         name: 'vendorDetails',
         label: 'Vendor Details',
@@ -204,7 +204,7 @@ export const componentStepperConfig = [
         labelKey: 'name',
         valueKey: 'id',
         required: true,
-        filterCategory: 'COMPONENT', // Filter to show only COMPONENT category
+        filterCategory: 'Components',// Filter to show only COMPONENT category
       },
       {
         name: 'brand',

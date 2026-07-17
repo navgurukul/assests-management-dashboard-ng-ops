@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import { Plus, LayoutDashboard } from "lucide-react";
 import "@/components/atoms/Loader.css";
@@ -43,9 +43,47 @@ export default function TableWrapper({
   margin = "m-0",
   shadow = "shadow-md",
   emptyContent,
+  scrollKey,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
+
+   // Scroll position persistence
+  const scrollContainerRef = useRef(null);
+  const hasRestoredScroll = useRef(false);
+  const prevScrollKey = useRef(scrollKey);
+  useEffect(() => {
+    if (prevScrollKey.current !== scrollKey) {
+      hasRestoredScroll.current = false;
+      prevScrollKey.current = scrollKey;
+    }
+  }, [scrollKey]);
+  
+  useEffect(() => {
+    if (!scrollKey || isLoading || hasRestoredScroll.current) return;
+    if (!data || data.length === 0) return; // Wait until data is loaded
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const savedScroll = sessionStorage.getItem(`scroll-${scrollKey}`);
+    if (!savedScroll) return;
+
+    hasRestoredScroll.current = true;
+    const scrollValue = parseInt(savedScroll, 10);
+
+    // Double requestAnimationFrame ensures layout and paint are complete before restoring scroll position.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        container.scrollTop = scrollValue;
+      });
+    });
+  }, [scrollKey, isLoading, data?.length]); // Wait for data before restoring scroll position
+
+
+  const handleScroll = (e) => {
+    if (!scrollKey) return;
+    sessionStorage.setItem(`scroll-${scrollKey}`, e.target.scrollTop.toString());
+  };
 
   const totalPages = useMemo(() => {
     if (serverPagination) return paginationData?.totalPages || 1;
@@ -195,7 +233,7 @@ export default function TableWrapper({
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden sm:block flex-1 min-h-0 overflow-y-auto relative">
+      <div className="hidden sm:block flex-1 min-h-0 overflow-y-auto relative" ref={scrollContainerRef} onScroll={handleScroll}>
         <Table aria-label={ariaLabel} classNames={tableClassNames} isHeaderSticky>
           <TableHeader>
             {columns.map((column) => (

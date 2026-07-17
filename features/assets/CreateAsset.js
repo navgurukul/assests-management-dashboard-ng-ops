@@ -27,7 +27,7 @@ export default function CreateAsset() {
     }
 
     setIsSubmitting(true);
-    
+
     // Show loading toast
     const loadingToastId = toast.loading('Creating asset...');
 
@@ -38,8 +38,36 @@ export default function CreateAsset() {
         assetCategoryId: _assetCategoryId,
         assetCategoryName: _assetCategoryName,
         purchaseBills,
+        serviceBillDocument,
+        amcDocument,
+        needsServicing,
+        hasAmcInsurance,
+        inspectionDate,
+        nextInspectionDate,
+        inspectionStatus,
+        inspectionRemark,
+        serviceDate,
+        nextServiceDate,
+        serviceStatus,
+        serviceProvider,
+        serviceCost,
+        serviceRemark,
+        amcStartDate,
+        amcExpiryDate,
+        healthStatus,
+        amcProvider,
+        amcCost,
+        amcVendor,
         ...rest
       } = values;
+
+      const toDateTime = (dateStr) => {
+        if (!dateStr) return undefined;
+        return new Date(dateStr).toISOString(); // "2026-06-18" → "2026-06-18T00:00:00.000Z"
+      };
+
+      const toNumber = (value) =>
+        value !== '' && value !== null && value !== undefined ? Number(value) : undefined;
 
       const assetTypeFieldMap = {
         processor: ['Laptop', 'Desktop', 'Server', 'CPU', 'Tablet', 'Smartphone'],
@@ -54,9 +82,49 @@ export default function CreateAsset() {
         status: 'IN_STOCK', // Always set to IN_STOCK for new assets
         ramSizeGB: values.ramSizeGB ? parseInt(values.ramSizeGB, 10) : undefined,
         storageSizeGB: values.storageSizeGB ? parseInt(values.storageSizeGB, 10) : undefined,
-        cost: values.cost !== '' && values.cost !== null ? Number(values.cost) : undefined,
+        cost: toNumber(values.cost),
         purchaseBillId: values.purchaseBills?.[0]?.id || undefined,
+        isMaintanceAndInspection: Boolean(needsServicing),
+        isInsurance: Boolean(hasAmcInsurance),
       };
+
+      if (needsServicing) {
+        // Service record → maintenance-history (carries cost, provider and bill).
+        // Also mirror the date into the top-level serviceDate summary (date-only, per asset schema).
+        if (serviceDate) {
+          rawPayload.serviceDate = serviceDate;
+          rawPayload.maintenanceHistory = {
+            serviceDate: toDateTime(serviceDate),
+            nextServiceDate: toDateTime(nextServiceDate),
+            serviceProvider: serviceProvider || undefined,
+            cost: toNumber(serviceCost),
+            healthStatus: serviceStatus || undefined,
+            notes: serviceRemark || undefined,
+            billId: serviceBillDocument?.[0]?.id || undefined,
+          };
+        }
+        // Inspection-history
+        if (inspectionDate) {
+          rawPayload.inspectionHistory = {
+            inspectionDate: toDateTime(inspectionDate),
+            nextInspectionDate: toDateTime(nextInspectionDate),
+            healthStatus: inspectionStatus || undefined,
+            notes: inspectionRemark || undefined,
+          };
+        }
+      }
+
+      if (hasAmcInsurance) {
+        rawPayload.insurance = {
+          amcStartDate: toDateTime(amcStartDate),
+          amcExpiryDate: toDateTime(amcExpiryDate),
+          insuranceProvider: amcProvider || undefined,
+          insuranceProviderDetails: amcVendor || undefined,
+          cost: toNumber(amcCost),
+          healthStatus: healthStatus || undefined,
+          policyDocumentId: amcDocument?.[0]?.id || undefined,
+        };
+      }
 
       // Remove fields not relevant to the selected asset type
       Object.keys(assetTypeFieldMap).forEach((field) => {
@@ -136,7 +204,7 @@ export default function CreateAsset() {
             size="sm"
             className="mb-6"
           />
-          
+
           <div className="bg-(--surface) text-foreground rounded-xl shadow-sm border border-(--border) p-6">
             <h1 className="text-xl font-bold mb-2">Register New Asset</h1>
             <p className="text-(--muted)">Fill in the details below to register a new asset in your inventory system</p>
@@ -156,6 +224,7 @@ export default function CreateAsset() {
               valueKey={assetCategoryField.valueKey}
               dataPath={assetCategoryField.dataPath}
               isRequired={assetCategoryField.required}
+              filterFn={assetCategoryField.filterFn}
               value={assetCategoryId}
               onChange={(e) => {
                 const categoryId = e.target.value;

@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import useFetch from '@/app/hooks/query/useFetch';
-import { usePersistentFilters } from '@/app/hooks/usePersistentFilters';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import SummaryCard from '@/components/atoms/SummaryCard';
 import { Ticket, AlertCircle, Clock, CheckCircle, XCircle, TrendingUp, BarChart2, AlertTriangle } from 'lucide-react';
 import TicketsTable from './TicketsTable';
 
 export default function TicketsList() {
   // Filter state (persisted)
-  const [filters, setFilters] = usePersistentFilters('tickets-filters', {});
+  const [filters, setFilters] = usePersistentState('tickets-filters', {});
   const [showCards, setShowCards] = useState(false);
 
   // Fetch consolidated data by campus

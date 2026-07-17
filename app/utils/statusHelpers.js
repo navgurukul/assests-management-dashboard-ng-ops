@@ -89,6 +89,14 @@ const CONDITION_COLOR_MAP = {
   MINOR_ISSUES: 'bg-yellow-100 text-yellow-800',
 };
 
+// Maintenance Health Status
+const HEALTH_STATUS_COLOR_MAP = {
+  HEALTHY: 'bg-green-100 text-green-800',
+  SERVICE_DUE: 'bg-yellow-100 text-yellow-800',
+  INSPECTION_DUE: 'bg-amber-100 text-amber-800',
+  NEED_ATTENTION: 'bg-red-100 text-red-800',
+};
+
 const ALLOCATION_TYPE_COLOR_MAP = {
   CAMPUS: 'bg-purple-100 text-purple-800',
   USER: 'bg-blue-100 text-blue-800',
@@ -129,6 +137,7 @@ export const getChipColor = (value, colorMap) => {
 export const getStatusChipColor = (value) => getChipColor(value, STATUS_COLOR_MAP);
 export const getPriorityChipColor = (value) => getChipColor(value, PRIORITY_COLOR_MAP);
 export const getConditionChipColor = (value) => getChipColor(value, CONDITION_COLOR_MAP);
+export const getHealthStatusChipColor = (value) => getChipColor(value, HEALTH_STATUS_COLOR_MAP);
 export const getAllocationTypeChipColor = (value) => getChipColor(value, ALLOCATION_TYPE_COLOR_MAP);
 export const getAllocationReasonChipColor = (value) => getChipColor(value, ALLOCATION_REASON_COLOR_MAP);
 export const getDeviceModeChipColor = (value) => getChipColor(value, DEVICE_MODE_COLOR_MAP);
