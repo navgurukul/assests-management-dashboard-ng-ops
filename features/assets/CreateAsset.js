@@ -44,6 +44,8 @@ export default function CreateAsset() {
         hasAmcInsurance,
         inspectionDate,
         nextInspectionDate,
+        inspectionStatus,
+        inspectionRemark,
         serviceDate,
         nextServiceDate,
         serviceStatus,
@@ -106,8 +108,8 @@ export default function CreateAsset() {
           rawPayload.inspectionHistory = {
             inspectionDate: toDateTime(inspectionDate),
             nextInspectionDate: toDateTime(nextInspectionDate),
-            healthStatus: serviceStatus || undefined,
-            notes: serviceRemark || undefined,
+            healthStatus: inspectionStatus || undefined,
+            notes: inspectionRemark || undefined,
           };
         }
       }
