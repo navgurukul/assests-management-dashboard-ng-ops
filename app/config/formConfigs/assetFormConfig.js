@@ -207,6 +207,28 @@ export const commonAssetFields = [
     showIf: { field: "needsServicing", value: true },
   },
   {
+    name: "inspectionStatus",
+    label: "Inspection Status",
+    type: "select",
+    placeholder: "Select inspection status",
+    required: (values) => !!values.needsServicing,
+    options: [
+      { value: "HEALTHY", label: "Healthy" },
+      { value: "NEED_ATTENTION", label: "Need Attention" },
+      { value: "INSPECTION_DUE", label: "Inspection Due" },
+    ],
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
+    name: "inspectionRemark",
+    label: "Inspection Remarks",
+    type: "textarea",
+    placeholder: "Add any inspection remarks",
+    required: false,
+    fullWidth: true,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
     name: "serviceHeader",
     label: "Service",
     type: "section-header",
@@ -231,15 +253,14 @@ export const commonAssetFields = [
   },
   {
     name: "serviceStatus",
-    label: "Status",
+    label: "Service Status",
     type: "select",
-    placeholder: "Select status",
+    placeholder: "Select service status",
     required: (values) => !!values.needsServicing,
     options: [
       { value: "HEALTHY", label: "Healthy" },
       { value: "NEED_ATTENTION", label: "Need Attention" },
       { value: "SERVICE_DUE", label: "Service Due" },
-      { value: "INSPECTION_DUE", label: "Inspection Due" },
     ],
     showIf: { field: "needsServicing", value: true },
   },
@@ -262,9 +283,9 @@ export const commonAssetFields = [
   },
   {
     name: "serviceRemark",
-    label: "Remark",
+    label: "Service Remarks",
     type: "textarea",
-    placeholder: "Add any remarks",
+    placeholder: "Add any service remarks",
     required: false,
     fullWidth: true,
     showIf: { field: "needsServicing", value: true },
@@ -502,16 +523,27 @@ export const commonAssetValidation = {
         return new Date(value) >= new Date(serviceDate);
       },
     ),
+  inspectionStatus: Yup.string()
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) =>
+        schema
+          .required("Inspection status is required")
+          .oneOf(["HEALTHY", "NEED_ATTENTION", "INSPECTION_DUE"], "Invalid status"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  inspectionRemark: Yup.string().nullable(),
   serviceStatus: Yup.string()
-  .nullable()
-  .when("needsServicing", {
-    is: true,
-    then: (schema) =>
-      schema
-        .required("Service status is required")
-        .oneOf(["HEALTHY", "NEED_ATTENTION", "SERVICE_DUE", "INSPECTION_DUE"], "Invalid status"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) =>
+        schema
+          .required("Service status is required")
+          .oneOf(["HEALTHY", "NEED_ATTENTION", "SERVICE_DUE"], "Invalid status"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   serviceProvider: Yup.string()
     .nullable()
     .when("needsServicing", {
@@ -620,6 +652,8 @@ export const commonAssetInitial = {
   needsServicing: false,
   inspectionDate: "",
   nextInspectionDate: "",
+  inspectionStatus: "",
+  inspectionRemark: "",
   serviceDate: "",
   nextServiceDate: "",
   serviceStatus: "",
