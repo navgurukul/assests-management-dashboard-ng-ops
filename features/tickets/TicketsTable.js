@@ -125,6 +125,12 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     queryKey: ['campuses'],
   });
 
+  // Fetch campus-incharge data to build assignee filter options
+  const { data: campusInchargeData } = useFetch({
+    url: '/campus-incharge',
+    queryKey: ['campus-incharge'],
+  });
+
   // Handle page change
   const handlePageChange = (page) => {
     setPaginationState((prev) => ({ ...prev, currentPage: page }));
@@ -172,6 +178,28 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     }));
   }, [campusData]);
 
+  // Build deduplicated assignee options from campus-incharge data
+  const assigneeOptions = React.useMemo(() => {
+    const list = campusInchargeData?.data;
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    const options = [];
+    list.forEach((campus) => {
+      const people = [campus.itCoordinator, campus.operation, campus.itLead,campus.campusManager,];
+      people.forEach((person) => {
+        const userId = person?.user?.id;
+        if (userId && !seen.has(userId)) {
+          seen.add(userId);
+          options.push({
+            value: userId,
+            label: person.name || person.email || userId,
+          });
+        }
+      });
+    });
+    return options;
+  }, [campusInchargeData]);
+
   // Status filter options based on API documentation
   const filterStatusOptions = [
     { value: 'RAISED', label: 'Raised' },
@@ -205,6 +233,10 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     }
     if (filterKey === 'isAssigned') {
       return value === 'true' ? 'Assigned' : 'Unassigned';
+    }
+    if (filterKey === 'assignee') {
+      const assignee = assigneeOptions.find(opt => opt.value === value);
+      return assignee ? assignee.label : value;
     }
     return value;
   };
@@ -389,6 +421,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
           campusOptions={campusOptions}
           statusOptions={filterStatusOptions}
           isAssignedOptions={isAssignedOptions}
+          assigneeOptions={assigneeOptions}
           selectedFilters={filters}
         />
       }
