@@ -127,22 +127,7 @@ export default function TicketApprovalTab() {
       case 'ticketNumber':
         return <span className="font-medium text-[var(--theme-main)]">{ticket.ticketNumber}</span>;
       case 'description':
-        return (
-          <div className="relative group max-w-xs">
-            <span className="text-gray-900 truncate block overflow-hidden whitespace-nowrap cursor-pointer">
-              {ticket.description || '-'}
-            </span>
-
-            {ticket.description && (
-              <div className="absolute z-50 left-0 top-full mt-1 hidden group-hover:block bg-white text-gray-900 text-xs rounded-md px-3 py-2 w-72 break-words shadow-lg border border-gray-200">
-                <p className="font-semibold mb-1 text-gray-700">
-                  Ticket Description
-                </p>
-                <p>{ticket.description}</p>
-              </div>
-          )}
-          </div>
-        );
+        return <span className="text-gray-900 max-w-lg block">{ticket.description || '-'}</span>;
       case 'ticketType':
         return <span className="text-gray-700">{ticket.ticketType?.replace('_', ' ')}</span>;
       case 'priority':
