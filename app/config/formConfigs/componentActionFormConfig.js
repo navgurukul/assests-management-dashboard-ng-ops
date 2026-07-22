@@ -88,7 +88,32 @@ const getInstallUninstallBaseFields = (componentData = null) => [
 // Install-specific fields (includes slotLabel and notes for API)
 export const getInstallFields = (componentData = null) => getInstallUninstallBaseFields(componentData);
 
-// Uninstall fields (no slotLabel, notes - same base fields for now)
+// Uninstall fields — removalReason (required) + notes (optional)
+export const getUninstallFields = () => [
+  {
+    name: 'removalReason',
+    label: 'Reason for Removal',
+    type: 'textarea',
+    placeholder: 'Enter reason for uninstalling this component',
+    required: true,
+    rows: 3,
+    validation: (value) => {
+      if (!value) return null;
+      if (value.trim().length < 5) return 'Reason must be at least 5 characters';
+      if (value.trim().length > 500) return 'Reason must not exceed 500 characters';
+      return null;
+    },
+  },
+  {
+    name: 'notes',
+    label: 'Notes',
+    type: 'textarea',
+    placeholder: 'Optional additional notes',
+    required: false,
+    rows: 2,
+  },
+];
+
 export const getInstallUninstallFields = (componentData = null) => {
   const baseFields = getInstallUninstallBaseFields(componentData);
   return baseFields.filter(
@@ -188,7 +213,7 @@ export const getFieldsByActionType = (actionType, componentData = null) => {
     case 'INSTALL':
       return getInstallFields(componentData);
     case 'UNINSTALL':
-      return getInstallUninstallFields(componentData);
+      return getUninstallFields();
     case 'SCRAP':
       return scrapFields;
     case 'LOST':
