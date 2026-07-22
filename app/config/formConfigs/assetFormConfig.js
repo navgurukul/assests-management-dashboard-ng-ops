@@ -1,3 +1,4 @@
+
 import * as Yup from "yup";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -220,6 +221,15 @@ export const commonAssetFields = [
     showIf: { field: "needsServicing", value: true },
   },
   {
+    name: "inspectionCost",
+    label: "Cost",
+    type: "number",
+    placeholder: "Enter cost (optional)",
+    required: false,
+    min: 0,
+    showIf: { field: "needsServicing", value: true },
+  },
+  {
     name: "inspectionRemark",
     label: "Inspection Remarks",
     type: "textarea",
@@ -338,17 +348,17 @@ export const commonAssetFields = [
   },
   {
     name: "amcProvider",
-    label: "Provider",
+    label: "AMC / Insurance Provider",
     type: "text",
     placeholder: "Enter provider name",
     required: (values) => !!values.hasAmcInsurance,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
-    name: "amcVendor",
-    label: "Vendor Detail",
+    name: "amcProviderDetails",
+    label: "Provider Details",
     type: "text",
-    placeholder: "Enter vendor detail",
+    placeholder: "Enter provider detail",
     required: (values) => !!values.hasAmcInsurance,
     showIf: { field: "hasAmcInsurance", value: true },
   },
@@ -359,6 +369,15 @@ export const commonAssetFields = [
     placeholder: "Enter cost (optional)",
     required: false,
     min: 0,
+    showIf: { field: "hasAmcInsurance", value: true },
+  },
+  {
+    name: "amcRemark",
+    label: "AMC / Insurance Remarks",
+    type: "textarea",
+    placeholder: "Add any AMC / insurance remarks",
+    required: false,
+    fullWidth: true,
     showIf: { field: "hasAmcInsurance", value: true },
   },
   {
@@ -500,6 +519,27 @@ export const commonAssetValidation = {
         return new Date(value) >= new Date(inspectionDate);
       },
     ),
+  inspectionStatus: Yup.string()
+    .nullable()
+    .when("needsServicing", {
+      is: true,
+      then: (schema) =>
+        schema
+          .required("Inspection status is required")
+          .oneOf(["HEALTHY", "NEED_ATTENTION", "INSPECTION_DUE"], "Invalid status"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  inspectionCost: Yup.number()
+    .nullable()
+    .transform((value, originalValue) =>
+    originalValue === "" || originalValue === null || originalValue === undefined
+      ? null
+      : value,
+    )
+    .min(0, "Cost must be a positive number")
+    .max(9999999, "Cost cannot exceed 99,99,999"),
+  inspectionRemark: Yup.string().nullable(),
+  // Service / Maintenance
   serviceDate: Yup.string()
     .nullable()
     .when("needsServicing", {
@@ -523,17 +563,6 @@ export const commonAssetValidation = {
         return new Date(value) >= new Date(serviceDate);
       },
     ),
-  inspectionStatus: Yup.string()
-    .nullable()
-    .when("needsServicing", {
-      is: true,
-      then: (schema) =>
-        schema
-          .required("Inspection status is required")
-          .oneOf(["HEALTHY", "NEED_ATTENTION", "INSPECTION_DUE"], "Invalid status"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  inspectionRemark: Yup.string().nullable(),
   serviceStatus: Yup.string()
     .nullable()
     .when("needsServicing", {
@@ -618,14 +647,15 @@ export const commonAssetValidation = {
     )
     .min(0, "Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
-  amcVendor: Yup.string()
+  amcProviderDetails: Yup.string()
     .nullable()
     .when("hasAmcInsurance", {
       is: true,
-      then: (schema) => schema.required("Vendor details are required"),
+      then: (schema) => schema.required("Provider details are required"),
       otherwise: (schema) => schema.notRequired(),
-    }),
+  }),
   amcDocument: Yup.array().nullable(),
+  amcRemark: Yup.string().nullable(),
   notes: Yup.string(),
   charger: Yup.boolean(),
 };
@@ -653,6 +683,7 @@ export const commonAssetInitial = {
   inspectionDate: "",
   nextInspectionDate: "",
   inspectionStatus: "",
+  inspectionCost: "",
   inspectionRemark: "",
   serviceDate: "",
   nextServiceDate: "",
@@ -668,7 +699,8 @@ export const commonAssetInitial = {
   healthStatus: "",
   amcProvider: "",
   amcCost: "",
-  amcVendor: "",
+  amcProviderDetails: "",
+  amcRemark: "",
   amcDocument: [],
   notes: "",
   charger: false,
@@ -938,8 +970,8 @@ export const amcRenewalFields = [
     required: true,
   },
   {
-    name: "vendorDetails",
-    label: "Vendor Details",
+    name: "providerDetails",
+    label: "Provider Details",
     type: "textarea",
     placeholder: "Contact person, phone, email, address",
     required: true,
@@ -984,8 +1016,7 @@ export const amcRenewalValidationSchema = Yup.object().shape({
     ),
   healthStatus: Yup.string().required("AMC / Insurance status is required"),
   insuranceProvider: Yup.string().required("AMC / Insurance provider is required"),
-  vendorDetails: Yup.string()
-  .required("Vendor details are required"),
+  providerDetails: Yup.string().required("Provider details are required"),
   cost: Yup.number()
     .nullable()
     .transform((value, originalValue) =>
