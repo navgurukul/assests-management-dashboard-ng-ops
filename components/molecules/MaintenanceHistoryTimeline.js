@@ -82,11 +82,9 @@ export default function MaintenanceHistoryTimeline({
       return (
         <div className="relative">
           {services.map((item, idx) => {
-            const providerName =
-              item.serviceProvider ||
-              (item.performedByUserId
-                ? `${item.performedByUserId.name} ${item.performedByUserId.lastName}`.trim()
-                : '—');
+            const performedByName = item.performedByUserId
+              ? `${item.performedByUserId.name} ${item.performedByUserId.lastName}`.trim()
+              : null;
             const costFormatted = formatCost(item.cost);
 
             return (
@@ -99,15 +97,24 @@ export default function MaintenanceHistoryTimeline({
                   )}
                 </div>
 
-                {/* Card — matches MovementTimeline's border/padding/shadow */}
+                {/* Card */}
                 <div className="mb-4 flex-1 min-w-0 overflow-hidden rounded-lg border p-2.5 sm:p-3 bg-white shadow-sm">
                   <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
                     <span className="text-xs sm:text-sm font-medium text-gray-800">
-                      {providerName}
+                      {performedByName || item.serviceProvider || '—'}
                     </span>
                     <span className={`text-[9px] sm:text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${typeBadgeColor('SERVICE')}`}>
                       SERVICE
                     </span>
+                  </div>
+
+                  {/* Provider Details + Performed By — shown as separate labeled rows */}
+                  <div className="flex flex-col gap-0.5 mb-1.5">
+                    {item.serviceProvider && (
+                      <p className="text-xs text-gray-500">
+                        Provider: <span className="font-medium text-gray-700">{item.serviceProvider}</span>
+                      </p>
+                    )}
                   </div>
 
                   {item.notes && (
@@ -230,11 +237,9 @@ export default function MaintenanceHistoryTimeline({
       return (
         <div className="relative">
           {amcs.map((item, idx) => {
-            const providerName =
-              item.insuranceProvider ||
-              (item.performedByUser
-                ? `${item.performedByUser.name} ${item.performedByUser.lastName}`.trim()
-                : '—');
+            const performedByName = item.performedByUser
+              ? `${item.performedByUser.name} ${item.performedByUser.lastName}`.trim()
+              : null;
             const costFormatted = formatCost(item.cost);
 
             return (
@@ -249,11 +254,25 @@ export default function MaintenanceHistoryTimeline({
                 <div className="mb-4 flex-1 min-w-0 overflow-hidden rounded-lg border p-2.5 sm:p-3 bg-white shadow-sm">
                   <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
                     <span className="text-xs sm:text-sm font-medium text-gray-800">
-                      {providerName}
+                       {performedByName || item.insuranceProvider || '—'}
                     </span>
                     <span className={`text-[9px] sm:text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${typeBadgeColor('AMC')}`}>
                       AMC
                     </span>
+                  </div>
+
+                  {/* Provider Details + Performed By — shown as separate labeled rows */}
+                  <div className="flex flex-col gap-0.5 mb-1.5">
+                    {item.insuranceProvider && (
+                      <p className="text-xs text-gray-500">
+                        Provider: <span className="font-medium text-gray-700">{item.insuranceProvider}</span>
+                      </p>
+                    )}
+                    {item.insuranceProviderDetails && (
+                      <p className="text-xs text-gray-500">
+                        Provider details: <span className="font-medium text-gray-700">{item.insuranceProviderDetails}</span>
+                      </p>
+                    )}
                   </div>
 
                   {item.notes && (

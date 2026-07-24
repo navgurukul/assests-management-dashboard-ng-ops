@@ -189,6 +189,7 @@ export default function FormField({ field, formik, onFieldChange }) {
             onBillsChange={(bills) => formik.setFieldValue(name, bills)}
             allowMultiple={field.allowMultiple === true}
             simpleMode={field.simpleMode === true}
+            label={label}
           />
         );
 
