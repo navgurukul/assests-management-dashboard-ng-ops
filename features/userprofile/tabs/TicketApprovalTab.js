@@ -2,6 +2,7 @@
 
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import TableWrapper from '@/components/Table/TableWrapper';
 import ActionMenu from '@/components/molecules/ActionMenu';
@@ -43,6 +44,7 @@ function getTicketId(ticket) {
 
 export default function TicketApprovalTab() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -51,6 +53,12 @@ export default function TicketApprovalTab() {
 
   const managerEmail = user?.email;
   const queryString = new URLSearchParams({ page: currentPage, limit: pageSize }).toString();
+
+  const handleRowClick = (ticket) => {
+    const ticketId = getTicketId(ticket);
+    if (!ticketId) return;
+    router.push(`/tickets/${ticketId}`);
+  };
 
   const { data, isLoading, isError, error, refetch } = useFetch({
     url: `${config.endpoints.tickets.pendingApproval}/${encodeURIComponent(managerEmail ?? '')}?${queryString}`,
@@ -156,10 +164,12 @@ export default function TicketApprovalTab() {
       case 'actions':
         if (ticket.status !== 'RAISED' ) return null;
         return (
+          <div onClick={(e) => e.stopPropagation()}>
           <ActionMenu
             menuOptions={getActionMenuOptions(ticket)}
             disabled={processingId === getTicketId(ticket)}
           />
+          </div>
         );
       default:
         return ticket[columnKey];
@@ -212,6 +222,7 @@ export default function TicketApprovalTab() {
         paginationData={paginationData}
         onPageChange={setCurrentPage}
         onPageSizeChange={handlePageSizeChange}
+        onRowClick={handleRowClick}
       />
     </div>
   );
