@@ -37,7 +37,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const [assetModalAction, setAssetModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | null
   const [isAssetSubmitting, setIsAssetSubmitting] = useState(false);
 
-    const loggedInEmail = React.useMemo(() => {
+  const loggedInEmail = React.useMemo(() => {
     try {
       const auth = decryptData(localStorage.getItem('__AUTH__')) || {};
       const email =  auth?.user?.email || null;
@@ -145,6 +145,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
   const ticket = ticketData;
 
+  const isRequester = loggedInEmail && ticket.raisedByUser?.email === loggedInEmail;
+  const canCancelTicket = isRequester || loggedInUserRole === 'ADMIN';
+  const isCancellable = ['RAISED', 'OPEN'].includes(ticket.status);
+
+
   const historyLogs = ticket.historyLogs || [];
 
   const formatHistoryDate = (dateStr) => {
@@ -176,6 +181,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       case 'REJECTED':                return 'bg-rose-100 text-rose-700 border-rose-200';
       case 'PENDING':                 return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'ASSIGNED':                return 'bg-violet-100 text-violet-700 border-violet-200';
+      case 'CANCELLED':               return 'bg-red-100 text-red-700 border-red-200';
       default:                        return 'bg-gray-100 text-gray-600 border-gray-200';
     }
   };
@@ -196,6 +202,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       case 'REJECTED':                return 'bg-rose-500 border-rose-300';
       case 'PENDING':                 return 'bg-amber-500 border-amber-300';
       case 'ASSIGNED':                return 'bg-violet-500 border-violet-300';
+      case 'CANCELLED':               return 'bg-red-500 border-red-300';
       default:                        return 'bg-gray-400 border-gray-300';
     }
   };
@@ -322,6 +329,26 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const updateFormFieldsModified = ticketUpdateFormFields;
 
   const handleAssetStatusUpdate = async (formData) => {
+    if (assetModalAction === 'CANCEL') {
+      setIsAssetSubmitting(true);
+      try {
+        await updateTicket({
+          endpoint: config.endpoints.tickets.update(ticketId),
+          body: {
+            status: 'CANCELLED',
+            comment: formData.description,
+          },
+        });
+        toast.success('Ticket cancelled successfully!');
+        setAssetModalAction(null);
+        queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
+      } catch (error) {
+        toast.error(error?.message || 'Failed to cancel ticket.');
+      } finally {
+        setIsAssetSubmitting(false);
+      }
+      return;
+    }
     const assetId = ticket.asset?.id || ticket.assetId;
     if (!assetId) {
       toast.error('Asset ID not found');
@@ -398,9 +425,17 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                 ))}
               </div>
             )}
+            {canCancelTicket && isCancellable && (
+              <CustomButton
+                text="Cancel Ticket"
+                variant="danger"
+                size="md"
+                onClick={() => setAssetModalAction('CANCEL')}
+              />
+            )}
             {!isStudentOrEmployee && (
               <>
-                {loggedInUserRole !== 'MANAGER' && !['RAISED', 'CLOSED', 'CLOSE', 'CONSIGNMENT_DELIVERED'].includes(ticket.status) && (
+                {loggedInUserRole !== 'MANAGER' && !['RAISED', 'CLOSED', 'CLOSE', 'CONSIGNMENT_DELIVERED','CANCELLED'].includes(ticket.status) && (
                   <CustomButton
                     text="Update Ticket"
                     variant="secondary"
@@ -501,15 +536,17 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       <FormModal
         isOpen={!!assetModalAction}
         onClose={() => setAssetModalAction(null)}
-        title={assetModalAction === 'REPAIR' ? 'Move Asset to Repair' : 'Mark Asset as Scrap'}
+        title={assetModalAction === 'REPAIR' ? 'Move Asset to Repair' : assetModalAction === 'SCRAP' ? 'Mark Asset as Scrap' : 'Cancel Ticket'}
         fields={[
           {
             name: 'description',
-            label: assetModalAction === 'REPAIR' ? 'Reason for Repair' : 'Reason for Scrapping',
+            label: assetModalAction === 'CANCEL' ? 'Reason for Cancellation' : (assetModalAction === 'REPAIR' ? 'Reason for Repair' : 'Reason for Scrapping'),
             type: 'textarea',
             required: true,
-            placeholder: assetModalAction === 'REPAIR' 
-              ? 'Describe the issue or reason this asset needs repair...' 
+            placeholder: assetModalAction === 'CANCEL'
+              ? 'Describe the reason for cancelling this ticket(e.g. duplicate ticket, raised by mistake, or issue no longer applies).'
+              : assetModalAction === 'REPAIR'
+              ? 'Describe the issue or reason this asset needs repair...'
               : 'Describe why this asset is being scrapped...',
           },
         ]}
