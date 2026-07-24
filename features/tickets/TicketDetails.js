@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Laptop, Monitor, Tablet, Smartphone, Package } from 'lucide-react';
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
 import { selectUserRole } from '@/app/store/slices/appSlice';
+import { IT_ROLES } from '@/app/config/routePermissions';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import FormModal from '@/components/molecules/FormModal';
@@ -371,6 +372,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }
 
   const isStudentOrEmployee = loggedInUserRole === 'STUDENT' || loggedInUserRole === 'EMPLOYEE';
+  const isItRole = IT_ROLES.includes(loggedInUserRole);
 
   return (
     <>
@@ -417,7 +419,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   />
                 )}
                 {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE' || ticket.status === 'IN_PROGRESS') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
-                   (isAssigneeCurrentUser || loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD') ? (
+                   (isItRole && (isAssigneeCurrentUser || loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD')) ? (
                     <CustomButton
                       text="Create Allocation"
                       variant="primary"
@@ -426,11 +428,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                       onClick={handleCreateAllocation}
                       disabled={!ticket.assigneeUser}
                     />
-                  ) : (
+                  ) : isItRole ? (
                     <span className="text-[10px] text-gray-500">
                       Only &apos;{ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : 'the assignee'}&apos; can create the allocation
                     </span>
-                  )
+                  ) : null
                 ) : ticket.status === 'RAISED' ? (
                   <CustomButton
                     text="Ticket is not approved"

@@ -39,6 +39,13 @@ function getAllowedRoles(pathname) {
     if (config.exactOnly) {
       return pathname === route;
     }
+    if (route.includes('[') && route.includes(']')) {
+      const regexPattern = route
+        .replace(/\[[^\]]+\]/g, '[^/]+')
+        .replace(/\//g, '\\/');
+      const regex = new RegExp(`^${regexPattern}(/.*)?$`);
+      return regex.test(pathname);
+    }
     return pathname === route || pathname.startsWith(route + '/');
   });
   return match ? routePermissions[match].allowedRoles : null;
