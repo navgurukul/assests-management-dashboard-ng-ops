@@ -56,7 +56,7 @@ export const ticketFormFields = [
     labelKey: 'email',
     valueKey: 'email',
     dataPath: 'data',
-    additionalParams: { role: 'MANAGER & ADMIN', limit: 1000 },
+    additionalParams: { role: 'MANAGER & ADMIN & CAMPUS_MANAGER', limit: 1000 },
     formatLabel: (manager) => {
       const fullName = `${manager?.firstName || ''} ${manager?.lastName || ''}`.trim();
       return fullName ? `${fullName} - ${manager?.email}` : manager?.email;
