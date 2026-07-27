@@ -56,7 +56,8 @@ export const userRoleOptions = [
   { value: 'STUDENT', label: 'Student' },
   { value: 'ADMIN', label: 'Admin' },
   { value: 'EMPLOYEE', label: 'Employee' },
-  { value: 'MANAGER', label: 'manager' },
+  { value: 'MANAGER', label: 'Manager' },
+  { value: 'CAMPUS_MANAGER', label: 'Campus Manager' },
   { value: 'RESIDENTIAL_TEAM', label: 'Residential Team' },
   { value: 'IT_COORDINATOR', label: 'IT Coordinator' },
   { value: 'IT_LEAD', label: 'IT Lead' },
@@ -1316,4 +1317,3 @@ export const addSchoolFormFields = [
   { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter Email', required: true },
   { name: 'address', label: 'Address', type: 'text', placeholder: 'Enter Full Address', required: true }
 ];
-
