@@ -20,6 +20,7 @@ import {
   TicketCheck,
   PanelLeftOpen,
   PanelLeftClose,
+  PackageCheck, 
 } from 'lucide-react';
 import { menuItems } from '@/app/config/routePermissions';
 
@@ -35,6 +36,7 @@ const iconMap = {
   User,
   Building2,
   TicketCheck,
+  PackageCheck,
 };
 
 function TooltipWrapper({ show, content, children }) {
