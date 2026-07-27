@@ -14,6 +14,7 @@ const config = {
       details: (id) => `/components/${id}`,
       addDocuments: (id) => `/components/${id}/documents`,
       install: (id) => `/components/${id}/install`,
+      remove: (id) => `/components/${id}/remove`,
     },
     
     // Assets

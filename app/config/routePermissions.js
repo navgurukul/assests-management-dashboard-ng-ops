@@ -51,6 +51,7 @@ export const menuItems = [
 export const additionalRoutePermissions = [
   { path: '/userprofile', allowedRoles: ALL_AUTHENTICATED },
   { path: '/tickets/create', allowedRoles: ALL_AUTHENTICATED },
+  { path: '/tickets/[id]', allowedRoles: ALL_AUTHENTICATED },
   { path: '/assets/create', allowedRoles: IT_ROLES },
 ];
 

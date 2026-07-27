@@ -102,10 +102,11 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         });
         toast.success('Service logged successfully.');
       } else if (modalAction === 'AMC_RENEWAL') {
-        const { cost, policyDocument, amcStartDate, amcExpiryDate, ...rest } = formData;
+        const { cost, policyDocument, amcStartDate, amcExpiryDate, providerDetails, ...rest } = formData;
         await apiService.post(config.endpoints.insurance.create, {
           assetId: id,
           ...rest,
+          insuranceProviderDetails: providerDetails,
           amcStartDate: toDateTime(amcStartDate),
           amcExpiryDate: toDateTime(amcExpiryDate),
           cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
