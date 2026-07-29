@@ -36,6 +36,7 @@ const STATUS_COLOR_MAP = {
   OVERDUE: 'bg-red-100 text-red-800',
   APPROVED: 'bg-green-100 text-green-800',
   REJECTED: 'bg-red-100 text-red-800',
+  CANCELLED: 'bg-red-100 text-red-800',
 
   // Asset / allocation
   ACTIVE: 'bg-green-100 text-green-800',

@@ -45,6 +45,7 @@ export default function CreateAsset() {
         inspectionDate,
         nextInspectionDate,
         inspectionStatus,
+        inspectionCost,
         inspectionRemark,
         serviceDate,
         nextServiceDate,
@@ -57,7 +58,8 @@ export default function CreateAsset() {
         healthStatus,
         amcProvider,
         amcCost,
-        amcVendor,
+        amcProviderDetails,
+        amcRemark,
         ...rest
       } = values;
 
@@ -109,6 +111,7 @@ export default function CreateAsset() {
             inspectionDate: toDateTime(inspectionDate),
             nextInspectionDate: toDateTime(nextInspectionDate),
             healthStatus: inspectionStatus || undefined,
+            cost: toNumber(inspectionCost),
             notes: inspectionRemark || undefined,
           };
         }
@@ -119,9 +122,10 @@ export default function CreateAsset() {
           amcStartDate: toDateTime(amcStartDate),
           amcExpiryDate: toDateTime(amcExpiryDate),
           insuranceProvider: amcProvider || undefined,
-          insuranceProviderDetails: amcVendor || undefined,
+          insuranceProviderDetails: amcProviderDetails || undefined,
           cost: toNumber(amcCost),
           healthStatus: healthStatus || undefined,
+          notes: amcRemark || undefined, 
           policyDocumentId: amcDocument?.[0]?.id || undefined,
         };
       }

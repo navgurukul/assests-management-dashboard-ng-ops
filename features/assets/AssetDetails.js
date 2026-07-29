@@ -25,10 +25,14 @@ import { buildSpecLabel } from '@/app/utils/dataTransformers';
 import {   
   getCategoryDisplayItems,
 } from '@/app/config/formConfigs/categoryFormConfigs';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
   const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const userRole = useAppSelector(selectUserRole);
+  const isCampusManager = userRole === 'CAMPUS_MANAGER';
 
   const { mutateAsync: moveToStock, isPending: isMovingToStock } = usePut({
     onSuccess: () => {
@@ -98,10 +102,11 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         });
         toast.success('Service logged successfully.');
       } else if (modalAction === 'AMC_RENEWAL') {
-        const { cost, policyDocument, amcStartDate, amcExpiryDate, ...rest } = formData;
+        const { cost, policyDocument, amcStartDate, amcExpiryDate, providerDetails, ...rest } = formData;
         await apiService.post(config.endpoints.insurance.create, {
           assetId: id,
           ...rest,
+          insuranceProviderDetails: providerDetails,
           amcStartDate: toDateTime(amcStartDate),
           amcExpiryDate: toDateTime(amcExpiryDate),
           cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
@@ -438,6 +443,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         showTimeline={false}
         onBack={onBack}
         headerActions={
+          isCampusManager ? null : (
           <>
             <CustomButton
               text="Change Location"
@@ -477,6 +483,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               onClick={() => setModalAction('AMC_RENEWAL')}
             />
           </>
+          )
         }
       />
     </>

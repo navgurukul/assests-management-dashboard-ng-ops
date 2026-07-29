@@ -290,6 +290,28 @@ export default function ComponentsList() {
         queryClient.invalidateQueries({ queryKey: ['components'] });
         toast.success('Install action completed successfully!');
         handleCloseModal();
+      } else if (currentAction?.toUpperCase() === 'UNINSTALL') {
+        const componentId = currentComponent?.id;
+        if (!componentId) {
+          toast.error('Component ID is missing.');
+          return;
+        }
+
+        loadingToastId = toast.loading('Uninstalling component...');
+
+        const uninstallPayload = {
+          removalReason: formData.removalReason?.trim() || '',
+          notes: formData.notes?.trim() || '',
+        };
+
+        const removeUrl = config.getApiUrl(config.endpoints.components.remove(componentId));
+        await post({ url: removeUrl, method: 'POST', data: uninstallPayload });
+
+        toast.dismiss(loadingToastId);
+        loadingToastId = null;
+        queryClient.invalidateQueries({ queryKey: ['components'] });
+        toast.success('Component uninstalled successfully!');
+        handleCloseModal();
       } else {
         // Non-Install actions: simulate API call for now
         loadingToastId = toast.loading(`${currentAction} in progress...`);

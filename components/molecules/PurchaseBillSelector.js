@@ -11,6 +11,7 @@ export default function PurchaseBillSelector({
   onBillsChange,
   allowMultiple = false,
   simpleMode = false,
+  label,
 }) {
   const [mode, setMode] = useState('link');
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +110,11 @@ export default function PurchaseBillSelector({
 
     return (
       <div className="space-y-2">
+        {label && (
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            {label}
+          </label>
+        )}
         <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2">
           <FileText className="w-4 h-4 text-gray-400 shrink-0" />
 
