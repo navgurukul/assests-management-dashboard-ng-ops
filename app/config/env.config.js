@@ -122,6 +122,7 @@ const config = {
     // User
     user: {
       me: '/user/me',
+      myManager: '/user/me/manager',
     },
 
     // Campus Incharge
