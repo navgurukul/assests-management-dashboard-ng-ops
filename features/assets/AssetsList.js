@@ -25,12 +25,16 @@ import {
 } from '@/app/config/tableConfigs/assetTableConfig';
 import { transformAssetForTable } from '@/app/utils/dataTransformers';
 import { useAssetExport } from '@/app/hooks/useAssetExport';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectUserRole } from '@/app/store/slices/appSlice';
 
 const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
 const actionOptions = ['View', 'Assign', 'Details'];
 
 export default function AssetsList() {
   const router = useRouter();
+  const userRole = useAppSelector(selectUserRole);
+  const canCreateAsset = userRole !== 'CAMPUS_MANAGER';
   
   // Export functionality
   const { exportToPDF, exportToCSV } = useAssetExport();
@@ -425,7 +429,7 @@ export default function AssetsList() {
         showPagination={true}
         ariaLabel="Assets table"
         onRowClick={handleRowClick}
-        showCreateButton={true}
+        showCreateButton={canCreateAsset}
         onCreateClick={handleCreateClick}
         showDashboardToggle={true}
         showCards={showCards}

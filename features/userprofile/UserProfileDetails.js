@@ -63,13 +63,14 @@ export default function UserProfileDetails() {
   const currentRole = storeUserRole || userData.role;
 
   const filteredTabs = tabs.filter(tab => {
-    // For MANAGER, STUDENT, EMPLOYEE, only show 'userprofile' option
-    if ((currentRole === 'MANAGER' || currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
+    // MANAGER, CAMPUS_MANAGER, STUDENT, EMPLOYEE: only show 'userprofile' tab
+    // They access My Assets, Ticket Status, Ticket Approval via dedicated sidebar pages
+    if ((currentRole === 'MANAGER' || currentRole === 'CAMPUS_MANAGER' || currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
       return false;
     }
 
-    const adminOnlyTabs = [  'campusincharge', 'campuslocation', 'addschool'];
-    
+    const adminOnlyTabs = ['campusincharge', 'campuslocation', 'addschool'];
+
     // Only ADMIN should see these tabs
     if (adminOnlyTabs.includes(tab.id) && currentRole !== 'ADMIN') {
       return false;
