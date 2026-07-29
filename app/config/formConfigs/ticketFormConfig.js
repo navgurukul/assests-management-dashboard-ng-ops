@@ -50,7 +50,7 @@ export const ticketFormFields = [
     name: 'managerEmail',
     label: 'Manager Email',
     type: 'api-autocomplete',
-    placeholder: 'Search and select manager',
+    placeholder: 'Search by name or email',
     apiUrl: baseUrl + '/users',
     queryKey: ['managers'],
     labelKey: 'email',
@@ -61,6 +61,8 @@ export const ticketFormFields = [
       const fullName = `${manager?.firstName || ''} ${manager?.lastName || ''}`.trim();
       return fullName ? `${fullName} - ${manager?.email}` : manager?.email;
     },
+    helpText: "Search by name or email. Can't find your manager? Ask them to log in to the dashboard once, or contact IT/Admin.",
+    emptyContent: "No manager found with that name/email. They may not have logged in yet, or their account role isn't set to Manager — ask them to log in once, or contact IT/Admin to update their role.",
     required: true,
   },
   {
