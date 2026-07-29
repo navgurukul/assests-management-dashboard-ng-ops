@@ -36,6 +36,7 @@ export const assetTypeField = {
   onFieldChange: "onAssetTypeChange",
 };
 
+// Brand field for general IT & Electronics assets (non-smartphone)
 export const itBrandField = {
   name: "brand",
   label: "Brand",
@@ -58,6 +59,51 @@ export const itBrandField = {
     { label: "Toshiba", value: "Toshiba" },
   ],
   required: true,
+  showIf: {
+    field: "assetTypeName",
+    value: ["Smartphone"],
+    negate: true, // show for all IT asset types EXCEPT Smartphone
+  },
+};
+
+// Brand field specifically for Smartphones
+export const smartphoneBrandField = {
+  name: "brand",
+  label: "Brand",
+  type: "api-autocomplete",
+  placeholder: "Search and select brand",
+  apiUrl: "",
+  queryKey: [],
+  labelKey: "label",
+  valueKey: "value",
+  staticItems: [
+    { label: "Samsung", value: "Samsung" },
+    { label: "Apple", value: "Apple" },
+    { label: "Xiaomi", value: "Xiaomi" },
+    { label: "Redmi", value: "Redmi" },
+    { label: "POCO", value: "POCO" },
+    { label: "Realme", value: "Realme" },
+    { label: "Vivo", value: "Vivo" },
+    { label: "OPPO", value: "OPPO" },
+    { label: "OnePlus", value: "OnePlus" },
+    { label: "iQOO", value: "iQOO" },
+    { label: "Motorola", value: "Motorola" },
+    { label: "Google Pixel", value: "Google Pixel" },
+    { label: "Nothing", value: "Nothing" },
+    { label: "CMF by Nothing", value: "CMF by Nothing" },
+    { label: "Lava", value: "Lava" },
+    { label: "Nokia", value: "Nokia" },
+    { label: "HMD", value: "HMD" },
+    { label: "Infinix", value: "Infinix" },
+    { label: "Tecno", value: "Tecno" },
+    { label: "itel", value: "itel" },
+    { label: "Honor", value: "Honor" },
+  ],
+  required: true,
+  showIf: {
+    field: "assetTypeName",
+    value: ["Smartphone"],
+  },
 };
 
 export const itModelField = {
@@ -712,7 +758,7 @@ const IT_ELECTRONICS = "IT & Electronics";
 
 export const getBrandModelFields = (categoryName) =>
   categoryName === IT_ELECTRONICS
-    ? [itBrandField, itModelField]
+    ? [itBrandField, smartphoneBrandField, itModelField]
     : defaultBrandModelFields;
 
 export const getBrandModelValidation = (categoryName) =>
