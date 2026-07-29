@@ -137,6 +137,7 @@ const config = {
       list: '/users',
       details: (id) => `/users/${id}`,
       changeRole: (id) => `/users/${id}/role`,
+      managers: '/users?role=MANAGER & ADMIN & CAMPUS_MANAGER',
     },
     schools: {
       list: '/schools',
