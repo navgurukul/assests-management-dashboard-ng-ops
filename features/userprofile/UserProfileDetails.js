@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, Package, Ticket, Building2, Users } from 'lucide-react';
-import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab, ManagerListTab, CampusLocationTab, AddSchoolTab } from './tabs';
+import { UserProfileTab, MyAssetsTab, TicketStatusTab, TicketApprovalTab, CampusInchargeTab, ManagerListTab, CampusLocationTab, AddSchoolTab, ReporteesAssetsTab } from './tabs';
 import config from '@/app/config/env.config';
 import useFetch from '@/app/hooks/query/useFetch';
 import { useAppSelector } from '@/app/store/hooks';
@@ -16,6 +16,7 @@ const tabs = [
   { id: 'campusincharge', label: 'Campus Incharge', icon: Building2, Component: CampusInchargeTab },
   { id: 'campuslocation', label: 'Campus Location', icon: Building2, Component: CampusLocationTab },
   { id: 'addschool', label: 'Add School', icon: Building2, Component: AddSchoolTab },
+  { id: 'reporteesassets', label: 'Reportees Assets', icon: Users, Component: ReporteesAssetsTab },
   // { id: 'managerlist', label: 'Manager List', icon: Users, Component: ManagerListTab },
 ];
 
@@ -63,9 +64,14 @@ export default function UserProfileDetails() {
   const currentRole = storeUserRole || userData.role;
 
   const filteredTabs = tabs.filter(tab => {
-    // MANAGER, CAMPUS_MANAGER, STUDENT, EMPLOYEE: only show 'userprofile' tab
-    // They access My Assets, Ticket Status, Ticket Approval via dedicated sidebar pages
-    if ((currentRole === 'MANAGER' || currentRole === 'CAMPUS_MANAGER' || currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
+    // MANAGER, CAMPUS_MANAGER: only 'userprofile' tab in /userprofile page
+    // They access My Assets, Ticket Status, Ticket Approval, Reportees Assets via dedicated sidebar pages
+    if ((currentRole === 'MANAGER' || currentRole === 'CAMPUS_MANAGER') && tab.id !== 'userprofile') {
+      return false;
+    }
+
+    // STUDENT, EMPLOYEE: only 'userprofile' tab
+    if ((currentRole === 'STUDENT' || currentRole === 'EMPLOYEE') && tab.id !== 'userprofile') {
       return false;
     }
 
@@ -73,6 +79,11 @@ export default function UserProfileDetails() {
 
     // Only ADMIN should see these tabs
     if (adminOnlyTabs.includes(tab.id) && currentRole !== 'ADMIN') {
+      return false;
+    }
+
+    // reporteesassets: visible only for ADMIN (managers use sidebar page instead)
+    if (tab.id === 'reporteesassets' && currentRole !== 'ADMIN') {
       return false;
     }
 

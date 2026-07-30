@@ -36,6 +36,7 @@ export const menuItems = [
   { name: 'My Assets', icon: 'PackageCheck', path: '/myassets', allowedRoles: [...END_USER_ROLES, 'CAMPUS_MANAGER'] },
   { name: 'My Ticket Status', icon: 'Ticket', path: '/ticketstatus', allowedRoles: [...END_USER_ROLES, 'CAMPUS_MANAGER'] },
   { name: 'Ticket for Approval', icon: 'TicketCheck', path: '/ticketforapproval', allowedRoles: MANAGER_ROLES },
+  { name: 'Reportees Assets', icon: 'Users', path: '/reporteesassets', allowedRoles: MANAGER_ROLES },
   // CAMPUS_MANAGER only — All Assets (view only")
   { name: 'All Assets', icon: 'Package', path: '/assets', allowedRoles: ['CAMPUS_MANAGER'] },
 ];
