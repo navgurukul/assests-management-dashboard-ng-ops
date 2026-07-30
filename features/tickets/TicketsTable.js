@@ -108,6 +108,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     if (filters?.isAssigned !== undefined && filters?.isAssigned !== null && filters?.isAssigned !== '') {
       params.append('isAssigned', filters.isAssigned);
     }
+    if (filters?.ticketType) params.append('ticketType', filters.ticketType);
     
     return params.toString();
   };
@@ -221,6 +222,12 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
     { value: 'false', label: 'Unassigned' },
   ];
 
+  // ticketType filter options
+  const ticketTypeOptions = [
+    { value: 'NEW', label: 'New' },
+    { value: 'REPAIR', label: 'Repair' },
+  ];
+
   // Get label for a filter value
   const getFilterLabel = (filterKey, value) => {
     if (filterKey === 'campus') {
@@ -238,6 +245,10 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
       const assignee = assigneeOptions.find(opt => opt.value === value);
       return assignee ? assignee.label : value;
     }
+    if (filterKey === 'ticketType') {
+      const type = ticketTypeOptions.find(opt => opt.value === value);
+      return type ? type.label : value;
+    }
     return value;
   };
 
@@ -248,6 +259,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
       status: 'Status',
       assignee: 'Assigned To',
       isAssigned: 'Unassigned Ticket',
+      ticketType: 'Ticket Type',
     };
     return categoryNames[filterKey] || filterKey;
   };
@@ -422,6 +434,7 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
           statusOptions={filterStatusOptions}
           isAssignedOptions={isAssignedOptions}
           assigneeOptions={assigneeOptions}
+          ticketTypeOptions={ticketTypeOptions}
           selectedFilters={filters}
         />
       }
