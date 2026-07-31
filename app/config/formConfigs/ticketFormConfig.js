@@ -49,18 +49,9 @@ export const ticketFormFields = [
   {
     name: 'managerEmail',
     label: 'Manager Email',
-    type: 'api-autocomplete',
-    placeholder: 'Search and select manager',
-    apiUrl: baseUrl + '/users',
-    queryKey: ['managers'],
-    labelKey: 'email',
-    valueKey: 'email',
-    dataPath: 'data',
-    additionalParams: { role: 'MANAGER & ADMIN & CAMPUS_MANAGER', limit: 1000 },
-    formatLabel: (manager) => {
-      const fullName = `${manager?.firstName || ''} ${manager?.lastName || ''}`.trim();
-      return fullName ? `${fullName} - ${manager?.email}` : manager?.email;
-    },
+    type: 'text',
+    placeholder: 'Fetching your manager...',
+    disabled: true,
     required: true,
   },
   {
