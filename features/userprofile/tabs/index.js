@@ -4,4 +4,6 @@ export { default as TicketStatusTab } from './TicketStatusTab';
 export { default as TicketApprovalTab } from './TicketApprovalTab';
 export { default as CampusInchargeTab } from './CampusInchargeTab';
 export { default as ManagerListTab } from './ManagerListTab';
-export { default as CampusLocationTab } from './CampusLocationTab';export { default as AddSchoolTab } from './AddSchoolTab';
+export { default as CampusLocationTab } from './CampusLocationTab';
+export { default as AddSchoolTab } from './AddSchoolTab';
+export { default as ReporteesAssetsTab } from './ReporteesAssetsTab';
