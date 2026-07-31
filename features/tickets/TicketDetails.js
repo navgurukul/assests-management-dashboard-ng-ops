@@ -107,6 +107,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
             phone:    person.phone || '—',
             position,
             campus:   campus.campusName || '—',
+            campusId: campus.campusId || campus.campus?.id,
           });
         }
       });
@@ -280,6 +281,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
 
     if (selectedAssignee) {
       payload.assigneeUserId = selectedAssignee.id || selectedAssignee.email;
+      payload.campusId = selectedAssignee.campusId;
     }
 
     if (Object.keys(payload).length === 0) {
