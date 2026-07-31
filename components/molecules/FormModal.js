@@ -756,6 +756,7 @@ export default function FormModal({
             formatLabel={field.formatLabel}
             selectedItem={field.selectedItem}
             staticItems={field.staticItems || null}
+            emptyContent={field.emptyContent}
           />
         );
 
@@ -955,6 +956,10 @@ export default function FormModal({
                 {/* Show errors for all field types */}
                 {field.type !== 'multi-select' && touched[field.name] && errors[field.name] && (
                   <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
+                )}
+                {/* Field-level help text — shown below the input as a subtle hint */}
+                {field.helpText && (
+                  <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">{field.helpText}</p>
                 )}
               </div>
             );

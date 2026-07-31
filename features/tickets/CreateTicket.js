@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -15,13 +15,63 @@ import {
 import { toast } from '@/app/utils/toast';
 import { useSelector } from 'react-redux';
 import { selectUserRole } from '@/app/store/slices/appSlice';
+import useFetch from '@/app/hooks/query/useFetch';
 
 export default function CreateTicket() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userRole = useSelector(selectUserRole);
 
+  // Fetch the current user's manager automatically
+  const { data: managerData, isLoading: isLoadingManager } = useFetch({
+    url: config.endpoints.user.myManager,
+    queryKey: ['myManager'],
+  });
+
+  const manager = managerData?.data?.manager;
+  const managerEmail = manager?.email || '';
+
+  // Build dynamic fields with conditional manager field
+  const dynamicFields = useMemo(() => {
+    return ticketFormFields.map((field) => {
+      if (field.name === 'managerEmail') {
+        // If loading, show loading message
+        if (isLoadingManager) {
+          return {
+            ...field,
+            placeholder: 'Loading...',
+          };
+        }
+        // If manager is null, show helpful message but keep disabled
+        if (!manager) {
+          return {
+            ...field,
+            placeholder: 'No manager found.',
+          };
+        }
+        // Manager found - show as disabled field with approval context
+        return {
+          ...field,
+          helpText: `This ticket will be sent to ${manager.firstName || ''} ${manager.lastName || ''}`.trim() + ' for approval.',
+        };
+      }
+      return field;
+    });
+  }, [manager, isLoadingManager]);
+
+  // Pre-fill managerEmail from the fetched manager
+  const initialValues = useMemo(() => ({
+    ...ticketInitialValues,
+    managerEmail,
+  }), [managerEmail]);
+
   const handleFormSubmit = async (values) => {
+    // Prevent submission if manager is not set
+    if (!manager || !values.managerEmail) {
+      toast.error('Please update your manager from your profile before creating a ticket.');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Show loading toast
@@ -104,9 +154,33 @@ export default function CreateTicket() {
 
         {/* Form Container */}
         <div className="bg-(--surface) text-foreground rounded-xl shadow-lg border border-(--border) p-8">
+          {/* Show warning if manager is not set */}
+          {!isLoadingManager && !manager && (
+            <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    <strong>Manager not found.</strong> Please update your manager from your profile before creating a ticket.
+                  </p>
+                  <button
+                    onClick={() => router.push('/userprofile')}
+                    className="mt-2 text-sm font-medium text-yellow-700 underline hover:text-yellow-800"
+                  >
+                    Go to Profile →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <GenericForm
-            fields={ticketFormFields}
-            initialValues={ticketInitialValues}
+            fields={dynamicFields}
+            initialValues={initialValues}
             validationSchema={ticketValidationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
