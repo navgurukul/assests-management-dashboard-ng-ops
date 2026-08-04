@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Mail, Phone, MapPin, Calendar, Building } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, UserRound, Building2, GraduationCap } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
@@ -10,7 +10,8 @@ import { toast } from '@/app/utils/toast';
 import FormModal from '@/components/molecules/FormModal';
 import {
   getEditProfileFields,
-  editProfileValidationSchema
+  editProfileValidationSchema,
+  managerOnlyValidationSchema,
 } from '@/app/config/formConfigs/editProfileModalConfig';
 import { useTheme } from '@/app/context/ThemeContext';
 
@@ -18,6 +19,7 @@ export default function UserProfileTab() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMandatoryFill, setIsMandatoryFill] = useState(false);
+  const [profileMode, setProfileMode] = useState('full'); // 'full' | 'manager-only'
   const { isDark } = useTheme();
 
   const { data: schoolsResponse } = useFetch({
@@ -49,6 +51,12 @@ export default function UserProfileTab() {
     role: rawUserData.role || '',
     department: rawUserData.department || '',
     location: rawUserData.location || '',
+    managerName: rawUserData.manager
+      ? `${rawUserData.manager.firstName || ''} ${rawUserData.manager.lastName || ''}`.trim() || rawUserData.manager.email
+      : '',
+    managerEmail: rawUserData.manager?.email || '',
+    campusName: rawUserData.campus?.campusName || rawUserData.campusName || '',
+    schoolName: rawUserData.school?.name || rawUserData.schoolName || '',
     joinDate: rawUserData.createdAt ? new Date(rawUserData.createdAt).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
@@ -62,6 +70,10 @@ export default function UserProfileTab() {
     role: '',
     department: '',
     location: '',
+    managerName: '',
+    managerEmail: '',
+    campusName: '',
+    schoolName: '',
     joinDate: '',
     avatar: null,
   };
@@ -69,14 +81,16 @@ export default function UserProfileTab() {
   const handleEditSubmit = async (formData) => {
     setIsSubmitting(true);
     const loadingToastId = toast.loading('Updating profile...');
-    
-    // Remove empty fields from payload
-    const payload = Object.entries(formData).reduce((acc, [key, value]) => {
-      if (value !== '' && value !== null && value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+
+    // Manager-only mode: send just managerId, don't touch other fields
+    const payload = profileMode === 'manager-only'
+      ? { managerId: formData.managerId }
+      : Object.entries(formData).reduce((acc, [key, value]) => {
+          if (value !== '' && value !== null && value !== undefined) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {});
     
     try {
       await post({
@@ -86,7 +100,11 @@ export default function UserProfileTab() {
       });
       
       toast.dismiss(loadingToastId);
-      toast.success('Profile updated successfully');
+      toast.success(
+        profileMode === 'manager-only'
+          ? 'Manager saved. You can now use all features.'
+          : 'Profile updated successfully'
+      );
       setIsMandatoryFill(false);
       setIsEditModalOpen(false);
       
@@ -101,11 +119,22 @@ export default function UserProfileTab() {
     }
   };
 
-  // Auto-open modal when phone, department, or location is missing
+  // Auto-open modal when profile info is missing — split into two flows:
+  // 1. New/incomplete users (no phone OR no location) → full profile form
+  // 2. Existing users (phone + location set, only manager missing) → manager-only modal
   useEffect(() => {
     if (!isLoadingUserData && rawUserData) {
-      const isMissingInfo = !rawUserData.phone || !rawUserData.location;
-      if (isMissingInfo) {
+      const hasCoreProfile = rawUserData.phone && rawUserData.location;
+      const hasManager = rawUserData.managerId || rawUserData.manager?.id;
+
+      if (!hasCoreProfile) {
+        // New or incomplete user — show full form
+        setProfileMode('full');
+        setIsMandatoryFill(true);
+        setIsEditModalOpen(true);
+      } else if (!hasManager) {
+        // Existing user, only manager missing — show focused manager modal
+        setProfileMode('manager-only');
         setIsMandatoryFill(true);
         setIsEditModalOpen(true);
       }
@@ -120,6 +149,15 @@ export default function UserProfileTab() {
   };
 
   const editProfileFields = useMemo(() => {
+    // Manager-only mode — no school/campus logic needed
+    if (profileMode === 'manager-only') {
+      return getEditProfileFields(
+        { managerId: rawUserData?.managerId || rawUserData?.manager?.id || '' },
+        'manager-only'
+      );
+    }
+
+    // Full profile mode
     const schoolOptions = (schoolsResponse?.data?.schools || []).map((school) => ({
       value: school.id,
       label: school.name,
@@ -130,21 +168,28 @@ export default function UserProfileTab() {
       location: userData.location,
       campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
       schoolId: rawUserData?.schoolId || '',
-    });
+      managerId: rawUserData?.managerId || rawUserData?.manager?.id || '',
+    }, 'full');
 
     const rolesWithSchool = ['STUDENT', 'IT_COORDINATOR'];
 
     return fields
-      .map((field) =>
-        field.name === 'schoolId' ? { ...field, options: schoolOptions } : field
-      )
+      .map((field) => {
+        if (field.name === 'schoolId') {
+          return { ...field, options: schoolOptions };
+        }
+        if (field.name === 'managerId' && rawUserData?.manager) {
+          return { ...field, selectedItem: rawUserData.manager };
+        }
+        return field;
+      })
       .filter((field) => {
         if (field.name === 'schoolId') {
           return rolesWithSchool.includes(rawUserData?.role);
         }
         return true;
       });
-  }, [schoolsResponse, userData.phone, userData.location, rawUserData]);
+  }, [schoolsResponse, userData.phone, userData.location, rawUserData, profileMode]);
 
   if (isLoadingUserData && !rawUserData) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -156,12 +201,21 @@ export default function UserProfileTab() {
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         componentName=""
-        actionType="User Details"
+        actionType={profileMode === 'manager-only' ? 'Select Your Manager' : 'User Details'}
+        helpText={
+          profileMode === 'manager-only'
+            ? 'Your manager information is required. Please select your manager to continue.'
+            : ''
+        }
         fields={editProfileFields}
         onSubmit={handleEditSubmit}
         size="medium"
         isSubmitting={isSubmitting}
-        validationSchema={editProfileValidationSchema}
+        validationSchema={
+          profileMode === 'manager-only'
+            ? managerOnlyValidationSchema
+            : editProfileValidationSchema
+        }
       />
       
       {/* Tab Heading */}
@@ -213,9 +267,57 @@ export default function UserProfileTab() {
           </div>
           <div>
             <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Location</p>
-            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.location}</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.location || '—'}</p>
           </div>
         </div>
+
+        {/* Manager */}
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
+          <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-900/50' : 'bg-purple-100'}`}>
+            <UserRound className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+          </div>
+          <div>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Manager</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+              {userData.managerName || '—'}
+            </p>
+            {userData.managerEmail && (
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                {userData.managerEmail}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Campus — only for STUDENT and IT_COORDINATOR */}
+        {['STUDENT', 'IT_COORDINATOR'].includes(userData.role) && (
+          <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
+            <div className={`p-2 rounded-lg ${isDark ? 'bg-teal-900/50' : 'bg-teal-100'}`}>
+              <Building2 className={`w-5 h-5 ${isDark ? 'text-teal-400' : 'text-teal-600'}`} />
+            </div>
+            <div>
+              <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Campus</p>
+              <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                {userData.campusName || '—'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* School — only for STUDENT and IT_COORDINATOR */}
+        {['STUDENT', 'IT_COORDINATOR'].includes(userData.role) && (
+          <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
+            <div className={`p-2 rounded-lg ${isDark ? 'bg-yellow-900/50' : 'bg-yellow-100'}`}>
+              <GraduationCap className={`w-5 h-5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
+            </div>
+            <div>
+              <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>School</p>
+              <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                {userData.schoolName || '—'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Join Date */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
@@ -235,7 +337,10 @@ export default function UserProfileTab() {
           text="Edit Profile" 
           variant="primary" 
           size="md"
-          onClick={() => setIsEditModalOpen(true)}
+          onClick={() => {
+            setProfileMode('full');
+            setIsEditModalOpen(true);
+          }}
         />
       </div>
     </div>

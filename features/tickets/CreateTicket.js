@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import CustomButton from '@/components/atoms/CustomButton';
 import GenericForm from '@/components/molecules/GenericForm';
 import post from '@/app/api/post/post';
@@ -15,13 +15,63 @@ import {
 import { toast } from '@/app/utils/toast';
 import { useSelector } from 'react-redux';
 import { selectUserRole } from '@/app/store/slices/appSlice';
+import useFetch from '@/app/hooks/query/useFetch';
 
 export default function CreateTicket() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userRole = useSelector(selectUserRole);
 
+  // Fetch the current user's manager automatically
+  const { data: managerData, isLoading: isLoadingManager } = useFetch({
+    url: config.endpoints.user.myManager,
+    queryKey: ['myManager'],
+  });
+
+  const manager = managerData?.data?.manager;
+  const managerEmail = manager?.email || '';
+
+  // Build dynamic fields with conditional manager field
+  const dynamicFields = useMemo(() => {
+    return ticketFormFields.map((field) => {
+      if (field.name === 'managerEmail') {
+        // If loading, show loading message
+        if (isLoadingManager) {
+          return {
+            ...field,
+            placeholder: 'Loading...',
+          };
+        }
+        // If manager is null, show helpful message but keep disabled
+        if (!manager) {
+          return {
+            ...field,
+            placeholder: 'No manager found.',
+          };
+        }
+        // Manager found - show as disabled field with approval context
+        return {
+          ...field,
+          helpText: `This ticket will be sent to ${manager.firstName || ''} ${manager.lastName || ''}`.trim() + ' for approval.',
+        };
+      }
+      return field;
+    });
+  }, [manager, isLoadingManager]);
+
+  // Pre-fill managerEmail from the fetched manager
+  const initialValues = useMemo(() => ({
+    ...ticketInitialValues,
+    managerEmail,
+  }), [managerEmail]);
+
   const handleFormSubmit = async (values) => {
+    // Prevent submission if manager is not set
+    if (!manager || !values.managerEmail) {
+      toast.error('Please update your manager from your profile before creating a ticket.');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Show loading toast
@@ -104,9 +154,31 @@ export default function CreateTicket() {
 
         {/* Form Container */}
         <div className="bg-(--surface) text-foreground rounded-xl shadow-lg border border-(--border) p-8">
+          {/* Show warning if manager is not set */}
+          {!isLoadingManager && !manager && (
+            <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    <strong>Manager not found.</strong> Please update your manager from your profile before creating a ticket.
+                  </p>
+                  <button
+                    onClick={() => router.push('/userprofile')}
+                    className="mt-2 text-sm font-medium text-yellow-700 underline hover:text-yellow-800"
+                  >
+                    Go to Profile →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <GenericForm
-            fields={ticketFormFields}
-            initialValues={ticketInitialValues}
+            fields={dynamicFields}
+            initialValues={initialValues}
             validationSchema={ticketValidationSchema}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}

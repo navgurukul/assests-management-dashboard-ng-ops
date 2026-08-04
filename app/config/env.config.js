@@ -122,6 +122,7 @@ const config = {
     // User
     user: {
       me: '/user/me',
+      myManager: '/user/me/manager',
     },
 
     // Campus Incharge
@@ -137,6 +138,7 @@ const config = {
       list: '/users',
       details: (id) => `/users/${id}`,
       changeRole: (id) => `/users/${id}/role`,
+      managerAssets: (managerId) => `/users/manager/${managerId}/assets`,
     },
     schools: {
       list: '/schools',
