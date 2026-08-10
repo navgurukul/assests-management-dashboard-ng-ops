@@ -99,6 +99,14 @@ export default function AllocationDetails({ allocationId, onBack }) {
     destinationCampusDisplay,
   };
 
+  // Disable "Create Consignment" if all assets already have a consignment OR allocation is completed
+  const allAssetsConsigned =
+    normalizedAssets.length > 0 &&
+    normalizedAssets.every((asset) => asset.isConsignmentCreated === true);
+  const isAllocationCompleted =
+    String(allocationDetails.status || '').toUpperCase() === 'ALLOCATION_COMPLETED';
+  const canCreateConsignment = !allAssetsConsigned && !isAllocationCompleted;
+
   const createFieldsForAllocation = createConsignmentFields.map((field) => {
     if (field.type !== 'allocation-consignment-selector') {
       return field;
@@ -423,12 +431,22 @@ export default function AllocationDetails({ allocationId, onBack }) {
         rightGrid={true}
         onBack={onBack}
         headerActions={
-          <CustomButton
-            text="Create Consignments"
-            variant="primary"
-            size="md"
-            onClick={() => setIsCreateModalOpen(true)}
-          />
+          canCreateConsignment ? (
+            <CustomButton
+              text="Create Consignments"
+              variant="primary"
+              size="md"
+              onClick={() => setIsCreateModalOpen(true)}
+            />
+          ) : (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-200">
+              <span className="text-sm text-gray-500 font-medium">
+                {isAllocationCompleted
+                  ? 'Allocation Completed'
+                  : 'Consignment Already Created'}
+              </span>
+            </div>
+          )
         }
       />
 

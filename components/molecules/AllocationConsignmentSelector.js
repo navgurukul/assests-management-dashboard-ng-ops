@@ -277,7 +277,7 @@ export default function AllocationConsignmentSelector({
   const currentSelectedAllocation = isAllocationLocked ? String(lockedAllocationId) : selectedAllocation;
   const currentAllocationDetails = isAllocationLocked ? lockedAllocationDetails : allocationDetails;
   const selectableAssets = Array.isArray(currentAllocationDetails?.assets)
-    ? currentAllocationDetails.assets.filter((asset) => !asset?.isConsignementCreated)
+    ? currentAllocationDetails.assets.filter((asset) => !asset?.isConsignmentCreated)
     : [];
 
   // Handle allocation selection
@@ -551,7 +551,7 @@ export default function AllocationConsignmentSelector({
               <tbody className="divide-y divide-gray-200 bg-white">
                 {currentAllocationDetails.assets.map((asset) => {
                   const assetId = getAssetId(asset);
-                  const isConsignmentCreated = asset?.isConsignementCreated === true;
+                  const isConsignmentCreated = asset?.isConsignmentCreated === true;
                   const isSelected = selectedAssets.some(a => (a.id || a.assetId) === assetId);
                   
                   return (
