@@ -22,6 +22,7 @@ const columns = [
 function transformRow(item, index) {
   return {
     id: `${item.campus}_${index}`, // Unique ID using campus name and index
+    campusId: item.campusId,
     campus: item.campus,
     lws: item.LWS ?? 0,
     lis: item.LIS ?? 0,
@@ -45,12 +46,6 @@ export default function AssetsTable() {
     queryKey: ["assets", "consolidated-by-campus"],
   });
 
-  // Fetch campus data to resolve campus name -> campusId
-  const { data: campusData } = useFetch({
-    url: '/campuses',
-    queryKey: ['campuses'],
-  });
-
   // Fetch asset types to dynamically resolve Laptop's ID
   const { data: assetTypesData } = useFetch({
     url: '/asset-types',
@@ -68,16 +63,6 @@ export default function AssetsTable() {
     return rows.map(transformRow);
   }, [response?.data]);
 
-  // Helper function to get campus ID from campus name
-  const getCampusIdFromName = (campusName) => {
-    if (!campusData?.data || !campusName || campusName === "Total") return null;
-
-    const campus = campusData.data.find(c =>
-      c.campusName?.toLowerCase() === campusName.toLowerCase()
-    );
-    return campus?.id || null;
-  };
-
   // Function to handle cell clicks and navigate to assets page with filters
   const handleCellClick = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -87,10 +72,8 @@ export default function AssetsTable() {
 
     const queryParams = new URLSearchParams();
 
-    // Add campus filter for all clicks
-    const campusId = getCampusIdFromName(item.campus);
-    if (campusId) {
-      queryParams.set('campusId', campusId);
+    if (item.campusId) {
+      queryParams.set('campusId', item.campusId);
     }
 
     // Add ownedBy filter based on the column clicked
@@ -168,7 +151,7 @@ export default function AssetsTable() {
     const isTotalRow = item.id === "total-row";
 
     // Helper to determine if cell should be clickable
-    const isClickable = !isTotalRow && cellValue > 0 && ['lws', 'lis', 'lct', 'lr', 'lnw', 'lwfhe', 'lsdb'].includes(columnKey);
+    const isClickable = !isTotalRow && cellValue > 0 && laptopTypeId && ['lws', 'lis', 'lct', 'lr', 'lnw', 'lwfhe', 'lsdb'].includes(columnKey);
 
     if (isTotalRow) {
       if (columnKey === "campus") {
