@@ -56,15 +56,15 @@ export const ticketTableColumns = [
     colorFn: getPriorityChipColor
   },
   { 
-    key: 'campus', 
-    label: 'CAMPUS',
-    description: 'Campus location'
-  },
-  { 
     key: 'raisedBy', 
     label: 'RAISED BY',
     description: 'User who created the ticket',
     type: 'userWithEmail'
+  },
+  { 
+    key: 'campus', 
+    label: 'CAMPUS',
+    description: 'Campus location'
   },
   { 
     key: 'assignedTo', 
@@ -118,6 +118,7 @@ export const defaultVisibleColumns = [
   'createdAt',
   'assignDate',
   'raisedBy',
+  'campus',
   'assignedTo',
   'actionTakenBy',
 ];

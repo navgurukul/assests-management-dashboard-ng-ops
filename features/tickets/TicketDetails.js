@@ -392,6 +392,9 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const assigneeEmail = ticket.assigneeUser?.email;
   const isAssigneeCurrentUser = !!(loggedInEmail && assigneeEmail && loggedInEmail === assigneeEmail);
 
+  // Allocation already created if asset has isAllocated: true
+  const allocationAlreadyCreated = ticket.asset?.isAllocated === true;
+
   const leftSections = getTicketLeftSections(ticket, historyTimeline);
   const rightSections = getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveToRepair, loggedInUserRole);
 
@@ -456,6 +459,11 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                   />
                 )}
                 {(ticket.status === 'APPROVED' || ticket.status === 'OVERDUE' || ticket.status === 'IN_PROGRESS') && ticket.ticketType?.toUpperCase() !== 'REPAIR' ? (
+                  allocationAlreadyCreated ? (
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-50 border border-green-200">
+                      <span className="text-sm text-green-700 font-medium">Allocation Already Created</span>
+                    </div>
+                  ) : (
                    (isItRole && (isAssigneeCurrentUser || loggedInUserRole === 'ADMIN' || loggedInUserRole === 'IT_LEAD')) ? (
                     <CustomButton
                       text="Create Allocation"
@@ -470,6 +478,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
                       Only &apos;{ticket.assigneeUser ? `${ticket.assigneeUser.firstName} ${ticket.assigneeUser.lastName}`.trim() : 'the assignee'}&apos; can create the allocation
                     </span>
                   ) : null
+                  )
                 ) : ticket.status === 'RAISED' ? (
                   <CustomButton
                     text="Ticket is not approved"
