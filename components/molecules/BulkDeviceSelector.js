@@ -343,10 +343,13 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
           {/* Selected Chips Display */}
           {checkedAssets.size > 0 && (
             <div className="shrink-0 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              {/* Header OUTSIDE scroll area - no sticky needed */}
               <h5 className="text-sm font-semibold text-blue-900 mb-2">
                 Selected Assets ({checkedAssets.size})
               </h5>
-              <div className="flex flex-wrap gap-2">
+
+              {/* Only this wrapper scrolls */}
+              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto pr-1">
                 {Array.from(checkedAssets).map((assetId) => {
                   const asset = availableAssets.find(a => a.id === assetId);
                   return (
@@ -369,7 +372,6 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
               </div>
             </div>
           )}
-
           {/* Error State */}
           {isError && (
             <div className="shrink-0 text-center py-8">
