@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, Eye, UserPlus, FileText, X, Check, Download, ChevronDown, BarChart2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, UserPlus, FileText, X, Check, Download, BarChart2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor, getHealthStatusChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -33,6 +33,7 @@ const actionOptions = ['View', 'Assign', 'Details'];
 
 export default function AssetsList() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const userRole = useAppSelector(selectUserRole);
   const canCreateAsset = userRole !== 'CAMPUS_MANAGER';
   
@@ -49,8 +50,38 @@ export default function AssetsList() {
   // Dashboard toggle state
   const [showCards, setShowCards] = useState(false);
   
-  // Filter state (persisted)
+  // Filter state (persisted) - Initialize with URL parameters
   const [filters, setFilters] = usePersistentState('assets-filters', {});
+  
+  // Initialize filters from URL parameters on component mount
+  useEffect(() => {
+    const urlFilters = {};
+    
+    // Check for ownedBy parameter
+    const ownedByParam = searchParams.get('ownedBy');
+    if (ownedByParam) {
+      urlFilters.ownedBy = ownedByParam;
+    }
+  
+    // Check for campus parameter
+    const campusParam = searchParams.get('campusId');
+    if (campusParam) {
+      urlFilters.campus = campusParam;
+    }
+    // Check for type perameter
+    const typeParam = searchParams.get('type');
+    if (typeParam) {
+      urlFilters.type = typeParam;
+    }
+
+    // Only update if there are URL parameters
+    if (Object.keys(urlFilters).length > 0) {
+      setFilters(prevFilters => ({
+        ...prevFilters,
+        ...urlFilters
+      }));
+    }
+  }, [searchParams]); // Remove setFilters from dependency array
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -104,6 +135,7 @@ export default function AssetsList() {
     if (filters.status) params.append('status', filters.status);
     if (filters.type) params.append('type', filters.type);
     if (filters.healthStatus) params.append('healthStatus', filters.healthStatus);
+    if (filters.ownedBy) params.append('ownedBy', filters.ownedBy);
     
     return params.toString();
   };
@@ -156,7 +188,7 @@ export default function AssetsList() {
   );
   
   // Transform campus data from API to filter options
-  const campusOptions = React.useMemo(() => {
+  const campusOptions = useMemo(() => {
     if (!campusData || !campusData.data) return [];
     
     return campusData.data.map((campus) => ({
@@ -166,7 +198,7 @@ export default function AssetsList() {
   }, [campusData]);
   
   // Transform asset types data from API to filter options
-  const assetTypeOptions = React.useMemo(() => {
+  const assetTypeOptions = useMemo(() => {
     if (!assetTypesData || !assetTypesData.data) return [];
     
     return assetTypesData.data
@@ -177,25 +209,36 @@ export default function AssetsList() {
     }));
   }, [assetTypesData]);
   
-  // Status filter options
-  const filterStatusOptions = [
+  // Status filter options - memoize to prevent rerenders
+  const filterStatusOptions = useMemo(() => [
     { value: 'IN_STOCK', label: 'In Stock' },
     { value: 'ALLOCATED', label: 'Allocated' },
     { value: 'REPAIR', label: 'Under Repair' },
     { value: 'SCRAP', label: 'Scrap' },
     { value: 'PARTED_OUT', label: 'Parted Out' },
-  ];
+  ], []);
 
-  // Health status filter options
-  const healthStatusOptions = [
+  // Health status filter options - memoize to prevent rerenders
+  const healthStatusOptions = useMemo(() => [
     { value: 'HEALTHY', label: 'Healthy' },
     { value: 'SERVICE_DUE', label: 'Service Due' },
     { value: 'NEED_ATTENTION', label: 'Need Attention' },
     { value: 'INSPECTION_DUE', label: 'Inspection Due' },
-  ];
+  ], []);
+
+  // Owned By filter options - memoize to prevent rerenders
+  const ownedByOptions = useMemo(() => [
+    { value: 'lws', label: 'LWS' },
+    { value: 'lis', label: 'LIS' },
+    { value: 'lr', label: 'LR' },
+    { value: 'lnw', label: 'LNW' },
+    { value: 'lwfhe', label: 'LWFHE' },
+    { value: 'lct', label: 'LCT' },
+    { value: 'lsd/b', label: 'LSD/B' },
+  ], []);
   
-  // Get label for a filter value
-  const getFilterLabel = (filterKey, value) => {
+  // Get label for a filter value - memoize this function
+  const getFilterLabel = useCallback((filterKey, value) => {
     if (filterKey === 'campus') {
       const campus = campusOptions.find(opt => opt.value === value);
       return campus ? campus.label : value;
@@ -212,19 +255,24 @@ export default function AssetsList() {
       const status = healthStatusOptions.find(opt => opt.value === value);
       return status ? status.label : value;
     }
+    if (filterKey === 'ownedBy') {
+      const ownedBy = ownedByOptions.find(opt => opt.value === value);
+      return ownedBy ? ownedBy.label : value;
+    }
     return value;
-  };
+  }, [campusOptions, assetTypeOptions, filterStatusOptions, healthStatusOptions, ownedByOptions]);
   
-  // Get category name for display
-  const getCategoryName = (filterKey) => {
+  // Get category name for display - memoize this function
+  const getCategoryName = useCallback((filterKey) => {
     const categoryNames = {
       campus: 'Campus',
       type: 'Asset Type',
       status: 'Status',
       healthStatus: 'Health Status',
+      ownedBy: 'Owned By',
     };
     return categoryNames[filterKey] || filterKey;
-  };
+  }, []);
 
   // Setup summary cards — only health/maintenance status from /maintenance-history/count
   const healthStats = maintenanceCountData?.data?.byStatus || {};
@@ -250,7 +298,7 @@ export default function AssetsList() {
   };
 
   // Transform API data to match table structure
-  const assetsListData = React.useMemo(() => {
+  const assetsListData = useMemo(() => {
     if (!data || !data.data) return [];
     
     return data.data.map((asset) => ({
@@ -317,6 +365,9 @@ export default function AssetsList() {
       
       case "cost":
         return <span className="font-medium text-gray-700">{cellValue}</span>;
+      
+      case "ownedBy":
+        return <span className="font-medium text-gray-700 uppercase">{cellValue}</span>;
       
       case "allocatedTo":
         if (cellValue && typeof cellValue === 'object') {
@@ -468,6 +519,7 @@ export default function AssetsList() {
             statusOptions={filterStatusOptions}
             assetTypeOptions={assetTypeOptions}
             healthStatusOptions={healthStatusOptions}
+            ownedByOptions={ownedByOptions}
             selectedFilters={filters}
           />
         }
