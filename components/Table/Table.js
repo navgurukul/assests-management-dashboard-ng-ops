@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
 import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
@@ -18,9 +19,10 @@ const columns = [
   { key: "grandTotal", label: "Grand Total" },
 ];
 
-function transformRow(item) {
+function transformRow(item, index) {
   return {
-    id: item.campus,
+    id: `${item.campus}_${index}`, // Unique ID using campus name and index
+    campusId: item.campusId,
     campus: item.campus,
     lws: item.LWS ?? 0,
     lis: item.LIS ?? 0,
@@ -35,6 +37,7 @@ function transformRow(item) {
 }
 
 export default function AssetsTable() {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
@@ -43,7 +46,60 @@ export default function AssetsTable() {
     queryKey: ["assets", "consolidated-by-campus"],
   });
 
-  const tableData = (response?.data ?? []).map(transformRow);
+  // Fetch asset types to dynamically resolve Laptop's ID
+  const { data: assetTypesData } = useFetch({
+    url: '/asset-types',
+    queryKey: ['asset-types'],
+  });
+
+  const laptopTypeId = React.useMemo(() => {
+    const types = assetTypesData?.data || [];
+    const laptop = types.find((t) => t.name?.toLowerCase() === 'laptop');
+    return laptop?.id || null;
+  }, [assetTypesData]);
+
+  const tableData = React.useMemo(() => {
+    const rows = response?.data || [];
+    return rows.map(transformRow);
+  }, [response?.data]);
+
+  // Function to handle cell clicks and navigate to assets page with filters
+  const handleCellClick = (item, columnKey) => {
+    const cellValue = item[columnKey];
+
+    // Don't allow clicks on total row or zero values
+    if (item.id === "total-row" || cellValue === 0) return;
+
+    const queryParams = new URLSearchParams();
+
+    if (item.campusId) {
+      queryParams.set('campusId', item.campusId);
+    }
+
+    // Add ownedBy filter based on the column clicked
+    const columnToOwnedByMapping = {
+      lws: 'lws',
+      lis: 'lis',
+      lct: 'lct',
+      lr: 'lr',
+      lnw: 'lnw',
+      lwfhe: 'lwfhe',
+      lsdb: 'lsd/b',
+    };
+
+    if (columnToOwnedByMapping[columnKey]) {
+      queryParams.set('ownedBy', columnToOwnedByMapping[columnKey]);
+    }
+
+    // Dashboard consolidated data is Laptop-only — keep assets page filter consistent
+    if (laptopTypeId) {
+      queryParams.set('type', laptopTypeId);
+    }
+
+    // Navigate to assets page with filters
+    const queryString = queryParams.toString();
+    router.push(`/assets${queryString ? `?${queryString}` : ''}`);
+  };
 
   // Calculate totals across all rows
   const totals = tableData.reduce(
@@ -92,9 +148,11 @@ export default function AssetsTable() {
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
-
     const isTotalRow = item.id === "total-row";
-    
+
+    // Helper to determine if cell should be clickable
+    const isClickable = !isTotalRow && cellValue > 0 && laptopTypeId && ['lws', 'lis', 'lct', 'lr', 'lnw', 'lwfhe', 'lsdb'].includes(columnKey);
+
     if (isTotalRow) {
       if (columnKey === "campus") {
         return <span className="font-extrabold text-blue-800 uppercase">TOTAL</span>;
@@ -108,6 +166,26 @@ export default function AssetsTable() {
       case "subTotal":
       case "grandTotal":
         return <span className="font-bold text-blue-600">{cellValue}</span>;
+      case "lws":
+      case "lis":
+      case "lct":
+      case "lr":
+      case "lnw":
+      case "lwfhe":
+      case "lsdb":
+        return (
+          <span
+            className={`text-gray-700 text-center ${
+              isClickable
+                ? 'cursor-pointer hover:text-blue-600 hover:underline transition-colors font-medium'
+                : ''
+            }`}
+            onClick={isClickable ? () => handleCellClick(item, columnKey) : undefined}
+            title={isClickable ? `Click to view ${columnKey.toUpperCase()} assets in ${item.campus}` : ''}
+          >
+            {cellValue}
+          </span>
+        );
       default:
         return <span className="text-gray-700 text-center">{cellValue}</span>;
     }
