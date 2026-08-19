@@ -1070,7 +1070,7 @@ export default function ConsignmentsList() {
               alwaysVisibleColumns={alwaysVisibleColumns}
               onToggleColumn={toggleColumn}
               onShowAll={showAllColumns}
-              onReset={resetToDefault}
+              onResetToDefault={resetToDefault}
             />
           )
         }
