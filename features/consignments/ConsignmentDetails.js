@@ -406,7 +406,9 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         onBack={onBack}
         headerActions={
           <div className="flex gap-2">
-            {destinationName?.toUpperCase() !== 'REMOTE' && consignment.status?.toUpperCase() !== 'DELIVERED' && (
+            {destinationName?.toUpperCase() !== 'REMOTE' && 
+             consignment.status?.toUpperCase() !== 'DELIVERED' && 
+             consignment.status?.toUpperCase() === 'DISPATCHED' && (
               <CustomButton
                 text="Bulk Consignment"
                 variant="primary"
