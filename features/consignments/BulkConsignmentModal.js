@@ -20,18 +20,6 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
   };
 
   const handleToggleDevice = (assetValue) => {
-    // Don't allow toggling for already accepted assets
-    const asset = consignment?.assets?.find(a => {
-      const assetObj = a?.asset || a || {};
-      const currentAssetValue = assetObj?.id || assetObj?.assetTag || assetObj?.serialNumber || assetObj?.id;
-      return currentAssetValue === assetValue;
-    });
-    
-    const assetObj = asset?.asset || asset || {};
-    if (assetObj?.consignmentAssetStatus === 'ACCEPTED') {
-      return; // Don't allow selection of already accepted assets
-    }
-
     setFeedbacks((prev) => {
       const isCurrentlySelected = prev[assetValue]?.selected || false;
       return {
@@ -103,7 +91,7 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
     >
       <div className="flex flex-col space-y-4 p-4">
         <p className="text-sm text-gray-600 mb-2">
-          Select the devices you are receiving and provide feedback on their condition. Already accepted devices are locked and cannot be modified
+          Select the devices you are receiving and provide feedback on their condition.
         </p>
 
         <div className="flex flex-col space-y-4 max-h-[60vh] overflow-y-auto pr-2 pb-2">
@@ -138,7 +126,6 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
 
             const isSelected = feedbacks[assetValue]?.selected || false;
             const currentFeedback = feedbacks[assetValue]?.text || '';
-            const isAlreadyAccepted = assetObj?.consignmentAssetStatus === 'ACCEPTED';
 
             return (
               <div 
@@ -149,18 +136,14 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                 }`}
               >
-
-                <div className={`flex items-start ${isAlreadyAccepted ? '' : 'cursor-pointer group'}`} 
-                     onClick={isAlreadyAccepted ? undefined : () => handleToggleDevice(assetValue)}>
+                <div className="flex items-start cursor-pointer group" onClick={() => handleToggleDevice(assetValue)}>
                   <div className="flex-shrink-0 pt-1">
-                    {isAlreadyAccepted ? null : (
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        readOnly // Controlled by onClick on parent div
-                        className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
-                      />
-                    )}
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      readOnly // Controlled by onClick on parent div
+                      className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                    />
                   </div>
                   
                   <div className="ml-3 flex flex-col flex-grow">
@@ -190,27 +173,25 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
                   </div>
                 </div>
                 
-                {/* Expandable Feedback Area - Only for non-accepted assets */}
-                {!isAlreadyAccepted && (
-                  <div 
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      isSelected ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
-                    }`}
-                  >
-                    <div className="pt-3 border-t border-blue-100">
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Condition & Feedback
-                      </label>
-                      <textarea
-                        rows={2}
-                        placeholder={`Describe the condition of ${assetLabel}... (e.g. Device received in good condition, no physical damage)`}
-                        className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 bg-white placeholder-gray-400 shadow-sm transition-shadow"
-                        value={currentFeedback}
-                        onChange={(e) => handleFeedbackChange(assetValue, e.target.value)}
-                      />
-                    </div>
+                {/* Expandable Feedback Area */}
+                <div 
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isSelected ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
+                  }`}
+                >
+                  <div className="pt-3 border-t border-blue-100">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Condition & Feedback
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder={`Describe the condition of ${assetLabel}... (e.g. Device received in good condition, no physical damage)`}
+                      className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 bg-white placeholder-gray-400 shadow-sm transition-shadow"
+                      value={currentFeedback}
+                      onChange={(e) => handleFeedbackChange(assetValue, e.target.value)}
+                    />
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
