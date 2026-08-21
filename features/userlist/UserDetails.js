@@ -115,6 +115,17 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         { label: 'Phone', value: userData.phone || 'N/A' },
       ],
     },
+    ...(userData.manager ? [{
+      title: 'Manager Information',
+      color: 'theme',
+      items: [
+        { 
+          label: 'Manager Name', 
+          value: `${userData.manager.firstName || ''} ${userData.manager.lastName || ''}`.trim() || userData.manager.username || 'N/A'
+        },
+        { label: 'Manager Email', value: userData.manager.email || 'N/A' },
+      ],
+    }] : []),
     {
       title: 'Role & Access',
       color: 'theme',
@@ -222,6 +233,14 @@ export default function UserDetails({ userId, userData, allocations = [], onBack
         { label: 'Username', value: userData.username || 'N/A' },
         { label: 'Email', value: userData.email || 'N/A' },
         { label: 'Phone', value: userData.phone || 'N/A' },
+        ...(userData.manager ? [
+          { 
+            label: 'Manager Name', 
+            value: `${userData.manager.firstName || ''} ${userData.manager.lastName || ''}`.trim() || userData.manager.username || 'N/A'
+          },
+          { label: 'Manager Email', value: userData.manager.email || 'N/A' },
+          { label: 'Manager Phone', value: userData.manager.phone || 'N/A' },
+        ] : []),
       ],
     },
     ...allocationSections,
