@@ -143,17 +143,18 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
             return (
               <div 
                 key={assetValue} 
-                className={`relative border rounded-xl p-4 transition-all duration-200 ${
+                className={`border rounded-xl p-4 transition-all duration-200 ${
                   isSelected 
                     ? 'border-blue-400 bg-blue-50/40 shadow-sm' 
                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                 }`}
               >
-
                 <div className={`flex items-start ${isAlreadyAccepted ? '' : 'cursor-pointer group'}`} 
                      onClick={isAlreadyAccepted ? undefined : () => handleToggleDevice(assetValue)}>
                   <div className="flex-shrink-0 pt-1">
-                    {isAlreadyAccepted ? null : (
+                    {isAlreadyAccepted ? (
+                      <span className="text-green-600 font-bold text-lg">✓</span>
+                    ) : (
                       <input
                         type="checkbox"
                         checked={isSelected}
@@ -165,15 +166,36 @@ export default function BulkConsignmentModal({ isOpen, onClose, consignment }) {
                   
                   <div className="ml-3 flex flex-col flex-grow">
                     <div className="flex justify-between items-start">
-                      <span className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                      <span className={`text-base font-semibold transition-colors ${
+                        isAlreadyAccepted 
+                          ? 'text-gray-900' 
+                          : 'text-gray-900 group-hover:text-blue-700'
+                      }`}>
                         {assetLabel}
                       </span>
-                      <span className="text-xs font-medium px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full">
-                        {type}
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        isAlreadyAccepted 
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {isAlreadyAccepted ? 'Already Received' : type}
                       </span>
                     </div>
 
+                    {/* All Asset Details in One Line */}
                     <div className="flex flex-wrap gap-2 mt-2">
+                      {assetObj?.serialNumber && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white border border-gray-200 text-gray-600 shadow-sm">
+                          <span className="font-medium text-gray-500 mr-1">Serial:</span>
+                          <span className="font-mono">{assetObj.serialNumber}</span>
+                        </span>
+                      )}
+                      {assetObj?.previousTag && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white border border-gray-200 text-gray-600 shadow-sm">
+                          <span className="font-medium text-gray-500 mr-1">Prev Tag:</span>
+                          <span className="font-mono">{assetObj.previousTag}</span>
+                        </span>
+                      )}
                       <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white border border-gray-200 text-gray-600 shadow-sm">
                         <svg className="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
                         {processor}
