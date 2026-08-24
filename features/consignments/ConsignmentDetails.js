@@ -410,7 +410,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
              consignment.status?.toUpperCase() !== 'DELIVERED' && 
              consignment.status?.toUpperCase() === 'DISPATCHED' && (
               <CustomButton
-                text="Bulk Consignment"
+                text="Receive Assets"
                 variant="primary"
                 size="md"
                 onClick={() => setShowBulkModal(true)}

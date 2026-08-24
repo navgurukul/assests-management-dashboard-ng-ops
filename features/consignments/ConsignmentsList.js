@@ -21,6 +21,9 @@ import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import { usePersistentState } from '@/app/hooks/usePersistentState';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectUserRole } from '@/app/store/slices/appSlice';
+import { useAuth } from '@/app/context/AuthContext';
 import {
   CONSIGNMENT_TABLE_ID,
   consignmentTableColumns,
@@ -41,6 +44,27 @@ const actionOptions = ['View', 'Details', 'Update Status'];
 export default function ConsignmentsList() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const storeUserRole = useAppSelector(selectUserRole);
+  const { user } = useAuth();
+  
+  // Resolve campus ID for the Campus Manager role
+  const { data: campusIncharges } = useFetch({
+    url: '/campus-incharge',
+    queryKey: ['campus-incharge'],
+    enabled: storeUserRole === 'CAMPUS_MANAGER',
+  });
+  
+  const userCampusId = React.useMemo(() => {
+    if (!campusIncharges?.data || !user?.email || storeUserRole !== 'CAMPUS_MANAGER') {
+      return null;
+    }
+    
+    const userCampus = campusIncharges.data.find(campus => 
+      campus.campusManager?.email === user.email
+    );
+    
+    return userCampus?.campusId || null;
+  }, [campusIncharges, user?.email, storeUserRole]);
   
   // Pagination state (persisted)
   const [paginationState, setPaginationState] = usePersistentState('consignments-pagination', { currentPage: 1, pageSize: 20 });
@@ -151,6 +175,11 @@ export default function ConsignmentsList() {
     params.append('page', currentPage);
     params.append('limit', pageSize);
     
+    // Filter consignments by campus for Campus Manager role
+    if (storeUserRole === 'CAMPUS_MANAGER' && userCampusId) {
+      params.append('campusId', userCampusId);
+    }
+    
     if (filters.status) params.append('status', filters.status);
     if (filters.courier) params.append('courierServiceId', filters.courier);
     if (filters.allocation) params.append('allocationId', filters.allocation);
@@ -183,7 +212,8 @@ export default function ConsignmentsList() {
   // Fetch consignments data from API with pagination, filters, and search
   const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
-    queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
+    queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch, userCampusId],
+    enabled: storeUserRole !== 'CAMPUS_MANAGER' || (storeUserRole === 'CAMPUS_MANAGER' && userCampusId !== null),
   });
 
   const acceptReturnCampusId = React.useMemo(() => {
