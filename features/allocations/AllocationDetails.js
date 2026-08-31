@@ -412,7 +412,7 @@ export default function AllocationDetails({ allocationId, onBack }) {
               { label: 'Ticket Type', value: allocationDetails.ticket.ticketType || 'N/A' },
               { label: 'Priority', value: allocationDetails.ticket.priority || 'N/A' },
               { label: 'Ticket Status', value: allocationDetails.ticket.status || 'N/A' },
-              { label: 'Description', value: allocationDetails.ticket.description || 'N/A', className: 'col-span-2 line-clamp-2 break-all' },
+              { label: 'Description', value: allocationDetails.ticket.description || 'N/A', className: 'col-span-2 break-all' },
             ],
           },
         ]

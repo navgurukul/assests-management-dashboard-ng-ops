@@ -44,9 +44,9 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         { label: 'Status', value: ticket.status || '—' },
         { label: 'Is Escalated', value: ticket.isEscalated ? 'Yes' : 'No' },
         { label: 'Manager Email', value: ticket.managerEmail || '—' },
-        { label: 'Address', value: ticket.address || '—', className: 'col-span-2 line-clamp-2 break-all', title: ticket.address || undefined },
-        { label: 'Description', value: ticket.description || '—', className: 'col-span-2 line-clamp-2 break-all', title: ticket.description || undefined },
-        { label: 'Manager Comment', value: ticket.resolutionNotes || '—', className: 'col-span-2 line-clamp-2' },
+        { label: 'Address', value: ticket.address || '—', className: 'col-span-2 break-all', title: ticket.address || undefined },
+        { label: 'Description', value: ticket.description || '—', className: 'col-span-2 break-all', title: ticket.description || undefined },
+        { label: 'Manager Comment', value: ticket.resolutionNotes || '—', className: 'col-span-2 break-all' },
       ],
     },
     ...(hasAsset ? [{
