@@ -102,7 +102,7 @@ export default function CreateTicket() {
       toast.success(`Ticket created successfully! Ticket Tag: ${result.data.ticketNumber}`);
       
       // Navigate based on user role
-      if (userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER') {
+      if (userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER' || userRole === 'CAMPUS_MANAGER') {
         router.push('/ticketstatus');
       } else {
         router.push('/tickets');
@@ -125,7 +125,7 @@ export default function CreateTicket() {
   };
 
   const handleCancel = () => {
-    if (userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER') {
+    if (userRole === 'STUDENT' || userRole === 'EMPLOYEE' || userRole === 'MANAGER' || userRole === 'CAMPUS_MANAGER') {
       router.push('/ticketstatus');
     } else {
       router.push('/tickets');
