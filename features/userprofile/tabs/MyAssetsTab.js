@@ -117,7 +117,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const assets = userAssets?.data?.assets || userAssets?.assets || [];
   const allocations = userAssets?.data?.allocations || userAssets?.allocations || [];
   const assetMovements = userAssets?.data?.assetMovements || userAssets?.assetMovements || [];
-
+  const apiUser = userAssets?.data?.user || userAssets?.user || {}; 
   const allocationMap = (() => {
     const map = {};
     allocations.forEach((allocation) => {
@@ -854,7 +854,7 @@ export default function MyAssetsTab({ userData = {} }) {
           </div>
           <CustomButton
             text="Download NOC"
-            onClick={() => downloadNOC(userData, assetMovements)}
+            onClick={() => downloadNOC({ ...userData, ...apiUser }, assetMovements)}
             variant="success"
             size="md"
             icon={Download}
