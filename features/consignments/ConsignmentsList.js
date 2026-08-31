@@ -21,6 +21,9 @@ import config from '@/app/config/env.config';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import { usePersistentState } from '@/app/hooks/usePersistentState';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectUserRole } from '@/app/store/slices/appSlice';
+import { useAuth } from '@/app/context/AuthContext';
 import {
   CONSIGNMENT_TABLE_ID,
   consignmentTableColumns,
@@ -41,6 +44,67 @@ const actionOptions = ['View', 'Details', 'Update Status'];
 export default function ConsignmentsList() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const storeUserRole = useAppSelector(selectUserRole);
+  const { user } = useAuth();
+  
+  // Resolve campus ID for the Campus Manager role
+  const { data: campusIncharges } = useFetch({
+    url: '/campus-incharge',
+    queryKey: ['campus-incharge'],
+    enabled: storeUserRole === 'CAMPUS_MANAGER',
+  });
+
+  // Fetch campus options for filter dropdown (for all roles except Campus Manager)
+  const { data: campusData } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+    enabled: storeUserRole !== 'CAMPUS_MANAGER', // Campus Managers get their options from campus-incharge API
+  });
+  
+  // Filter state (persisted) - moved up before userCampusId since it depends on filters
+  const [filters, setFilters] = usePersistentState('consignments-filters', {});
+  
+  // Get managed campuses for Campus Manager
+  const managedCampusesData = React.useMemo(() => {
+    if (!campusIncharges?.data || !user?.email || storeUserRole !== 'CAMPUS_MANAGER') {
+      return [];
+    }
+
+    return campusIncharges.data.filter(campus => 
+      campus.campusManager?.email === user.email
+    );
+  }, [campusIncharges, user?.email, storeUserRole]);
+
+  const userCampusId = React.useMemo(() => {
+    if (managedCampusesData.length === 0) {
+      return null;
+    }
+    
+    // If Campus Manager has selected a specific campus via filter, use that
+    if (filters.campus) {
+      const isValidCampus = managedCampusesData.some(campus => campus.campusId === filters.campus);
+      if (isValidCampus) {
+        return filters.campus;
+      }
+    }
+    
+    // Otherwise, default to first campus
+    return managedCampusesData[0]?.campusId || null;
+  }, [managedCampusesData, filters.campus]);
+
+  // Campus filter options for Campus Manager (only show if managing multiple campuses)
+  const managedCampusOptions = React.useMemo(() => {
+    // Only show campus filter if Campus Manager manages more than 1 campus
+    // Single campus managers don't need filter since they see only their campus
+    if (managedCampusesData.length <= 1) {
+      return [];
+    }
+
+    return managedCampusesData.map(campus => ({
+      value: campus.campusId,
+      label: campus.campusName || `Campus ${campus.campusId}`,
+    }));
+  }, [managedCampusesData]);
   
   // Pagination state (persisted)
   const [paginationState, setPaginationState] = usePersistentState('consignments-pagination', { currentPage: 1, pageSize: 20 });
@@ -49,9 +113,6 @@ export default function ConsignmentsList() {
   // In-transit pagination state (persisted)
   const [inTransitPaginationState, setInTransitPaginationState] = usePersistentState('intransit-pagination', { inTransitPage: 1, inTransitPageSize: 10 });
   const { inTransitPage, inTransitPageSize } = inTransitPaginationState;
-  
-  // Filter state (persisted)
-  const [filters, setFilters] = usePersistentState('consignments-filters', {});
   
   // Search state
   const [searchInput, setSearchInput] = useState('');
@@ -151,6 +212,17 @@ export default function ConsignmentsList() {
     params.append('page', currentPage);
     params.append('limit', pageSize);
     
+    // Filter consignments by campus
+    if (storeUserRole === 'CAMPUS_MANAGER' && userCampusId) {
+      // For Campus Manager: Use either selected campus or default (first) campus
+      params.append('campusId', userCampusId);
+    }
+    
+    // Campus filter for other roles (when explicitly selected)
+    if (storeUserRole !== 'CAMPUS_MANAGER' && filters.campus) {
+      params.append('campusId', filters.campus);
+    }
+    
     if (filters.status) params.append('status', filters.status);
     if (filters.courier) params.append('courierServiceId', filters.courier);
     if (filters.allocation) params.append('allocationId', filters.allocation);
@@ -183,7 +255,8 @@ export default function ConsignmentsList() {
   // Fetch consignments data from API with pagination, filters, and search
   const { data, isLoading, isError, error, refetch: refetchConsignments } = useFetch({
     url: `/consignments?${buildQueryString()}`,
-    queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch],
+    queryKey: ['consignments', currentPage, pageSize, filters, debouncedSearch, userCampusId],
+    enabled: storeUserRole !== 'CAMPUS_MANAGER' || (storeUserRole === 'CAMPUS_MANAGER' && userCampusId !== null),
   });
 
   const acceptReturnCampusId = React.useMemo(() => {
@@ -278,7 +351,8 @@ export default function ConsignmentsList() {
     return map;
   }, [data]);
 
-  const campusOptions = React.useMemo(() => {
+  // Campus options for form creation (from consignment data)
+  const campusOptionsForForm = React.useMemo(() => {
     return Array.from(campusNameById.entries()).map(([value, label]) => ({
       value,
       label,
@@ -287,17 +361,17 @@ export default function ConsignmentsList() {
 
   // Update createFormFields when campus options are available
   useEffect(() => {
-    if (campusOptions.length > 0) {
+    if (campusOptionsForForm.length > 0) {
       setCreateFormFields(prev =>
         prev.map(field => {
           if (field.type === 'filter-group') {
-            return { ...field, campusOptions };
+            return { ...field, campusOptions: campusOptionsForForm };
           }
           return field;
         })
       );
     }
-  }, [campusOptions]);
+  }, [campusOptionsForForm]);
   
   // Status filter options
   const statusOptions = [
@@ -312,6 +386,16 @@ export default function ConsignmentsList() {
     { value: 'DAMAGED', label: 'Damaged' },
   ];
 
+  // Transform campus data from API to filter options (only for non-Campus Manager roles)
+  const campusOptionsForFilter = React.useMemo(() => {
+    if (!campusData || !campusData.data || storeUserRole === 'CAMPUS_MANAGER') return [];
+    
+    return campusData.data.map((campus) => ({
+      value: campus.id,
+      label: campus.campusName,
+    }));
+  }, [campusData, storeUserRole]);
+
   // In-transit return status filter options
   const inTransitStatusOptions = [
     { value: 'PENDING', label: 'Pending' },
@@ -324,7 +408,8 @@ export default function ConsignmentsList() {
     const categoryNames = {
       status: 'Status',
       courier: 'Shipped Through',
-      allocation: 'Allocation'
+      allocation: 'Allocation',
+      campus: 'Campus'
     };
     return categoryNames[filterKey] || filterKey;
   };
@@ -338,6 +423,18 @@ export default function ConsignmentsList() {
     if (filterKey === 'status') {
       const option = statusOptions.find((opt) => opt.value === value);
       return option ? option.label : value;
+    }
+    if (filterKey === 'campus') {
+      // For Campus Manager, check managed campus options first
+      if (storeUserRole === 'CAMPUS_MANAGER') {
+        const managedCampus = managedCampusesData.find(campus => campus.campusId === value);
+        if (managedCampus) {
+          return managedCampus.campusName || `Campus ${value}`;
+        }
+      }
+      // For other roles, check all campus options
+      const campus = campusOptionsForFilter.find(opt => opt.value === value);
+      return campus ? campus.label : value;
     }
     return value;
   };
@@ -1049,6 +1146,11 @@ export default function ConsignmentsList() {
             {!showInTransit && (
               <FilterDropdown
                 statusOptions={statusOptions}
+                campusOptions={
+                  storeUserRole === 'CAMPUS_MANAGER' 
+                    ? managedCampusOptions
+                    : campusOptionsForFilter         // Show all campuses for other roles
+                }
                 selectedFilters={filters}
                 onFilterChange={handleFilterChange}
               />
