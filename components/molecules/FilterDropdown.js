@@ -134,6 +134,7 @@ function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, 
   return [
     { key: 'campus',        label: 'Campus',         items: campusOptions },
     { key: 'ticketType',    label: 'Ticket Type',     items: ticketTypeOptions },
+    { key: 'isAssigned',    label: 'Unassigned Ticket', items: isAssignedOptions },
     { key: 'componentType', label: 'Component Type',  items: componentTypeOptions },
     { key: 'source',        label: 'Source',          items: sourceOptions },
     { key: 'condition',     label: 'Condition',       items: conditionOptions },
@@ -141,7 +142,6 @@ function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, 
     { key: 'type',          label: 'Asset Type',      items: assetTypeOptions },
     { key: 'healthStatus',  label: 'Health Status',   items: healthStatusOptions },
     { key: 'ownedBy',       label: 'Owned By',        items: ownedByOptions },
-    { key: 'isAssigned',    label: 'Unassigned Ticket', items: isAssignedOptions },
     { key: 'assignee',      label: 'Assigned To',     items: assigneeOptions },
   ].filter((opt) => opt.items && opt.items.length > 0);
 }
