@@ -28,7 +28,7 @@ const columns = [
   { key: 'actions', label: 'ACTIONS' },
 ];
 
-const CANCELLABLE_STATUSES = ['RAISED', 'OPEN', 'APPROVED', 'IN_PROGRESS'];
+const CANCELLABLE_STATUSES = ['RAISED', 'OPEN', 'APPROVED', 'IN_PROGRESS', 'OVERDUE'];
 
 export default function TicketStatusTab() {
   const router = useRouter();
