@@ -28,7 +28,7 @@ const columns = [
   { key: 'actions', label: 'ACTIONS' },
 ];
 
-const CANCELLABLE_STATUSES = ['RAISED', 'OPEN'];
+const CANCELLABLE_STATUSES = ['RAISED', 'OPEN', 'APPROVED', 'IN_PROGRESS'];
 
 export default function TicketStatusTab() {
   const router = useRouter();
@@ -100,9 +100,14 @@ export default function TicketStatusTab() {
     return raiser && user?.email && raiser === user.email;
   };
 
-  const canCancel = (ticket) =>
-    CANCELLABLE_STATUSES.includes(ticket.status) && isOwnTicket(ticket);
+  const isAssetAllocated = (ticket) =>
+    !!(ticket.assetId || (ticket.assetIds?.length > 0));
 
+  const canCancel = (ticket) =>
+    isOwnTicket(ticket) &&
+    CANCELLABLE_STATUSES.includes(ticket.status) &&
+    !isAssetAllocated(ticket);
+  
   const renderCell = useCallback((ticket, columnKey) => {
     switch (columnKey) {
       case 'ticketNumber':
