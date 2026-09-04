@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Laptop, Monitor, Tablet, Smartphone, Package } from 'lucide-react';
 import { setSelectedTicket } from '@/app/store/slices/ticketSlice';
 import { selectUserRole } from '@/app/store/slices/appSlice';
-import { IT_ROLES } from '@/app/config/routePermissions';
+import { IT_ROLES,  MANAGER_ROLES } from '@/app/config/routePermissions';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import Modal from '@/components/molecules/Modal';
 import FormModal from '@/components/molecules/FormModal';
@@ -146,11 +146,15 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   }
 
   const ticket = ticketData;
-
+  // Cancel allowed for: Admin, the requester themself, and the requester's reporting manager
   const isRequester = loggedInEmail && ticket.raisedByUser?.email === loggedInEmail;
-  const canCancelTicket = isRequester || loggedInUserRole === 'ADMIN';
-  const isCancellable = ['RAISED', 'OPEN'].includes(ticket.status);
+  const isTicketManager = loggedInEmail && ticket.managerEmail === loggedInEmail;
+  const canCancelTicket = loggedInUserRole === 'ADMIN' || isRequester || (MANAGER_ROLES.includes(loggedInUserRole) && isTicketManager);
 
+  // IN_PROGRESS is used after assignment; allocation is checked via assetId/assetIds.
+  const CANCELLABLE_STATUSES = ['RAISED', 'OPEN', 'APPROVED', 'IN_PROGRESS'];
+  const isAssetAllocated = !!(ticket.assetId || (ticket.assetIds?.length > 0));
+  const isCancellable = CANCELLABLE_STATUSES.includes(ticket.status) && !isAssetAllocated;
 
   const historyLogs = ticket.historyLogs || [];
 
