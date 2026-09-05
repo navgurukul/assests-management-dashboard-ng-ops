@@ -152,7 +152,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
   const canCancelTicket = loggedInUserRole === 'ADMIN' || isRequester || (MANAGER_ROLES.includes(loggedInUserRole) && isTicketManager);
 
   // IN_PROGRESS is used after assignment; allocation is checked via assetId/assetIds.
-  const CANCELLABLE_STATUSES = ['RAISED', 'OPEN', 'APPROVED', 'IN_PROGRESS'];
+  const CANCELLABLE_STATUSES = ['RAISED', 'OPEN', 'APPROVED', 'IN_PROGRESS', 'OVERDUE'];
   const isAssetAllocated = !!(ticket.assetId || (ticket.assetIds?.length > 0));
   const isCancellable = CANCELLABLE_STATUSES.includes(ticket.status) && !isAssetAllocated;
 
