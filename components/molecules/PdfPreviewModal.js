@@ -23,6 +23,7 @@ export default function PdfPreviewModal({
   fromLabel = 'From (Source)',
   filename = 'Document.pdf',
   destinationUser = null,
+  assets = null,
 }) {
   const pdfRef = useRef(null);
 
@@ -49,35 +50,41 @@ export default function PdfPreviewModal({
       <div className="p-6 max-h-[70vh] overflow-y-auto">
         <div
           ref={pdfRef}
-          className="bg-white p-12 rounded border border-gray-200"
-          style={{ minHeight: '1000px', backgroundColor: '#ffffff', borderColor: '#e5e7eb', color: '#1f2937' }}
+          className="bg-white p-6"
+          style={{ minHeight: '800px', backgroundColor: '#ffffff', color: '#1f2937', fontFamily: 'Arial, sans-serif', fontSize: '14px', lineHeight: '1.5' }}
         >
           {/* Header */}
-          <div className="text-center border-b pb-8 mb-12" style={{ borderColor: '#e5e7eb' }}>
-            <h1 className="text-4xl font-bold uppercase tracking-wider" style={{ color: '#1f2937' }}>
+          <div className="text-center border-b pb-6 mb-8" style={{ borderColor: '#e5e7eb' }}>
+            <h1 className="text-2xl font-bold uppercase tracking-wider" style={{ color: '#1f2937' }}>
               {documentTitle}
             </h1>
-            <p className="text-xl font-medium mt-4" style={{ color: '#6b7280' }}>
+            <p className="text-base font-medium mt-2" style={{ color: '#6b7280' }}>
               Code: {documentCode || 'N/A'}
             </p>
-            <p className="text-xl font-medium mt-2" style={{ color: '#6b7280' }}>
+            <p className="text-base font-medium mt-1" style={{ color: '#6b7280' }}>
               Date: {date ? new Date(date).toLocaleDateString() : 'N/A'}
             </p>
           </div>
 
           {/* Addresses Section */}
-          <div className="flex flex-col gap-24 mb-16">
-            <div className="p-8 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
-              <h3 className="text-2xl font-bold uppercase tracking-wider mb-4" style={{ color: '#6b7280' }}>
+          <div className="grid grid-cols-2 gap-8 mb-10">
+            {/* Destination - Left Side */}
+            <div className="p-5 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
+              <h3 className="text-base font-bold uppercase tracking-wider mb-3" style={{ color: '#6b7280' }}>
                 {toLabel}
               </h3>
               
               {/* User Details */}
               {destinationUser && (
-                <div className="mt-4 mb-4 space-y-2">
+                <div className="mb-3 space-y-1">
                   {(destinationUser.firstName || destinationUser.lastName) && (
-                    <p className="text-2xl font-medium" style={{ color: '#1f2937' }}>
+                    <p className="text-base font-medium" style={{ color: '#1f2937' }}>
                       {`${destinationUser.firstName || ''} ${destinationUser.lastName || ''}`.trim()}
+                    </p>
+                  )}
+                  {destinationUser.phone && (
+                    <p className="text-sm" style={{ color: '#4b5563' }}>
+                      Phone: {destinationUser.phone}
                     </p>
                   )}
                 </div>
@@ -85,40 +92,35 @@ export default function PdfPreviewModal({
               
               {/* Address */}
               {destinationAddress && destinationAddress !== 'N/A' && (
-                <p className="text-lg leading-relaxed whitespace-pre-wrap mb-3" style={{ color: '#4b5563' }}>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
                   {destinationAddress}
-                </p>
-              )}
-              
-              {/* Phone Number */}
-              {destinationUser && destinationUser.phone && (
-                <p className="text-lg" style={{ color: '#4b5563' }}>
-                  Phone: {destinationUser.phone}
-                </p>
+                </div>
               )}
             </div>
-            <div className="p-8 border rounded mt-12" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
-              <h3 className="text-2xl font-bold uppercase tracking-wider mb-4" style={{ color: '#6b7280' }}>
+
+            {/* Source - Right Side */}
+            <div className="p-5 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
+              <h3 className="text-base font-bold uppercase tracking-wider mb-3" style={{ color: '#6b7280' }}>
                 {fromLabel}
               </h3>
               
               {/* Organization Name */}
               {organizationName && (
-                <p className="font-semibold text-2xl mb-2" style={{ color: '#1f2937' }}>
+                <p className="font-semibold text-base mb-2" style={{ color: '#1f2937' }}>
                   {organizationName}
                 </p>
               )}
               
-              {/* Created By User Name (First Name + Last Name) */}
+              {/* Created By User Name */}
               {sourceCreatedBy && (sourceCreatedBy.firstName || sourceCreatedBy.lastName) && (
-                <p className="text-xl font-medium mb-2" style={{ color: '#1f2937' }}>
+                <p className="text-base font-medium mb-1" style={{ color: '#1f2937' }}>
                   {`${sourceCreatedBy.firstName || ''} ${sourceCreatedBy.lastName || ''}`.trim()}
                 </p>
               )}
               
-              {/* Campus Name and State on same line */}
+              {/* Campus Name and State */}
               {(sourceCampusName || (sourceState && sourceState !== 'N/A')) && (
-                <p className="text-xl font-medium mb-3" style={{ color: '#1f2937' }}>
+                <p className="text-base font-medium mb-2" style={{ color: '#1f2937' }}>
                   {sourceCampusName}
                   {sourceCampusName && sourceState && sourceState !== 'N/A' && ', '}
                   {sourceState && sourceState !== 'N/A' && sourceState}
@@ -127,22 +129,97 @@ export default function PdfPreviewModal({
               
               {/* Campus Address */}
               {sourceAddress && sourceAddress !== 'N/A' && (
-                <p className="text-lg leading-relaxed whitespace-pre-wrap mb-3" style={{ color: '#4b5563' }}>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap mb-2" style={{ color: '#4b5563' }}>
                   {sourceAddress}
-                </p>
+                </div>
               )}
               
               {/* Created By Phone */}
-              {sourceCreatedBy && (
-                <p className="text-lg" style={{ color: '#4b5563' }}>
-                  Phone: {sourceCreatedBy.phone || 'N/A'}
+              {sourceCreatedBy && sourceCreatedBy.phone && (
+                <p className="text-sm" style={{ color: '#4b5563' }}>
+                  Phone: {sourceCreatedBy.phone}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="mt-32 text-center pt-8 border-t" style={{ borderColor: '#e5e7eb' }}>
-            <p className="text-lg" style={{ color: '#9ca3af' }}>
+          {/* Assets Table Section */}
+          {assets && assets.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-bold uppercase tracking-wider mb-4" style={{ color: '#1f2937' }}>
+                Assets in Consignment
+              </h2>
+              <div className="overflow-hidden border rounded" style={{ borderColor: '#e5e7eb' }}>
+                <table className="w-full border-collapse" style={{ fontSize: '12px' }}>
+                  <thead style={{ backgroundColor: '#f3f4f6' }}>
+                    <tr>
+                      <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '6%' }}>
+                        S.No.
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '18%' }}>
+                        Asset Tag
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                        Asset Type
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                        Brand
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                        Model
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '15%' }}>
+                        Serial Number
+                      </th>
+                      <th className="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12.5%' }}>
+                        Checked at Source
+                      </th>
+                      <th className="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', width: '12.5%' }}>
+                        Checked at Destination
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assets.map((assetItem, index) => {
+                      const asset = assetItem?.asset || assetItem;
+                      const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
+                      return (
+                        <tr key={asset?.id || index} style={{ backgroundColor: rowBg }}>
+                          <td className="px-3 py-3 text-center font-semibold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {index + 1}
+                          </td>
+                          <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {asset?.assetTag || 'N/A'}
+                          </td>
+                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {asset?.assetType?.name || 'N/A'}
+                          </td>
+                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {asset?.brand || 'N/A'}
+                          </td>
+                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {asset?.model || 'N/A'}
+                          </td>
+                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {asset?.serialNumber || 'N/A'}
+                          </td>
+                          <td className="px-2 py-3 text-center" style={{ borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            
+                          </td>
+                          <td className="px-2 py-3 text-center" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                            
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-12 text-center pt-4 border-t" style={{ borderColor: '#e5e7eb' }}>
+            <p className="text-base" style={{ color: '#9ca3af' }}>
               Generated on {new Date().toLocaleDateString()}
             </p>
           </div>
