@@ -23,29 +23,39 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     });
   };
 
-  // Group movements by device (assetTag) and extract allocation/return dates
+  // Group movements by device and extract allocation/return dates.
   const deviceMap = {};
   assetMovements.forEach((movement) => {
     const tag = movement.newAssetTag || movement.previousAssetTag;
     if (!tag) return;
-    if (!deviceMap[tag]) {
-      deviceMap[tag] = { assetTag: tag, allocatedAt: null, returnedAt: null, isReturned: false, notes: [] };
+
+    // Group by assetId — it's stable across tag renames, unlike assetTag itself.
+    const key = movement.assetId || tag;
+    if (!deviceMap[key]) {
+      deviceMap[key] = { assetTag: tag, allocatedAt: null, returnedAt: null, isReturned: false, notes: [], lastMovedAt: null };
     }
-    if (movement.notes && !deviceMap[tag].notes.includes(movement.notes)) {
-      deviceMap[tag].notes.push(movement.notes);
+
+    // Always display the tag from the most recent movement, so a renamed/returned
+    if (!deviceMap[key].lastMovedAt || new Date(movement.movedAt) > new Date(deviceMap[key].lastMovedAt)) {
+      deviceMap[key].assetTag = tag;
+      deviceMap[key].lastMovedAt = movement.movedAt;
+    }
+
+    if (movement.notes && !deviceMap[key].notes.includes(movement.notes)) {
+      deviceMap[key].notes.push(movement.notes);
     }
     if (movement.movementType === 'ALLOCATION') {
       const movedAt = new Date(movement.movedAt).getTime();
-      if (!deviceMap[tag].allocatedAt || movedAt < new Date(deviceMap[tag].allocatedAt).getTime()) {
-        deviceMap[tag].allocatedAt = movement.movedAt;
+      if (!deviceMap[key].allocatedAt || movedAt < new Date(deviceMap[key].allocatedAt).getTime()) {
+        deviceMap[key].allocatedAt = movement.movedAt;
       }
     }
     if (movement.movementType === 'RETURN ACCEPTED') {
       const movedAt = new Date(movement.movedAt).getTime();
-      if (!deviceMap[tag].returnedAt || movedAt > new Date(deviceMap[tag].returnedAt).getTime()) {
-        deviceMap[tag].returnedAt = movement.movedAt;
+      if (!deviceMap[key].returnedAt || movedAt > new Date(deviceMap[key].returnedAt).getTime()) {
+        deviceMap[key].returnedAt = movement.movedAt;
       }
-      deviceMap[tag].isReturned = true;
+      deviceMap[key].isReturned = true;
     }
   });
 

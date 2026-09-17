@@ -206,7 +206,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: [
         { label: 'Status', value: <StatusChip value={displayStatus} /> },
         { label: 'Consignment Code', value: consignment.consignmentCode || consignment.code || 'N/A' },
-        { label: 'Ticket Number', value: consignment.ticketDetails?.ticketNumber || consignment.ticket?.ticketNumber || consignment.ticketNumber || 'N/A' },
+        { label: 'Ticket Tag', value: consignment.ticketDetails?.ticketNumber || consignment.ticket?.ticketNumber || consignment.ticketNumber || 'N/A' },
         { label: 'Total Assets', value: String(totalAssets) },
       ],
     },
@@ -448,6 +448,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         organizationName={organizationName}
         sourceCreatedBy={sourceCreatedBy}
         destinationUser={destinationUser}
+        assets={consignment.assets}
         filename={`Consignment_${consignment?.consignmentCode || consignment?.id || 'Details'}.pdf`}
       />
 

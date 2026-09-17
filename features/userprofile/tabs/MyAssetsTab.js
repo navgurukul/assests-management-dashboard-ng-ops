@@ -422,43 +422,36 @@ export default function MyAssetsTab({ userData = {} }) {
     RETURN_REQUESTED: { label: 'Return Requested', textColor: 'text-amber-700', bg: 'bg-amber-50' },
   };
 
-  // Build cards for returned assets that only exist in movements (not in assets array)
+  // Group by assetId, not assetTag — tags get reused/renamed on return.
+  const activeAssetIds = new Set(assets.map((assetItem) => assetItem.id));
   const activeAssetTags = new Set(assets.map((assetItem) => assetItem.assetTag));
+
   const returnedAssetMap = {};
   assetMovements.forEach((movement) => {
     const tag = movement.newAssetTag || movement.assetTag;
-    if (!tag || activeAssetTags.has(tag)) return;
-    if (!returnedAssetMap[tag]) {
-      returnedAssetMap[tag] = { assetTag: tag, movements: [] };
+    if (!tag) return;
+
+    const isActiveAsset = movement.assetId
+      ? activeAssetIds.has(movement.assetId)
+      : activeAssetTags.has(tag);
+    if (isActiveAsset) return;
+
+    // Group by assetId — it's stable across tag renames, unlike assetTag itself.
+    const key = movement.assetId || tag;
+    if (!returnedAssetMap[key]) {
+      returnedAssetMap[key] = { id: key, assetTag: tag, movements: [], lastMovedAt: null };
     }
-    returnedAssetMap[tag].movements.push(movement);
-    // Also capture the previous tag movements under the same group
-    if (movement.previousAssetTag && movement.previousAssetTag !== tag && !activeAssetTags.has(movement.previousAssetTag)) {
-      if (!returnedAssetMap[movement.previousAssetTag]) {
-        returnedAssetMap[movement.previousAssetTag] = { assetTag: movement.previousAssetTag, movements: [] };
-      }
-      returnedAssetMap[movement.previousAssetTag].movements.push(movement);
+    returnedAssetMap[key].movements.push(movement);
+
+    // Always display the tag from the most recent movement, so a renamed/returned
+    if (!returnedAssetMap[key].lastMovedAt || new Date(movement.movedAt) > new Date(returnedAssetMap[key].lastMovedAt)) {
+      returnedAssetMap[key].assetTag = tag;
+      returnedAssetMap[key].lastMovedAt = movement.movedAt;
     }
   });
   const returnedAssets = Object.values(returnedAssetMap);
 
-  // Check if every device's latest movement is "RETURN ACCEPTED"
-  const allDevicesReturned = (() => {
-    if (assetMovements.length === 0) return false;
-    const latestByTag = {};
-    assetMovements.forEach((movement) => {
-      const tag = movement.newAssetTag || movement.assetTag;
-      if (!tag) return;
-      const movedAt = new Date(movement.movedAt).getTime();
-      if (!latestByTag[tag] || movedAt > latestByTag[tag].time) {
-        latestByTag[tag] = { time: movedAt, type: movement.movementType };
-      }
-    });
-    const latestEntries = Object.values(latestByTag);
-    return latestEntries.length > 0 && latestEntries.every((entry) => entry.type === 'RETURN ACCEPTED');
-  })();
-
-  const canDownloadNOC = (assets.length === 0 && assetMovements.length > 0) || allDevicesReturned;
+  const canDownloadNOC = assets.length === 0 && assetMovements.length > 0;
 
   const formatMovementDate = (isoDate) => {
     if (!isoDate) return 'N/A';
@@ -691,7 +684,7 @@ export default function MyAssetsTab({ userData = {} }) {
 
             return (
               <div
-                key={returnedAsset.assetTag}
+                key={returnedAsset.id}
                 className="bg-(--surface) border border-(--border) rounded-lg p-4 shadow-sm opacity-80 flex flex-col"
               >
                 {/* Header */}
@@ -732,13 +725,13 @@ export default function MyAssetsTab({ userData = {} }) {
                 {/* Movement Timeline */}
                 <div className="mt-auto">
                 {sortedMovements.length > 0 && (() => {
-                  const isTimelineExpanded = !!expandedTimelines[returnedAsset.assetTag];
+                  const isTimelineExpanded = !!expandedTimelines[returnedAsset.id];
 
                   return (
                   <div className="pt-2 border-t border-(--border)">
                     <button
                       type="button"
-                      onClick={() => setExpandedTimelines((prev) => ({ ...prev, [returnedAsset.assetTag]: !prev[returnedAsset.assetTag] }))}
+                      onClick={() => setExpandedTimelines((prev) => ({ ...prev, [returnedAsset.id]: !prev[returnedAsset.id] }))}
                       className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted) uppercase tracking-widest mb-2 hover:text-foreground transition-colors cursor-pointer"
                     >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isTimelineExpanded ? '' : '-rotate-90'}`} />
