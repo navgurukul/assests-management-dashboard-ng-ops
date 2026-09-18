@@ -263,6 +263,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       items: consignment.assets?.length > 0 ? consignment.assets.flatMap((asset, index) => {
         const assetData = asset?.asset || asset;
         const assetTag = assetData?.assetTag || asset?.assetTag || 'Unknown';
+        const previousAssetTag = assetData?.previousTag || asset?.previousTag || 'N/A';
         const assetType = assetData?.assetType?.name || 'N/A';
         const serialNumber = assetData?.serialNumber || 'N/A';
         const brand = assetData?.brand || 'N/A';
@@ -273,6 +274,11 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
             label: `Asset ${index + 1}`,
             value: assetTag,
             className: 'text-blue-600 font-medium col-span-2'
+          },
+          {
+            label: 'Previous Asset Tag',
+            value: previousAssetTag,
+            className: 'col-span-2 text-gray-600'
           },
           {
             label: 'Type',
