@@ -31,6 +31,7 @@ export const formatAssetStatus = (status) => {
     'REPAIR': 'Under Repair',
     'SCRAP': 'Scrap',
     'PARTED_OUT': 'Parted Out',
+    'DISPOSED': 'Disposed',
   };
   return statusMap[status] || status || 'N/A';
 };

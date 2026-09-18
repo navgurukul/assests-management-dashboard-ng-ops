@@ -29,7 +29,7 @@ import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
-  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | null
+  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | 'DISPOSE' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userRole = useAppSelector(selectUserRole);
   const isCampusManager = userRole === 'CAMPUS_MANAGER';
@@ -74,7 +74,12 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         await apiService.post(config.endpoints.assets.scrap(id), {
           reasonForScrapping: formData.description,
         });
-        toast.success('Asset marked as scrap successfully.');
+        toast.success('Asset marked as not working (scrap) successfully.');
+      } else if (modalAction === 'DISPOSE') {
+        await apiService.put(config.endpoints.assets.dispose(id), {
+          reasonForDisposal: formData.description,
+        });
+        toast.success('Asset marked as disposed successfully.');
       } else if (modalAction === 'CHANGE_LOCATION') {
         await apiService.put(config.endpoints.assets.update(id), {
           currentLocationId: formData.locationId,
@@ -141,7 +146,17 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       label: 'Reason for Scrapping',
       type: 'textarea',
       required: true,
-      placeholder: 'Describe why this asset is being scrapped...',
+      placeholder: 'Describe why this asset is being not working (scrapped)...',
+    },
+  ];
+
+  const disposeFields = [
+    {
+      name: 'description',
+      label: 'Reason for Disposal',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Describe why this asset is being disposed...',
     },
   ];
 
@@ -193,6 +208,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       'REPAIR': 'Under Repair',
       'SCRAP': 'Scrap',
       'PARTED_OUT': 'Parted Out',
+      'DISPOSED': 'Disposed',
     };
     return statusMap[status] || status;
   };
@@ -232,6 +248,8 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         return 'text-gray-600';
       case 'PARTED_OUT':
         return 'text-orange-600';
+      case 'DISPOSED':
+        return 'text-purple-600';
       default:
         return 'text-gray-900';
     }
@@ -389,8 +407,8 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         isOpen={modalAction !== null && modalAction !== 'CHANGE_LOCATION'}
         onClose={() => setModalAction(null)}
         componentName={assetDetails.assetTag}
-        actionType={modalAction === 'IN_STOCK' ? 'Move to In Stock' : modalAction === 'REPAIR' ? 'Put in Repair' : 'Scrap this Device'}
-        fields={modalAction === 'IN_STOCK' ? inStockFields : modalAction === 'REPAIR' ? repairFields : scrapFields}
+        actionType={modalAction === 'IN_STOCK' ? 'Move to In Stock' : modalAction === 'REPAIR' ? 'Put in Repair' : modalAction === 'DISPOSE' ? 'Mark as Disposed' : 'Scrap this Device'}
+        fields={modalAction === 'IN_STOCK' ? inStockFields : modalAction === 'REPAIR' ? repairFields : modalAction === 'DISPOSE' ? disposeFields : scrapFields}
         onSubmit={handleStatusUpdate}
         isSubmitting={isSubmitting || isMovingToStock}
         helpText={
@@ -398,6 +416,8 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
             ? 'Add notes for moving this asset back to In Stock. The status and condition will be updated.'
             : modalAction === 'REPAIR'
             ? 'Provide details about the issue. The asset status will be updated to Under Repair.'
+            : modalAction === 'DISPOSE'
+            ? 'Provide a reason for disposal. This will mark the asset as disposed and no longer in service.'
             : 'Provide a reason for scrapping. This will mark the asset as no longer in service.'
         }
       />
@@ -462,9 +482,14 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               }}
             />
             <CustomButton
-              text="Mark as Scrap"
-              disabled={assetDetails?.ownedBy === 'lnw'}
+              text="Mark as Disposed"
               variant="danger"
+              onClick={() => setModalAction('DISPOSE')}
+            />
+            <CustomButton
+              text="Mark as Not Working"
+              disabled={assetDetails?.ownedBy === 'lnw'}
+              variant="secondary"
               onClick={() => setModalAction('SCRAP')}
             />
             <CustomButton

@@ -28,7 +28,7 @@ import { useAssetExport } from '@/app/hooks/useAssetExport';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 
-const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
+const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out', 'Disposed'];
 const actionOptions = ['View', 'Assign', 'Details'];
 
 export default function AssetsList() {
@@ -216,6 +216,7 @@ export default function AssetsList() {
     { value: 'REPAIR', label: 'Under Repair' },
     { value: 'SCRAP', label: 'Scrap' },
     { value: 'PARTED_OUT', label: 'Parted Out' },
+    { value: 'DISPOSED', label: 'Disposed' },
   ], []);
 
   // Health status filter options - memoize to prevent rerenders

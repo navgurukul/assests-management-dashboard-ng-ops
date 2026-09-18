@@ -46,6 +46,7 @@ const STATUS_COLOR_MAP = {
   UNDER_REPAIR: 'bg-red-100 text-red-800',
   SCRAP: 'bg-gray-100 text-gray-800',
   PARTED_OUT: 'bg-orange-100 text-orange-800',
+  DISPOSED: 'bg-purple-100 text-purple-800',
   IN_REPAIR: 'bg-yellow-100 text-yellow-800',
   RETIRED: 'bg-gray-100 text-gray-800',
   AVAILABLE: 'bg-blue-100 text-blue-800',

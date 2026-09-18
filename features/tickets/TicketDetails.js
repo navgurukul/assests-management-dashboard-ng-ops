@@ -373,7 +373,7 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
         await apiService.post(config.endpoints.assets.scrap(assetId), {
           reasonForScrapping: formData.description,
         });
-        toast.success('Asset marked as scrap successfully.');
+        toast.success('Asset marked as not working (scrap ) successfully.');
       }
       setAssetModalAction(null);
       queryClient.invalidateQueries({ queryKey: ['ticket-details', ticketId] });
@@ -553,18 +553,18 @@ export default function TicketDetails({ ticketId, ticketData, onBack, isLoading,
       <FormModal
         isOpen={!!assetModalAction}
         onClose={() => setAssetModalAction(null)}
-        title={assetModalAction === 'REPAIR' ? 'Move Asset to Repair' : assetModalAction === 'SCRAP' ? 'Mark Asset as Scrap' : 'Cancel Ticket'}
+        title={assetModalAction === 'REPAIR' ? 'Move Asset to Repair' : assetModalAction === 'SCRAP' ? 'Mark Asset as Not Working' : 'Cancel Ticket'}
         fields={[
           {
             name: 'description',
-            label: assetModalAction === 'CANCEL' ? 'Reason for Cancellation' : (assetModalAction === 'REPAIR' ? 'Reason for Repair' : 'Reason for Scrapping'),
+            label: assetModalAction === 'CANCEL' ? 'Reason for Cancellation' : (assetModalAction === 'REPAIR' ? 'Reason for Repair' : 'Reason for marking as Not Working (Scrapping)'),
             type: 'textarea',
             required: true,
             placeholder: assetModalAction === 'CANCEL'
               ? 'Describe the reason for cancelling this ticket(e.g. duplicate ticket, raised by mistake, or issue no longer applies).'
               : assetModalAction === 'REPAIR'
               ? 'Describe the issue or reason this asset needs repair...'
-              : 'Describe why this asset is being scrapped...',
+              : 'Describe why this asset is being not working (Scrapped)...',
           },
         ]}
         initialValues={{ description: '' }}

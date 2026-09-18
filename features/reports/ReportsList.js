@@ -69,7 +69,7 @@ export default function ReportsList() {
   };
 
   const campusOptions = ['Sarjapura', 'Pune', 'Dharamshala', 'Bangalore', 'Dantewada', 'Jashpur', 'Raipur', 'Amaravati', 'Udaipur', 'Jabalpur'];
-  const statusOptions = ['Allocated', 'In Stock', 'Under Repair', 'In Courier', 'Scrap'];
+  const statusOptions = ['Allocated', 'In Stock', 'Under Repair', 'In Courier', 'Scrap', 'Disposed'];
   const assetTypeOptions = ['Laptop', 'Desktop', 'Tablet', 'Monitor'];
   const vendorOptions = ['TechCare', 'FixIT', 'CompuServe', 'ITSolutions'];
   const donorOptions = ['CSR Fund', 'Corporate Donation', 'Individual Donor'];
