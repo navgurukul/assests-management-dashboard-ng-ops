@@ -39,6 +39,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const [expandedTimelines, setExpandedTimelines] = useState({});
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
   const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
+  const [isDownloadingNOC, setIsDownloadingNOC] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -181,6 +182,19 @@ export default function MyAssetsTab({ userData = {} }) {
     }
     setSelectedAsset(asset);
     setReceivedModalOpen(true);
+  };
+
+  const handleDownloadNOC = async () => {
+    setIsDownloadingNOC(true);
+    try {
+      await downloadNOC({ ...userData, ...apiUser }, assetMovements);
+      toast.success('NOC downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading NOC:', error);
+      toast.error('Failed to download NOC. Please try again.');
+    } finally {
+      setIsDownloadingNOC(false);
+    }
   };
 
   const handleAssetReceivedSubmit = async (formData) => {
@@ -472,11 +486,11 @@ export default function MyAssetsTab({ userData = {} }) {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-gray-900">My Assets</h1>
         <CustomButton
-          text="Download NOC"
+          text={isDownloadingNOC ? "Downloading..." : "Download NOC"}
           onClick={() => setNocModalOpen(true)}
           variant="primary"
           size="sm"
-          disabled={!canDownloadNOC}
+          disabled={!canDownloadNOC || isDownloadingNOC}
           icon={Download}
         />
       </div>
@@ -846,11 +860,12 @@ export default function MyAssetsTab({ userData = {} }) {
             </p>
           </div>
           <CustomButton
-            text="Download NOC"
-            onClick={() => downloadNOC({ ...userData, ...apiUser }, assetMovements)}
+            text={isDownloadingNOC ? "Downloading..." : "Download NOC"}
+            onClick={handleDownloadNOC}
             variant="success"
             size="md"
             icon={Download}
+            disabled={isDownloadingNOC}
           />
         </div>
       </Modal>

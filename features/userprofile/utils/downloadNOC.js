@@ -1,3 +1,5 @@
+import { apiGet } from '@/app/utils/apiService';
+
 export async function downloadNOC(userData = {}, assetMovements = []) {
   const html2pdf = (await import('html2pdf.js')).default;
 
@@ -23,6 +25,25 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     });
   };
 
+  // Function to fetch asset details including serial number
+  const fetchAssetDetails = async (assetId) => {
+    try {
+      const response = await apiGet(`/assets/${assetId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching asset details for ${assetId}:`, error);
+      // Don't throw, just return null to show N/A in the NOC
+      if (error.code === 401) {
+        console.warn('Authentication error while fetching asset details. Serial number will show as N/A.');
+      } else if (error.code === 404) {
+        console.warn(`Asset ${assetId} not found. Serial number will show as N/A.`);
+      } else {
+        console.warn(`Failed to fetch asset ${assetId}. Serial number will show as N/A.`);
+      }
+    }
+    return null;
+  };
+
   // Group movements by device and extract allocation/return dates.
   const deviceMap = {};
   assetMovements.forEach((movement) => {
@@ -32,7 +53,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     // Group by assetId — it's stable across tag renames, unlike assetTag itself.
     const key = movement.assetId || tag;
     if (!deviceMap[key]) {
-      deviceMap[key] = { assetTag: tag, allocatedAt: null, returnedAt: null, isReturned: false, notes: [], lastMovedAt: null };
+      deviceMap[key] = { assetTag: tag, assetId: movement.assetId, allocatedAt: null, returnedAt: null, isReturned: false, notes: [], lastMovedAt: null, serialNumber: null };
     }
 
     // Always display the tag from the most recent movement, so a renamed/returned
@@ -59,7 +80,32 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     }
   });
 
-  const devices = Object.values(deviceMap);
+  // Fetch serial numbers for all assets (parallel, with a per-asset timeout
+  const deviceArray = Object.values(deviceMap);
+
+  const fetchWithTimeout = (device) => {
+    return Promise.race([
+      (async () => {
+        if (device.assetId) {
+          const assetDetails = await fetchAssetDetails(device.assetId);
+          if (assetDetails && assetDetails.serialNumber) {
+            device.serialNumber = assetDetails.serialNumber;
+          }
+        }
+        return device;
+      })(),
+      // Timeout after 10 seconds per asset
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 10000)
+      ),
+    ]).catch((error) => {
+      console.warn(`Failed to fetch serial number for asset ${device.assetId}:`, error.message);
+      return device; // Return device without serial number
+    });
+  };
+
+  const assetDetailsPromises = deviceArray.map(fetchWithTimeout);
+  const devices = await Promise.all(assetDetailsPromises);
 
   const deviceRowsHtml = devices.map((device, index) => {
     const rowBg = index % 2 === 0 ? '' : 'background: #f9fafb;';
@@ -67,10 +113,12 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     const statusColor = device.isReturned ? '#15803d' : '#b45309';
     const statusBg = device.isReturned ? '#f0fdf4' : '#fffbeb';
     const notesText = device.notes.length > 0 ? device.notes.join(', ') : 'N/A';
+    const serialNumber = device.serialNumber || 'N/A';
 
     return `
-      <tr style="${rowBg}">
+      <tr style="${rowBg} page-break-inside: avoid; break-inside: avoid;">
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px; font-weight: 600;">${device.assetTag}</td>
+        <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px; font-weight: 500;">${serialNumber}</td>
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px;">${formatDate(device.allocatedAt)}</td>
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px;">${formatDate(device.returnedAt)}</td>
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px; text-align: center;">
@@ -91,6 +139,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
       <thead>
         <tr style="background: #f3f4f6;">
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Device</th>
+          <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Serial Number</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Allocated On</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Returned On</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: center; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Status</th>
@@ -165,7 +214,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
 
       ${deviceSectionHtml}
 
-      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px 20px; margin-bottom: 28px;">
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; page-break-inside: avoid;">
         <p style="margin: 0; font-size: 14px; font-weight: 600; color: #15803d;">
           &#10003;&nbsp; Status: NOC GRANTED
         </p>
@@ -185,11 +234,12 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
 
   html2pdf()
     .set({
-      margin: 0,
+      margin: [5, 8, 5, 8],  
       filename: 'NOC.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] },
     })
     .from(element)
     .save();
