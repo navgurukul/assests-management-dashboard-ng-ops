@@ -156,8 +156,11 @@ export default function PdfPreviewModal({
                       <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '6%' }}>
                         S.No.
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '18%' }}>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '16%' }}>
                         Asset Tag
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '16%' }}>
+                        Previous Asset Tag
                       </th>
                       <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
                         Asset Type
@@ -190,6 +193,9 @@ export default function PdfPreviewModal({
                           </td>
                           <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
                             {asset?.assetTag || 'N/A'}
+                          </td>
+                          <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                            {asset?.previousTag || 'N/A'}
                           </td>
                           <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
                             {asset?.assetType?.name || 'N/A'}
