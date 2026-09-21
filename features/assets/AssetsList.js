@@ -136,6 +136,7 @@ export default function AssetsList() {
     if (filters.type) params.append('type', filters.type);
     if (filters.healthStatus) params.append('healthStatus', filters.healthStatus);
     if (filters.ownedBy) params.append('ownedBy', filters.ownedBy);
+    if (filters.sourceType) params.append('sourceType', filters.sourceType);
     
     return params.toString();
   };
@@ -237,6 +238,13 @@ export default function AssetsList() {
     { value: 'lct', label: 'LCT' },
     { value: 'lsd/b', label: 'LSD/B' },
   ], []);
+
+  // Source Type filter options - memoize to prevent rerenders
+  const sourceTypeOptions = useMemo(() => [
+    { value: 'PURCHASED', label: 'Purchased' },
+    { value: 'DONATED', label: 'Donated' },
+    { value: 'PERSONAL', label: 'Personal' },
+  ], []);
   
   // Get label for a filter value - memoize this function
   const getFilterLabel = useCallback((filterKey, value) => {
@@ -260,8 +268,12 @@ export default function AssetsList() {
       const ownedBy = ownedByOptions.find(opt => opt.value === value);
       return ownedBy ? ownedBy.label : value;
     }
+    if (filterKey === 'sourceType') {
+      const sourceType = sourceTypeOptions.find(opt => opt.value === value);
+      return sourceType ? sourceType.label : value;
+    }
     return value;
-  }, [campusOptions, assetTypeOptions, filterStatusOptions, healthStatusOptions, ownedByOptions]);
+  }, [campusOptions, assetTypeOptions, filterStatusOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions]);
   
   // Get category name for display - memoize this function
   const getCategoryName = useCallback((filterKey) => {
@@ -271,6 +283,7 @@ export default function AssetsList() {
       status: 'Status',
       healthStatus: 'Health Status',
       ownedBy: 'Owned By',
+      sourceType: 'Source Type',
     };
     return categoryNames[filterKey] || filterKey;
   }, []);
@@ -521,6 +534,7 @@ export default function AssetsList() {
             assetTypeOptions={assetTypeOptions}
             healthStatusOptions={healthStatusOptions}
             ownedByOptions={ownedByOptions}
+            sourceTypeOptions={sourceTypeOptions}
             selectedFilters={filters}
           />
         }

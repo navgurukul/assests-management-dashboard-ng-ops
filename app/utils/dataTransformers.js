@@ -79,6 +79,7 @@ export const formatSourceType = (sourceType) => {
   const sourceTypeMap = {
     'PURCHASED': 'Purchased',
     'DONATED': 'Donated',
+    'PERSONAL': 'Personal',
     'LEASED': 'Leased',
     'NEW_PURCHASE': 'New Purchase',
     'EXTRACTED': 'Extracted',
