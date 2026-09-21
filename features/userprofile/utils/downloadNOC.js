@@ -53,7 +53,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     // Group by assetId — it's stable across tag renames, unlike assetTag itself.
     const key = movement.assetId || tag;
     if (!deviceMap[key]) {
-      deviceMap[key] = { assetTag: tag, assetId: movement.assetId, allocatedAt: null, returnedAt: null, isReturned: false, notes: [], lastMovedAt: null, serialNumber: null };
+      deviceMap[key] = { assetTag: tag, assetId: movement.assetId, allocatedAt: null, returnedAt: null, isReturned: false, notes: [], lastMovedAt: null, serialNumber: null, assetType: null };
     }
 
     // Always display the tag from the most recent movement, so a renamed/returned
@@ -88,8 +88,13 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
       (async () => {
         if (device.assetId) {
           const assetDetails = await fetchAssetDetails(device.assetId);
-          if (assetDetails && assetDetails.serialNumber) {
-            device.serialNumber = assetDetails.serialNumber;
+          if (assetDetails) {
+            if (assetDetails.serialNumber) {
+              device.serialNumber = assetDetails.serialNumber;
+            }
+            if (assetDetails.assetType?.name) {
+              device.assetType = assetDetails.assetType.name;
+            }
           }
         }
         return device;
@@ -114,10 +119,12 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
     const statusBg = device.isReturned ? '#f0fdf4' : '#fffbeb';
     const notesText = device.notes.length > 0 ? device.notes.join(', ') : 'N/A';
     const serialNumber = device.serialNumber || 'N/A';
+    const assetTypeText = device.assetType || 'N/A';
 
     return `
       <tr style="${rowBg} page-break-inside: avoid; break-inside: avoid;">
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px; font-weight: 600;">${device.assetTag}</td>
+        <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px;">${assetTypeText}</td>
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px; font-weight: 500;">${serialNumber}</td>
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px;">${formatDate(device.allocatedAt)}</td>
         <td style="padding: 8px 10px; border: 1px solid #e5e7eb; font-size: 12px;">${formatDate(device.returnedAt)}</td>
@@ -139,6 +146,7 @@ export async function downloadNOC(userData = {}, assetMovements = []) {
       <thead>
         <tr style="background: #f3f4f6;">
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Device</th>
+          <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Asset Type</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Serial Number</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Allocated On</th>
           <th style="padding: 8px 10px; border: 1px solid #e5e7eb; text-align: left; font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase;">Returned On</th>
