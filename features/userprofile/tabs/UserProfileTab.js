@@ -11,7 +11,8 @@ import FormModal from '@/components/molecules/FormModal';
 import {
   getEditProfileFields,
   editProfileValidationSchema,
-  managerOnlyValidationSchema,
+  getValidationSchemaForFields,
+  getMissingMandatoryFields,
 } from '@/app/config/formConfigs/editProfileModalConfig';
 import { useTheme } from '@/app/context/ThemeContext';
 
@@ -19,7 +20,7 @@ export default function UserProfileTab() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMandatoryFill, setIsMandatoryFill] = useState(false);
-  const [profileMode, setProfileMode] = useState('full'); // 'full' | 'manager-only'
+  const [profileMode, setProfileMode] = useState('full'); // 'full' (all fields) | 'partial' (only missing mandatory fields)
   const { isDark } = useTheme();
 
   const { data: schoolsResponse } = useFetch({
@@ -27,87 +28,88 @@ export default function UserProfileTab() {
     queryKey: ['schools'],
   });
 
-
   // Fetch user data using React Query
-  const { 
-    data: userDataResponse, 
-    isLoading: isLoadingUserData, 
+  const {
+    data: userDataResponse,
+    isLoading: isLoadingUserData,
     error: userDataError,
-    refetch: refetchUserData
+    refetch: refetchUserData,
   } = useFetch({
     url: config.endpoints.user.me,
     queryKey: ['userMe'],
-    enabled: true
+    enabled: true,
   });
 
   // Extract user data from response or use fallback
   const rawUserData = userDataResponse?.data || userDataResponse || null;
-  
+
   // Transform API response to match component expectations
-  const userData = rawUserData ? {
-    name: `${rawUserData.firstName || ''} ${rawUserData.lastName || ''}`.trim() || 'User',
-    email: rawUserData.email || '',
-    phone: rawUserData.phone || '',
-    role: rawUserData.role || '',
-    department: rawUserData.department || '',
-    location: rawUserData.location || '',
-    managerName: rawUserData.manager
-      ? `${rawUserData.manager.firstName || ''} ${rawUserData.manager.lastName || ''}`.trim() || rawUserData.manager.email
-      : '',
-    managerEmail: rawUserData.manager?.email || '',
-    campusName: rawUserData.campus?.campusName || rawUserData.campusName || '',
-    schoolName: rawUserData.school?.name || rawUserData.schoolName || '',
-    joinDate: rawUserData.createdAt ? new Date(rawUserData.createdAt).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '',
-    avatar: null,
-  } : {
-    name: 'Loading...',
-    email: '',
-    phone: '',
-    role: '',
-    department: '',
-    location: '',
-    managerName: '',
-    managerEmail: '',
-    campusName: '',
-    schoolName: '',
-    joinDate: '',
-    avatar: null,
-  };
+  const userData = rawUserData
+    ? {
+        name: `${rawUserData.firstName || ''} ${rawUserData.lastName || ''}`.trim() || 'User',
+        email: rawUserData.email || '',
+        phone: rawUserData.phone || '',
+        role: rawUserData.role || '',
+        department: rawUserData.department || '',
+        location: rawUserData.location || '',
+        managerName: rawUserData.manager
+          ? `${rawUserData.manager.firstName || ''} ${rawUserData.manager.lastName || ''}`.trim() ||
+            rawUserData.manager.email
+          : '',
+        managerEmail: rawUserData.manager?.email || '',
+        campusName: rawUserData.campus?.campusName || rawUserData.campusName || '',
+        schoolName: rawUserData.school?.name || rawUserData.schoolName || '',
+        joinDate: rawUserData.createdAt
+          ? new Date(rawUserData.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : '',
+        avatar: null,
+      }
+    : {
+        name: 'Loading...',
+        email: '',
+        phone: '',
+        role: '',
+        department: '',
+        location: '',
+        managerName: '',
+        managerEmail: '',
+        campusName: '',
+        schoolName: '',
+        joinDate: '',
+        avatar: null,
+      };
 
   const handleEditSubmit = async (formData) => {
     setIsSubmitting(true);
     const loadingToastId = toast.loading('Updating profile...');
 
-    // Manager-only mode: send just managerId, don't touch other fields
-    const payload = profileMode === 'manager-only'
-      ? { managerId: formData.managerId }
-      : Object.entries(formData).reduce((acc, [key, value]) => {
-          if (value !== '' && value !== null && value !== undefined) {
-            acc[key] = value;
-          }
-          return acc;
-        }, {});
-    
+    // Only send the fields that were actually present in the form
+    // (works the same whether it's the full form or a partial one).
+    const payload = Object.entries(formData).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
     try {
       await post({
         url: config.getApiUrl(config.endpoints.user.me),
         method: 'PUT',
         data: payload,
       });
-      
+
       toast.dismiss(loadingToastId);
       toast.success(
-        profileMode === 'manager-only'
-          ? 'Manager saved. You can now use all features.'
-          : 'Profile updated successfully'
+        profileMode === 'partial' ? 'Details saved. You can now use all features.' : 'Profile updated successfully'
       );
       setIsMandatoryFill(false);
       setIsEditModalOpen(false);
-      
+
       // Refetch user data without page reload
       refetchUserData();
     } catch (error) {
@@ -119,22 +121,16 @@ export default function UserProfileTab() {
     }
   };
 
-  // Auto-open modal when profile info is missing — split into two flows:
-  // 1. New/incomplete users (no phone OR no location) → full profile form
-  // 2. Existing users (phone + location set, only manager missing) → manager-only modal
+  // Auto-open modal when any mandatory field is missing.
+  // - Brand-new / very incomplete users (phone or location missing) → full form.
+  // - Existing users missing only some newer mandatory field(s) (e.g. department) → a small modal with just those fields.
   useEffect(() => {
     if (!isLoadingUserData && rawUserData) {
-      const hasCoreProfile = rawUserData.phone && rawUserData.location;
-      const hasManager = rawUserData.managerId || rawUserData.manager?.id;
+      const missing = getMissingMandatoryFields(rawUserData);
 
-      if (!hasCoreProfile) {
-        // New or incomplete user — show full form
-        setProfileMode('full');
-        setIsMandatoryFill(true);
-        setIsEditModalOpen(true);
-      } else if (!hasManager) {
-        // Existing user, only manager missing — show focused manager modal
-        setProfileMode('manager-only');
+      if (missing.length > 0) {
+        const isNewOrIncompleteUser = missing.includes('phone') || missing.includes('location');
+        setProfileMode(isNewOrIncompleteUser ? 'full' : 'partial');
         setIsMandatoryFill(true);
         setIsEditModalOpen(true);
       }
@@ -148,32 +144,31 @@ export default function UserProfileTab() {
     }
   };
 
-  const editProfileFields = useMemo(() => {
-    // Manager-only mode — no school/campus logic needed
-    if (profileMode === 'manager-only') {
-      return getEditProfileFields(
-        { managerId: rawUserData?.managerId || rawUserData?.manager?.id || '' },
-        'manager-only'
-      );
-    }
+  const missingFieldNames = useMemo(
+    () => (rawUserData ? getMissingMandatoryFields(rawUserData) : []),
+    [rawUserData]
+  );
 
-    // Full profile mode
+  const editProfileFields = useMemo(() => {
+    if (!rawUserData) return [];
+
     const schoolOptions = (schoolsResponse?.data?.schools || []).map((school) => ({
       value: school.id,
       label: school.name,
     }));
 
-    const fields = getEditProfileFields({
+    const allFields = getEditProfileFields({
       phone: userData.phone,
       location: userData.location,
+      department: userData.department,
       campusId: rawUserData?.campusId || rawUserData?.campus?.id || '',
       schoolId: rawUserData?.schoolId || '',
       managerId: rawUserData?.managerId || rawUserData?.manager?.id || '',
-    }, 'full');
+    });
 
     const rolesWithSchool = ['STUDENT', 'IT_COORDINATOR'];
 
-    return fields
+    const mappedFields = allFields
       .map((field) => {
         if (field.name === 'schoolId') {
           return { ...field, options: schoolOptions };
@@ -189,7 +184,34 @@ export default function UserProfileTab() {
         }
         return true;
       });
-  }, [schoolsResponse, userData.phone, userData.location, rawUserData, profileMode]);
+
+    if (profileMode === 'full') {
+      // New/incomplete user — show the whole relevant form
+      return mappedFields;
+    }
+
+    // 'partial' — only show whichever mandatory fields are actually missing
+    return mappedFields.filter((field) => missingFieldNames.includes(field.name));
+  }, [schoolsResponse, userData.phone, userData.location, userData.department, rawUserData, profileMode, missingFieldNames]);
+
+  const { modalHeading, modalHelpText, modalValidationSchema } = useMemo(() => {
+    const isCompletionFlow = isMandatoryFill && (profileMode === 'full' || profileMode === 'partial');
+
+    if (isCompletionFlow) {
+      return {
+        modalHeading: 'Complete Your Profile',
+        modalHelpText: 'Please fill in the following details to continue using the dashboard.',
+        modalValidationSchema:
+          profileMode === 'partial' ? getValidationSchemaForFields(missingFieldNames) : editProfileValidationSchema,
+      };
+    }
+
+    return {
+      modalHeading: 'User Details',
+      modalHelpText: '',
+      modalValidationSchema: editProfileValidationSchema,
+    };
+  }, [profileMode, isMandatoryFill, missingFieldNames]);
 
   if (isLoadingUserData && !rawUserData) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -201,28 +223,18 @@ export default function UserProfileTab() {
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         componentName=""
-        actionType={profileMode === 'manager-only' ? 'Select Your Manager' : 'User Details'}
-        helpText={
-          profileMode === 'manager-only'
-            ? 'Your manager information is required. Please select your manager to continue.'
-            : ''
-        }
+        actionType={modalHeading}
+        helpText={modalHelpText}
         fields={editProfileFields}
         onSubmit={handleEditSubmit}
         size="medium"
         isSubmitting={isSubmitting}
-        validationSchema={
-          profileMode === 'manager-only'
-            ? managerOnlyValidationSchema
-            : editProfileValidationSchema
-        }
+        validationSchema={modalValidationSchema}
       />
-      
+
       {/* Tab Heading */}
       <div className="mb-5">
-        <h2 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-          Personal Information
-        </h2>
+        <h2 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>Personal Information</h2>
       </div>
 
       {/* Information Grid */}
@@ -250,15 +262,15 @@ export default function UserProfileTab() {
         </div>
 
         {/* Department */}
-        {/* <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
+        <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
           <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-900/50' : 'bg-purple-100'}`}>
-            <Building className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+            <Building2 className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
           </div>
           <div>
             <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Department</p>
-            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.department}</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.department || '—'}</p>
           </div>
-        </div> */}
+        </div>
 
         {/* Location */}
         <div className={`flex items-start space-x-4 p-4 rounded-xl shadow-sm ${isDark ? 'profile-box-bg-dark' : 'profile-box-bg-light'}`}>
@@ -278,13 +290,9 @@ export default function UserProfileTab() {
           </div>
           <div>
             <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Manager</p>
-            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-              {userData.managerName || '—'}
-            </p>
+            <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.managerName || '—'}</p>
             {userData.managerEmail && (
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                {userData.managerEmail}
-              </p>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{userData.managerEmail}</p>
             )}
           </div>
         </div>
@@ -297,9 +305,7 @@ export default function UserProfileTab() {
             </div>
             <div>
               <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Campus</p>
-              <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                {userData.campusName || '—'}
-              </p>
+              <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.campusName || '—'}</p>
             </div>
           </div>
         )}
@@ -312,9 +318,7 @@ export default function UserProfileTab() {
             </div>
             <div>
               <p className={`text-xs mb-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>School</p>
-              <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                {userData.schoolName || '—'}
-              </p>
+              <p className={`text-sm font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{userData.schoolName || '—'}</p>
             </div>
           </div>
         )}
@@ -333,9 +337,9 @@ export default function UserProfileTab() {
 
       {/* Actions */}
       <div className="mt-6 flex gap-3">
-        <CustomButton 
-          text="Edit Profile" 
-          variant="primary" 
+        <CustomButton
+          text="Edit Profile"
+          variant="primary"
           size="md"
           onClick={() => {
             setProfileMode('full');
