@@ -281,21 +281,22 @@ export default function TableWrapper({
       </div>
 
       {/* Pagination – reduced via className overrides passed down */}
-      <div className="w-full bg-white z-20 shrink-0">
-        <Pagination
-          currentPage={serverPagination ? (paginationData?.page || 1) : currentPage}
-          totalPages={serverPagination ? (paginationData?.totalPages || 1) : totalPages}
-          totalCount={serverPagination ? (paginationData?.totalCount || 0) : data.length}
-          pageSize={serverPagination ? (paginationData?.limit || pageSize) : pageSize}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          showPageSizeSelector={true}
-          showPageInfo={true}
-          // Pass size hint so Pagination can render smaller buttons
-          size="sm"
-          className="text-[10px] sm:text-[11px] md:text-[12px]"
-        />
-      </div>
+      {showPagination && (
+        <div className="w-full bg-white z-20 shrink-0">
+          <Pagination
+            currentPage={serverPagination ? (paginationData?.page || 1) : currentPage}
+            totalPages={serverPagination ? (paginationData?.totalPages || 1) : totalPages}
+            totalCount={serverPagination ? (paginationData?.totalCount || 0) : data.length}
+            pageSize={serverPagination ? (paginationData?.limit || pageSize) : pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            showPageSizeSelector={true}
+            showPageInfo={true}
+            size="sm"
+            className="text-[10px] sm:text-[11px] md:text-[12px]"
+         />
+        </div>
+      )}
     </div>
   );
 }
