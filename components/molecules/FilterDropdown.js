@@ -130,9 +130,10 @@ function useMenuPosition(isOpen, menuRef) {
   }, [isOpen, menuRef]);
 }
 
-function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions, isAssignedOptions, assigneeOptions, ticketTypeOptions, statusLabel }) {
+function useFilterOptions({ campusOptions, assetCategoryOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions, isAssignedOptions, assigneeOptions, ticketTypeOptions, statusLabel }) {
   return [
     { key: 'campus',        label: 'Campus',         items: campusOptions },
+    { key: 'category',      label: 'Asset Category', items: assetCategoryOptions },
     { key: 'ticketType',    label: 'Ticket Type',     items: ticketTypeOptions },
     { key: 'isAssigned',    label: 'Unassigned Ticket', items: isAssignedOptions },
     { key: 'componentType', label: 'Component Type',  items: componentTypeOptions },
@@ -152,6 +153,7 @@ function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, 
 export default function FilterDropdown({
   onFilterChange,
   campusOptions = [],
+  assetCategoryOptions = [], 
   statusOptions = [],
   assetTypeOptions = [],
   componentTypeOptions = [],
@@ -175,6 +177,7 @@ export default function FilterDropdown({
   useMenuPosition(isOpen, menuRef);
   const filterOptions = useFilterOptions({
     campusOptions,
+    assetCategoryOptions,
     componentTypeOptions,
     sourceOptions,
     conditionOptions,

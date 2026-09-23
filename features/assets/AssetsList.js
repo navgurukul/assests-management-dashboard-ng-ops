@@ -57,6 +57,12 @@ export default function AssetsList() {
   useEffect(() => {
     const urlFilters = {};
     
+    // Check for status parameter
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      urlFilters.status = statusParam;
+    }
+
     // Check for ownedBy parameter
     const ownedByParam = searchParams.get('ownedBy');
     if (ownedByParam) {
@@ -68,7 +74,7 @@ export default function AssetsList() {
     if (campusParam) {
       urlFilters.campus = campusParam;
     }
-    // Check for type perameter
+    // Check for type parameter
     const typeParam = searchParams.get('type');
     if (typeParam) {
       urlFilters.type = typeParam;
@@ -76,10 +82,7 @@ export default function AssetsList() {
 
     // Only update if there are URL parameters
     if (Object.keys(urlFilters).length > 0) {
-      setFilters(prevFilters => ({
-        ...prevFilters,
-        ...urlFilters
-      }));
+      setFilters(urlFilters);
     }
   }, [searchParams]); // Remove setFilters from dependency array
   

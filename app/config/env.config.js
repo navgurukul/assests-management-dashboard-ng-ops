@@ -28,6 +28,7 @@ const config = {
       scrap: (id) => `/assets/${id}/scrap`,
       dispose: (id) => `/assets/${id}/disposed`,
       consolidatedByCampus: '/assets/consolidated-data/by-campus',
+      categoryAndType: '/assets/category-and-type',
       export: '/assets/export/csv',
       types: '/asset-types',
       categories: '/asset-categories',
