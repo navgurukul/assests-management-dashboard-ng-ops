@@ -7,6 +7,7 @@ import StateHandler from '@/components/atoms/StateHandler';
 import PdfPreviewModal from '@/components/molecules/PdfPreviewModal';
 import CustomButton from '@/components/atoms/CustomButton';
 import BulkConsignmentModal from './BulkConsignmentModal';
+import AssetTagsPrintModal from '@/components/molecules/AssetTagsPrintModal';
 import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 import StatusChip from '@/components/atoms/StatusChip';
 import { Edit } from 'lucide-react';
@@ -19,6 +20,7 @@ import config from '@/app/config/env.config';
 export default function ConsignmentDetails({ consignmentId, consignmentData, onBack, isLoading, isError, error }) {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
+  const [showTagsModal, setShowTagsModal] = useState(false);
   
   const [showEstDateModal, setShowEstDateModal] = useState(false);
   const queryClient = useQueryClient();
@@ -428,6 +430,12 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
               size="md"
               onClick={() => setShowPdfModal(true)}
             />
+            <CustomButton
+              text="Print Tags"
+              variant="secondary"
+              size="md"
+              onClick={() => setShowTagsModal(true)}
+            />
           </div>
         }
       />
@@ -456,6 +464,13 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         destinationUser={destinationUser}
         assets={consignment.assets}
         filename={`Consignment_${consignment?.consignmentCode || consignment?.id || 'Details'}.pdf`}
+      />
+
+      <AssetTagsPrintModal
+        isOpen={showTagsModal}
+        onClose={() => setShowTagsModal(false)}
+        consignmentCode={consignment.consignmentCode || consignment.code}
+        assets={consignment.assets}
       />
 
       <FormModal
