@@ -151,34 +151,34 @@ export default function PdfPreviewModal({
                 Assets in Consignment
               </h2>
               <div className="overflow-hidden border rounded" style={{ borderColor: '#e5e7eb' }}>
-                <table className="w-full border-collapse" style={{ fontSize: '12px' }}>
+                <table className="w-full border-collapse" style={{ fontSize: '12px', tableLayout: 'fixed' }}>
                   <thead style={{ backgroundColor: '#f3f4f6' }}>
                     <tr>
-                      <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '6%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '5%', wordBreak: 'break-word' }}>
                         S.No.
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '16%' }}>
+                      <th className="px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '14%', wordBreak: 'break-word' }}>
                         Asset Tag
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '16%' }}>
+                      <th className="px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '14%', wordBreak: 'break-word' }}>
                         Previous Asset Tag
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                      <th className="px-2 py-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '8%' }}>
                         Asset Type
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '9%', whiteSpace: 'nowrap' }}>
                         Brand
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                      <th className="px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '10%', wordBreak: 'break-word' }}>
                         Model
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '15%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '15%', wordBreak: 'break-word' }}>
                         Serial Number
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12.5%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '13%', wordBreak: 'break-word' }}>
                         Checked at Source
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', width: '12.5%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', width: '13%', wordBreak: 'break-word' }}>
                         Checked at Destination
                       </th>
                     </tr>
@@ -189,31 +189,31 @@ export default function PdfPreviewModal({
                       const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
                       return (
                         <tr key={asset?.id || index} style={{ backgroundColor: rowBg }}>
-                          <td className="px-3 py-3 text-center font-semibold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center font-semibold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {index + 1}
                           </td>
-                          <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.assetTag || 'N/A'}
                           </td>
-                          <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.previousTag || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', whiteSpace: 'nowrap' }}>
                             {asset?.assetType?.name || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.brand || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.model || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.serialNumber || 'N/A'}
                           </td>
-                          <td className="px-2 py-3 text-center" style={{ borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
                             
                           </td>
-                          <td className="px-2 py-3 text-center" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ borderBottom: '1px solid #e5e7eb' }}>
                             
                           </td>
                         </tr>
