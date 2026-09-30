@@ -39,8 +39,8 @@ export default function AssetTagsPrintModal({
 
           {/* Consignment code — once at the top */}
           <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #e5e7eb' }}>
-            <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Consignment</p>
-            <p style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937', margin: '2px 0 0 0' }}>
+            <p style={{ fontSize: '15px', color: '#6b7280', margin: 0 }}>Consignment</p>
+            <p style={{ fontSize: '17px', fontWeight: '700', color: '#1f2937', margin: '2px 0 0 0' }}>
               {consignmentCode || 'N/A'}
             </p>
           </div>
@@ -61,11 +61,9 @@ export default function AssetTagsPrintModal({
                 <div
                   key={copy}
                   style={{
-                    border: '2px solid #1f2937',
-                    borderRadius: '10px',
-                    backgroundColor: '#ffffff',
-                    boxSizing: 'border-box',
-                    padding: '20px 6px 36px',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '8px',
+                    padding: '2px 6px 18px',
                     textAlign: 'center',
                   }}
                 >
