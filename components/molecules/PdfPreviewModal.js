@@ -37,6 +37,7 @@ export default function PdfPreviewModal({
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
       };
 
       html2pdf().set(opt).from(element).save();
@@ -54,36 +55,36 @@ export default function PdfPreviewModal({
           style={{ minHeight: '800px', backgroundColor: '#ffffff', color: '#1f2937', fontFamily: 'Arial, sans-serif', fontSize: '14px', lineHeight: '1.5' }}
         >
           {/* Header */}
-          <div className="text-center border-b pb-6 mb-8" style={{ borderColor: '#e5e7eb' }}>
-            <h1 className="text-2xl font-bold uppercase tracking-wider" style={{ color: '#1f2937' }}>
+          <div className="text-center border-b pb-8 mb-10" style={{ borderColor: '#e5e7eb' }}>
+            <h1 className="text-4xl font-bold uppercase tracking-wider mb-4" style={{ color: '#1f2937' }}>
               {documentTitle}
             </h1>
-            <p className="text-base font-medium mt-2" style={{ color: '#6b7280' }}>
+            <p className="text-lg font-medium mt-3" style={{ color: '#6b7280' }}>
               Code: {documentCode || 'N/A'}
             </p>
-            <p className="text-base font-medium mt-1" style={{ color: '#6b7280' }}>
+            <p className="text-lg font-medium mt-2" style={{ color: '#6b7280' }}>
               Date: {date ? new Date(date).toLocaleDateString() : 'N/A'}
             </p>
           </div>
 
-          {/* Addresses Section */}
-          <div className="grid grid-cols-2 gap-8 mb-10">
-            {/* Destination - Left Side */}
-            <div className="p-5 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
-              <h3 className="text-base font-bold uppercase tracking-wider mb-3" style={{ color: '#6b7280' }}>
+          {/* Addresses Section - stacked vertically */}
+          <div className="flex flex-col gap-10 mb-10">
+            {/* Destination */}
+            <div className="p-6 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
+              <h3 className="text-lg font-bold uppercase tracking-wider mb-4" style={{ color: '#6b7280' }}>
                 {toLabel}
               </h3>
               
               {/* User Details */}
               {destinationUser && (
-                <div className="mb-3 space-y-1">
+                <div className="mb-3 space-y-2">
                   {(destinationUser.firstName || destinationUser.lastName) && (
-                    <p className="text-base font-medium" style={{ color: '#1f2937' }}>
+                    <p className="text-lg font-semibold" style={{ color: '#1f2937' }}>
                       {`${destinationUser.firstName || ''} ${destinationUser.lastName || ''}`.trim()}
                     </p>
                   )}
                   {destinationUser.phone && (
-                    <p className="text-sm" style={{ color: '#4b5563' }}>
+                    <p className="text-base" style={{ color: '#4b5563' }}>
                       Phone: {destinationUser.phone}
                     </p>
                   )}
@@ -92,35 +93,35 @@ export default function PdfPreviewModal({
               
               {/* Address */}
               {destinationAddress && destinationAddress !== 'N/A' && (
-                <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
+                <div className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: '#4b5563' }}>
                   {destinationAddress}
                 </div>
               )}
             </div>
 
-            {/* Source - Right Side */}
-            <div className="p-5 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
-              <h3 className="text-base font-bold uppercase tracking-wider mb-3" style={{ color: '#6b7280' }}>
+            {/* Source */}
+            <div className="p-6 border rounded" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
+              <h3 className="text-lg font-bold uppercase tracking-wider mb-4" style={{ color: '#6b7280' }}>
                 {fromLabel}
               </h3>
               
               {/* Organization Name */}
               {organizationName && (
-                <p className="font-semibold text-base mb-2" style={{ color: '#1f2937' }}>
+                <p className="font-bold text-xl mb-3" style={{ color: '#1f2937' }}>
                   {organizationName}
                 </p>
               )}
               
               {/* Created By User Name */}
               {sourceCreatedBy && (sourceCreatedBy.firstName || sourceCreatedBy.lastName) && (
-                <p className="text-base font-medium mb-1" style={{ color: '#1f2937' }}>
+                <p className="text-lg font-semibold mb-2" style={{ color: '#1f2937' }}>
                   {`${sourceCreatedBy.firstName || ''} ${sourceCreatedBy.lastName || ''}`.trim()}
                 </p>
               )}
               
               {/* Campus Name and State */}
               {(sourceCampusName || (sourceState && sourceState !== 'N/A')) && (
-                <p className="text-base font-medium mb-2" style={{ color: '#1f2937' }}>
+                <p className="text-base font-medium mb-3" style={{ color: '#1f2937' }}>
                   {sourceCampusName}
                   {sourceCampusName && sourceState && sourceState !== 'N/A' && ', '}
                   {sourceState && sourceState !== 'N/A' && sourceState}
@@ -129,14 +130,14 @@ export default function PdfPreviewModal({
               
               {/* Campus Address */}
               {sourceAddress && sourceAddress !== 'N/A' && (
-                <div className="text-sm leading-relaxed whitespace-pre-wrap mb-2" style={{ color: '#4b5563' }}>
+                <div className="text-base leading-relaxed whitespace-pre-wrap mb-3" style={{ color: '#4b5563' }}>
                   {sourceAddress}
                 </div>
               )}
               
               {/* Created By Phone */}
               {sourceCreatedBy && sourceCreatedBy.phone && (
-                <p className="text-sm" style={{ color: '#4b5563' }}>
+                <p className="text-base" style={{ color: '#4b5563' }}>
                   Phone: {sourceCreatedBy.phone}
                 </p>
               )}
@@ -145,39 +146,39 @@ export default function PdfPreviewModal({
 
           {/* Assets Table Section */}
           {assets && assets.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-8" style={{ pageBreakBefore: 'always', breakBefore: 'page' }}>
               <h2 className="text-lg font-bold uppercase tracking-wider mb-4" style={{ color: '#1f2937' }}>
                 Assets in Consignment
               </h2>
               <div className="overflow-hidden border rounded" style={{ borderColor: '#e5e7eb' }}>
-                <table className="w-full border-collapse" style={{ fontSize: '12px' }}>
+                <table className="w-full border-collapse" style={{ fontSize: '12px', tableLayout: 'fixed' }}>
                   <thead style={{ backgroundColor: '#f3f4f6' }}>
                     <tr>
-                      <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '6%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '5%', wordBreak: 'break-word' }}>
                         S.No.
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '16%' }}>
+                      <th className="px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '14%', wordBreak: 'break-word' }}>
                         Asset Tag
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '16%' }}>
+                      <th className="px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '14%', wordBreak: 'break-word' }}>
                         Previous Asset Tag
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                      <th className="px-2 py-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '8%' }}>
                         Asset Type
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '9%', whiteSpace: 'nowrap' }}>
                         Brand
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12%' }}>
+                      <th className="px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '10%', wordBreak: 'break-word' }}>
                         Model
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '15%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '15%', wordBreak: 'break-word' }}>
                         Serial Number
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '12.5%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', borderRight: '1px solid #e5e7eb', width: '13%', wordBreak: 'break-word' }}>
                         Checked at Source
                       </th>
-                      <th className="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', width: '12.5%' }}>
+                      <th className="px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider leading-tight" style={{ color: '#374151', width: '13%', wordBreak: 'break-word' }}>
                         Checked at Destination
                       </th>
                     </tr>
@@ -188,31 +189,31 @@ export default function PdfPreviewModal({
                       const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
                       return (
                         <tr key={asset?.id || index} style={{ backgroundColor: rowBg }}>
-                          <td className="px-3 py-3 text-center font-semibold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center font-semibold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {index + 1}
                           </td>
-                          <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.assetTag || 'N/A'}
                           </td>
-                          <td className="px-3 py-3 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 font-bold" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.previousTag || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', whiteSpace: 'nowrap' }}>
                             {asset?.assetType?.name || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.brand || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.model || 'N/A'}
                           </td>
-                          <td className="px-3 py-3" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ color: '#1f2937', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', wordBreak: 'break-word' }}>
                             {asset?.serialNumber || 'N/A'}
                           </td>
-                          <td className="px-2 py-3 text-center" style={{ borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
                             
                           </td>
-                          <td className="px-2 py-3 text-center" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                          <td className="px-2 py-1.5 text-center" style={{ borderBottom: '1px solid #e5e7eb' }}>
                             
                           </td>
                         </tr>

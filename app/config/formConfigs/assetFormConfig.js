@@ -172,6 +172,7 @@ export const commonAssetFields = [
       // { value: 'REPAIR', label: 'Under Repair' },
       { value: "SCRAP", label: "Scrap" },
       { value: "PARTED_OUT", label: "Parted Out" },
+      { value: "DISPOSED", label: "Disposed" },
     ],
   },
   {
@@ -496,7 +497,7 @@ export const commonAssetValidation = {
   status: Yup.string()
     .required("Status is required")
     .oneOf(
-      ["IN_STOCK", "ALLOCATED", "REPAIR", "SCRAP", "PARTED_OUT"],
+      ["IN_STOCK", "ALLOCATED", "REPAIR", "SCRAP", "PARTED_OUT", "DISPOSED"],
       "Invalid status",
     ),
   condition: Yup.string()

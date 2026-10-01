@@ -5,6 +5,7 @@ import DashboardCard from '@/components/atoms/DashboardCard';
 import PieChart from '@/components/molecules/PieChart';
 import StackedColumnChart from '@/components/molecules/StackedColumnChart'; 
 import AssetsTable from '@/components/Table/Table';
+import AllAssetsReportTable from '@/components/Table/AllAssetsReportTable';
 import useFetch from '@/app/hooks/query/useFetch';
 import config from '@/app/config/env.config';
 
@@ -107,6 +108,11 @@ export default function DashboardPage() {
         </div>
       </div>
       <AssetsTable />
+      
+      {/* All Assets Report Section */}
+      <div className="mt-8">
+        <AllAssetsReportTable />
+      </div>
     </div>
   );
 }

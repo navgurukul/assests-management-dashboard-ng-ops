@@ -31,6 +31,7 @@ export const formatAssetStatus = (status) => {
     'REPAIR': 'Under Repair',
     'SCRAP': 'Scrap',
     'PARTED_OUT': 'Parted Out',
+    'DISPOSED': 'Disposed',
   };
   return statusMap[status] || status || 'N/A';
 };
@@ -78,6 +79,7 @@ export const formatSourceType = (sourceType) => {
   const sourceTypeMap = {
     'PURCHASED': 'Purchased',
     'DONATED': 'Donated',
+    'PERSONAL': 'Personal',
     'LEASED': 'Leased',
     'NEW_PURCHASE': 'New Purchase',
     'EXTRACTED': 'Extracted',

@@ -72,7 +72,7 @@ export function getTicketRightSections(ticket, hasAsset, onMarkAsScrap, onMoveTo
         },
       ],
       headerActions: (ticket.ticketType?.toUpperCase() === 'REPAIR'&& ['ADMIN', 'IT_LEAD', 'OPERATION', 'IT_COORDINATOR'].includes(loggedInUserRole)) ? [
-        { label: 'Mark as Scrap', variant: 'danger', onClick: onMarkAsScrap },
+        { label: 'Mark as Not Working', variant: 'danger', onClick: onMarkAsScrap }, // Updated the label from "Mark as scrap" to "Mark as not working" as the asset is marked as not working.
         { label: 'Moved to Repair', variant: 'warning', onClick: onMoveToRepair },
       ] : [],
     }] : []),

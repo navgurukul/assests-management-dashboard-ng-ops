@@ -28,7 +28,7 @@ import { useAssetExport } from '@/app/hooks/useAssetExport';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 
-const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out'];
+const statusOptions = ['Under Repair', 'Allocated', 'In Stock', 'Scrap', 'Parted Out', 'Disposed'];
 const actionOptions = ['View', 'Assign', 'Details'];
 
 export default function AssetsList() {
@@ -57,6 +57,12 @@ export default function AssetsList() {
   useEffect(() => {
     const urlFilters = {};
     
+    // Check for status parameter
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      urlFilters.status = statusParam;
+    }
+
     // Check for ownedBy parameter
     const ownedByParam = searchParams.get('ownedBy');
     if (ownedByParam) {
@@ -68,7 +74,7 @@ export default function AssetsList() {
     if (campusParam) {
       urlFilters.campus = campusParam;
     }
-    // Check for type perameter
+    // Check for type parameter
     const typeParam = searchParams.get('type');
     if (typeParam) {
       urlFilters.type = typeParam;
@@ -76,10 +82,7 @@ export default function AssetsList() {
 
     // Only update if there are URL parameters
     if (Object.keys(urlFilters).length > 0) {
-      setFilters(prevFilters => ({
-        ...prevFilters,
-        ...urlFilters
-      }));
+      setFilters(urlFilters);
     }
   }, [searchParams]); // Remove setFilters from dependency array
   
@@ -136,6 +139,7 @@ export default function AssetsList() {
     if (filters.type) params.append('type', filters.type);
     if (filters.healthStatus) params.append('healthStatus', filters.healthStatus);
     if (filters.ownedBy) params.append('ownedBy', filters.ownedBy);
+    if (filters.sourceType) params.append('sourceType', filters.sourceType);
     
     return params.toString();
   };
@@ -216,6 +220,7 @@ export default function AssetsList() {
     { value: 'REPAIR', label: 'Under Repair' },
     { value: 'SCRAP', label: 'Scrap' },
     { value: 'PARTED_OUT', label: 'Parted Out' },
+    { value: 'DISPOSED', label: 'Disposed' },
   ], []);
 
   // Health status filter options - memoize to prevent rerenders
@@ -235,6 +240,13 @@ export default function AssetsList() {
     { value: 'lwfhe', label: 'LWFHE' },
     { value: 'lct', label: 'LCT' },
     { value: 'lsd/b', label: 'LSD/B' },
+  ], []);
+
+  // Source Type filter options - memoize to prevent rerenders
+  const sourceTypeOptions = useMemo(() => [
+    { value: 'PURCHASED', label: 'Purchased' },
+    { value: 'DONATED', label: 'Donated' },
+    { value: 'PERSONAL', label: 'Personal' },
   ], []);
   
   // Get label for a filter value - memoize this function
@@ -259,8 +271,12 @@ export default function AssetsList() {
       const ownedBy = ownedByOptions.find(opt => opt.value === value);
       return ownedBy ? ownedBy.label : value;
     }
+    if (filterKey === 'sourceType') {
+      const sourceType = sourceTypeOptions.find(opt => opt.value === value);
+      return sourceType ? sourceType.label : value;
+    }
     return value;
-  }, [campusOptions, assetTypeOptions, filterStatusOptions, healthStatusOptions, ownedByOptions]);
+  }, [campusOptions, assetTypeOptions, filterStatusOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions]);
   
   // Get category name for display - memoize this function
   const getCategoryName = useCallback((filterKey) => {
@@ -270,6 +286,7 @@ export default function AssetsList() {
       status: 'Status',
       healthStatus: 'Health Status',
       ownedBy: 'Owned By',
+      sourceType: 'Source Type',
     };
     return categoryNames[filterKey] || filterKey;
   }, []);
@@ -520,6 +537,7 @@ export default function AssetsList() {
             assetTypeOptions={assetTypeOptions}
             healthStatusOptions={healthStatusOptions}
             ownedByOptions={ownedByOptions}
+            sourceTypeOptions={sourceTypeOptions}
             selectedFilters={filters}
           />
         }

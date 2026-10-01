@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from 'next/navigation';
 import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
@@ -38,8 +38,6 @@ function transformRow(item, index) {
 
 export default function AssetsTable() {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
 
   const { data: response, isLoading, isError, error } = useFetch({
     url: config.endpoints.assets.consolidatedByCampus,
@@ -130,21 +128,11 @@ export default function AssetsTable() {
     }
   );
 
-  const totalCount = tableData.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = tableData.slice(startIndex, startIndex + pageSize);
-
-  // Append totals row at the bottom of the current page view
+  // Append totals row at the bottom
+  const finalTableData = [...tableData];
   if (tableData.length > 0) {
-    paginatedData.push(totals);
+    finalTableData.push(totals);
   }
-
-  const handlePageChange = (page) => setCurrentPage(page);
-  const handlePageSizeChange = (newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(1);
-  };
 
   const renderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
@@ -205,25 +193,13 @@ export default function AssetsTable() {
 
   return (
     <TableWrapper
-      data={paginatedData}
+      data={finalTableData}
       columns={columns}
       title="Consolidated Laptop Data"
       renderCell={renderCell}
       margin="m-0"
       shadow="shadow-none"
-      itemsPerPage={pageSize}
-      showPagination={true}
-      serverPagination={true}
-      paginationData={{
-        page: currentPage,
-        limit: pageSize,
-        totalCount,
-        totalPages,
-        hasNextPage: currentPage < totalPages,
-        hasPreviousPage: currentPage > 1,
-      }}
-      onPageChange={handlePageChange}
-      onPageSizeChange={handlePageSizeChange}
+      showPagination={false}
       ariaLabel="Consolidated laptop table"
     />
   );

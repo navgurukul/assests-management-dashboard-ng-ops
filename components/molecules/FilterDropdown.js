@@ -55,7 +55,7 @@ function MobileAccordionItems({ filter, selectedValue, onSelect }) {
 
 function DesktopFlyout({ filter, selectedValue, onSelect }) {
   return (
-    <div className="hidden sm:block absolute right-full top-4 -mr-0.5 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+    <div className="hidden sm:block absolute right-full top-0 -mr-0.5 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
       <div className="py-2 max-h-64 overflow-y-auto">
         {filter.items.map((item) => (
           <FilterOptionItem
@@ -72,7 +72,7 @@ function DesktopFlyout({ filter, selectedValue, onSelect }) {
 
 function FilterCategoryRow({ filter, isExpanded, isHovered, selectedValue, onToggle, onHoverEnter, onHoverLeave, onSelect }) {
   return (
-    <div onMouseEnter={onHoverEnter} onMouseLeave={onHoverLeave}>
+    <div className="relative" onMouseEnter={onHoverEnter} onMouseLeave={onHoverLeave}>
       <div
         className="px-4 py-2.5 sm:py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between gap-2"
         onClick={onToggle}
@@ -130,9 +130,10 @@ function useMenuPosition(isOpen, menuRef) {
   }, [isOpen, menuRef]);
 }
 
-function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, healthStatusOptions, ownedByOptions, isAssignedOptions, assigneeOptions, ticketTypeOptions, statusLabel }) {
+function useFilterOptions({ campusOptions, assetCategoryOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions, isAssignedOptions, assigneeOptions, ticketTypeOptions, statusLabel }) {
   return [
     { key: 'campus',        label: 'Campus',         items: campusOptions },
+    { key: 'category',      label: 'Asset Category', items: assetCategoryOptions },
     { key: 'ticketType',    label: 'Ticket Type',     items: ticketTypeOptions },
     { key: 'isAssigned',    label: 'Unassigned Ticket', items: isAssignedOptions },
     { key: 'componentType', label: 'Component Type',  items: componentTypeOptions },
@@ -142,6 +143,7 @@ function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, 
     { key: 'type',          label: 'Asset Type',      items: assetTypeOptions },
     { key: 'healthStatus',  label: 'Health Status',   items: healthStatusOptions },
     { key: 'ownedBy',       label: 'Owned By',        items: ownedByOptions },
+    { key: 'sourceType',    label: 'Source Type',     items: sourceTypeOptions },
     { key: 'assignee',      label: 'Assigned To',     items: assigneeOptions },
   ].filter((opt) => opt.items && opt.items.length > 0);
 }
@@ -151,6 +153,7 @@ function useFilterOptions({ campusOptions, componentTypeOptions, sourceOptions, 
 export default function FilterDropdown({
   onFilterChange,
   campusOptions = [],
+  assetCategoryOptions = [], 
   statusOptions = [],
   assetTypeOptions = [],
   componentTypeOptions = [],
@@ -158,6 +161,7 @@ export default function FilterDropdown({
   conditionOptions = [],
   healthStatusOptions = [],
   ownedByOptions = [],
+  sourceTypeOptions = [],
   isAssignedOptions = [],
   assigneeOptions = [],
   ticketTypeOptions = [],
@@ -173,6 +177,7 @@ export default function FilterDropdown({
   useMenuPosition(isOpen, menuRef);
   const filterOptions = useFilterOptions({
     campusOptions,
+    assetCategoryOptions,
     componentTypeOptions,
     sourceOptions,
     conditionOptions,
@@ -180,6 +185,7 @@ export default function FilterDropdown({
     assetTypeOptions,
     healthStatusOptions,
     ownedByOptions,
+    sourceTypeOptions,
     isAssignedOptions,
     assigneeOptions,
     ticketTypeOptions,

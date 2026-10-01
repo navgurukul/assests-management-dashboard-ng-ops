@@ -28,6 +28,7 @@ export default function BulkDeviceSelector({ selectedAssets = [], onChange, asse
     { value: 'REPAIR', label: 'Under Repair' },
     { value: 'SCRAP', label: 'Scrap' },
     { value: 'PARTED_OUT', label: 'Parted Out' },
+    { value: 'DISPOSED', label: 'Disposed' },
   ];
 
   const filterConditionOptions = [
