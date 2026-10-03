@@ -7,10 +7,8 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const DEPARTMENT_OPTIONS = [
   'Samyarth',
   'PnC',
-  'Residential Academics',
-  'Residential Life Skills',
+  'Residential',
   'Placements',
-  'Residential Program',
   'Admissions/Outreach',
   'CEO Office',
   'SOSC',
@@ -18,14 +16,18 @@ export const DEPARTMENT_OPTIONS = [
   'Ad Curriculum Support',
   'Zuvy',
   'Finance',
-  'Residential Operations',
   'Communication',
 ].map((dept) => ({ value: dept, label: dept }));
+
+/** Valid department values — derived from DEPARTMENT_OPTIONS so there's a single source of truth. */
+const VALID_DEPARTMENTS = new Set(DEPARTMENT_OPTIONS.map((d) => d.value));
 
 export const MANDATORY_PROFILE_FIELDS = [
   { name: 'phone', isFilled: (user) => !!user?.phone },
   { name: 'location', isFilled: (user) => !!user?.location },
-  { name: 'department', isFilled: (user) => !!user?.department },
+  // Department is considered "not filled" if it's blank OR if it holds an old/invalid value
+  // (e.g. 'Residential Academics', 'Residential Operations', etc.) that was removed from the list.
+  { name: 'department', isFilled: (user) => !!user?.department && VALID_DEPARTMENTS.has(user.department) },
   { name: 'managerId', isFilled: (user) => !!(user?.managerId || user?.manager?.id) },
 ];
 
@@ -127,7 +129,12 @@ const profileFieldValidations = {
   location: Yup.string()
     .required('Location is required')
     .min(2, 'Location must be at least 2 characters'),
-  department: Yup.string().required('Department is required'),
+  department: Yup.string()
+    .required('Department is required')
+    .oneOf(
+      DEPARTMENT_OPTIONS.map((d) => d.value),
+      'Please select a valid department from the list'
+    ),
   campusId: Yup.string().nullable(),
   schoolId: Yup.string().nullable(),
   managerId: Yup.string().required('Manager is required'),
