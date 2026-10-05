@@ -22,6 +22,7 @@ const config = {
       list: '/assets',
       create: '/assets',
       update: (id) => `/assets/${id}`,
+      updateDetails: (id) => `/assets/details/${id}`,
       delete: (id) => `/assets/${id}`,
       details: (id) => `/assets/${id}`,
       repair: (id) => `/assets/${id}/repair`,
