@@ -55,6 +55,7 @@ export const additionalRoutePermissions = [
   { path: '/tickets/create', allowedRoles: ALL_AUTHENTICATED },
   { path: '/tickets/[id]', allowedRoles: ALL_AUTHENTICATED },
   { path: '/assets/create', allowedRoles: IT_ROLES },
+  { path: '/assets/[id]/edit', allowedRoles: ['ADMIN'] },
 ];
 
 /**
