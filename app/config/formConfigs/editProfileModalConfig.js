@@ -17,6 +17,7 @@ export const DEPARTMENT_OPTIONS = [
   'Zuvy',
   'Finance',
   'Communication',
+  'AI Labs',
 ].map((dept) => ({ value: dept, label: dept }));
 
 /** Valid department values — derived from DEPARTMENT_OPTIONS so there's a single source of truth. */
