@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, UserPlus, FileText, X, Check, Download, BarChart2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
+import { Eye, X, Check, FileText, Download, BarChart2, CheckCircle, Clock, AlertCircle, Calendar, Pencil } from 'lucide-react';
 import StatusChip from '@/components/atoms/StatusChip';
 import { getConditionChipColor, getHealthStatusChipColor } from '@/app/utils/statusHelpers';
 import TableWrapper from '@/components/Table/TableWrapper';
@@ -400,20 +400,25 @@ export default function AssetsList() {
         return <span className="text-xs text-gray-400">—</span>;
       
       case "actions":
-        const actionIcons = {
-          'View': <Eye className="w-4 h-4" />,
-          'Assign': <UserPlus className="w-4 h-4" />,
-          'Details': <FileText className="w-4 h-4" />,
-        };
-        const actionColors = {
-          'View': 'text-blue-600 hover:text-blue-800',
-          'Assign': 'text-green-600 hover:text-green-800',
-          'Details': 'text-gray-600 hover:text-gray-800',
-        };
+        if (userRole === 'ADMIN') {
+          return (
+            <button
+              className="text-gray-500 hover:text-gray-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/assets/${item.id}/edit`);
+              }}
+              title="Edit asset"
+              aria-label="Edit asset"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          );
+        }
         return (
-          <button className={`flex items-center gap-1 font-medium ${actionColors[cellValue] || 'text-blue-600 hover:text-blue-800'}`}>
-            {actionIcons[cellValue]}
-            <span>{cellValue}</span>
+          <button className="flex items-center gap-1 font-medium text-blue-600 hover:text-blue-800">
+            <Eye className="w-4 h-4" />
+            <span>View</span>
           </button>
         );
       
