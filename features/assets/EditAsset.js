@@ -266,6 +266,9 @@ export default function EditAsset({ assetId }) {
     onCampusChange: (value, formik) => {
       formik.setFieldValue('currentLocationId', '');
     },
+    onSourceTypeChange: (value, formik) => {
+      formik.setFieldValue('sourceBy', '');
+    },
   };
 
   if (isLoading || isError || !assetData) {
