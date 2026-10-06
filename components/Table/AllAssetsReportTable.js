@@ -173,12 +173,14 @@ export default function AllAssetsReportTable() {
   const handleCellClick = (item, columnKey) => {
     const cellValue = item[columnKey];
 
-    // Don't allow clicks on total row or zero values
-    if (item.id === "total-row" || cellValue === 0) return;
+    // Don't allow clicks on zero values
+    if (cellValue === 0) return;
 
+    const isTotalRow = item.id === "total-row";
     const queryParams = new URLSearchParams();
 
-    if (item.campusId) {
+    // For campus rows, include campusId; for total row, navigate without campus filter
+    if (!isTotalRow && item.campusId) {
       queryParams.set('campusId', item.campusId);
     }
 
@@ -196,7 +198,7 @@ export default function AllAssetsReportTable() {
       queryParams.set('status', columnToStatusMapping[columnKey]);
     }
 
-    // Add type and category filters
+    // Add type filter
     if (filters.type) {
       queryParams.set('type', filters.type);
     }
@@ -241,13 +243,31 @@ export default function AllAssetsReportTable() {
     const cellValue = item[columnKey];
     const isTotalRow = item.id === "total-row";
 
-    // Helper to determine if cell should be clickable
-    const isClickable = !isTotalRow && cellValue > 0 && filters.type && filters.category && 
-      ['inStock', 'allocated', 'repair', 'scrap', 'partedOut', 'disposed'].includes(columnKey);
+    const statusColumns = ['inStock', 'allocated', 'repair', 'scrap', 'partedOut', 'disposed'];
+
+    // Campus rows: clickable when value > 0 and filters set
+    // Total row: clickable when value > 0 and filters set (navigates without campus)
+    const isClickable = cellValue > 0 && filters.type && filters.category &&
+      statusColumns.includes(columnKey);
 
     if (isTotalRow) {
       if (columnKey === "campus") {
         return <span className="font-extrabold text-blue-800 uppercase">TOTAL</span>;
+      }
+      if (statusColumns.includes(columnKey)) {
+        return (
+          <span
+            className={`font-extrabold text-blue-800 ${
+              isClickable
+                ? 'cursor-pointer hover:text-blue-600 hover:underline transition-colors'
+                : ''
+            }`}
+            onClick={isClickable ? () => handleCellClick(item, columnKey) : undefined}
+            title={isClickable ? `Click to view all ${columnKey} assets (all campuses)` : ''}
+          >
+            {cellValue}
+          </span>
+        );
       }
       return <span className="font-extrabold text-blue-800">{cellValue}</span>;
     }
