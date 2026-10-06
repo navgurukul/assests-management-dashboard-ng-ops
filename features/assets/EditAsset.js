@@ -85,8 +85,6 @@ export default function EditAsset({ assetId }) {
       assetCategoryId: assetData.assetType?.assetCategory?.id || '',
       assetCategoryName: assetData.assetType?.assetCategory?.name || '',
 
-      // Brand & Model — brand uses api-autocomplete with staticItems; value must
-      // match the staticItem's valueKey exactly (which is the brand string itself)
       brand: assetData.brand || '',
       model: assetData.model || '',
 
@@ -220,6 +218,20 @@ export default function EditAsset({ assetId }) {
         purchaseBillId: purchaseBills?.[0]?.id || undefined,
       };
 
+      const assetTypeFieldMap = {
+        // processor: ['Laptop', 'Desktop', 'Server', 'CPU', 'Tablet', 'Smartphone'],
+        // ramSizeGB: ['Laptop', 'Desktop', 'Server', 'RAM', 'Tablet', 'Smartphone'],
+        // storageSizeGB: ['Laptop', 'Desktop', 'Server', 'SSD', 'HDD', 'External Hard Drive', 'USB Flash Drive', 'Tablet', 'Smartphone'],
+        charger: ['Laptop', 'Tablet', 'Smartphone'],
+      };
+
+      Object.keys(assetTypeFieldMap).forEach((field) => {
+        const allowedTypes = assetTypeFieldMap[field];
+        if (!allowedTypes.includes(assetTypeName)) {
+          delete payload[field];
+        }
+      });
+
       // Remove empty / null / undefined keys before sending
       const cleanPayload = Object.fromEntries(
         Object.entries(payload).filter(([, v]) => v !== '' && v !== undefined && v !== null),
@@ -231,8 +243,6 @@ export default function EditAsset({ assetId }) {
       );
 
       toast.success('Asset updated successfully!');
-      // replace() removes the edit page from history so back button
-      // goes straight to the assets list, not back into the edit form
       router.replace('/assets');
     } catch (err) {
       console.error('Error updating asset:', err);
@@ -292,22 +302,11 @@ export default function EditAsset({ assetId }) {
   ]);
 
   // For edit, status and condition dropdowns should be enabled.
-  // Brand fields (api-autocomplete with staticItems) have a timing issue where
-  // the initial value doesn't display until items load — convert them to plain
-  // text inputs for edit mode so the prefilled value is always visible.
   const editFields = currentConfig.fields
     .filter((field) => !EDIT_EXCLUDED_FIELDS.has(field.name))
     .map((field) => {
       if (field.name === 'status' || field.name === 'condition') {
         return { ...field, disabled: false };
-      }
-      // brand fields use staticItems autocomplete — render as text in edit mode
-      if (field.name === 'brand') {
-        return {
-          ...field,
-          type: 'text',
-          placeholder: field.placeholder || 'Enter brand name',
-        };
       }
       return field;
     });
