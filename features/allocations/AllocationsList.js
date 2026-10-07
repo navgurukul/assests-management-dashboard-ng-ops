@@ -48,10 +48,10 @@ export default function AllocationsList() {
   // Filter state (persisted)
   const [filters, setFilters] = usePersistentState('allocations-filters', {});
 
-  // Search state
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  
+  // Search state (searchInput persisted; debouncedSearch derived on mount to stay consistent)
+  const [searchInput, setSearchInput] = usePersistentState('allocations-search-input', '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
+
   // Column visibility management
   const {
     visibleColumns,

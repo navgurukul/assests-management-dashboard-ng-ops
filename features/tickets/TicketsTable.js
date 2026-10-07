@@ -27,10 +27,10 @@ export default function TicketsTable({ filters = {}, onFilterChange, showCards, 
   const [paginationState, setPaginationState] = usePersistentState('tickets-pagination', {currentPage: 1, pageSize: 20});
   const { currentPage, pageSize } = paginationState;
 
-  // Search state
-  const [searchInput, setSearchInput] = useState('');
+  // Search state (searchInput persisted; debouncedSearch derived on mount to stay consistent)
+  const [searchInput, setSearchInput] = usePersistentState('tickets-search-input', '');
   const prevSearchRef = useRef(searchInput);
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
   const [assigneeEmail, setAssigneeEmail] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [showAllModeState, setShowAllModeState] = usePersistentState('tickets-show-all-mode', { isShowAll: true });
