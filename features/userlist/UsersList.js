@@ -50,15 +50,16 @@ export default function UsersList() {
   // All Users Filters (persisted)
   const [allUsersFilters, setAllUsersFilters] = usePersistentState('allusers-filters', {});
 
-  // Search
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  // Search (searchInput persisted; debouncedSearch derived on mount to stay consistent)
+  const [searchInput, setSearchInput] = usePersistentState('users-search-input', '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
 
   // Show All Users State
   const initialShowAllUsers = searchParams?.get('view') === 'all-users';
   const [showAllUsers, setShowAllUsers] = useState(initialShowAllUsers);
-  const [allUsersSearch, setAllUsersSearch] = useState('');
-  const [debouncedAllUsersSearch, setDebouncedAllUsersSearch] = useState('');
+  // allUsersSearch persisted separately so "All Users" tab also remembers search
+  const [allUsersSearch, setAllUsersSearch] = usePersistentState('allusers-search-input', '');
+  const [debouncedAllUsersSearch, setDebouncedAllUsersSearch] = useState(allUsersSearch);
 
   // Column visibility
   const {

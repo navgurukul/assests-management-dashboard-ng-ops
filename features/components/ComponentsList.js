@@ -43,10 +43,10 @@ export default function ComponentsList() {
   // Filter state (persisted)
   const [filters, setFilters] = usePersistentState('components-filters', {});
   
-  // Search state
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  
+  // Search state (searchInput persisted; debouncedSearch derived on mount to stay consistent)
+  const [searchInput, setSearchInput] = usePersistentState('components-search-input', '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState(null);
