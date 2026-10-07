@@ -114,10 +114,10 @@ export default function ConsignmentsList() {
   const [inTransitPaginationState, setInTransitPaginationState] = usePersistentState('intransit-pagination', { inTransitPage: 1, inTransitPageSize: 10 });
   const { inTransitPage, inTransitPageSize } = inTransitPaginationState;
   
-  // Search state
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  
+  // Search state (searchInput persisted; debouncedSearch derived on mount to stay consistent)
+  const [searchInput, setSearchInput] = usePersistentState('consignments-search-input', '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
+
   // Menu state
   const [openMenuId, setOpenMenuId] = useState(null);
   
@@ -137,8 +137,9 @@ export default function ConsignmentsList() {
   // In-transit returns modal state
   const initialShowInTransit = searchParams?.get('view') === 'in-transit';
   const [showInTransit, setShowInTransit] = useState(initialShowInTransit);
-  const [inTransitSearch, setInTransitSearch] = useState('');
-  const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState('');
+  // inTransitSearch persisted so In-Transit tab search survives navigation
+  const [inTransitSearch, setInTransitSearch] = usePersistentState('intransit-search-input', '');
+  const [debouncedInTransitSearch, setDebouncedInTransitSearch] = useState(inTransitSearch);
 
   // In-transit filters state (persisted)
   const [inTransitFilters, setInTransitFilters] = usePersistentState('intransit-filters', {});
