@@ -86,10 +86,11 @@ export default function AssetsList() {
     }
   }, [searchParams]); // Remove setFilters from dependency array
   
-  // Search state
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  
+  // Search state:
+  // searchInput is persisted so the input box restores correctly after navigation.
+  const [searchInput, setSearchInput] = usePersistentState('assets-search-input', '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
+
   // Column visibility management
   const {
     visibleColumns,
