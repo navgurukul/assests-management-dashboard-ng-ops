@@ -21,7 +21,14 @@ export function usePersistentState(key, initialValue = {}) {
       const valueToStore = value instanceof Function ? value(state) : value;
       setState(valueToStore);
       if (typeof window !== 'undefined') {
-        if (Object.keys(valueToStore).length === 0) {
+        // Handle empty check for both objects and primitive types (e.g. strings)
+        const isEmpty =
+          valueToStore === null ||
+          valueToStore === undefined ||
+          valueToStore === '' ||
+          (typeof valueToStore === 'object' && Object.keys(valueToStore).length === 0);
+
+        if (isEmpty) {
           sessionStorage.removeItem(key);
         } else {
           sessionStorage.setItem(key, JSON.stringify(valueToStore));
