@@ -193,6 +193,9 @@ export default function CreateAsset() {
     onCampusChange: (value, formik) => {
       formik.setFieldValue('currentLocationId', '');
     },
+    onSourceTypeChange: (value, formik) => {
+      formik.setFieldValue('sourceBy', '');
+    },
   };
 
   return (

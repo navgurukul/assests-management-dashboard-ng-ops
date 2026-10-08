@@ -48,6 +48,14 @@ export default function GenericForm({
                       if (!conditionMet) return null;
                     }
                     
+                    // Resolve optionsMap → options based on a sibling field value
+                    let resolvedField = field;
+                    if (field.optionsMap) {
+                      const depVal = formik.values[field.optionsMap.field];
+                      const resolvedOptions = field.optionsMap.map[depVal] ?? field.optionsMap.default ?? [];
+                      resolvedField = { ...field, options: resolvedOptions };
+                    }
+                    
                     return (
                       <div
                         key={field.name}
@@ -57,7 +65,7 @@ export default function GenericForm({
                             : ''
                         }
                       >
-                        <FormField field={field} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
+                        <FormField field={resolvedField} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
                         {field.helpText && (
                           <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
                         )}
@@ -81,6 +89,14 @@ export default function GenericForm({
                   if (!conditionMet) return null;
                 }
                 
+                // Resolve optionsMap → options based on a sibling field value
+                let resolvedField = field;
+                if (field.optionsMap) {
+                  const depVal = formik.values[field.optionsMap.field];
+                  const resolvedOptions = field.optionsMap.map[depVal] ?? field.optionsMap.default ?? [];
+                  resolvedField = { ...field, options: resolvedOptions };
+                }
+                
                 return (
                   <div
                     key={field.name}
@@ -94,7 +110,7 @@ export default function GenericForm({
                         : ''
                     }
                   >
-                    <FormField field={field} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
+                    <FormField field={resolvedField} formik={formik} onFieldChange={field.onFieldChange ? fieldCallbacks[field.onFieldChange] : null} />
                     {field.helpText && (
                       <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
                     )}
