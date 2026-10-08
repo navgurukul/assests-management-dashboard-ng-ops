@@ -194,6 +194,7 @@ export const commonAssetFields = [
     type: "select",
     placeholder: "Select source type",
     required: true,
+    onFieldChange: "onSourceTypeChange",
     options: [
       { value: "PURCHASED", label: "Purchased" },
       { value: "DONATED", label: "Donated" },
@@ -203,9 +204,22 @@ export const commonAssetFields = [
   {
     name: "sourceBy",
     label: "Source By",
-    type: "text",
-    placeholder: "Enter source by",
+    type: "select",
+    placeholder: "Select source by",
     required: true,
+    // Options change based on sourceType value
+    optionsMap: {
+      field: "sourceType",
+      map: {
+        PURCHASED: [{ value: "NavGuruKul", label: "NavGuruKul" }],
+        PERSONAL:  [{ value: "NavGuruKul", label: "NavGuruKul" }],
+        DONATED:   [
+          { value: "Sama", label: "Sama" },
+          { value: "NavGuruKul", label: "NavGuruKul" },
+        ],
+      },
+      default: [{ value: "NavGuruKul", label: "NavGuruKul" }],
+    },
   },
   {
     name: "purchaseDate",
@@ -508,7 +522,13 @@ export const commonAssetValidation = {
     .oneOf(["PURCHASED", "DONATED", "PERSONAL"], "Invalid source type"),
   sourceBy: Yup.string()
     .required("Source by is required")
-    .min(2, "Source by must be at least 2 characters"),
+    .when("sourceType", {
+      is: "DONATED",
+      then: (schema) =>
+        schema.oneOf(["Sama", "NavGuruKul"], "Invalid source by value"),
+      otherwise: (schema) =>
+        schema.oneOf(["NavGuruKul"], "Invalid source by value"),
+    }),
   purchaseDate: Yup.string()
     .nullable()
     .when("sourceType", {
