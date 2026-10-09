@@ -103,7 +103,8 @@ export const returnAssetFields = [
     label: 'Manager Email',
     type: 'email',
     required: true,
-    placeholder: 'Manager email to loop in',
+    disabled: true,
+    placeholder: 'Fetching manager...',
   },
   {
     name: 'expectedDeliveryDate',
