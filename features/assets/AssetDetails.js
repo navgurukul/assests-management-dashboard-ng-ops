@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import FormModal from '@/components/molecules/FormModal';
 import CustomButton from '@/components/atoms/CustomButton';
@@ -11,6 +11,8 @@ import apiService from '@/app/utils/apiService';
 import { toast } from '@/app/utils/toast';
 import config from '@/app/config/env.config';
 import usePut from '@/app/hooks/query/usePut';
+import useFetch from '@/app/hooks/query/useFetch';
+import usePost from '@/app/hooks/query/usePost';
 import {
   changeLocationFields,
   changeLocationValidationSchema,
@@ -21,6 +23,10 @@ import {
   amcRenewalFields,
   amcRenewalValidationSchema,
 } from '@/app/config/formConfigs/assetFormConfig';
+import {
+  getReturnAssetFields,
+  returnAssetValidationSchema,
+} from '@/app/config/formConfigs/returnAssetModalConfig';
 import { buildSpecLabel } from '@/app/utils/dataTransformers';
 import {   
   getCategoryDisplayItems,
@@ -29,10 +35,115 @@ import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 
 export default function AssetDetails({ assetId, assetData, isLoading, isError, error, onBack, refetch }) {
-  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | 'DISPOSE' | null
+  const [modalAction, setModalAction] = useState(null); // 'REPAIR' | 'SCRAP' | 'IN_STOCK' | 'CHANGE_LOCATION' | 'DISPOSE' | 'INITIATE_RETURN' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
+  const [coordinatorUpdateTick, setCoordinatorUpdateTick] = useState(0);
+  const [localFormState, setLocalFormState] = useState({});
+  const formStateRef = useRef({});
+  const hasToastedRef = useRef(null);
+
   const userRole = useAppSelector(selectUserRole);
   const isCampusManager = userRole === 'CAMPUS_MANAGER';
+  const isAdmin = userRole === 'ADMIN';
+
+  const { mutateAsync: postMutation, isPending: isReturnSubmitting } = usePost();
+
+  // Fetch campuses list for return modal (to auto-fill address on campus select)
+  const { data: campusesResponse } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+    enabled: modalAction === 'INITIATE_RETURN',
+  });
+
+  // Fetch logged-in user's manager for auto-filling managerEmail (same as ticket form)
+  const { data: myManagerData } = useFetch({
+    url: config.endpoints.user.myManager,
+    queryKey: ['myManager'],
+    enabled: modalAction === 'INITIATE_RETURN',
+  });
+
+  const managerEmail = useMemo(() => {
+    const mgr = myManagerData?.data?.manager || myManagerData?.data || myManagerData?.manager;
+    return mgr?.email || '';
+  }, [myManagerData]);
+
+  // Fetch campus IT coordinator when campus is selected in return modal
+  const { data: coordinatorResponse, error: coordinatorError, failureCount } = useFetch({
+    url: `/campus-incharge/campus/${coordinatorCampusId}`,
+    queryKey: ['campus-incharge', coordinatorCampusId],
+    enabled: !!coordinatorCampusId,
+  });
+
+  const campusesData = useMemo(() => {
+    const raw = campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
+    return Array.isArray(raw) ? raw : [];
+  }, [campusesResponse]);
+
+  const getCampusAddressById = (campusId) => {
+    if (!campusId) return '';
+    const campus = campusesData.find((c) => c.id === campusId);
+    return campus?.address || campus?.campus?.address || '';
+  };
+
+  const getSourcedCampusAddress = () => {
+    const campusId = assetData?.campus?.id || assetData?.campusId || assetData?.sourceCampusId;
+    return assetData?.campus?.address || getCampusAddressById(campusId) || '';
+  };
+
+  const coordinatorEmail = useMemo(() => {
+    if (!coordinatorResponse) return '';
+    const data = coordinatorResponse?.data || coordinatorResponse;
+    if (data?.success === false) return '';
+    return data?.data?.itCoordinator?.email || data?.itCoordinator?.email || '';
+  }, [coordinatorResponse]);
+
+  const coordinatorData = coordinatorResponse?.data || coordinatorResponse;
+  const isCoordinatorError = coordinatorError || coordinatorData?.success === false || failureCount > 0;
+
+  // Sync localFormState when coordinator tick change
+  useEffect(() => {
+    setLocalFormState({ ...formStateRef.current });
+  }, [coordinatorUpdateTick]);
+
+  // When coordinator email resolves, inject it into formStateRef and trigger re-render
+  useEffect(() => {
+    if (!coordinatorCampusId) {
+      hasToastedRef.current = null;
+      return;
+    }
+    if (isCoordinatorError) {
+      if (hasToastedRef.current !== coordinatorCampusId) {
+        toast.error('This campus does not have an IT coordinator at present.');
+        formStateRef.current.campusItCoordinator = '';
+        setTimeout(() => setCoordinatorUpdateTick((t) => t + 1), 0);
+        hasToastedRef.current = coordinatorCampusId;
+      }
+    } else if (coordinatorEmail) {
+      if (hasToastedRef.current !== coordinatorCampusId) {
+        formStateRef.current.campusItCoordinator = coordinatorEmail;
+        setTimeout(() => setCoordinatorUpdateTick((t) => t + 1), 0);
+        hasToastedRef.current = coordinatorCampusId;
+      }
+    }
+  }, [coordinatorEmail, isCoordinatorError, coordinatorCampusId]);
+
+  // When manager email resolves, inject into formStateRef
+  useEffect(() => {
+    if (managerEmail && formStateRef.current.managerEmail !== managerEmail) {
+      formStateRef.current.managerEmail = managerEmail;
+      setTimeout(() => setCoordinatorUpdateTick((t) => t + 1), 0);
+    }
+  }, [managerEmail]);
+
+  // Fill sourced-campus address once /campuses loads (asset details campus has no address)
+  useEffect(() => {
+    if (formStateRef.current.returnMode !== 'SOURCED_CAMPUS') return;
+    const sourcedAddress = getSourcedCampusAddress();
+    if (!sourcedAddress || formStateRef.current.exactAddress === sourcedAddress) return;
+    formStateRef.current = { ...formStateRef.current, exactAddress: sourcedAddress };
+    setCoordinatorUpdateTick((t) => t + 1);
+  }, [campusesData, assetData]);
 
   const { mutateAsync: moveToStock, isPending: isMovingToStock } = usePut({
     onSuccess: () => {
@@ -125,6 +236,181 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       }
     } catch (error) {
       toast.error(error?.message || 'Failed to update asset. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ─── Admin-initiated return handler ───
+
+  const handleReturnFormChange = (updatedData, fieldChanged) => {
+    let nextData = updatedData;
+
+    if (fieldChanged) {
+      const { name } = fieldChanged;
+      const { returnMode, destinationCampusId: campusId } = updatedData;
+      const isOtherOrVisit = returnMode === 'OTHER_CAMPUS' || returnMode === 'VISIT_CAMPUS';
+
+      switch (name) {
+        case 'returnMode':
+          if (isOtherOrVisit) {
+            setTimeout(() => setCoordinatorCampusId(null), 0);
+            nextData = {
+              ...updatedData,
+              exactAddress: '',
+              destinationCampusId: '',
+              campusItCoordinator: '',
+              managerEmail: formStateRef.current.managerEmail || updatedData.managerEmail || '',
+              expectedDeliveryDate: '',
+              vendorName: '',
+              vendorReceipt: null,
+            };
+          } else if (returnMode === 'SOURCED_CAMPUS') {
+            const sourceId = assetData?.campus?.id || assetData?.campusId || assetData?.sourceCampusId;
+            if (sourceId) {
+              setTimeout(() => setCoordinatorCampusId(sourceId), 0);
+            }
+            nextData = {
+              ...updatedData,
+              exactAddress: getSourcedCampusAddress(),
+              destinationCampusId: '',
+              managerEmail: formStateRef.current.managerEmail || updatedData.managerEmail || '',
+              expectedDeliveryDate: '',
+              vendorName: '',
+              vendorReceipt: null,
+            };
+          }
+          break;
+
+        case 'destinationCampusId':
+          if (isOtherOrVisit) {
+            if (campusId) {
+              setTimeout(() => setCoordinatorCampusId(campusId), 0);
+              const selectedCampus = campusesData.find((c) => c.id === campusId);
+              if (selectedCampus?.address) {
+                nextData = { ...updatedData, exactAddress: selectedCampus.address };
+              }
+            } else {
+              setTimeout(() => setCoordinatorCampusId(null), 0);
+              nextData = { ...updatedData, exactAddress: '', campusItCoordinator: '' };
+            }
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    formStateRef.current = nextData;
+    return nextData;
+  };
+
+  // ─── Return form fields — inject localFormState values (coordinator email etc.) ──
+
+  const returnFormFields = useMemo(() => {
+    const base = getReturnAssetFields(
+      assetData,
+      assetData?.campus?.campusName || assetData?.campus?.name || '',
+      getSourcedCampusAddress()
+    );
+    return (base || []).map((f) => {
+      const newField = { ...f };
+      if (newField.name === 'destinationCampusId') {
+        newField.dependsOn = null;
+        newField.staticItems = campusesData;
+      }
+      // Auto-fill managerEmail from logged-in user's manager (disabled, cannot edit)
+      if (newField.name === 'managerEmail' && managerEmail) {
+        newField.defaultValue = managerEmail;
+        newField.helpText = `This return will loop in your manager (${managerEmail}).`;
+      }
+      if (localFormState[newField.name] !== undefined) {
+        newField.defaultValue = localFormState[newField.name];
+      }
+      return newField;
+    });
+  }, [assetData, campusesData, localFormState, managerEmail]);
+
+  // ─── End admin-initiated return ─────────────────────────────────────────────
+
+  const handleReturnSubmit = async (formData) => {
+    const id = assetId || assetData?.id;
+    setIsSubmitting(true);
+    try {
+      const consignmentId = assetData?.consignments?.[0]?.id || assetData?.consignmentId || assetData?.consignment?.id;
+
+      let sourceCampusIdValue = '';
+      let returnTypeValue = '';
+
+      if (formData.returnMode === 'VISIT_CAMPUS') {
+        sourceCampusIdValue = formData.destinationCampusId || formData.sourceCampusId;
+        returnTypeValue = 'RETURN_PHYSICALLY';
+      } else if (formData.returnMode === 'OTHER_CAMPUS') {
+        sourceCampusIdValue = formData.destinationCampusId || formData.sourceCampusId;
+        returnTypeValue = 'RETURN_TO_OTHER_CAMPUS';
+      } else if (formData.returnMode === 'SOURCED_CAMPUS') {
+        sourceCampusIdValue = assetData?.sourceCampusId || assetData?.campusId || assetData?.campus?.id || '';
+        returnTypeValue = 'RETURN_TO_SOURCE_CAMPUS';
+      }
+
+      const expDate = formData.expectedDeliveryDate;
+      const formattedDate = expDate instanceof Date
+        ? expDate.toISOString().split('T')[0]
+        : (typeof expDate === 'string' ? expDate : '');
+
+      const campusITCoordinatorEmail =
+        formData.campusItCoordinator ||
+        coordinatorEmail ||
+        formStateRef.current?.campusItCoordinator ||
+        '';
+
+      const exactAddress =
+        formData.exactAddress ||
+        formStateRef.current?.exactAddress ||
+        '';
+
+      const fields = {
+        ...(consignmentId ? { consignmentId } : {}),
+        assetId: id,
+        returnType: returnTypeValue,
+        sourceCampusId: sourceCampusIdValue,
+        campusITCoordinatorEmail,
+        exactAddress,
+        vendorName: formData.returnMode === 'VISIT_CAMPUS' ? 'NA' : (formData.vendorName || ''),
+        managerEmail: formData.managerEmail || '',
+        expectedDeliveryDate: formattedDate,
+      };
+
+      // trackingNumber only for SOURCED_CAMPUS and OTHER_CAMPUS (not applicable for VISIT_CAMPUS)
+      if (formData.returnMode !== 'VISIT_CAMPUS') {
+        fields.trackingNumber = formData.trackingId || '';
+      }
+
+      const payload = new FormData();
+      Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
+
+      const vendorReceipts = Array.from(formData.vendorReceipt || []);
+      if (vendorReceipts.length > 0) {
+        vendorReceipts.forEach((file) => payload.append('vendorReceipt', file));
+      } else if (formData.returnMode === 'VISIT_CAMPUS') {
+        payload.append('vendorReceipt', new File(['dummy'], 'NA.pdf', { type: 'application/pdf' }));
+      }
+
+      await postMutation({
+        endpoint: '/consignment/assets/return',
+        body: payload,
+      });
+
+      toast.success('Return initiated successfully. Asset return has been logged.');
+      setModalAction(null);
+      setCoordinatorCampusId(null);
+      formStateRef.current = {};
+      setLocalFormState({});
+      hasToastedRef.current = null;
+      if (refetch) refetch();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to initiate return. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -391,6 +677,26 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
 
   return (
     <>
+      {/* Admin-initiated return modal — only shown for ALLOCATED assets */}
+      <FormModal
+        isOpen={modalAction === 'INITIATE_RETURN'}
+        onClose={() => { setModalAction(null); setCoordinatorCampusId(null); formStateRef.current = {}; setLocalFormState({}); hasToastedRef.current = null; }}
+        componentName={`Initiate Return — ${assetDetails.assetTag}`}
+        actionType="Initiate Return on Behalf of User"
+        fields={returnFormFields}
+        validationSchema={returnAssetValidationSchema}
+        onSubmit={handleReturnSubmit}
+        onFormDataChange={handleReturnFormChange}
+        isSubmitting={isSubmitting || isReturnSubmitting}
+        helpText={(() => {
+          const allocation = assetDetails.allocations?.[0];
+          const userName = allocation
+            ? `${allocation.userFirstName || ''} ${allocation.userLastName || ''}`.trim() || allocation.userName || allocation.userId
+            : 'unknown user';
+          return `Admin-initiated return for asset ${assetDetails.assetTag}. Currently allocated to: ${userName}. Fill in the return details on behalf of the student.`;
+        })()}
+        size="medium"
+      />
       <FormModal
         isOpen={modalAction === 'CHANGE_LOCATION'}
         onClose={() => setModalAction(null)}
@@ -404,7 +710,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         size="medium"
       />
       <FormModal
-        isOpen={modalAction !== null && modalAction !== 'CHANGE_LOCATION'}
+        isOpen={modalAction !== null && modalAction !== 'CHANGE_LOCATION' && modalAction !== 'INITIATE_RETURN' && modalAction !== 'INSPECTION_LOG' && modalAction !== 'SERVICE_LOG' && modalAction !== 'AMC_RENEWAL'}
         onClose={() => setModalAction(null)}
         componentName={assetDetails.assetTag}
         actionType={modalAction === 'IN_STOCK' ? 'Move to In Stock' : modalAction === 'REPAIR' ? 'Put in Repair' : modalAction === 'DISPOSE' ? 'Mark as Disposed' : 'Scrap this Device'}
@@ -465,6 +771,13 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         headerActions={
           isCampusManager ? null : (
           <>
+            {isAdmin && assetDetails.status === 'ALLOCATED' && assetDetails.consignments?.[0]?.status === 'DELIVERED' && assetDetails.consignmentReturnAssetStatus !== 'PENDING' && (
+              <CustomButton
+                text="Initiate Return"
+                variant="warning"
+                onClick={() => setModalAction('INITIATE_RETURN')}
+              />
+            )}
             <CustomButton
               text="Change Location"
               variant="secondary"
