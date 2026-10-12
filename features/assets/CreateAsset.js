@@ -138,8 +138,8 @@ export default function CreateAsset() {
         }
       });
 
-      // Remove purchaseDate if sourceType is DONATED (since it's not applicable)
-      if (values.sourceType === 'DONATED') {
+      // Remove purchaseDate if sourceType is DONATED or LOANED (not applicable)
+      if (values.sourceType === 'DONATED' || values.sourceType === 'LOANED') {
         delete rawPayload.purchaseDate;
       }
 
@@ -163,7 +163,7 @@ export default function CreateAsset() {
       router.push('/assets');
 
     } catch (error) {
-      console.error('Error creating asset:', error);
+      console.error('Error creating asset:', error?.message, error?.status, error?.errors);
 
       const errorMessage = error?.message || 'Failed to create asset. Please try again.';
       const errorDetails = error?.errors ? ` - ${JSON.stringify(error.errors)}` : '';
