@@ -198,7 +198,7 @@ export const commonAssetFields = [
     options: [
       { value: "PURCHASED", label: "Purchased" },
       { value: "DONATED", label: "Donated" },
-      { value: "PERSONAL", label: "Personal" },
+      { value: "LOANED", label: "Loaned" },
     ],
   },
   {
@@ -212,10 +212,12 @@ export const commonAssetFields = [
       field: "sourceType",
       map: {
         PURCHASED: [{ value: "NavGuruKul", label: "NavGuruKul" }],
-        PERSONAL:  [{ value: "NavGuruKul", label: "NavGuruKul" }],
         DONATED:   [
           { value: "Sama", label: "Sama" },
           { value: "NavGuruKul", label: "NavGuruKul" },
+        ],
+        LOANED: [
+          { value: "Anish Jadhav Memorial Foundation", label: "Anish Jadhav Memorial Foundation" },
         ],
       },
       default: [{ value: "NavGuruKul", label: "NavGuruKul" }],
@@ -227,7 +229,7 @@ export const commonAssetFields = [
     type: "date",
     placeholder: "Select purchase date",
     required: true,
-    showIf: { field: "sourceType", value: ["PURCHASED", "PERSONAL"] },
+    showIf: { field: "sourceType", value: ["PURCHASED"] },
   },
   {
     name: "cost",
@@ -519,7 +521,7 @@ export const commonAssetValidation = {
     .oneOf(["WORKING", "MINOR_ISSUES", "NOT_WORKING"], "Invalid condition"),
   sourceType: Yup.string()
     .required("Source type is required")
-    .oneOf(["PURCHASED", "DONATED", "PERSONAL"], "Invalid source type"),
+    .oneOf(["PURCHASED", "DONATED", "LOANED"], "Invalid source type"),
   sourceBy: Yup.string()
     .required("Source by is required")
     .when("sourceType", {
@@ -527,12 +529,18 @@ export const commonAssetValidation = {
       then: (schema) =>
         schema.oneOf(["Sama", "NavGuruKul"], "Invalid source by value"),
       otherwise: (schema) =>
-        schema.oneOf(["NavGuruKul"], "Invalid source by value"),
+        schema.when("sourceType", {
+          is: "LOANED",
+          then: (schema) =>
+            schema.oneOf(["Anish Jadhav Memorial Foundation"], "Invalid source by value"),
+          otherwise: (schema) =>
+            schema.oneOf(["NavGuruKul"], "Invalid source by value"),
+        }),
     }),
   purchaseDate: Yup.string()
     .nullable()
     .when("sourceType", {
-      is: "DONATED",
+      is: (val) => val === "DONATED" || val === "LOANED",
       then: (schema) => schema.notRequired(),
       otherwise: (schema) =>
         schema
