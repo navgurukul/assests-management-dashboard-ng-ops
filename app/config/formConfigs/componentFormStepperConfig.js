@@ -248,7 +248,7 @@ export const componentStepperConfig = [
         required: true,
         allowMultiple: true,
         documentType: 'INVOICE',
-        helpText: 'You must upload or link at least one document. You can link to existing Bills or upload new ones. One bill can be linked to multiple components.'
+        helpText: 'You must upload or link at least one document. You can link to existing Bills or upload new ones. One bill can be linked to multiple components.Upload files with descriptive names. Avoid generic names like IMG_1234, Screenshot, or WhatsApp Image. '
       }
     ]
   }

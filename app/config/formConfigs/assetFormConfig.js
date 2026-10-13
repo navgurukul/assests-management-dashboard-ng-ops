@@ -371,6 +371,7 @@ export const commonAssetFields = [
     allowMultiple: false,
     simpleMode: true,
     showIf: { field: "needsServicing", value: true },
+    helpText: "Before uploading, rename your file clearly — e.g. \"service_bill_Dell_May2024.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
   // AMC / Insurance
   {
@@ -451,6 +452,7 @@ export const commonAssetFields = [
     required: false,
     simpleMode: true,
     showIf: { field: "hasAmcInsurance", value: true },
+    helpText: "Before uploading, rename your file clearly — e.g. \"amc_policy_HP_2024-2025.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
   {
     name: "notes",
@@ -475,7 +477,7 @@ export const commonAssetFields = [
     type: "purchase-bill-selector",
     required: false,
     allowMultiple: false,
-    helpText: "Link or upload purchase bills for this asset",
+    helpText: "Link or upload purchase bills for this asset. Before uploading, rename your file clearly — e.g. \"purchase_invoice_Laptop_Dell_Jan2024.pdf\". Avoid generic names like IMG_1234, Screenshot, or WhatsApp Image.",
   },
 ];
 
@@ -975,6 +977,7 @@ export const serviceLogFields = [
     required: false,
     allowMultiple: false,
     simpleMode: true,
+    helpText: "Before uploading, rename your file clearly — e.g. \"service_receipt_Printer_Mar2024.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
 ];
 
@@ -1073,6 +1076,7 @@ export const amcRenewalFields = [
     required: false,
     allowMultiple: false,
     simpleMode: true,
+    helpText: "Before uploading, rename your file clearly — e.g. \"amc_renewal_HP_2024-2025.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
 ];
 
