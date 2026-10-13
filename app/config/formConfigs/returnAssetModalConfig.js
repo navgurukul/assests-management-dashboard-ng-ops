@@ -86,7 +86,7 @@ export const returnAssetFields = [
     required: true,
     accept: 'image/*,application/pdf',
     multiple: true,
-    hint: 'Accepted formats: JPG, PNG, PDF',
+    hint: 'Upload files with descriptive names. Avoid generic names like IMG_1234, Screenshot, or WhatsApp Image.',
     showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
    {
