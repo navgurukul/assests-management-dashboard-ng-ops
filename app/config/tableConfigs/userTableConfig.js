@@ -33,6 +33,11 @@ export const userTableColumns = [
     description: 'Campus the user belongs to',
   },
   {
+    key: 'school',
+    label: 'SCHOOL',
+    description: 'School the user belongs to',
+  },
+  {
     key: 'assetTag',
     label: 'ASSIGNED ASSET',
     description: 'Asset tag of the asset assigned to the user',
@@ -104,7 +109,8 @@ export const defaultVisibleColumns = [
   'name',
   'email',
   'role',
-  // 'campus',
+  'campus',
+  'school',
   'assetTag',
   'assetType',
   'assetBrand',
