@@ -49,7 +49,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
 
   const { mutateAsync: postMutation, isPending: isReturnSubmitting } = usePost();
 
-  // Fetch campuses list for return modal (to auto-fill address on campus select)
+  //  Fetch campuses list for return modal (to auto-fill address on campus select)
   const { data: campusesResponse } = useFetch({
     url: '/campuses',
     queryKey: ['campuses'],
