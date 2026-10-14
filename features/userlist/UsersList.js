@@ -16,6 +16,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import { useTableColumns } from '@/app/hooks/useTableColumns';
 import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 import { usePersistentState } from '@/app/hooks/usePersistentState';
+import config from '@/app/config/env.config';
 import {
   USER_TABLE_ID,
   userTableColumns,
@@ -103,6 +104,8 @@ export default function UsersList() {
     params.append('limit', pageSize);
     if (filters.role) params.append('role', filters.role);
     if (filters.status) params.append('status', filters.status);
+    if (filters.campus) params.append('campusId', filters.campus);
+    if (filters.school) params.append('schoolId', filters.school);
     return params.toString();
   };
 
@@ -117,6 +120,35 @@ export default function UsersList() {
     queryKey: ['allUsers', allUsersPage, allUsersPageSize, debouncedAllUsersSearch, allUsersFilters],
     enabled: showAllUsers,
   });
+
+  const { data: campusData } = useFetch({
+    url: '/campuses',
+    queryKey: ['campuses'],
+    enabled: !showAllUsers,
+  });
+
+  const { data: schoolsData } = useFetch({
+    url: config.endpoints.schools.list,
+    queryKey: ['schools'],
+    enabled: !showAllUsers,
+  });
+
+  const campusOptions = React.useMemo(() => {
+    if (!Array.isArray(campusData?.data)) return [];
+    return campusData.data.map((campus) => ({
+      value: campus.id,
+      label: campus.campusName,
+    }));
+  }, [campusData]);
+
+  const schoolOptions = React.useMemo(() => {
+    const schools = schoolsData?.data?.schools;
+    if (!Array.isArray(schools)) return [];
+    return schools.map((school) => ({
+      value: school.id,
+      label: school.name,
+    }));
+  }, [schoolsData]);
 
   // Pagination handlers
   const handlePageChange = (page) => setPaginationState((prev) => ({ ...prev, currentPage: page }));
@@ -155,6 +187,14 @@ export default function UsersList() {
       const statusOption = allocationStatusOptions.find((option) => option.value === value);
       return statusOption ? statusOption.label : value;
     }
+    if (filterKey === 'campus') {
+      const campusOption = campusOptions.find((option) => option.value === value);
+      return campusOption ? campusOption.label : value;
+    }
+    if (filterKey === 'school') {
+      const schoolOption = schoolOptions.find((option) => option.value === value);
+      return schoolOption ? schoolOption.label : value;
+    }
     return value;
   };
 
@@ -167,7 +207,7 @@ export default function UsersList() {
   };
 
   const getCategoryName = (filterKey) => {
-    const names = { role: 'Role', status: 'Allocation Status' };
+    const names = { role: 'Role', status: 'Allocation Status', campus: 'User Campus', school: 'School' };
     return names[filterKey] || filterKey;
   };
 
@@ -226,7 +266,8 @@ export default function UsersList() {
         name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'N/A',
         email: user.email || 'N/A',
         role: formatRole(user.role),
-        campus: user.campusId || 'N/A',
+        campus: user.campus?.campusName || 'N/A',
+        school: user.school?.name || 'N/A',
         phone: user.phone || 'N/A',
         department: user.department || 'N/A',
         location: user.location || 'N/A',
@@ -236,7 +277,7 @@ export default function UsersList() {
         assetBrand: asset.brand || 'N/A',
         assetModel: asset.model || 'N/A',
         assetCondition: asset.condition || 'N/A',
-        assetCampus: asset.campusId || 'N/A',
+        assetCampus: asset.campus?.campusName || 'N/A',
         assetSerialNumber: asset.serialNumber || 'N/A',
         // Allocation fields
         allocationDate: alloc.createdAt ? new Date(alloc.createdAt).toLocaleDateString() : 'N/A',
@@ -381,6 +422,10 @@ export default function UsersList() {
             {!showAllUsers && (
               <FilterDropdown
                 onFilterChange={handleFilterChange}
+                campusOptions={campusOptions}
+                schoolOptions={schoolOptions}
+                campusLabel="User Campus"
+                filterOrder={['status', 'campus', 'school']}
                 statusOptions={allocationStatusOptions}
                 statusLabel="Allocation Status"
                 selectedFilters={filters}
