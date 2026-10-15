@@ -521,6 +521,13 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
 
   const displayStatus = formatStatus(assetDetails.status);
   const computedSpecLabel = assetDetails.specLabel || buildSpecLabel(assetDetails);
+  const currentAllocation = assetDetails.allocations?.[0];
+  const allocatedToName = currentAllocation
+    ? [currentAllocation.userFirstName, currentAllocation.userLastName].filter(Boolean).join(' ') ||
+      currentAllocation.userName ||
+      currentAllocation.userId ||
+      'N/A'
+    : 'N/A';
 
   const getStatusColor = () => {
     switch (assetDetails.status) {
@@ -566,6 +573,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         { label: 'Asset Type', value: assetDetails.assetType?.name || 'N/A' },
         { label: 'Campus', value: assetDetails.campus?.name || 'N/A' },
         { label: 'Location', value: assetDetails.location?.name || 'N/A' },
+        { label: 'Allocated To', value: allocatedToName },
       ],
     },
     // {
