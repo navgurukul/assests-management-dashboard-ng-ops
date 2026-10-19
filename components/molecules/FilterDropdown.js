@@ -130,9 +130,10 @@ function useMenuPosition(isOpen, menuRef) {
   }, [isOpen, menuRef]);
 }
 
-function useFilterOptions({ campusOptions, assetCategoryOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions, isAssignedOptions, assigneeOptions, ticketTypeOptions, statusLabel }) {
-  return [
-    { key: 'campus',        label: 'Campus',         items: campusOptions },
+function useFilterOptions({ campusOptions, schoolOptions, campusLabel, assetCategoryOptions, componentTypeOptions, sourceOptions, conditionOptions, statusOptions, assetTypeOptions, healthStatusOptions, ownedByOptions, sourceTypeOptions, isAssignedOptions, assigneeOptions, ticketTypeOptions, statusLabel, filterOrder }) {
+  const options = [
+    { key: 'campus',        label: campusLabel,      items: campusOptions },
+    { key: 'school',        label: 'School',         items: schoolOptions },
     { key: 'category',      label: 'Asset Category', items: assetCategoryOptions },
     { key: 'ticketType',    label: 'Ticket Type',     items: ticketTypeOptions },
     { key: 'isAssigned',    label: 'Unassigned Ticket', items: isAssignedOptions },
@@ -146,6 +147,14 @@ function useFilterOptions({ campusOptions, assetCategoryOptions, componentTypeOp
     { key: 'sourceType',    label: 'Source Type',     items: sourceTypeOptions },
     { key: 'assignee',      label: 'Assigned To',     items: assigneeOptions },
   ].filter((opt) => opt.items && opt.items.length > 0);
+
+  if (!filterOrder.length) return options;
+
+  const filterOrderIndex = new Map(filterOrder.map((filterKey, position) => [filterKey, position]));
+  return [...options].sort((firstOption, secondOption) => (
+    (filterOrderIndex.get(firstOption.key) ?? filterOrder.length) -
+    (filterOrderIndex.get(secondOption.key) ?? filterOrder.length)
+  ));
 }
 
 // ─── main component ────────────────────────────────────────────────────────────
@@ -153,6 +162,9 @@ function useFilterOptions({ campusOptions, assetCategoryOptions, componentTypeOp
 export default function FilterDropdown({
   onFilterChange,
   campusOptions = [],
+  schoolOptions = [],
+  campusLabel = 'Campus',
+  filterOrder = [],
   assetCategoryOptions = [], 
   statusOptions = [],
   assetTypeOptions = [],
@@ -177,6 +189,9 @@ export default function FilterDropdown({
   useMenuPosition(isOpen, menuRef);
   const filterOptions = useFilterOptions({
     campusOptions,
+    schoolOptions,
+    campusLabel,
+    filterOrder,
     assetCategoryOptions,
     componentTypeOptions,
     sourceOptions,
@@ -245,4 +260,3 @@ export default function FilterDropdown({
     </div>
   );
 }
-

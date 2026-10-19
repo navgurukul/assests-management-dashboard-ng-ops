@@ -71,6 +71,18 @@ export default function MyAssetsTab({ userData = {} }) {
     enabled: returnModalOpen,
   });
 
+  // Fetch current user's manager for auto-filling managerEmail in return form
+  const { data: myManagerData } = useFetch({
+    url: config.endpoints.user.myManager,
+    queryKey: ['myManager'],
+    enabled: returnModalOpen,
+  });
+
+  const myManagerEmail = useMemo(() => {
+    const mgr = myManagerData?.data?.manager || myManagerData?.data || myManagerData?.manager;
+    return mgr?.email || '';
+  }, [myManagerData]);
+
   const { data: coordinatorResponse, error: coordinatorError, failureCount } = useFetch({
     url: `/campus-incharge/campus/${coordinatorCampusId}`,
     queryKey: ['campus-incharge', coordinatorCampusId],
@@ -87,6 +99,14 @@ export default function MyAssetsTab({ userData = {} }) {
     if (data?.success === false) return '';
     return data?.data?.itCoordinator?.email || data?.itCoordinator?.email || '';
   }, [coordinatorResponse]);
+
+  // When manager email resolves, inject into formStateRef so submit picks it up
+  useEffect(() => {
+    if (myManagerEmail && formStateRef.current.managerEmail !== myManagerEmail) {
+      formStateRef.current.managerEmail = myManagerEmail;
+      setTimeout(() => setCoordinatorUpdateTick((t) => t + 1), 0);
+    }
+  }, [myManagerEmail]);
 
   // Extract variables locally so they are guaranteed to exist identically on every render sequence
   const coordinatorData = coordinatorResponse?.data || coordinatorResponse;
@@ -153,6 +173,12 @@ export default function MyAssetsTab({ userData = {} }) {
       if (newField.name === 'destinationCampusId') {
         newField.dependsOn = null;
         newField.staticItems = campusesData;
+      }
+
+      // Auto-fill managerEmail from fetched manager (disabled, user cannot edit)
+      if (newField.name === 'managerEmail' && myManagerEmail) {
+        newField.defaultValue = myManagerEmail;
+        newField.helpText = `Your return request will be sent to your manager (${myManagerEmail}) for loop-in.`;
       }
 
       // Preserve whatever the user actually typed previously, and apply new coordinator values
@@ -355,7 +381,7 @@ export default function MyAssetsTab({ userData = {} }) {
               exactAddress: '',
               destinationCampusId: '',
               campusItCoordinator: '',
-              managerEmail: '',
+              managerEmail: formStateRef.current.managerEmail || updatedData.managerEmail || '',
               expectedDeliveryDate: '',
               vendorName: '',
               vendorReceipt: null,
@@ -371,7 +397,7 @@ export default function MyAssetsTab({ userData = {} }) {
               ...updatedData,
               exactAddress: assetAddress,
               destinationCampusId: '',
-              managerEmail: '',
+              managerEmail: formStateRef.current.managerEmail || updatedData.managerEmail || '',
               expectedDeliveryDate: '',
               vendorName: '',
               vendorReceipt: null,

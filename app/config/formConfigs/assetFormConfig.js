@@ -198,7 +198,7 @@ export const commonAssetFields = [
     options: [
       { value: "PURCHASED", label: "Purchased" },
       { value: "DONATED", label: "Donated" },
-      { value: "PERSONAL", label: "Personal" },
+      { value: "LOANED", label: "Loaned" },
     ],
   },
   {
@@ -212,10 +212,12 @@ export const commonAssetFields = [
       field: "sourceType",
       map: {
         PURCHASED: [{ value: "NavGuruKul", label: "NavGuruKul" }],
-        PERSONAL:  [{ value: "NavGuruKul", label: "NavGuruKul" }],
         DONATED:   [
           { value: "Sama", label: "Sama" },
           { value: "NavGuruKul", label: "NavGuruKul" },
+        ],
+        LOANED: [
+          { value: "Anish Jadhav Memorial Foundation", label: "Anish Jadhav Memorial Foundation" },
         ],
       },
       default: [{ value: "NavGuruKul", label: "NavGuruKul" }],
@@ -227,7 +229,7 @@ export const commonAssetFields = [
     type: "date",
     placeholder: "Select purchase date",
     required: true,
-    showIf: { field: "sourceType", value: ["PURCHASED", "PERSONAL"] },
+    showIf: { field: "sourceType", value: ["PURCHASED"] },
   },
   {
     name: "cost",
@@ -369,6 +371,7 @@ export const commonAssetFields = [
     allowMultiple: false,
     simpleMode: true,
     showIf: { field: "needsServicing", value: true },
+    helpText: "Before uploading, rename your file clearly — e.g. \"service_bill_Dell_May2024.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
   // AMC / Insurance
   {
@@ -449,6 +452,7 @@ export const commonAssetFields = [
     required: false,
     simpleMode: true,
     showIf: { field: "hasAmcInsurance", value: true },
+    helpText: "Before uploading, rename your file clearly — e.g. \"amc_policy_HP_2024-2025.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
   {
     name: "notes",
@@ -473,7 +477,7 @@ export const commonAssetFields = [
     type: "purchase-bill-selector",
     required: false,
     allowMultiple: false,
-    helpText: "Link or upload purchase bills for this asset",
+    helpText: "Link or upload purchase bills for this asset. Before uploading, rename your file clearly — e.g. \"purchase_invoice_Laptop_Dell_Jan2024.pdf\". Avoid generic names like IMG_1234, Screenshot, or WhatsApp Image.",
   },
 ];
 
@@ -519,7 +523,7 @@ export const commonAssetValidation = {
     .oneOf(["WORKING", "MINOR_ISSUES", "NOT_WORKING"], "Invalid condition"),
   sourceType: Yup.string()
     .required("Source type is required")
-    .oneOf(["PURCHASED", "DONATED", "PERSONAL"], "Invalid source type"),
+    .oneOf(["PURCHASED", "DONATED", "LOANED"], "Invalid source type"),
   sourceBy: Yup.string()
     .required("Source by is required")
     .when("sourceType", {
@@ -527,12 +531,18 @@ export const commonAssetValidation = {
       then: (schema) =>
         schema.oneOf(["Sama", "NavGuruKul"], "Invalid source by value"),
       otherwise: (schema) =>
-        schema.oneOf(["NavGuruKul"], "Invalid source by value"),
+        schema.when("sourceType", {
+          is: "LOANED",
+          then: (schema) =>
+            schema.oneOf(["Anish Jadhav Memorial Foundation"], "Invalid source by value"),
+          otherwise: (schema) =>
+            schema.oneOf(["NavGuruKul"], "Invalid source by value"),
+        }),
     }),
   purchaseDate: Yup.string()
     .nullable()
     .when("sourceType", {
-      is: "DONATED",
+      is: (val) => val === "DONATED" || val === "LOANED",
       then: (schema) => schema.notRequired(),
       otherwise: (schema) =>
         schema
@@ -967,6 +977,7 @@ export const serviceLogFields = [
     required: false,
     allowMultiple: false,
     simpleMode: true,
+    helpText: "Before uploading, rename your file clearly — e.g. \"service_receipt_Printer_Mar2024.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
 ];
 
@@ -1065,6 +1076,7 @@ export const amcRenewalFields = [
     required: false,
     allowMultiple: false,
     simpleMode: true,
+    helpText: "Before uploading, rename your file clearly — e.g. \"amc_renewal_HP_2024-2025.pdf\". Avoid names like \"IMG_001\", \"WhatsApp Image\", or \"Screenshot\".",
   },
 ];
 
