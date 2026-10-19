@@ -802,11 +802,13 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
                 }
               }}
             />
-            <CustomButton
-              text="Mark as Disposed"
-              variant="danger"
-              onClick={() => setModalAction('DISPOSE')}
-            />
+            {isAdmin && (
+              <CustomButton
+                text="Mark as Disposed"
+                variant="danger"
+                onClick={() => setModalAction('DISPOSE')}
+              />
+            )}
             <CustomButton
               text="Mark as Not Working"
               disabled={assetDetails?.ownedBy === 'lnw'}
