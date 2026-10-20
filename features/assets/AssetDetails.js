@@ -471,10 +471,10 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
 
   const assetDetails = assetData;
   const status = assetDetails.status;
-  const canMoveToRepair = ['IN_STOCK', 'SCRAP', 'DISPOSED'].includes(status);
+  const canMoveToRepair = ['IN_STOCK', 'SCRAP'].includes(status);
   const canMoveToStock = status === 'REPAIR';
   const canDispose = isAdmin && !['ALLOCATED', 'DISPOSED'].includes(status);
-  const canMarkNotWorking = ['IN_STOCK', 'REPAIR', 'DISPOSED'].includes(status);
+  const canMarkNotWorking = ['IN_STOCK', 'REPAIR'].includes(status);
 
   // Fields for changing asset location (same campus, different location)
   // Must be defined AFTER assetDetails is created
@@ -796,7 +796,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               variant="secondary"
               onClick={() => setModalAction('CHANGE_LOCATION')}
             />
-            {status !== 'ALLOCATED' && (
+            {status !== 'ALLOCATED' && status !== 'DISPOSED' && (
               <CustomButton
                 text={canMoveToStock ? 'Move to in Stock' : 'Moved to Repair'}
                 disabled={!canMoveToRepair && !canMoveToStock}
@@ -818,7 +818,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
                 onClick={() => setModalAction('DISPOSE')}
               />
             )}
-            {status !== 'ALLOCATED' && (
+            {status !== 'ALLOCATED' && status !== 'DISPOSED' && (
               <CustomButton
                 text="Mark as Not Working"
                 disabled={!canMarkNotWorking || assetDetails?.ownedBy === 'lnw'}
