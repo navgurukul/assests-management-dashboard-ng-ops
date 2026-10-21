@@ -173,6 +173,8 @@ export default function EditAsset({ assetId }) {
         assetTypeName,
         assetCategoryId: _catId,
         assetCategoryName: _catName,
+        status: _status,
+        condition: _condition,
         purchaseBills,
         // Strip servicing/AMC fields — those are managed via separate log actions
         needsServicing,
@@ -304,12 +306,12 @@ export default function EditAsset({ assetId }) {
     'amcCost', 'amcProviderDetails', 'amcRemark', 'amcDocument',
   ]);
 
-  // For edit, status and condition dropdowns should be enabled.
+  // Status and condition are shown for reference but cannot be changed from edit.
   const editFields = currentConfig.fields
     .filter((field) => !EDIT_EXCLUDED_FIELDS.has(field.name))
     .map((field) => {
       if (field.name === 'status' || field.name === 'condition') {
-        return { ...field, disabled: false };
+        return { ...field, disabled: true };
       }
       return field;
     });

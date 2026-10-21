@@ -12,7 +12,7 @@ import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 import StatusChip from '@/components/atoms/StatusChip';
 import { Edit } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
-import { estDateFields } from '@/dummyJson/dummyJson';
+import { estDateFields, estDateValidation } from '@/dummyJson/dummyJson';
 import { toast } from '@/app/utils/toast';
 import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
@@ -46,7 +46,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
     updateEstimatedDate({
       endpoint: config.endpoints.consignments.deliveryDetails(consignmentId),
       body: {
-        estimatedDeliveryDate: formData.newEstDate ? new Date(formData.newEstDate).toISOString().split('T')[0] : null,
+        estimatedDeliveryDate: formData.newEstDate,
         previousEstimatedDeliveryDate: prevDate,
         notes: formData.estDateComment || ''
       }
@@ -219,31 +219,28 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
       className: sharedHeightClass,
       items: [
         { label: 'Shipped At', value: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : 'Not shipped yet' },
-        // Courier mode fields - show only for courier dispatch
-        ...(!isInPerson ? [
-          { 
-            label: 'Est. Delivery', 
-            value: (
-              <div className="flex items-center gap-2">
-                <span>{consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A'}</span>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowEstDateModal(true);
-                  }} 
-                  className="text-gray-500 hover:text-blue-600 transition-colors"
-                  title="Update Est. Delivery"
-                >
-                  <Edit size={16} />
-                </button>
-              </div>
-            ) 
-          },
-          { 
-            label: 'Prev. Est. Delivery', 
-            value: consignment.previousEstimatedDeliveryDate ? new Date(consignment.previousEstimatedDeliveryDate).toLocaleDateString() : 'N/A' 
-          },
-        ] : []),
+        {
+          label: 'Est. Delivery',
+          value: (
+            <div className="flex items-center gap-2">
+              <span>{consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A'}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEstDateModal(true);
+                }}
+                className="text-gray-500 hover:text-blue-600 transition-colors"
+                title="Update Est. Delivery"
+              >
+                <Edit size={16} />
+              </button>
+            </div>
+          )
+        },
+        {
+          label: 'Prev. Est. Delivery',
+          value: consignment.previousEstimatedDeliveryDate ? new Date(consignment.previousEstimatedDeliveryDate).toLocaleDateString() : 'N/A'
+        },
         {
           label: 'Delivered At',
           value: (consignment.receivedAt || consignment.deliveredAt)
@@ -478,9 +475,10 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         onClose={() => setShowEstDateModal(false)}
         actionType="Update Estimated Date"
         fields={estDateFields}
+        validationSchema={estDateValidation}
         onSubmit={handleUpdateEstDate}
         size="medium"
-        isLoading={isUpdatingEstDate}
+         isSubmitting={isUpdatingEstDate}
       />
     </>
   );
