@@ -2,6 +2,9 @@ import * as Yup from 'yup';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://asset-dashboard.navgurukul.org/api';
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
 // Courier service providers with their tracking URL patterns
 export const courierProviders = [
   {
@@ -114,21 +117,34 @@ export const readyToDispatchFields = [
     name: 'estimatedDeliveryDate',
     label: 'Estimated Delivery Date',
     type: 'date',
-    placeholder: 'Select estimated delivery date',
+    placeholder: 'Select expected handover/delivery date',
     required: true,
-    showWhen: (formData) => formData.dispatchMode === 'courier',
+    minDate: today,
   },
 ];
 
 export const readyToDispatchValidation = Yup.object().shape({
-  courierServiceId: Yup.string().required('Courier partner is required'),
-  trackingId: Yup.string().required('Tracking ID is required'),
+  dispatchMode: Yup.string().required('Dispatch mode is required'),
+  courierServiceId: Yup.string().when('dispatchMode', {
+    is: 'courier',
+    then: (schema) => schema.required('Courier partner is required'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  trackingId: Yup.string().when('dispatchMode', {
+    is: 'courier',
+    then: (schema) => schema.required('Tracking ID is required'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   estimatedDeliveryDate: Yup.date()
+    .transform((value, originalValue) => (originalValue === '' ? null : value))
+    .typeError('Estimated delivery date is required')
+    .nullable()
     .required('Estimated delivery date is required')
-    .nullable(),
+    .min(today, 'Estimated delivery date cannot be in the past'),
 });
 
 export const readyToDispatchInitialValues = {
+  dispatchMode: 'courier',
   courierServiceId: '',
   trackingId: '',
   trackingLink: 'https://www.shiprocket.in/shipment-tracking/',

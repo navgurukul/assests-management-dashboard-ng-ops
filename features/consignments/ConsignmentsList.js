@@ -33,6 +33,7 @@ import { transformConsignmentForTable } from '@/app/utils/dataTransformers';
 import {
   createConsignmentFields,
   readyToDispatchFields,
+  readyToDispatchValidation,
   courierProviders,
   getAcceptReturnFields,
 } from '@/app/config/formConfigs/consignmentFormConfig';
@@ -762,12 +763,13 @@ export default function ConsignmentsList() {
     const loadingToastId = toast.loading('Dispatching consignment...');
     
     try{
-    let payload;
+      let payload;
 
       if (formData.dispatchMode === 'in_person') {
         payload = {
           inPerson: true,
           inPersonComment: formData.comment || 'Dispatched in person',
+          estimatedDeliveryDate: formData.estimatedDeliveryDate,
           // notes: formData.comment || 'Dispatched in person',
         };
       } else {
@@ -1241,6 +1243,7 @@ export default function ConsignmentsList() {
         }}
         actionType="Dispatch"
         fields={readyToDispatchFields}
+        validationSchema={readyToDispatchValidation}
         onSubmit={handleDispatchConsignment}
         size="medium"
         isSubmitting={isSubmitting}
