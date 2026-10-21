@@ -1,4 +1,33 @@
-export const estDateFields = [{name:"newEstDate",label:"New Estimated Date",type:"date",required:true},{name:"estDateComment",label:"Comment",type:"textarea",placeholder:"Add your comments here...",required:false}];
+import * as Yup from 'yup';
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+export const estDateFields = [
+  {
+    name: 'newEstDate',
+    label: 'New Estimated Date',
+    type: 'date',
+    required: true,
+    minDate: today,
+  },
+  {
+    name: 'estDateComment',
+    label: 'Comment',
+    type: 'textarea',
+    placeholder: 'Add your comments here...',
+    required: false,
+  },
+];
+
+export const estDateValidation = Yup.object({
+  newEstDate: Yup.date()
+    .transform((value, originalValue) => (originalValue === '' ? null : value))
+    .typeError('Estimated delivery date is required')
+    .nullable()
+    .required('Estimated delivery date is required')
+    .min(today, 'Estimated delivery date cannot be in the past'),
+});
 
 import { CheckCircle2, ArrowRightLeft, Calendar, ExternalLink } from 'lucide-react';
 
