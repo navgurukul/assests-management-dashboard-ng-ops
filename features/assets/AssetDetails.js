@@ -470,6 +470,11 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
   }
 
   const assetDetails = assetData;
+  const status = assetDetails.status;
+  const canMoveToRepair = ['IN_STOCK', 'SCRAP'].includes(status);
+  const canMoveToStock = status === 'REPAIR';
+  const canDispose = isAdmin && !['ALLOCATED', 'DISPOSED'].includes(status);
+  const canMarkNotWorking = ['IN_STOCK', 'REPAIR'].includes(status);
 
   // Fields for changing asset location (same campus, different location)
   // Must be defined AFTER assetDetails is created
@@ -791,30 +796,36 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               variant="secondary"
               onClick={() => setModalAction('CHANGE_LOCATION')}
             />
-            <CustomButton
-              text={assetDetails.status === 'REPAIR' ? 'Move to in Stock' : 'Moved to Repair'}
-              variant="warning"
-              onClick={() => {
-                if (assetDetails.status === 'REPAIR') {
-                  setModalAction('IN_STOCK');
-                } else {
-                  setModalAction('REPAIR');
-                }
-              }}
-            />
-            {isAdmin && (
+            {status !== 'ALLOCATED' && status !== 'DISPOSED' && (
+              <CustomButton
+                text={canMoveToStock ? 'Move to in Stock' : 'Moved to Repair'}
+                disabled={!canMoveToRepair && !canMoveToStock}
+                variant="warning"
+                onClick={() => {
+                  if (canMoveToStock) {
+                    setModalAction('IN_STOCK');
+                  } else {
+                    setModalAction('REPAIR');
+                  }
+                }}
+              />
+            )}
+            {isAdmin && status !== 'ALLOCATED' && (
               <CustomButton
                 text="Mark as Disposed"
+                disabled={!canDispose}
                 variant="danger"
                 onClick={() => setModalAction('DISPOSE')}
               />
             )}
-            <CustomButton
-              text="Mark as Not Working"
-              disabled={assetDetails?.ownedBy === 'lnw'}
-              variant="secondary"
-              onClick={() => setModalAction('SCRAP')}
-            />
+            {status !== 'ALLOCATED' && status !== 'DISPOSED' && (
+              <CustomButton
+                text="Mark as Not Working"
+                disabled={!canMarkNotWorking || assetDetails?.ownedBy === 'lnw'}
+                variant="secondary"
+                onClick={() => setModalAction('SCRAP')}
+              />
+            )}
             <CustomButton
               text="Inspection Log"
               variant="info"
