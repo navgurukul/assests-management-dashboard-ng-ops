@@ -1,15 +1,18 @@
 import * as Yup from 'yup';
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+const getToday = () => {
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+  return currentDate;
+};
 
-export const estDateFields = [
+export const getEstDateFields = (minDate = getToday()) => [
   {
     name: 'newEstDate',
     label: 'New Estimated Date',
     type: 'date',
     required: true,
-    minDate: today,
+    minDate,
   },
   {
     name: 'estDateComment',
@@ -20,13 +23,16 @@ export const estDateFields = [
   },
 ];
 
-export const estDateValidation = Yup.object({
+export const getEstDateValidation = (minDate = getToday()) => Yup.object({
   newEstDate: Yup.date()
     .transform((value, originalValue) => (originalValue === '' ? null : value))
     .typeError('Estimated delivery date is required')
     .nullable()
     .required('Estimated delivery date is required')
-    .min(today, 'Estimated delivery date cannot be in the past'),
+    .min(minDate, 'Estimated delivery date cannot be in the past'),
+  estDateComment: Yup.string()
+    .max(500, 'Comment cannot exceed 500 characters')
+    .nullable(),
 });
 
 import { CheckCircle2, ArrowRightLeft, Calendar, ExternalLink } from 'lucide-react';
