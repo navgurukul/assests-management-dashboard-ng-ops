@@ -163,11 +163,15 @@ export const categoryConfigs = {
   "Learning & Recreation": {
     fields: [
       { name: "name", label: "Name", type: "text", placeholder: "e.g. Cricket, Algebra Textbook", required: true },
-      { name: "isbn", label: "ISBN", type: "text", placeholder: "978-3-16-148410-0", required: false, showIf: { field: "assetTypeName", value: ["Books"] } },
+      { name: "isbn", label: "ISBN", type: "text", placeholder: "978-3-16-148410-0", required: true, showIf: { field: "assetTypeName", value: ["Books"] } },
     ],
     validation: {
       name: Yup.string().required("Name is required"),
-      isbn: Yup.string().required("ISBN is required").min(1),
+      isbn: Yup.string().when("assetTypeName", {
+        is: "Books",
+        then: (schema) => schema.required("ISBN is required").min(1),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     },
     initial: { name: "", isbn: "" },
   },
