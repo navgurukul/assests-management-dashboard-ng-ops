@@ -125,6 +125,7 @@ export const readyToDispatchFields = [
 
 export const readyToDispatchValidation = Yup.object().shape({
   dispatchMode: Yup.string().required('Dispatch mode is required'),
+  comment: Yup.string().max(500, 'Comment cannot exceed 500 characters').nullable(),
   courierServiceId: Yup.string().when('dispatchMode', {
     is: 'courier',
     then: (schema) => schema.required('Courier partner is required'),

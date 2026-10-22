@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import DetailsPage from '@/components/molecules/DetailsPage';
 import StateHandler from '@/components/atoms/StateHandler';
@@ -12,7 +12,7 @@ import { formatConsignmentStatus } from '@/app/utils/dataTransformers';
 import StatusChip from '@/components/atoms/StatusChip';
 import { Edit } from 'lucide-react';
 import FormModal from '@/components/molecules/FormModal';
-import { estDateFields, estDateValidation } from '@/dummyJson/dummyJson';
+import { getEstDateFields, getEstDateValidation } from '@/dummyJson/dummyJson';
 import { toast } from '@/app/utils/toast';
 import usePut from '@/app/hooks/query/usePut';
 import config from '@/app/config/env.config';
@@ -24,6 +24,31 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   
   const [showEstDateModal, setShowEstDateModal] = useState(false);
   const queryClient = useQueryClient();
+  const estimatedDeliveryDate =
+    (consignmentData?.data || consignmentData)?.estimatedDeliveryDate;
+
+  const minimumEstimatedDate = useMemo(() => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    if (!estimatedDeliveryDate) {
+      return currentDate;
+    }
+
+    const estimatedDateValue = String(estimatedDeliveryDate).split('T')[0];
+    const [year, month, day] = estimatedDateValue.split('-').map(Number);
+    const currentEstimatedDate = new Date(year, month - 1, day);
+
+    return currentEstimatedDate > currentDate ? currentEstimatedDate : currentDate;
+  }, [estimatedDeliveryDate]);
+  const estimatedDateFields = useMemo(
+    () => getEstDateFields(minimumEstimatedDate),
+    [minimumEstimatedDate],
+  );
+  const estimatedDateValidation = useMemo(
+    () => getEstDateValidation(minimumEstimatedDate),
+    [minimumEstimatedDate],
+  );
 
   const { mutate: updateEstimatedDate, isPending: isUpdatingEstDate } = usePut({
     onSuccess: () => {
@@ -131,6 +156,7 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
   const courierServiceName = consignment.courierPartnerName;
   const totalAssets = consignment.assetCount ?? consignment.assets?.length ?? 0;
   const isInPerson = consignment.inPerson === true;
+  const canUpdateEstimatedDate = consignment.status?.toUpperCase() === 'DISPATCHED';
 
   const resolveUserDisplay = (userValue) => {
     if (!userValue) return 'N/A';
@@ -224,16 +250,18 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
           value: (
             <div className="flex items-center gap-2">
               <span>{consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : 'N/A'}</span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowEstDateModal(true);
-                }}
-                className="text-gray-500 hover:text-blue-600 transition-colors"
-                title="Update Est. Delivery"
-              >
-                <Edit size={16} />
-              </button>
+              {canUpdateEstimatedDate && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEstDateModal(true);
+                  }}
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                  title="Update Est. Delivery"
+                >
+                  <Edit size={16} />
+                </button>
+              )}
             </div>
           )
         },
@@ -474,8 +502,8 @@ export default function ConsignmentDetails({ consignmentId, consignmentData, onB
         isOpen={showEstDateModal}
         onClose={() => setShowEstDateModal(false)}
         actionType="Update Estimated Date"
-        fields={estDateFields}
-        validationSchema={estDateValidation}
+        fields={estimatedDateFields}
+        validationSchema={estimatedDateValidation}
         onSubmit={handleUpdateEstDate}
         size="medium"
          isSubmitting={isUpdatingEstDate}
