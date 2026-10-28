@@ -96,6 +96,11 @@ export default function MyAssetsTab({ userData = {} }) {
     enabled: !!selectedLeaseCampusId && extendModalOpen,
   });
 
+  const { data: myLeaseResponse } = useFetch({
+    url: `${config.endpoints.leaseExtensions.list}?myRequests=true`,
+    queryKey: ['myLeaseRequests'],
+  });
+
   const leaseCampusIncharge = useMemo(() => {
     const list = leaseCampusInchargesResponse?.data || leaseCampusInchargesResponse || [];
     if (!Array.isArray(list)) return null;
@@ -208,6 +213,27 @@ export default function MyAssetsTab({ userData = {} }) {
     return map;
   })();
 
+  // Collect IDs of assets that already have an active (PENDING or APPROVED) lease
+  // extension request raised by the current user. Used to hide the "Extend Lease"
+  // button so the user cannot submit duplicate requests.
+  const assetsWithActiveleaseRequest = useMemo(() => {
+    const leaseRequests = myLeaseResponse?.data?.data || myLeaseResponse?.data || [];
+    const leaseRequestList = Array.isArray(leaseRequests) ? leaseRequests : [];
+
+    const BLOCKING_STATUSES = ['PENDING', 'APPROVED'];
+
+    const activeLeaseAssetIds = leaseRequestList
+      .filter((leaseRequest) => leaseRequest.requestedByUserId === apiUser?.id)
+      .filter((leaseRequest) => BLOCKING_STATUSES.includes(leaseRequest.status))
+      .map((leaseRequest) => leaseRequest.assetId);
+
+    return new Set(activeLeaseAssetIds);
+  }, [myLeaseResponse, apiUser?.id]);
+
+  // Returns true only when the asset has no active (PENDING / APPROVED) lease request.
+  // REJECTED, COMPLETED, or no prior request → user is allowed to raise a new one.
+  const canExtendLeaseForAsset = (assetId) => !assetsWithActiveleaseRequest.has(assetId);
+
   const computedReturnFields = (() => {
     const fields = getReturnAssetFields(
       selectedAsset, 
@@ -240,6 +266,10 @@ export default function MyAssetsTab({ userData = {} }) {
   })();
 
   const handleExtendLease = (asset) => {
+    if (!canExtendLeaseForAsset(asset.id)) {
+      toast.error('A lease extension request for this asset is already in progress.');
+      return;
+    }
     const allocation = allocationMap[asset.id];
     setSelectedAsset(asset);
     setSelectedAllocationId(allocation?.id || null);
@@ -423,6 +453,7 @@ export default function MyAssetsTab({ userData = {} }) {
 
       toast.success('Lease extension request submitted successfully.');
       queryClient.invalidateQueries({ queryKey: ['myAssets'] });
+      queryClient.invalidateQueries({ queryKey: ['myLeaseRequests'] });
       setExtendModalOpen(false);
       setSelectedAsset(null);
       setSelectedAllocationId(null);
@@ -643,7 +674,10 @@ export default function MyAssetsTab({ userData = {} }) {
                         Dispatch Pending
                       </span>
                     ) : (
-                      <ActionMenu menuOptions={getAssetMenuOptions(asset, assetMenuHandlers)} />
+                      <ActionMenu menuOptions={getAssetMenuOptions(asset, {
+                        ...assetMenuHandlers,
+                        canExtendLease: canExtendLeaseForAsset(asset.id),
+                      })} />
                     )}
                   </div>
                 </div>
