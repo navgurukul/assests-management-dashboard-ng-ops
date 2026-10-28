@@ -213,9 +213,7 @@ export default function MyAssetsTab({ userData = {} }) {
     return map;
   })();
 
-  // Collect IDs of assets that already have an active (PENDING or APPROVED) lease
-  // extension request raised by the current user. Used to hide the "Extend Lease"
-  // button so the user cannot submit duplicate requests.
+  // Get asset IDs with active lease requests to prevent duplicates.
   const assetsWithActiveleaseRequest = useMemo(() => {
     const leaseRequests = myLeaseResponse?.data?.data || myLeaseResponse?.data || [];
     const leaseRequestList = Array.isArray(leaseRequests) ? leaseRequests : [];
@@ -230,8 +228,7 @@ export default function MyAssetsTab({ userData = {} }) {
     return new Set(activeLeaseAssetIds);
   }, [myLeaseResponse, apiUser?.id]);
 
-  // Returns true only when the asset has no active (PENDING / APPROVED) lease request.
-  // REJECTED, COMPLETED, or no prior request → user is allowed to raise a new one.
+  // Check if the asset has no active lease request.
   const canExtendLeaseForAsset = (assetId) => !assetsWithActiveleaseRequest.has(assetId);
 
   const computedReturnFields = (() => {
@@ -559,6 +556,8 @@ export default function MyAssetsTab({ userData = {} }) {
     ALLOCATION: { label: 'Allocation', textColor: 'text-(--theme-main)', bg: '' },
     'RETURN ACCEPTED': { label: 'Return Accepted', textColor: 'text-green-700', bg: 'bg-green-50' },
     RETURN_REQUESTED: { label: 'Return Requested', textColor: 'text-amber-700', bg: 'bg-amber-50' },
+    LEASE_EXTENSION_CREATED: { label: 'Lease Extension Created', textColor: 'text-amber-700', bg: '' },
+    LEASE_EXTENSION: { label: 'Lease Extension', textColor: 'text-gray-700', bg: '' },
   };
 
   // Group by assetId, not assetTag — tags get reused/renamed on return.
