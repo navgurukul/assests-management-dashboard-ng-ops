@@ -191,6 +191,7 @@ export default function LeaseExtensionsList() {
       case 'status':
         return <StatusChip value={request.status || 'PENDING'} />;
       case 'actions':
+        if (request.status !== 'PENDING') return null; 
         return (
           <div onClick={(event) => event.stopPropagation()}>
             <ActionMenu
