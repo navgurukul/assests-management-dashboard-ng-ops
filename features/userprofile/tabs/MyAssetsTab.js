@@ -38,6 +38,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [expandedTimelines, setExpandedTimelines] = useState({});
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
+  const [selectedLeaseCampusId, setSelectedLeaseCampusId] = useState(null);
   const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
   const [isDownloadingNOC, setIsDownloadingNOC] = useState(false);
 
@@ -88,6 +89,59 @@ export default function MyAssetsTab({ userData = {} }) {
     queryKey: ['campus-incharge', coordinatorCampusId],
     enabled: !!coordinatorCampusId,
   });
+
+  const { data: leaseCampusInchargesResponse, isLoading: isLeaseCampusInchargeLoading } = useFetch({
+    url: config.endpoints.campusIncharge.list,
+    queryKey: ['lease-campus-incharges'],
+    enabled: !!selectedLeaseCampusId && extendModalOpen,
+  });
+
+  const { data: myLeaseResponse } = useFetch({
+    url: `${config.endpoints.leaseExtensions.list}?myRequests=true`,
+    queryKey: ['myLeaseRequests'],
+  });
+
+  const leaseCampusIncharge = useMemo(() => {
+    const list = leaseCampusInchargesResponse?.data || leaseCampusInchargesResponse || [];
+    if (!Array.isArray(list)) return null;
+    return (
+      list.find(
+        (record) =>
+          record.campusId === selectedLeaseCampusId ||
+          record.campus?.id === selectedLeaseCampusId
+      ) || null
+    );
+  }, [leaseCampusInchargesResponse, selectedLeaseCampusId]);
+
+  const leaseCampusManager = leaseCampusIncharge?.campusManager || null;
+
+  const leaseFields = useMemo(() => {
+    let campusDisplay = 'Asset campus unavailable';
+    let campusManagerDisplay = 'Campus Manager details unavailable';
+
+    if (isLeaseCampusInchargeLoading) {
+      campusDisplay = 'Loading asset campus...';
+      campusManagerDisplay = 'Loading Campus Manager...';
+    } else {
+      campusDisplay =
+        leaseCampusIncharge?.campusName ||
+        selectedAsset?.campus?.campusName ||
+        'Asset campus unavailable';
+    }
+
+    if (leaseCampusManager) {
+      const managerName = leaseCampusManager.name || '';
+      const managerEmail = leaseCampusManager.email || leaseCampusManager.user?.email || '';
+      campusManagerDisplay = [managerName, managerEmail].filter(Boolean).join(' - ') || 'Campus Manager details unavailable';
+    }
+
+    return getExtendLeaseFields(campusDisplay, campusManagerDisplay);
+  }, [
+    isLeaseCampusInchargeLoading,
+    leaseCampusIncharge,
+    leaseCampusManager,
+    selectedAsset,
+  ]);
 
   const campusesData = useMemo(() => {
     return campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
@@ -159,6 +213,24 @@ export default function MyAssetsTab({ userData = {} }) {
     return map;
   })();
 
+  // Get asset IDs with active lease requests to prevent duplicates.
+  const assetsWithActiveleaseRequest = useMemo(() => {
+    const leaseRequests = myLeaseResponse?.data?.data || myLeaseResponse?.data || [];
+    const leaseRequestList = Array.isArray(leaseRequests) ? leaseRequests : [];
+
+    const BLOCKING_STATUSES = ['PENDING', 'APPROVED'];
+
+    const activeLeaseAssetIds = leaseRequestList
+      .filter((leaseRequest) => leaseRequest.requestedByUserId === apiUser?.id)
+      .filter((leaseRequest) => BLOCKING_STATUSES.includes(leaseRequest.status))
+      .map((leaseRequest) => leaseRequest.assetId);
+
+    return new Set(activeLeaseAssetIds);
+  }, [myLeaseResponse, apiUser?.id]);
+
+  // Check if the asset has no active lease request.
+  const canExtendLeaseForAsset = (assetId) => !assetsWithActiveleaseRequest.has(assetId);
+
   const computedReturnFields = (() => {
     const fields = getReturnAssetFields(
       selectedAsset, 
@@ -191,8 +263,14 @@ export default function MyAssetsTab({ userData = {} }) {
   })();
 
   const handleExtendLease = (asset) => {
+    if (!canExtendLeaseForAsset(asset.id)) {
+      toast.error('A lease extension request for this asset is already in progress.');
+      return;
+    }
+    const allocation = allocationMap[asset.id];
     setSelectedAsset(asset);
-    setSelectedAllocationId(allocationMap[asset.id]?.id || null);
+    setSelectedAllocationId(allocation?.id || null);
+    setSelectedLeaseCampusId(asset.campusId || asset.campus?.id || null);
     setExtendModalOpen(true);
   };
 
@@ -345,10 +423,25 @@ export default function MyAssetsTab({ userData = {} }) {
       return;
     }
 
+    if (isLeaseCampusInchargeLoading) {
+      toast.error('Campus Manager details are still loading. Please try again.');
+      return;
+    }
+
+    const campusManagerId = leaseCampusManager?.user?.id;
+
+    if (!campusManagerId) {
+      toast.error('No Campus Manager is configured for this asset campus.');
+      return;
+    }
+
     try {
       await postMutation({
         endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
         body: {
+          assetId: selectedAsset?.id,
+          campusManagerId,
+          campusId: selectedLeaseCampusId,
           leaseType: formData.leaseType,
           extendUntil: formData.extendUntil,
           description: formData.description || undefined,
@@ -356,9 +449,12 @@ export default function MyAssetsTab({ userData = {} }) {
       });
 
       toast.success('Lease extension request submitted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['myAssets'] });
+      queryClient.invalidateQueries({ queryKey: ['myLeaseRequests'] });
       setExtendModalOpen(false);
       setSelectedAsset(null);
       setSelectedAllocationId(null);
+      setSelectedLeaseCampusId(null);
     } catch (err) {
       toast.error(err?.message || 'Failed to submit lease extension request.');
     }
@@ -460,6 +556,8 @@ export default function MyAssetsTab({ userData = {} }) {
     ALLOCATION: { label: 'Allocation', textColor: 'text-(--theme-main)', bg: '' },
     'RETURN ACCEPTED': { label: 'Return Accepted', textColor: 'text-green-700', bg: 'bg-green-50' },
     RETURN_REQUESTED: { label: 'Return Requested', textColor: 'text-amber-700', bg: 'bg-amber-50' },
+    LEASE_EXTENSION_CREATED: { label: 'Lease Extension Created', textColor: 'text-amber-700', bg: '' },
+    LEASE_EXTENSION: { label: 'Lease Extension', textColor: 'text-gray-700', bg: '' },
   };
 
   // Group by assetId, not assetTag — tags get reused/renamed on return.
@@ -575,7 +673,10 @@ export default function MyAssetsTab({ userData = {} }) {
                         Dispatch Pending
                       </span>
                     ) : (
-                      <ActionMenu menuOptions={getAssetMenuOptions(asset, assetMenuHandlers)} />
+                      <ActionMenu menuOptions={getAssetMenuOptions(asset, {
+                        ...assetMenuHandlers,
+                        canExtendLease: canExtendLeaseForAsset(asset.id),
+                      })} />
                     )}
                   </div>
                 </div>
@@ -845,10 +946,10 @@ export default function MyAssetsTab({ userData = {} }) {
 
       <FormModal
         isOpen={extendModalOpen}
-        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); }}
+        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); setSelectedLeaseCampusId(null); }}
         componentName=""
         actionType="Extend Lease"
-        fields={getExtendLeaseFields()}
+        fields={leaseFields}
         onSubmit={handleExtendSubmit}
         isSubmitting={isPostPending}
         size="medium"
