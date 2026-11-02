@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { usePersistentState } from '@/app/hooks/usePersistentState';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 import { useAuth } from '@/app/context/AuthContext';
 import { Check, X } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
+import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
 import TableWrapper from '@/components/Table/TableWrapper';
 import ActionMenu from '@/components/molecules/ActionMenu';
 import FormModal from '@/components/molecules/FormModal';
@@ -16,6 +18,7 @@ import useFetch from '@/app/hooks/query/useFetch';
 import apiService from '@/app/utils/apiService';
 import config from '@/app/config/env.config';
 import { toast } from '@/app/utils/toast';
+import { useFilterHandlers } from '@/app/hooks/useFilterHandlers';
 
 const columns = [
   { key: 'requester', label: 'REQUESTED BY', align: 'start' },
@@ -88,7 +91,7 @@ export default function LeaseExtensionsList() {
 
   const [modalState, setModalState] = useState({ isOpen: false, actionType: null, request: null });
   const [processingId, setProcessingId] = useState(null);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = usePersistentState('lease-extensions-filters', {});
 
   const { data: campusInchargesResponse } = useFetch({
     url: config.endpoints.campusIncharge.list,
@@ -107,15 +110,32 @@ export default function LeaseExtensionsList() {
         .filter((campusOption) => campusOption.value)
     : [];
 
-  const campusId = isAdmin ? filters.campus : undefined;
+  const leaseStatusOptions = [
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'APPROVED', label: 'Approved' },
+    { value: 'REJECTED', label: 'Rejected' },
+    { value: 'COMPLETED', label: 'Completed' },
+  ];
 
-  const leaseUrl = isAdmin
-    ? `${config.endpoints.leaseExtensions.list}${campusId ? `?campusId=${campusId}` : ''}`
-    : config.endpoints.leaseExtensions.byCampusManager(user?.id);
+  const campusId = isAdmin ? filters.campus : undefined;
+  const statusFilter = isAdmin ? filters.status : undefined;
+
+  const buildLeaseUrl = () => {
+    if (!isAdmin) {
+      return config.endpoints.leaseExtensions.byCampusManager(user?.id);
+    }
+    const queryParams = new URLSearchParams();
+    if (campusId) queryParams.append('campusId', campusId);
+    if (statusFilter) queryParams.append('status', statusFilter);
+    const queryString = queryParams.toString();
+    return `${config.endpoints.leaseExtensions.list}${queryString ? `?${queryString}` : ''}`;
+  };
+
+  const leaseUrl = buildLeaseUrl();
 
   const { data, isLoading, isError, error, refetch } = useFetch({
     url: leaseUrl,
-    queryKey: ['lease-extension-requests', isAdmin ? 'admin' : user?.id, campusId],
+    queryKey: ['lease-extension-requests', isAdmin ? 'admin' : user?.id, campusId, statusFilter],
     enabled: isAdmin || (isCampusManager && !!user?.id),
   });
 
@@ -132,6 +152,28 @@ export default function LeaseExtensionsList() {
 
   const handleFilterChange = (nextFilters) => {
     setFilters(nextFilters);
+  };
+
+  const { handleRemoveFilter, handleClearAllFilters } = useFilterHandlers(
+    filters,
+    setFilters,
+  );
+
+  const getFilterLabel = (filterKey, value) => {
+    if (filterKey === 'status') {
+      const matchedStatus = leaseStatusOptions.find((statusOption) => statusOption.value === value);
+      return matchedStatus ? matchedStatus.label : value;
+    }
+    if (filterKey === 'campus') {
+      const matchedCampus = campusOptions.find((campusOption) => campusOption.value === value);
+      return matchedCampus ? matchedCampus.label : value;
+    }
+    return value;
+  };
+
+  const getCategoryName = (filterKey) => {
+    const names = { status: 'Status', campus: 'Campus' };
+    return names[filterKey] || filterKey;
   };
 
   const closeModal = () => {
@@ -250,8 +292,20 @@ export default function LeaseExtensionsList() {
             <FilterDropdown
               campusOptions={campusOptions}
               campusLabel="Campus"
+              statusOptions={leaseStatusOptions}
               selectedFilters={filters}
               onFilterChange={handleFilterChange}
+            />
+          ) : undefined
+        }
+        activeFiltersComponent={
+          isAdmin ? (
+            <ActiveFiltersChips
+              filters={filters}
+              onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
+              getCategoryName={getCategoryName}
+              getFilterLabel={getFilterLabel}
             />
           ) : undefined
         }
