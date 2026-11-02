@@ -5,7 +5,7 @@ import { usePersistentState } from '@/app/hooks/usePersistentState';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 import { useAuth } from '@/app/context/AuthContext';
-import { Check, X } from 'lucide-react';
+import { Check, X, FileText } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
@@ -27,7 +27,9 @@ const columns = [
   { key: 'campus', label: 'CAMPUS', align: 'start' },
   { key: 'campusManager', label: 'CAMPUS MANAGER', align: 'start' },
   { key: 'extendUntil', label: 'EXTEND UNTIL', align: 'start' },
+  { key: 'description', label: 'DESCRIPTION', align: 'start' },
   { key: 'remark', label: 'REMARK', align: 'start' },
+  { key: 'supportedDocument', label: 'DOCUMENT', align: 'center' },
   { key: 'status', label: 'STATUS', align: 'start' },
   { key: 'actions', label: 'ACTIONS', align: 'center' },
 ];
@@ -74,10 +76,10 @@ const getReviewFields = (actionType) => [
       }]
     : []),
   {
-    name: 'remarks',
-    label: 'Remarks',
+    name: 'remark',
+    label: 'Remark',
     type: 'textarea',
-    placeholder: `Enter remarks for ${actionType === 'Approve' ? 'approving' : 'rejecting'} this request...`,
+    placeholder: `Enter remark for ${actionType === 'Approve' ? 'approving' : 'rejecting'} this request...`,
     required: actionType === 'Reject',
     rows: 4,
   },
@@ -196,7 +198,7 @@ export default function LeaseExtensionsList() {
         body: {
           action: actionType === 'Approve' ? 'APPROVE' : 'REJECT',
           ...(actionType === 'Approve' ? { conditionCompleted: true } : {}),
-          remarks: formData.remarks?.trim() || undefined,
+          remark: formData.remark?.trim() || undefined,
         },
       });
       toast.success(`Lease request ${actionType === 'Approve' ? 'approved' : 'rejected'} successfully.`);
@@ -228,8 +230,27 @@ export default function LeaseExtensionsList() {
       }
       case 'extendUntil':
         return <span className="text-gray-500">{request.extendUntil ? new Date(`${request.extendUntil}T00:00:00`).toLocaleDateString('en-IN') : 'N/A'}</span>;
+      case 'description':
+        return <span className="text-gray-700 max-w-xs block truncate">{request.description || 'N/A'}</span>;
       case 'remark':
-        return <span className="text-gray-700 max-w-xs block truncate">{request.remark || request.description || 'N/A'}</span>;
+        return <span className="text-gray-700 max-w-xs block truncate">{request.remark || 'N/A'}</span>;
+      case 'supportedDocument': {
+        const documentUrl = request.supportedDocument;
+        if (!documentUrl) return <span className="text-gray-400 text-sm">N/A</span>;
+        return (
+          <a
+            href={documentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(event) => event.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium"
+            title="View supporting document"
+          >
+            <FileText className="w-4 h-4 shrink-0" />
+            View
+          </a>
+        );
+      }
       case 'status':
         return <StatusChip value={request.status || 'PENDING'} />;
       case 'actions':
