@@ -436,16 +436,20 @@ export default function MyAssetsTab({ userData = {} }) {
     }
 
     try {
+      const leasePayload = new FormData();
+      leasePayload.append('assetId', selectedAsset?.id);
+      leasePayload.append('campusManagerId', campusManagerId);
+      leasePayload.append('campusId', selectedLeaseCampusId);
+      leasePayload.append('leaseType', formData.leaseType);
+      leasePayload.append('extendUntil', formData.extendUntil);
+      if (formData.description) leasePayload.append('description', formData.description);
+      if (formData.supportedDocument instanceof File) {
+        leasePayload.append('supportedDocument', formData.supportedDocument);
+      }
+
       await postMutation({
         endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
-        body: {
-          assetId: selectedAsset?.id,
-          campusManagerId,
-          campusId: selectedLeaseCampusId,
-          leaseType: formData.leaseType,
-          extendUntil: formData.extendUntil,
-          description: formData.description || undefined,
-        },
+        body: leasePayload,
       });
 
       toast.success('Lease extension request submitted successfully.');
