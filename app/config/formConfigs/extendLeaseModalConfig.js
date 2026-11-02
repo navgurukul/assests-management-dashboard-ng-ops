@@ -58,6 +58,15 @@ export const getExtendLeaseFields = (campusDisplay = '', campusManagerDisplay = 
       required: false,
       placeholder: 'Reason for extending lease...',
     },
+    {
+      name: 'supportedDocument',
+      label: 'Supporting Document',
+      type: 'file',
+      required: false,
+      accept: '.pdf,.jpg,.jpeg,.png',
+      helpText: 'Upload bond/lease related document (PDF or image).',
+      fullWidth: true,
+    },
   ];
 };
 
@@ -83,6 +92,7 @@ export const getExtendLeaseValidationSchema = () => {
       .min(minDate, 'Extension date must be in the future')
       .max(maxDate, 'Extension date cannot exceed 90 days from today'),
     description: Yup.string().nullable(),
+    supportedDocument: Yup.mixed().nullable(),
   });
 };
 
@@ -92,4 +102,5 @@ export const extendLeaseInitialValues = {
   leaseType: '',
   extendUntil: '',
   description: '',
+  supportedDocument: null,
 };
