@@ -5,7 +5,7 @@ import { usePersistentState } from '@/app/hooks/usePersistentState';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectUserRole } from '@/app/store/slices/appSlice';
 import { useAuth } from '@/app/context/AuthContext';
-import { Check, X, FileText } from 'lucide-react';
+import { Check, X, CheckCheck } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import FilterDropdown from '@/components/molecules/FilterDropdown';
 import ActiveFiltersChips from '@/components/molecules/ActiveFiltersChips';
@@ -79,8 +79,10 @@ const getReviewFields = (actionType) => [
     name: 'remark',
     label: 'Remark',
     type: 'textarea',
-    placeholder: `Enter remark for ${actionType === 'Approve' ? 'approving' : 'rejecting'} this request...`,
-    required: actionType === 'Reject',
+    placeholder: actionType === 'Complete'
+      ? 'Enter remark for completing this lease extension...'
+      : `Enter remark for ${actionType === 'Approve' ? 'approving' : 'rejecting'} this request...`,
+    required: actionType === 'Reject' || actionType === 'Complete',
     rows: 4,
   },
 ];
@@ -193,15 +195,23 @@ export default function LeaseExtensionsList() {
 
     setProcessingId(requestId);
     try {
-      await reviewRequest({
-        endpoint: config.endpoints.leaseExtensions.review(requestId),
-        body: {
-          action: actionType === 'Approve' ? 'APPROVE' : 'REJECT',
-          ...(actionType === 'Approve' ? { conditionCompleted: true } : {}),
-          remark: formData.remark?.trim() || undefined,
-        },
-      });
-      toast.success(`Lease request ${actionType === 'Approve' ? 'approved' : 'rejected'} successfully.`);
+      if (actionType === 'Complete') {
+        await reviewRequest({
+          endpoint: config.endpoints.leaseExtensions.complete(requestId),
+          body: { remark: formData.remark?.trim() || undefined },
+        });
+        toast.success('Lease extension marked as completed successfully.');
+      } else {
+        await reviewRequest({
+          endpoint: config.endpoints.leaseExtensions.review(requestId),
+          body: {
+            action: actionType === 'Approve' ? 'APPROVE' : 'REJECT',
+            ...(actionType === 'Approve' ? { conditionCompleted: true } : {}),
+            remark: formData.remark?.trim() || undefined,
+          },
+        });
+        toast.success(`Lease request ${actionType === 'Approve' ? 'approved' : 'rejected'} successfully.`);
+      }
       closeModal();
       refetch();
     } catch (submitError) {
@@ -246,36 +256,56 @@ export default function LeaseExtensionsList() {
             className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium"
             title="View supporting document"
           >
-            <FileText className="w-4 h-4 shrink-0" />
             View
           </a>
         );
       }
       case 'status':
         return <StatusChip value={request.status || 'PENDING'} />;
-      case 'actions':
-        if (request.status !== 'PENDING') return null; 
-        return (
-          <div onClick={(event) => event.stopPropagation()}>
-            <ActionMenu
-              menuOptions={[
-                {
-                  label: 'Approve',
-                  icon: Check,
-                  iconClassName: 'text-green-600',
-                  onClick: () => setModalState({ isOpen: true, actionType: 'Approve', request }),
-                },
-                {
-                  label: 'Reject',
-                  icon: X,
-                  iconClassName: 'text-red-600',
-                  onClick: () => setModalState({ isOpen: true, actionType: 'Reject', request }),
-                },
-              ]}
-              disabled={processingId === getRequestId(request)}
-            />
-          </div>
-        );
+      case 'actions': {
+        const isProcessing = processingId === getRequestId(request);
+        if (request.status === 'PENDING') {
+          return (
+            <div onClick={(event) => event.stopPropagation()}>
+              <ActionMenu
+                menuOptions={[
+                  {
+                    label: 'Approve',
+                    icon: Check,
+                    iconClassName: 'text-green-600',
+                    onClick: () => setModalState({ isOpen: true, actionType: 'Approve', request }),
+                  },
+                  {
+                    label: 'Reject',
+                    icon: X,
+                    iconClassName: 'text-red-600',
+                    onClick: () => setModalState({ isOpen: true, actionType: 'Reject', request }),
+                  },
+                ]}
+                disabled={isProcessing}
+              />
+            </div>
+          );
+        }
+        if (request.status === 'APPROVED') {
+          return (
+            <div onClick={(event) => event.stopPropagation()}>
+              <ActionMenu
+                menuOptions={[
+                  {
+                    label: 'Mark Complete',
+                    icon: CheckCheck,
+                    iconClassName: 'text-blue-600',
+                    onClick: () => setModalState({ isOpen: true, actionType: 'Complete', request }),
+                  },
+                ]}
+                disabled={isProcessing}
+              />
+            </div>
+          );
+        }
+        return null;
+      }
       default:
         return request[columnKey];
     }
