@@ -7,7 +7,7 @@ import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
-import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import { getConditionChipColor, getStatusChipColor, CHIP_CLASSES } from '@/app/utils/statusHelpers';
 import { useQueryClient } from '@tanstack/react-query';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
@@ -29,6 +29,20 @@ import {
   assetReceivedFields,
   assetReceivedValidationSchema,
 } from '@/app/config/formConfigs/assetReceivedModalConfig';
+
+//Lease badge helpers (outside component — no re-creation on render)
+
+const getLeaseBadge = (leaseRequest) => {
+  if (!leaseRequest) return null;
+  const labels = {
+    PENDING: 'Lease Pending Approval',
+    APPROVED: 'Lease Approved',
+    REJECTED: 'Lease Rejected',
+    COMPLETED: 'Lease Completed',
+  };
+  if (!labels[leaseRequest.status]) return null;
+  return { label: labels[leaseRequest.status] };
+};
 
 export default function MyAssetsTab({ userData = {} }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
@@ -213,23 +227,31 @@ export default function MyAssetsTab({ userData = {} }) {
     return map;
   })();
 
-  // Get asset IDs with active lease requests to prevent duplicates.
-  const assetsWithActiveleaseRequest = useMemo(() => {
+  // Latest lease request per asset (for badge display) — sorted by createdAt desc
+  const latestLeaseByAsset = useMemo(() => {
     const leaseRequests = myLeaseResponse?.data?.data || myLeaseResponse?.data || [];
     const leaseRequestList = Array.isArray(leaseRequests) ? leaseRequests : [];
+    const latestByAssetId = {};
 
-    const BLOCKING_STATUSES = ['PENDING', 'APPROVED'];
-
-    const activeLeaseAssetIds = leaseRequestList
+    [...leaseRequestList]
       .filter((leaseRequest) => leaseRequest.requestedByUserId === apiUser?.id)
-      .filter((leaseRequest) => BLOCKING_STATUSES.includes(leaseRequest.status))
-      .map((leaseRequest) => leaseRequest.assetId);
+      .sort((firstRequest, secondRequest) =>
+        new Date(secondRequest.createdAt) - new Date(firstRequest.createdAt)
+      )
+      .forEach((leaseRequest) => {
+        if (!latestByAssetId[leaseRequest.assetId]) {
+          latestByAssetId[leaseRequest.assetId] = leaseRequest;
+        }
+      });
 
-    return new Set(activeLeaseAssetIds);
+    return latestByAssetId;
   }, [myLeaseResponse, apiUser?.id]);
 
-  // Check if the asset has no active lease request.
-  const canExtendLeaseForAsset = (assetId) => !assetsWithActiveleaseRequest.has(assetId);
+  // Block lease creation only when PENDING or APPROVED — REJECTED/COMPLETED allow re-request
+  const canExtendLeaseForAsset = (assetId) => {
+    const latestRequest = latestLeaseByAsset[assetId];
+    return !latestRequest || !['PENDING', 'APPROVED'].includes(latestRequest.status);
+  };
 
   const computedReturnFields = (() => {
     const fields = getReturnAssetFields(
@@ -628,6 +650,8 @@ export default function MyAssetsTab({ userData = {} }) {
           {/* Active asset cards */}
           {assets.map((asset) => {
             const allocation = allocationMap[asset.id];
+            const latestLeaseRequest = latestLeaseByAsset[asset.id];
+            const leaseBadge = getLeaseBadge(latestLeaseRequest);
             const allocatedDate = allocation?.createdAt 
               ? new Date(allocation.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -658,25 +682,43 @@ export default function MyAssetsTab({ userData = {} }) {
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700 tracking-wide">
                       {asset.status}
                     </span>
-                    {asset.consignmentReturnStatus === 'ACCEPTED' ? (
+                    {/* Lease badge — custom label with statusHelpers color */}
+                    {leaseBadge && (
+                      <span
+                        title={latestLeaseRequest?.remark || ''}
+                        className={`${CHIP_CLASSES} ${getStatusChipColor(latestLeaseRequest?.status)} cursor-default select-none`}
+                      >
+                        {leaseBadge.label}
+                      </span>
+                    )}
+                    {/* Consignment / return status badges */}
+                    {asset.consignmentReturnStatus === 'ACCEPTED' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 text-green-700 border border-green-200 cursor-default select-none">
                         <CheckCircle2 className="w-3 h-3" />
                         Returned & accepted
-                     </span>
-                    ) : asset.consignmentReturnStatus === 'PENDING' ? (
+                      </span>
+                    )}
+                    {asset.consignmentReturnStatus === 'PENDING' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-default select-none">
                         <ArrowRightLeft className="w-3 h-3" />
                         Return In Progress
                       </span>
-                      ) : !asset.consignmentId ? (
+                    )}
+                    {!asset.consignmentReturnStatus && !asset.consignmentId && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 cursor-default select-none">
                         Device Allocated
                       </span>
-                      ) : asset.consignmentStatus === 'DRAFT' ? (
+                    )}
+                    {!asset.consignmentReturnStatus && asset.consignmentId && asset.consignmentStatus === 'DRAFT' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-50 text-gray-600 border border-gray-200 cursor-default select-none">
                         Dispatch Pending
                       </span>
-                    ) : (
+                    )}
+                    {/* ActionMenu — always last */}
+                    {asset.consignmentReturnStatus !== 'ACCEPTED' &&
+                      asset.consignmentReturnStatus !== 'PENDING' &&
+                      asset.consignmentId &&
+                      asset.consignmentStatus !== 'DRAFT' && (
                       <ActionMenu menuOptions={getAssetMenuOptions(asset, {
                         ...assetMenuHandlers,
                         canExtendLease: canExtendLeaseForAsset(asset.id),
@@ -711,6 +753,22 @@ export default function MyAssetsTab({ userData = {} }) {
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Allocated</p>
                     <p className="text-xs font-medium text-foreground">{allocatedDate}</p>
                   </div>
+                  {latestLeaseRequest && ['PENDING', 'APPROVED'].includes(latestLeaseRequest.status) && (
+                    <div className=" rounded-lg px-2.5 py-2">
+                      <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">
+                        {latestLeaseRequest.status === 'APPROVED' ? 'Lease Extended Till' : 'Requested Till'}
+                      </p>
+                      <p className={`text-xs text-foreground ${latestLeaseRequest.status === 'APPROVED' ? 'font-bold' : 'font-medium'}`}>
+                        {latestLeaseRequest.extendUntil
+                          ? new Date(`${latestLeaseRequest.extendUntil}T00:00:00`).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })
+                          : 'N/A'}
+                      </p>
+                    </div>
+                  )}
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Accessories</p>
                     <div className="flex items-center gap-1.5">
