@@ -332,7 +332,7 @@ export default function LeaseExtensionsList() {
         columns={columns}
         margin="m-0"
         shadow="shadow-none"
-        title={`Lease Requests (${requests.length})`}
+        title="Lease Requests"
         renderCell={renderCell}
         isLoading={isLoading}
         filterComponent={
