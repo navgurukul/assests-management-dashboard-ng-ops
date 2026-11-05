@@ -9,7 +9,7 @@ export const LEASE_TYPE_OPTIONS = [
 
 // ─── Field definitions ─────────────────────────────────────────────────────
 
-export const getExtendLeaseFields = (campusDisplay = '', campusManagerDisplay = '') => {
+export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', campusManagerDisplay = '') => {
   const minDate = new Date();
   minDate.setHours(0, 0, 0, 0);
 
@@ -18,6 +18,14 @@ export const getExtendLeaseFields = (campusDisplay = '', campusManagerDisplay = 
   maxDate.setHours(23, 59, 59, 999);
 
   return [
+    {
+      name: 'assetTagDisplay',
+      label: 'Asset Tag',
+      type: 'text',
+      defaultValue: assetTagDisplay,
+      disabled: true,
+      readOnly: true,
+    },
     {
       name: 'campusDisplay',
       label: 'Asset Campus',

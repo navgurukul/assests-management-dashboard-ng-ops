@@ -130,6 +130,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const leaseCampusManager = leaseCampusIncharge?.campusManager || null;
 
   const leaseFields = useMemo(() => {
+    const assetTagDisplay = selectedAsset?.assetTag || 'Asset tag unavailable';
     let campusDisplay = 'Asset campus unavailable';
     let campusManagerDisplay = 'Campus Manager details unavailable';
 
@@ -149,7 +150,7 @@ export default function MyAssetsTab({ userData = {} }) {
       campusManagerDisplay = [managerName, managerEmail].filter(Boolean).join(' - ') || 'Campus Manager details unavailable';
     }
 
-    return getExtendLeaseFields(campusDisplay, campusManagerDisplay);
+    return getExtendLeaseFields(assetTagDisplay, campusDisplay, campusManagerDisplay);
   }, [
     isLeaseCampusInchargeLoading,
     leaseCampusIncharge,
