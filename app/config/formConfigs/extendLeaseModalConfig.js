@@ -9,7 +9,7 @@ export const LEASE_TYPE_OPTIONS = [
 
 // ─── Field definitions ─────────────────────────────────────────────────────
 
-export const getExtendLeaseFields = () => {
+export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', campusManagerDisplay = '') => {
   const minDate = new Date();
   minDate.setHours(0, 0, 0, 0);
 
@@ -18,6 +18,31 @@ export const getExtendLeaseFields = () => {
   maxDate.setHours(23, 59, 59, 999);
 
   return [
+    {
+      name: 'assetTagDisplay',
+      label: 'Asset Tag',
+      type: 'text',
+      defaultValue: assetTagDisplay,
+      disabled: true,
+      readOnly: true,
+    },
+    {
+      name: 'campusDisplay',
+      label: 'Asset Campus',
+      type: 'text',
+      defaultValue: campusDisplay,
+      disabled: true,
+      readOnly: true,
+    },
+    {
+      name: 'campusManagerDisplay',
+      label: 'Campus Manager',
+      type: 'text',
+      defaultValue: campusManagerDisplay,
+      disabled: true,
+      readOnly: true,
+      helpText: `This lease request will be sent to ${campusManagerDisplay} for approval.`,
+    },
     {
       name: 'leaseType',
       label: 'Lease Type',
@@ -40,6 +65,15 @@ export const getExtendLeaseFields = () => {
       type: 'textarea',
       required: false,
       placeholder: 'Reason for extending lease...',
+    },
+    {
+      name: 'supportedDocument',
+      label: 'Supporting Document',
+      type: 'file',
+      required: false,
+      accept: '.pdf,.jpg,.jpeg,.png',
+      helpText: 'Upload bond/lease related document (PDF or image).',
+      fullWidth: true,
     },
   ];
 };
@@ -66,6 +100,7 @@ export const getExtendLeaseValidationSchema = () => {
       .min(minDate, 'Extension date must be in the future')
       .max(maxDate, 'Extension date cannot exceed 90 days from today'),
     description: Yup.string().nullable(),
+    supportedDocument: Yup.mixed().nullable(),
   });
 };
 
@@ -75,4 +110,5 @@ export const extendLeaseInitialValues = {
   leaseType: '',
   extendUntil: '',
   description: '',
+  supportedDocument: null,
 };
