@@ -36,12 +36,12 @@ export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', c
     },
     {
       name: 'campusManagerDisplay',
-      label: 'Approval will be sent to',
+      label: 'Campus Manager',
       type: 'text',
       defaultValue: campusManagerDisplay,
       disabled: true,
       readOnly: true,
-      helpText: 'This is the Campus Manager responsible for the asset campus.',
+      helpText: `This lease request will be sent to ${campusManagerDisplay} for approval.`,
     },
     {
       name: 'leaseType',
