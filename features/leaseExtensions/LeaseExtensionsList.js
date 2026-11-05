@@ -311,10 +311,6 @@ export default function LeaseExtensionsList() {
     }
   };
 
-  if (isLoading) {
-    return <StateHandler isLoading loadingMessage="Loading lease requests..." />;
-  }
-
   if (isError) {
     return <StateHandler isError error={error} errorMessage="Failed to load lease requests" />;
   }
@@ -338,6 +334,7 @@ export default function LeaseExtensionsList() {
         shadow="shadow-none"
         title={`Lease Requests (${requests.length})`}
         renderCell={renderCell}
+        isLoading={isLoading}
         filterComponent={
           isAdmin ? (
             <FilterDropdown
