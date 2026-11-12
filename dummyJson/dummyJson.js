@@ -1298,7 +1298,7 @@ export const locationTypeConfig = {
 };
 
 
-export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAsset, handleExtendLease }) => {
+export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAsset, handleExtendLease, canExtendLease = true }) => {
   const options = [];
   const status = asset.consignmentStatus || asset.consignment?.status || asset.status;
   const returnStatus = asset.consignmentReturnStatus || asset.consignment?.returnStatus;
@@ -1316,20 +1316,21 @@ export const getAssetMenuOptions = (asset, { handleAssetReceived, handleReturnAs
   // Otherwise, if it's already delivered or we don't have explicit dispatch status, we show them.
   //  if (status === 'DELIVERED' && !returnStatus) {
   if (status !== 'DISPATCHED' && !returnStatus) {
-    options.push(
-      {
-        label: 'Return',
-        icon: ArrowRightLeft,
-        iconClassName: 'text-red-500',
-        onClick: () => handleReturnAsset(asset),
-      },
-      {
+    options.push({
+      label: 'Return',
+      icon: ArrowRightLeft,
+      iconClassName: 'text-red-500',
+      onClick: () => handleReturnAsset(asset),
+    });
+    // Hide the Extend Lease option when an active lease request already exists. 
+    if (canExtendLease) {
+      options.push({
         label: 'Extend Lease',
         icon: Calendar,
         iconClassName: 'text-blue-600',
         onClick: () => handleExtendLease(asset),
-      }
-    );
+      });
+    }
   }
 
   if (asset.consignment && asset.consignmentStatus === 'DISPATCHED') {

@@ -7,7 +7,7 @@ import FormModal from '@/components/molecules/FormModal';
 import Modal from '@/components/molecules/Modal';
 import CustomButton from '@/components/atoms/CustomButton';
 import StatusChip from '@/components/atoms/StatusChip';
-import { getConditionChipColor } from '@/app/utils/statusHelpers';
+import { getConditionChipColor, getStatusChipColor, CHIP_CLASSES } from '@/app/utils/statusHelpers';
 import { useQueryClient } from '@tanstack/react-query';
 import useFetch from '@/app/hooks/query/useFetch';
 import usePost from '@/app/hooks/query/usePost';
@@ -30,6 +30,20 @@ import {
   assetReceivedValidationSchema,
 } from '@/app/config/formConfigs/assetReceivedModalConfig';
 
+//Lease badge helpers (outside component — no re-creation on render)
+
+const getLeaseBadge = (leaseRequest) => {
+  if (!leaseRequest) return null;
+  const labels = {
+    PENDING: 'Lease Pending Approval',
+    APPROVED: 'Lease Approved',
+    REJECTED: 'Lease Rejected',
+    COMPLETED: 'Lease Completed',
+  };
+  if (!labels[leaseRequest.status]) return null;
+  return { label: labels[leaseRequest.status] };
+};
+
 export default function MyAssetsTab({ userData = {} }) {
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
@@ -38,6 +52,7 @@ export default function MyAssetsTab({ userData = {} }) {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [expandedTimelines, setExpandedTimelines] = useState({});
   const [selectedAllocationId, setSelectedAllocationId] = useState(null);
+  const [selectedLeaseCampusId, setSelectedLeaseCampusId] = useState(null);
   const [coordinatorCampusId, setCoordinatorCampusId] = useState(null);
   const [isDownloadingNOC, setIsDownloadingNOC] = useState(false);
 
@@ -88,6 +103,60 @@ export default function MyAssetsTab({ userData = {} }) {
     queryKey: ['campus-incharge', coordinatorCampusId],
     enabled: !!coordinatorCampusId,
   });
+
+  const { data: leaseCampusInchargesResponse, isLoading: isLeaseCampusInchargeLoading } = useFetch({
+    url: config.endpoints.campusIncharge.list,
+    queryKey: ['lease-campus-incharges'],
+    enabled: !!selectedLeaseCampusId && extendModalOpen,
+  });
+
+  const { data: myLeaseResponse } = useFetch({
+    url: `${config.endpoints.leaseExtensions.list}?myRequests=true`,
+    queryKey: ['myLeaseRequests'],
+  });
+
+  const leaseCampusIncharge = useMemo(() => {
+    const list = leaseCampusInchargesResponse?.data || leaseCampusInchargesResponse || [];
+    if (!Array.isArray(list)) return null;
+    return (
+      list.find(
+        (record) =>
+          record.campusId === selectedLeaseCampusId ||
+          record.campus?.id === selectedLeaseCampusId
+      ) || null
+    );
+  }, [leaseCampusInchargesResponse, selectedLeaseCampusId]);
+
+  const leaseCampusManager = leaseCampusIncharge?.campusManager || null;
+
+  const leaseFields = useMemo(() => {
+    const assetTagDisplay = selectedAsset?.assetTag || 'Asset tag unavailable';
+    let campusDisplay = 'Asset campus unavailable';
+    let campusManagerDisplay = 'Campus Manager details unavailable';
+
+    if (isLeaseCampusInchargeLoading) {
+      campusDisplay = 'Loading asset campus...';
+      campusManagerDisplay = 'Loading Campus Manager...';
+    } else {
+      campusDisplay =
+        leaseCampusIncharge?.campusName ||
+        selectedAsset?.campus?.campusName ||
+        'Asset campus unavailable';
+    }
+
+    if (leaseCampusManager) {
+      const managerName = leaseCampusManager.name || '';
+      const managerEmail = leaseCampusManager.email || leaseCampusManager.user?.email || '';
+      campusManagerDisplay = [managerName, managerEmail].filter(Boolean).join(' - ') || 'Campus Manager details unavailable';
+    }
+
+    return getExtendLeaseFields(assetTagDisplay, campusDisplay, campusManagerDisplay);
+  }, [
+    isLeaseCampusInchargeLoading,
+    leaseCampusIncharge,
+    leaseCampusManager,
+    selectedAsset,
+  ]);
 
   const campusesData = useMemo(() => {
     return campusesResponse?.data?.data || campusesResponse?.data || campusesResponse || [];
@@ -159,6 +228,32 @@ export default function MyAssetsTab({ userData = {} }) {
     return map;
   })();
 
+  // Latest lease request per asset (for badge display) — sorted by createdAt desc
+  const latestLeaseByAsset = useMemo(() => {
+    const leaseRequests = myLeaseResponse?.data?.data || myLeaseResponse?.data || [];
+    const leaseRequestList = Array.isArray(leaseRequests) ? leaseRequests : [];
+    const latestByAssetId = {};
+
+    [...leaseRequestList]
+      .filter((leaseRequest) => leaseRequest.requestedByUserId === apiUser?.id)
+      .sort((firstRequest, secondRequest) =>
+        new Date(secondRequest.createdAt) - new Date(firstRequest.createdAt)
+      )
+      .forEach((leaseRequest) => {
+        if (!latestByAssetId[leaseRequest.assetId]) {
+          latestByAssetId[leaseRequest.assetId] = leaseRequest;
+        }
+      });
+
+    return latestByAssetId;
+  }, [myLeaseResponse, apiUser?.id]);
+
+  // Block lease creation only when PENDING or APPROVED — REJECTED/COMPLETED allow re-request
+  const canExtendLeaseForAsset = (assetId) => {
+    const latestRequest = latestLeaseByAsset[assetId];
+    return !latestRequest || !['PENDING', 'APPROVED'].includes(latestRequest.status);
+  };
+
   const computedReturnFields = (() => {
     const fields = getReturnAssetFields(
       selectedAsset, 
@@ -191,8 +286,14 @@ export default function MyAssetsTab({ userData = {} }) {
   })();
 
   const handleExtendLease = (asset) => {
+    if (!canExtendLeaseForAsset(asset.id)) {
+      toast.error('A lease extension request for this asset is already in progress.');
+      return;
+    }
+    const allocation = allocationMap[asset.id];
     setSelectedAsset(asset);
-    setSelectedAllocationId(allocationMap[asset.id]?.id || null);
+    setSelectedAllocationId(allocation?.id || null);
+    setSelectedLeaseCampusId(asset.campusId || asset.campus?.id || null);
     setExtendModalOpen(true);
   };
 
@@ -309,6 +410,10 @@ export default function MyAssetsTab({ userData = {} }) {
         expectedDeliveryDate: formattedDate,
       };
 
+      if (formData.returnMode !== 'VISIT_CAMPUS') {
+        fields.cost = String(Number(formData.cost ?? 0));
+      }
+
       // Add trackingID only for SOURCED_CAMPUS and OTHER_CAMPUS (not for VISIT_CAMPUS)
       if (formData.returnMode !== 'VISIT_CAMPUS') {
         fields.trackingNumber = formData.trackingId || '';
@@ -345,20 +450,42 @@ export default function MyAssetsTab({ userData = {} }) {
       return;
     }
 
+    if (isLeaseCampusInchargeLoading) {
+      toast.error('Campus Manager details are still loading. Please try again.');
+      return;
+    }
+
+    const campusManagerId = leaseCampusManager?.user?.id;
+
+    if (!campusManagerId) {
+      toast.error('No Campus Manager is configured for this asset campus.');
+      return;
+    }
+
     try {
+      const leasePayload = new FormData();
+      leasePayload.append('assetId', selectedAsset?.id);
+      leasePayload.append('campusManagerId', campusManagerId);
+      leasePayload.append('campusId', selectedLeaseCampusId);
+      leasePayload.append('leaseType', formData.leaseType);
+      leasePayload.append('extendUntil', formData.extendUntil);
+      if (formData.description) leasePayload.append('description', formData.description);
+      if (formData.supportedDocument instanceof File) {
+        leasePayload.append('supportedDocument', formData.supportedDocument);
+      }
+
       await postMutation({
         endpoint: `/allocations/${selectedAllocationId}/lease-extensions`,
-        body: {
-          leaseType: formData.leaseType,
-          extendUntil: formData.extendUntil,
-          description: formData.description || undefined,
-        },
+        body: leasePayload,
       });
 
       toast.success('Lease extension request submitted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['myAssets'] });
+      queryClient.invalidateQueries({ queryKey: ['myLeaseRequests'] });
       setExtendModalOpen(false);
       setSelectedAsset(null);
       setSelectedAllocationId(null);
+      setSelectedLeaseCampusId(null);
     } catch (err) {
       toast.error(err?.message || 'Failed to submit lease extension request.');
     }
@@ -460,6 +587,8 @@ export default function MyAssetsTab({ userData = {} }) {
     ALLOCATION: { label: 'Allocation', textColor: 'text-(--theme-main)', bg: '' },
     'RETURN ACCEPTED': { label: 'Return Accepted', textColor: 'text-green-700', bg: 'bg-green-50' },
     RETURN_REQUESTED: { label: 'Return Requested', textColor: 'text-amber-700', bg: 'bg-amber-50' },
+    LEASE_EXTENSION_CREATED: { label: 'Lease Extension Created', textColor: 'text-amber-700', bg: '' },
+    LEASE_EXTENSION: { label: 'Lease Extension', textColor: 'text-gray-700', bg: '' },
   };
 
   // Group by assetId, not assetTag — tags get reused/renamed on return.
@@ -526,6 +655,8 @@ export default function MyAssetsTab({ userData = {} }) {
           {/* Active asset cards */}
           {assets.map((asset) => {
             const allocation = allocationMap[asset.id];
+            const latestLeaseRequest = latestLeaseByAsset[asset.id];
+            const leaseBadge = getLeaseBadge(latestLeaseRequest);
             const allocatedDate = allocation?.createdAt 
               ? new Date(allocation.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -556,26 +687,47 @@ export default function MyAssetsTab({ userData = {} }) {
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700 tracking-wide">
                       {asset.status}
                     </span>
-                    {asset.consignmentReturnStatus === 'ACCEPTED' ? (
+                    {/* Lease badge — custom label with statusHelpers color */}
+                    {leaseBadge && (
+                      <span
+                        title={latestLeaseRequest?.remark || ''}
+                        className={`${CHIP_CLASSES} ${getStatusChipColor(latestLeaseRequest?.status)} cursor-default select-none`}
+                      >
+                        {leaseBadge.label}
+                      </span>
+                    )}
+                    {/* Consignment / return status badges */}
+                    {asset.consignmentReturnStatus === 'ACCEPTED' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 text-green-700 border border-green-200 cursor-default select-none">
                         <CheckCircle2 className="w-3 h-3" />
                         Returned & accepted
-                     </span>
-                    ) : asset.consignmentReturnStatus === 'PENDING' ? (
+                      </span>
+                    )}
+                    {asset.consignmentReturnStatus === 'PENDING' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-default select-none">
                         <ArrowRightLeft className="w-3 h-3" />
                         Return In Progress
                       </span>
-                      ) : !asset.consignmentId ? (
+                    )}
+                    {!asset.consignmentReturnStatus && !asset.consignmentId && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 cursor-default select-none">
                         Device Allocated
                       </span>
-                      ) : asset.consignmentStatus === 'DRAFT' ? (
+                    )}
+                    {!asset.consignmentReturnStatus && asset.consignmentId && asset.consignmentStatus === 'DRAFT' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-50 text-gray-600 border border-gray-200 cursor-default select-none">
                         Dispatch Pending
                       </span>
-                    ) : (
-                      <ActionMenu menuOptions={getAssetMenuOptions(asset, assetMenuHandlers)} />
+                    )}
+                    {/* ActionMenu — always last */}
+                    {asset.consignmentReturnStatus !== 'ACCEPTED' &&
+                      asset.consignmentReturnStatus !== 'PENDING' &&
+                      asset.consignmentId &&
+                      asset.consignmentStatus !== 'DRAFT' && (
+                      <ActionMenu menuOptions={getAssetMenuOptions(asset, {
+                        ...assetMenuHandlers,
+                        canExtendLease: canExtendLeaseForAsset(asset.id),
+                      })} />
                     )}
                   </div>
                 </div>
@@ -606,6 +758,22 @@ export default function MyAssetsTab({ userData = {} }) {
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Allocated</p>
                     <p className="text-xs font-medium text-foreground">{allocatedDate}</p>
                   </div>
+                  {latestLeaseRequest && ['PENDING', 'APPROVED'].includes(latestLeaseRequest.status) && (
+                    <div className=" rounded-lg px-2.5 py-2">
+                      <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">
+                        {latestLeaseRequest.status === 'APPROVED' ? 'Lease Extended Till' : 'Requested Till'}
+                      </p>
+                      <p className={`text-xs text-foreground ${latestLeaseRequest.status === 'APPROVED' ? 'font-bold' : 'font-medium'}`}>
+                        {latestLeaseRequest.extendUntil
+                          ? new Date(`${latestLeaseRequest.extendUntil}T00:00:00`).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })
+                          : 'N/A'}
+                      </p>
+                    </div>
+                  )}
                   <div className=" rounded-lg px-2.5 py-2">
                     <p className="text-[9px] uppercase tracking-wider text-(--muted) mb-0.5">Accessories</p>
                     <div className="flex items-center gap-1.5">
@@ -845,10 +1013,10 @@ export default function MyAssetsTab({ userData = {} }) {
 
       <FormModal
         isOpen={extendModalOpen}
-        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); }}
+        onClose={() => { setExtendModalOpen(false); setSelectedAsset(null); setSelectedAllocationId(null); setSelectedLeaseCampusId(null); }}
         componentName=""
         actionType="Extend Lease"
-        fields={getExtendLeaseFields()}
+        fields={leaseFields}
         onSubmit={handleExtendSubmit}
         isSubmitting={isPostPending}
         size="medium"
