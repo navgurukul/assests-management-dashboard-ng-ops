@@ -241,9 +241,17 @@ export default function LeaseExtensionsList() {
       case 'extendUntil':
         return <span className="text-gray-500">{request.extendUntil ? new Date(`${request.extendUntil}T00:00:00`).toLocaleDateString('en-IN') : 'N/A'}</span>;
       case 'description':
-        return <span className="text-gray-700 max-w-xs block truncate">{request.description || 'N/A'}</span>;
+        return (
+          <span className="text-gray-700 max-w-xs block whitespace-normal break-words py-2">
+            {request.description || 'N/A'}
+          </span>
+        );
       case 'remark':
-        return <span className="text-gray-700 max-w-xs block truncate">{request.remark || 'N/A'}</span>;
+        return (
+          <span className="text-gray-700 max-w-[200px] block whitespace-normal break-words py-2">
+            {request.remark || 'N/A'}
+          </span>
+        );
       case 'supportedDocument': {
         const documentUrl = request.supportedDocument;
         if (!documentUrl) return <span className="text-gray-400 text-sm">N/A</span>;
@@ -358,7 +366,7 @@ export default function LeaseExtensionsList() {
           ) : undefined
         }
         showPagination
-        itemsPerPage={10}
+        itemsPerPage={20}
         ariaLabel="Lease extension requests table"
         // emptyContent={<StateHandler isEmpty emptyMessage="No pending lease requests" />}
         emptyContent={<StateHandler isEmpty emptyMessage="No lease requests found" />}
