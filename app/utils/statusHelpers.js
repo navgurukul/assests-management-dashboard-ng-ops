@@ -25,34 +25,41 @@ const normalize = (value) =>
 /** Covers ticket, asset, allocation, component, consignment statuses */
 const STATUS_COLOR_MAP = {
   // Ticket
+  RAISED: 'bg-orange-100 text-orange-800',
   OPEN: 'bg-orange-100 text-orange-800',
-  IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
   PENDING: 'bg-yellow-100 text-yellow-800',
   PENDING_APPROVAL: 'bg-yellow-100 text-yellow-800',
   WAITING_FOR_APPROVAL: 'bg-yellow-100 text-yellow-800',
+  APPROVED: 'bg-blue-100 text-blue-800',
+  IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
+  CONSIGNMENT_CREATED: 'bg-indigo-100 text-indigo-800',
+  CONSIGNMENT_DISPATCHED: 'bg-amber-100 text-amber-800',
+  CONSIGNMENT_DELIVERED: 'bg-green-100 text-green-800',
   RESOLVED: 'bg-blue-100 text-blue-800',
-  CLOSED: 'bg-gray-100 text-gray-800',
+  CLOSED: 'bg-slate-200 text-slate-800',
   ESCALATED: 'bg-orange-100 text-orange-800',
   OVERDUE: 'bg-red-100 text-red-800',
-  APPROVED: 'bg-green-100 text-green-800',
-  COMPLETED: 'bg-green-100 text-green-800',
   REJECTED: 'bg-red-100 text-red-800',
   CANCELLED: 'bg-red-100 text-red-800',
+  COMPLETED: 'bg-green-100 text-green-800',
 
-  // Asset / allocation
-  ACTIVE: 'bg-green-100 text-green-800',
+  // Allocation 
   ALLOCATED: 'bg-green-100 text-green-800',
+  ALLOCATION_COMPLETED: 'bg-slate-200 text-slate-800',
+  ACTIVE: 'bg-green-100 text-green-800',
+  NO_ALLOCATION: 'bg-yellow-100 text-yellow-800',
+
+  // Asset 
   IN_STOCK: 'bg-blue-100 text-blue-800',
+  AVAILABLE: 'bg-blue-100 text-blue-800',
   REPAIR: 'bg-red-100 text-red-800',
   UNDER_REPAIR: 'bg-red-100 text-red-800',
-  SCRAP: 'bg-gray-100 text-gray-800',
+  IN_REPAIR: 'bg-yellow-100 text-yellow-800',
   PARTED_OUT: 'bg-orange-100 text-orange-800',
   DISPOSED: 'bg-purple-100 text-purple-800',
-  IN_REPAIR: 'bg-yellow-100 text-yellow-800',
+  SCRAP: 'bg-stone-200 text-stone-700',
   RETIRED: 'bg-gray-100 text-gray-800',
-  AVAILABLE: 'bg-blue-100 text-blue-800',
   RETURNED: 'bg-gray-100 text-gray-800',
-  NO_ALLOCATION: 'bg-yellow-100 text-yellow-800',
 
   // Component
   INSTALLED: 'bg-indigo-100 text-indigo-800',
@@ -102,7 +109,8 @@ const HEALTH_STATUS_COLOR_MAP = {
 
 const ALLOCATION_TYPE_COLOR_MAP = {
   CAMPUS: 'bg-purple-100 text-purple-800',
-  USER: 'bg-blue-100 text-blue-800',
+  USER: 'bg-cyan-100 text-cyan-800',
+  REMOTE: 'bg-blue-100 text-blue-800',
 };
 
 const ALLOCATION_REASON_COLOR_MAP = {
@@ -114,6 +122,7 @@ const ALLOCATION_REASON_COLOR_MAP = {
 
 const DEVICE_MODE_COLOR_MAP = {
   BULK: 'bg-indigo-50 text-indigo-700',
+  SINGLE: 'bg-sky-50 text-sky-700',
   MANUAL: 'bg-teal-50 text-teal-700',
 };
 
