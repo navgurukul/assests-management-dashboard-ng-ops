@@ -506,6 +506,7 @@ export default function ConsignmentsList() {
           source: resolvedSource,
           destination: resolvedDestination,
           trackingLink: extractTrackingUrl(consignment) || transformed?.trackingLink || '',
+          cost: consignment.cost ?? null,
           ticketId: consignment.ticketId || consignment.ticket?.id || transformed?.ticketId || null,
         };
       }
@@ -526,6 +527,7 @@ export default function ConsignmentsList() {
         shippedAt: consignment.shippedAt ? new Date(consignment.shippedAt).toLocaleDateString() : '-',
         estimatedDeliveryDate: consignment.estimatedDeliveryDate ? new Date(consignment.estimatedDeliveryDate).toLocaleDateString() : '-',
         trackingId: consignment.trackingNumber || '-',
+        cost: consignment.cost ?? null,
         trackingLink: extractTrackingUrl(consignment),
         assetCount: consignment.assetCount ?? 0,
         deliveredAt: consignment.receivedAt ? new Date(consignment.receivedAt).toLocaleDateString() : '-',
@@ -569,6 +571,7 @@ export default function ConsignmentsList() {
       userName: row.returnByUserEmail || row.returnedBy || '-',
       userEmail: row.returnByUserEmail || row.userEmail || '',
       trackingId: row.trackingNumber || row.trackingId || '-',
+      cost: row.cost ?? null,
       estimatedArrival: row.expectedDeliveryDate || row.estArrivalDate
         ? new Date(row.expectedDeliveryDate || row.estArrivalDate).toLocaleDateString()
         : '-',
@@ -782,6 +785,7 @@ export default function ConsignmentsList() {
           trackingId: formData.trackingId,
           trackingLink: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
           estimatedDeliveryDate: formData.estimatedDeliveryDate,
+          cost: Number(formData.cost ?? 0),
           inPerson: false,
         };
       }
@@ -1031,6 +1035,12 @@ export default function ConsignmentsList() {
           {cellValue}
         </button>
       );
+    }
+
+    if (columnKey === 'cost') {
+      const formattedCost =
+        cellValue == null ? '—' : `₹${Number(cellValue).toLocaleString('en-IN')}`;
+      return <span className="text-gray-700">{formattedCost}</span>;
     }
         
     if (columnKey === 'actions') {
