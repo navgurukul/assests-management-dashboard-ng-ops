@@ -107,6 +107,16 @@ export const returnAssetFields = [
     placeholder: 'Fetching manager...',
   },
   {
+    name: 'cost',
+    label: 'Return Cost',
+    type: 'number',
+    required: true,
+    min: 0,
+    defaultValue: '0',
+    placeholder: 'Enter total return cost',
+    showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
+  },
+  {
     name: 'expectedDeliveryDate',
     label: 'Expected Delivery Date',
     type: 'date',
@@ -144,6 +154,17 @@ export const getReturnAssetFields = (selectedAsset = null, sourceName = '', user
 
 export const returnAssetValidationSchema = Yup.object().shape({
   returnMode: Yup.string().required('Please select a return mode'),
+  cost: Yup.number()
+    .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+    .when('returnMode', {
+      is: (val) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(val),
+      then: (schema) =>
+        schema
+          .typeError('Return cost is required')
+          .min(0, 'Cost cannot be negative')
+          .required('Return cost is required'),
+      otherwise: (schema) => schema.notRequired().nullable(),
+    }),
   assetSource: Yup.string(),
   destinationCampusId: Yup.string().when('returnMode', {
     is: (val) => ['VISIT_CAMPUS', 'OTHER_CAMPUS'].includes(val),
@@ -155,7 +176,7 @@ export const returnAssetValidationSchema = Yup.object().shape({
     then: (schema) => schema
       .required('IT Coordinator email is required')
       .email('Enter a valid email address'),
-    trackingId: '',
+    // trackingId: '',
     otherwise: (schema) => schema.nullable(),
   }),
   exactAddress: Yup.string().when('returnMode', {
@@ -198,6 +219,7 @@ export const returnAssetValidationSchema = Yup.object().shape({
 export const returnAssetInitialValues = {
   assetId: '',
   returnMode: 'VISIT_CAMPUS',
+  cost: 0,
   assetSource: '',
   destinationCampusId: '',
   campusItCoordinator: '',

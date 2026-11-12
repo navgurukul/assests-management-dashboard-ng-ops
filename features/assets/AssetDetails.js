@@ -382,6 +382,10 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
         expectedDeliveryDate: formattedDate,
       };
 
+      if (formData.returnMode !== 'VISIT_CAMPUS') {
+        fields.cost = String(Number(formData.cost ?? 0));
+      }
+
       // trackingNumber only for SOURCED_CAMPUS and OTHER_CAMPUS (not applicable for VISIT_CAMPUS)
       if (formData.returnMode !== 'VISIT_CAMPUS') {
         fields.trackingNumber = formData.trackingId || '';

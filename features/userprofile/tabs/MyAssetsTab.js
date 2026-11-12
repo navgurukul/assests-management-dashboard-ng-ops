@@ -410,6 +410,10 @@ export default function MyAssetsTab({ userData = {} }) {
         expectedDeliveryDate: formattedDate,
       };
 
+      if (formData.returnMode !== 'VISIT_CAMPUS') {
+        fields.cost = String(Number(formData.cost ?? 0));
+      }
+
       // Add trackingID only for SOURCED_CAMPUS and OTHER_CAMPUS (not for VISIT_CAMPUS)
       if (formData.returnMode !== 'VISIT_CAMPUS') {
         fields.trackingNumber = formData.trackingId || '';
