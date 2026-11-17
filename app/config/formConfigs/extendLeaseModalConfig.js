@@ -7,15 +7,25 @@ export const LEASE_TYPE_OPTIONS = [
   { label: 'Deposit', value: 'DEPOSIT' },
 ];
 
-// ─── Field definitions ─────────────────────────────────────────────────────
+const MAX_EXTENSION_DAYS = 90;
 
-export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', campusManagerDisplay = '') => {
+// Earliest selectable date is tomorrow; today is not allowed.
+const getDateBounds = () => {
   const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 1);
   minDate.setHours(0, 0, 0, 0);
 
   const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 90);
+  maxDate.setDate(maxDate.getDate() + MAX_EXTENSION_DAYS);
   maxDate.setHours(23, 59, 59, 999);
+
+  return { minDate, maxDate };
+};
+
+// ─── Field definitions ─────────────────────────────────────────────────────
+
+export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', campusManagerDisplay = '') => {
+  const { minDate, maxDate } = getDateBounds();
 
   return [
     {
@@ -56,6 +66,7 @@ export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', c
       type: 'date',
       required: true,
       placeholder: 'Select date',
+      helpText: 'Select an extension end date (maximum 3 months)',
       minDate,
       maxDate,
     },
@@ -81,12 +92,7 @@ export const getExtendLeaseFields = (assetTagDisplay = '', campusDisplay = '', c
 // ─── Yup Validation Schema ─────────────────────────────────────────────────
 
 export const getExtendLeaseValidationSchema = () => {
-  const minDate = new Date();
-  minDate.setHours(0, 0, 0, 0);
-
-  const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 90);
-  maxDate.setHours(23, 59, 59, 999);
+  const { minDate, maxDate } = getDateBounds();
 
   return Yup.object().shape({
     leaseType: Yup.string()
@@ -96,9 +102,10 @@ export const getExtendLeaseValidationSchema = () => {
         'Invalid lease type'
       ),
     extendUntil: Yup.date()
+      .typeError('Please select a valid date')
       .required('Extension date is required')
       .min(minDate, 'Extension date must be in the future')
-      .max(maxDate, 'Extension date cannot exceed 90 days from today'),
+      .max(maxDate, 'Extension date cannot be more than 90 days from today'),
     description: Yup.string().nullable(),
     supportedDocument: Yup.mixed().nullable(),
   });

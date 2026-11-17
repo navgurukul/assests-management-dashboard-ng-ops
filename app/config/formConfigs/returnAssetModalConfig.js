@@ -112,7 +112,6 @@ export const returnAssetFields = [
     type: 'number',
     required: true,
     min: 0,
-    defaultValue: '0',
     placeholder: 'Enter total return cost',
     showWhen: (formData) => ['SOURCED_CAMPUS', 'OTHER_CAMPUS'].includes(formData.returnMode),
   },
@@ -219,7 +218,7 @@ export const returnAssetValidationSchema = Yup.object().shape({
 export const returnAssetInitialValues = {
   assetId: '',
   returnMode: 'VISIT_CAMPUS',
-  cost: 0,
+  cost: '',
   assetSource: '',
   destinationCampusId: '',
   campusItCoordinator: '',
