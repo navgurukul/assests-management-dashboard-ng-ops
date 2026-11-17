@@ -411,7 +411,7 @@ export default function MyAssetsTab({ userData = {} }) {
       };
 
       if (formData.returnMode !== 'VISIT_CAMPUS') {
-        fields.cost = String(Number(formData.cost ?? 0));
+        fields.cost = String(Number(formData.cost));
       }
 
       // Add trackingID only for SOURCED_CAMPUS and OTHER_CAMPUS (not for VISIT_CAMPUS)

@@ -383,7 +383,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       };
 
       if (formData.returnMode !== 'VISIT_CAMPUS') {
-        fields.cost = String(Number(formData.cost ?? 0));
+        fields.cost = String(Number(formData.cost));
       }
 
       // trackingNumber only for SOURCED_CAMPUS and OTHER_CAMPUS (not applicable for VISIT_CAMPUS)
