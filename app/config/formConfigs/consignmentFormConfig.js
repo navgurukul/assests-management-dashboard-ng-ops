@@ -120,7 +120,6 @@ export const readyToDispatchFields = [
     placeholder: 'Enter total courier charges',
     required: true,
     min: 0,
-    defaultValue: '0',
     showWhen: (formData) => formData.dispatchMode === 'courier',
   },
   {
@@ -167,7 +166,7 @@ export const readyToDispatchValidation = Yup.object().shape({
 
 export const readyToDispatchInitialValues = {
   dispatchMode: 'courier',
-  cost: 0,
+  cost: '',
   courierServiceId: '',
   trackingId: '',
   trackingLink: 'https://www.shiprocket.in/shipment-tracking/',

@@ -785,7 +785,7 @@ export default function ConsignmentsList() {
           trackingId: formData.trackingId,
           trackingLink: formData.trackingLink || 'https://www.shiprocket.in/shipment-tracking/',
           estimatedDeliveryDate: formData.estimatedDeliveryDate,
-          cost: Number(formData.cost ?? 0),
+          cost: Number(formData.cost),
           inPerson: false,
         };
       }
