@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import TableWrapper from "./TableWrapper";
 import StateHandler from "@/components/atoms/StateHandler";
 import useFetch from "@/app/hooks/query/useFetch";
@@ -45,14 +45,14 @@ export default function AssetsTable() {
   });
 
   // Fetch asset types to dynamically resolve Laptop's ID
-  const { data: assetTypesData } = useFetch({
-    url: '/asset-types',
-    queryKey: ['asset-types'],
+  const { data: assetTypesData, isLoading: typesLoading } = useFetch({
+    url: "/asset-types",
+    queryKey: ["asset-types", "laptop-lookup"],
   });
 
   const laptopTypeId = React.useMemo(() => {
     const types = assetTypesData?.data || [];
-    const laptop = types.find((t) => t.name?.toLowerCase() === 'laptop');
+    const laptop = types.find((t) => t.name?.toLowerCase() === "laptop");
     return laptop?.id || null;
   }, [assetTypesData]);
 
@@ -73,32 +73,32 @@ export default function AssetsTable() {
 
     // For campus rows, include campusId; for total row, navigate without campus filter
     if (!isTotalRow && item.campusId) {
-      queryParams.set('campusId', item.campusId);
+      queryParams.set("campusId", item.campusId);
     }
 
     // Add ownedBy filter based on the column clicked
     const columnToOwnedByMapping = {
-      lws: 'lws',
-      lis: 'lis',
-      lct: 'lct',
-      lr: 'lr',
-      lnw: 'lnw',
-      lwfhe: 'lwfhe',
-      lsdb: 'lsd/b',
+      lws: "lws",
+      lis: "lis",
+      lct: "lct",
+      lr: "lr",
+      lnw: "lnw",
+      lwfhe: "lwfhe",
+      lsdb: "lsd/b",
     };
 
     if (columnToOwnedByMapping[columnKey]) {
-      queryParams.set('ownedBy', columnToOwnedByMapping[columnKey]);
+      queryParams.set("ownedBy", columnToOwnedByMapping[columnKey]);
     }
 
     // Dashboard consolidated data is Laptop-only — keep assets page filter consistent
     if (laptopTypeId) {
-      queryParams.set('type', laptopTypeId);
+      queryParams.set("type", laptopTypeId);
     }
 
     // Navigate to assets page with filters
     const queryString = queryParams.toString();
-    router.push(`/assets${queryString ? `?${queryString}` : ''}`);
+    router.push(`/assets${queryString ? `?${queryString}` : ""}`);
   };
 
   // Calculate totals across all rows
@@ -140,7 +140,7 @@ export default function AssetsTable() {
     const cellValue = item[columnKey];
     const isTotalRow = item.id === "total-row";
 
-    const ownedByColumns = ['lws', 'lis', 'lct', 'lr', 'lnw', 'lwfhe', 'lsdb'];
+    const ownedByColumns = ["lws", "lis", "lct", "lr", "lnw", "lwfhe", "lsdb"];
 
     // Campus rows: clickable when value > 0 and laptopTypeId resolved
     // Total row: clickable when value > 0 and laptopTypeId resolved (navigates without campus)
@@ -155,11 +155,15 @@ export default function AssetsTable() {
           <span
             className={`font-extrabold text-blue-800 ${
               isClickable
-                ? 'cursor-pointer hover:text-blue-600 hover:underline transition-colors'
-                : ''
+                ? "cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+                : ""
             }`}
             onClick={isClickable ? () => handleCellClick(item, columnKey) : undefined}
-            title={isClickable ? `Click to view all ${columnKey.toUpperCase()} laptops (all campuses)` : ''}
+            title={
+              isClickable
+                ? `Click to view all ${columnKey.toUpperCase()} laptops (all campuses)`
+                : ""
+            }
           >
             {cellValue}
           </span>
@@ -185,11 +189,15 @@ export default function AssetsTable() {
           <span
             className={`text-gray-700 text-center ${
               isClickable
-                ? 'cursor-pointer hover:text-blue-600 hover:underline transition-colors font-medium'
-                : ''
+                ? "cursor-pointer hover:text-blue-600 hover:underline transition-colors font-medium"
+                : ""
             }`}
             onClick={isClickable ? () => handleCellClick(item, columnKey) : undefined}
-            title={isClickable ? `Click to view ${columnKey.toUpperCase()} assets in ${item.campus}` : ''}
+            title={
+              isClickable
+                ? `Click to view ${columnKey.toUpperCase()} assets in ${item.campus}`
+                : ""
+            }
           >
             {cellValue}
           </span>
@@ -199,10 +207,10 @@ export default function AssetsTable() {
     }
   };
 
-  if (isLoading || isError) {
+  if (isLoading || typesLoading || isError) {
     return (
       <StateHandler
-        isLoading={isLoading}
+        isLoading={isLoading || typesLoading}
         isError={isError}
         error={error}
         loadingMessage="Loading consolidated data..."
