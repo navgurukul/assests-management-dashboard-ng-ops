@@ -7,6 +7,7 @@ export const inTransitColumns = [
   { key: 'model',           label: 'LAPTOP MODEL'      },
   { key: 'userName',        label: 'RETURNED BY'       },
   { key: 'trackingId',      label: 'TRACKING ID'       },
+  { key: 'cost',            label: 'RETURN COST'       },
   { key: 'estimatedArrival',label: 'EST. ARRIVAL DATE' },
   { key: 'actions',         label: 'ACTION'            },
 ];
@@ -36,6 +37,13 @@ export function renderInTransitCell(item, columnKey) {
 
     case 'trackingId':
       return <span className="font-mono text-gray-500 text-xs">{value}</span>;
+
+    case 'cost':
+      return (
+        <span className="text-gray-700">
+          {value == null ? '—' : `₹${Number(value).toLocaleString('en-IN')}`}
+        </span>
+      );
 
     case 'estimatedArrival':
       return (

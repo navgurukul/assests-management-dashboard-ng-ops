@@ -114,6 +114,15 @@ export const readyToDispatchFields = [
     showWhen: (formData) => formData.dispatchMode === 'courier',
   },
   {
+    name: 'cost',
+    label: 'Courier Cost (₹)',
+    type: 'number',
+    placeholder: 'Enter total courier charges',
+    required: true,
+    min: 0,
+    showWhen: (formData) => formData.dispatchMode === 'courier',
+  },
+  {
     name: 'estimatedDeliveryDate',
     label: 'Estimated Delivery Date',
     type: 'date',
@@ -125,6 +134,17 @@ export const readyToDispatchFields = [
 
 export const readyToDispatchValidation = Yup.object().shape({
   dispatchMode: Yup.string().required('Dispatch mode is required'),
+  cost: Yup.number()
+    .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+    .when('dispatchMode', {
+      is: 'courier',
+      then: (schema) =>
+        schema
+          .typeError('Courier cost is required')
+          .min(0, 'Cost cannot be negative')
+          .required('Courier cost is required'),
+      otherwise: (schema) => schema.notRequired().nullable(),
+    }),
   comment: Yup.string().max(500, 'Comment cannot exceed 500 characters').nullable(),
   courierServiceId: Yup.string().when('dispatchMode', {
     is: 'courier',
@@ -146,6 +166,7 @@ export const readyToDispatchValidation = Yup.object().shape({
 
 export const readyToDispatchInitialValues = {
   dispatchMode: 'courier',
+  cost: '',
   courierServiceId: '',
   trackingId: '',
   trackingLink: 'https://www.shiprocket.in/shipment-tracking/',

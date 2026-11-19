@@ -54,8 +54,16 @@ export const consignmentTableColumns = [
     label: 'TRACKING ID',
     description: 'Courier tracking ID'
   },
+
+  // 7. Courier Cost
+  {
+    key: 'cost',
+    label: 'COURIER COST',
+    description: 'Courier delivery cost',
+    type: 'currency'
+  },
   
-  // 7. Allocated To
+  // 8. Allocated To
   { 
     key: 'allocatedTo', 
     label: 'ALLOCATED TO',
@@ -63,7 +71,7 @@ export const consignmentTableColumns = [
     type: 'userWithEmail'
   },
   
-  // 8. Status
+  // 9. Status
   { 
     key: 'status', 
     label: 'STATUS',
@@ -72,7 +80,7 @@ export const consignmentTableColumns = [
     colorFn: getStatusChipColor
   },
   
-  // 9. Actions
+  // 10. Actions
   { 
     key: 'actions', 
     label: 'ACTIONS', 
@@ -130,7 +138,8 @@ export const defaultVisibleColumns = [
   'destination',        // 4. Destination
   'courierService',     // 5. Courier Partner
   'trackingId',         // 6. Tracking ID
-  'allocatedTo',        // 7. Allocated To
-  'status',             // 8. Status
-  'actions',            // 9. Actions
+  'cost',               // 7. Courier Delivery Cost
+  'allocatedTo',        // 8. Allocated To
+  'status',             // 9. Status
+  'actions',            // 10. Actions
 ];

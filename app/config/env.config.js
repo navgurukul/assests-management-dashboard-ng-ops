@@ -109,6 +109,13 @@ const config = {
       myAssets: '/allocations/my-assets',
     },
 
+    leaseExtensions: {
+      list: '/lease-extensions',
+      byCampusManager: (id) => `/lease-extensions/campus-manager/${id}`,
+      review: (id) => `/lease-extensions/${id}/review`,
+      complete: (id) => `/lease-extensions/${id}/complete`,
+    },
+
     // Locations
     locations: {
       list: '/locations',
