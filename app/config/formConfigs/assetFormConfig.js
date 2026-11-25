@@ -391,7 +391,7 @@ export const commonAssetFields = [
   },
   {
     name: "amcExpiryDate",
-    label: "Expiry Date",
+    label: "AMC / Insurance Expiry Date",
     type: "date",
     placeholder: "Select expiry date",
     required: (values) => !!values.hasAmcInsurance,
@@ -420,7 +420,7 @@ export const commonAssetFields = [
   },
   {
     name: "amcProviderDetails",
-    label: "Provider Details",
+    label: "AMC / Insurance Provider Details",
     type: "text",
     placeholder: "Enter provider detail",
     required: (values) => !!values.hasAmcInsurance,
@@ -446,7 +446,7 @@ export const commonAssetFields = [
   },
   {
     name: "amcDocument",
-    label: "AMC / Policy Document",
+    label: "AMC / Insurance Policy Document",
     type: "purchase-bill-selector",
     allowMultiple: false,
     required: false,
@@ -684,7 +684,7 @@ export const commonAssetValidation = {
     .nullable()
     .when("hasAmcInsurance", {
       is: true,
-      then: (schema) => schema.required("Expiry date is required"),
+      then: (schema) => schema.required("AMC / Insurance Expiry date is required"),
       otherwise: (schema) => schema.notRequired(),
     })
     .test(
@@ -710,7 +710,7 @@ export const commonAssetValidation = {
     .nullable()
     .when("hasAmcInsurance", {
       is: true,
-      then: (schema) => schema.required("Provider is required"),
+      then: (schema) => schema.required("AMC / Insurance Provider is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
   amcCost: Yup.number()
@@ -722,13 +722,13 @@ export const commonAssetValidation = {
         ? null
         : value,
     )
-    .min(0, "Cost must be a positive number")
+    .min(0, "AMC / Insurance Cost must be a positive number")
     .max(9999999, "Cost cannot exceed 99,99,999"),
   amcProviderDetails: Yup.string()
     .nullable()
     .when("hasAmcInsurance", {
       is: true,
-      then: (schema) => schema.required("Provider details are required"),
+      then: (schema) => schema.required("AMC / Insurance Provider details are required"),
       otherwise: (schema) => schema.notRequired(),
   }),
   amcDocument: Yup.array().nullable(),
@@ -1013,7 +1013,7 @@ export const serviceLogValidationSchema = Yup.object().shape({
 export const amcRenewalFields = [
   {
     name: "amcStartDate",
-    label: "AMC Start Date",
+    label: "AMC / Insurance Start Date",
     type: "date",
     placeholder: "dd/mm/yyyy",
     required: true,
@@ -1021,7 +1021,7 @@ export const amcRenewalFields = [
   },
   {
     name: "amcExpiryDate",
-    label: "AMC Expiry Date",
+    label: "AMC / Insurance Expiry Date",
     type: "date",
     placeholder: "dd/mm/yyyy",
     required: true,
@@ -1049,14 +1049,14 @@ export const amcRenewalFields = [
   },
   {
     name: "providerDetails",
-    label: "Provider Details",
+    label: "AMC / Insurance Provider Details",
     type: "textarea",
     placeholder: "Contact person, phone, email, address",
     required: true,
   },
   {
     name: "cost",
-    label: "Cost",
+    label: "AMC / Insurance Cost",
     type: "number",
     placeholder: "Enter AMC / Insurance cost",
     required: false,
@@ -1064,14 +1064,14 @@ export const amcRenewalFields = [
   },
   {
     name: "notes",
-    label: "Notes / Remarks",
+    label: "AMC / Insurance Remarks",
     type: "textarea",
     placeholder: "Add any notes about this AMC / Insurance renewal...",
     required: false,
   },
   {
     name: "policyDocument",
-    label: "AMC / Policy Document",
+    label: "AMC / Insurance Policy Document",
     type: "purchase-bill-selector",
     required: false,
     allowMultiple: false,
@@ -1081,9 +1081,9 @@ export const amcRenewalFields = [
 ];
 
 export const amcRenewalValidationSchema = Yup.object().shape({
-  amcStartDate: Yup.string().required("AMC start date is required"),
+  amcStartDate: Yup.string().required("AMC / Insurance start date is required"),
   amcExpiryDate: Yup.string()
-    .required("AMC expiry date is required")
+    .required("AMC / Insurance expiry date is required")
     .test(
       "expiry-after-start",
       "Expiry date cannot be before the start date",
@@ -1095,7 +1095,7 @@ export const amcRenewalValidationSchema = Yup.object().shape({
     ),
   healthStatus: Yup.string().required("AMC / Insurance status is required"),
   insuranceProvider: Yup.string().required("AMC / Insurance provider is required"),
-  providerDetails: Yup.string().required("Provider details are required"),
+  providerDetails: Yup.string().required("AMC / Insurance Provider details are required"),
   cost: Yup.number()
     .nullable()
     .transform((value, originalValue) =>
@@ -1103,6 +1103,6 @@ export const amcRenewalValidationSchema = Yup.object().shape({
         ? null
         : value,
     )
-    .min(0, "Cost must be a positive number"),
+    .min(0, "AMC / Insurance Cost must be a positive number"),
   notes: Yup.string(),
 });

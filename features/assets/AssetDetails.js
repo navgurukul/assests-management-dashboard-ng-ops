@@ -228,7 +228,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
           cost: cost !== '' && cost !== null && cost !== undefined ? Number(cost) : undefined,
           policyDocumentId: policyDocument?.[0]?.id || undefined,
         });
-        toast.success('AMC / Insurance renewal logged successfully.');
+        toast.success('AMC / Insurance Renewal logged successfully.');
       }
       setModalAction(null);
       if (refetch) {
@@ -769,8 +769,8 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
       <FormModal
         isOpen={modalAction === 'AMC_RENEWAL'}
         onClose={() => setModalAction(null)}
-        componentName={`Log AMC Renewal — ${assetDetails.assetTag}`}
-        actionType="Log AMC Renewal"
+        componentName={`Log AMC / Insurance Renewal — ${assetDetails.assetTag}`}
+        actionType="Log AMC / Insurance Renewal"
         fields={amcRenewalFields}
         validationSchema={amcRenewalValidationSchema}
         onSubmit={handleStatusUpdate}
@@ -841,7 +841,7 @@ export default function AssetDetails({ assetId, assetData, isLoading, isError, e
               onClick={() => setModalAction('SERVICE_LOG')}
             />
             <CustomButton
-              text="AMC Renew"
+              text="AMC / Insurance Renewal"
               variant="success"
               onClick={() => setModalAction('AMC_RENEWAL')}
             />

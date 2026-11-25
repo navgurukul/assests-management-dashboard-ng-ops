@@ -71,7 +71,7 @@ export default function MaintenanceHistoryTimeline({
   const tabs = [
     { id: 'service', label: 'Service', count: services.length },
     { id: 'inspection', label: 'Inspection', count: inspections.length },
-    { id: 'amc', label: 'AMC', count: amcs.length },
+    { id: 'amc', label: 'AMC / Insurance', count: amcs.length },
   ];
 
   const renderActiveList = () => {
@@ -257,7 +257,7 @@ export default function MaintenanceHistoryTimeline({
                        {performedByName || item.insuranceProvider || '—'}
                     </span>
                     <span className={`text-[9px] sm:text-[10px] font-semibold px-1.5 py-px rounded border leading-tight ${typeBadgeColor('AMC')}`}>
-                      AMC
+                      AMC / INSURANCE
                     </span>
                   </div>
 
