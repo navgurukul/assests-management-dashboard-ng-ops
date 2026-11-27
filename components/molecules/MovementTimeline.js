@@ -1,4 +1,5 @@
 import React from 'react';
+import { getStatusChipColor } from '@/app/utils/statusHelpers';
 
 function formatMovementDate(dateStr) {
   if (!dateStr) return '—';
@@ -12,23 +13,27 @@ function formatMovementDate(dateStr) {
 }
 
 function movementDotColor(movementType) {
-  const type = (movementType || '').toUpperCase();
+  const type = (movementType || '').toUpperCase().replace(/[\s-]+/g, '_');
+  if (type.includes('ASSET_CREATED')) return 'bg-indigo-500 border-indigo-300';
+  if (type.includes('ASSET_UPDATE'))  return 'bg-sky-500 border-sky-300';
+  if (type.includes('LEASE_EXTENSION_CREATED')) return 'bg-amber-500 border-amber-300';
+  if (type.includes('LEASE_EXTENSION')) return 'bg-gray-500 border-gray-300';
+  if (type.includes('RETURN_REQUESTED')) return 'bg-amber-500 border-amber-300';
+  if (type.includes('RETURN_ACCEPTED') || type.includes('RETURN ACCEPTED')) return 'bg-green-500 border-green-300';
+  if (type.includes('ALLOCATION') || type.includes('ALLOCATED')) return 'bg-green-500 border-green-300';
   if (type.includes('TRANSFER'))  return 'bg-blue-500 border-blue-300';
   if (type.includes('ACCEPTED'))  return 'bg-green-500 border-green-300';
-  if (type.includes('REPAIR'))    return 'bg-orange-500 border-orange-300';
-  if (type.includes('SCRAP'))     return 'bg-red-500 border-red-300';
-  if (type.includes('ALLOCATED')) return 'bg-purple-500 border-purple-300';
+  if (type.includes('DISPOSED'))  return 'bg-purple-500 border-purple-300';
+  if (type.includes('REPAIR_COMPLETED')) return 'bg-orange-500 border-orange-300';
+  if (type.includes('IN_REPAIR'))  return 'bg-yellow-500 border-yellow-300';
+
+  if (type.includes('REPAIR'))  return 'bg-red-500 border-red-300';
+  if (type.includes('SCRAP'))   return 'bg-stone-500 border-stone-300';
   return 'bg-gray-400 border-gray-300';
 }
 
 function movementBadgeColor(movementType) {
-  const type = (movementType || '').toUpperCase();
-  if (type.includes('TRANSFER'))  return 'bg-blue-100 text-blue-700 border-blue-200';
-  if (type.includes('ACCEPTED'))  return 'bg-green-100 text-green-700 border-green-200';
-  if (type.includes('REPAIR'))    return 'bg-orange-100 text-orange-700 border-orange-200';
-  if (type.includes('SCRAP'))     return 'bg-red-100 text-red-700 border-red-200';
-  if (type.includes('ALLOCATED')) return 'bg-purple-100 text-purple-700 border-purple-200';
-  return 'bg-gray-100 text-gray-600 border-gray-200';
+  return `${getStatusChipColor(movementType)} border-gray-200`;
 }
 
 export default function MovementTimeline({ movements = [] }) {

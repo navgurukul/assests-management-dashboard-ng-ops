@@ -50,6 +50,16 @@ const STATUS_COLOR_MAP = {
   NO_ALLOCATION: 'bg-yellow-100 text-yellow-800',
 
   // Asset 
+  ALLOCATION: 'bg-green-100 text-green-800',
+  ASSET_CREATED: 'bg-indigo-100 text-indigo-800',
+  ASSET_UPDATE: 'bg-sky-100 text-sky-800',
+  LEASE_EXTENSION_CREATED: 'bg-amber-100 text-amber-800',
+  LEASE_EXTENSION: 'bg-gray-100 text-gray-800',
+  RETURN_REQUESTED: 'bg-amber-100 text-amber-800',
+  RETURN_ACCEPTED: 'bg-green-100 text-green-800',
+  TRANSFER: 'bg-blue-100 text-blue-800',
+  ACCEPTED: 'bg-green-100 text-green-800',
+  REPAIR_COMPLETED: 'bg-orange-100 text-orange-800',
   IN_STOCK: 'bg-blue-100 text-blue-800',
   AVAILABLE: 'bg-blue-100 text-blue-800',
   REPAIR: 'bg-red-100 text-red-800',
